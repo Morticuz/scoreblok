@@ -4,20 +4,47 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Spellen Scoreblok Pro</title>
+  <meta name="theme-color" content="#1e293b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Scoreblok" />
+  <link id="faviconLink" rel="icon" type="image/png" />
+  <link id="appleTouchIconLink" rel="apple-touch-icon" />
+  <link id="manifestLink" rel="manifest" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+    /* Light Mode Theme Overrides */
+    body.light-mode { background-color: #f1f5f9 !important; color: #0f172a !important; }
+    body.light-mode header { background-color: rgba(255,255,255,0.95) !important; border-color: #cbd5e1 !important; }
+    body.light-mode .bg-slate-900 { background-color: #ffffff !important; border-color: #cbd5e1 !important; box-shadow: 0 2px 8px rgba(15,23,42,0.05); }
+    body.light-mode .bg-slate-950 { background-color: #f8fafc !important; border-color: #cbd5e1 !important; }
+    body.light-mode .bg-slate-800 { background-color: #e2e8f0 !important; color: #1e293b !important; }
+    body.light-mode .text-white, body.light-mode .text-slate-100, body.light-mode .text-slate-200 { color: #0f172a !important; }
+    body.light-mode .text-slate-300, body.light-mode .text-slate-400 { color: #475569 !important; }
+    body.light-mode .border-slate-800, body.light-mode .border-slate-700 { border-color: #cbd5e1 !important; }
+    body.light-mode .bg-indigo-600 .text-white, body.light-mode button.bg-indigo-600, body.light-mode button.bg-emerald-600 { color: #ffffff !important; }
+    body.light-mode .bg-indigo-950\/60 { background-color: #eef2ff !important; }
+    body.light-mode .text-amber-300 { color: #b45309 !important; }
+    body.light-mode .text-indigo-300 { color: #4338ca !important; }
+    body.light-mode .text-emerald-300 { color: #047857 !important; }
+    body.light-mode .text-rose-300 { color: #be123c !important; }
+
+    /* Table Mode (Extra large scoreboard) */
+    body.table-mode #liveLeaderboard .score-number { font-size: 3rem !important; line-height: 1.05 !important; }
+    body.table-mode #liveLeaderboard .player-title { font-size: 1.1rem !important; }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen pb-24 select-none">
+<body class="bg-slate-950 text-slate-100 min-h-screen pb-24 select-none transition-colors duration-200">
 
   <!-- APP VERSION -->
-  <script>const APP_VERSION = '1.2';</script>
+  <script>const APP_VERSION = '1.3';</script>
 
   <!-- TOAST MESSAGE -->
   <div id="toastBar" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden bg-emerald-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-2xl border border-emerald-400/40"></div>
@@ -25,20 +52,45 @@
   <!-- UPDATE NOTIFICATION MODAL -->
   <div id="updateModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-indigo-500/50 rounded-3xl p-6 max-w-sm w-full space-y-4 text-center shadow-2xl">
-      <div class="w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mx-auto text-3xl">
-        🌟
-      </div>
+      <div class="w-16 h-16 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mx-auto text-3xl">🌟</div>
       <div class="space-y-1">
-        <h3 class="font-extrabold text-lg text-white">Nieuwe versie beschikbaar! (v1.2)</h3>
-        <p class="text-xs text-slate-400">Er is een update voor het Spellen Scoreblok. Je favorieten, spelers en historie blijven gewoon bewaard!</p>
+        <h3 class="font-extrabold text-lg text-white">Update v1.3 beschikbaar!</h3>
+        <p class="text-xs text-slate-400">Nieuw: 5 extra spellen (o.a. Lost Cities, Koehandel & Machiavelli), verbeterde scorekaarten (Keer op Keer, Catan, Yahtzee), Spelregels, Startspeler-tracker en een nieuw App-icoon!</p>
       </div>
       <div class="pt-2 flex flex-col gap-2">
-        <button type="button" onclick="applyUpdate()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg">
-          Nu bijwerken & herladen
-        </button>
-        <button type="button" onclick="dismissUpdate()" class="w-full py-2 rounded-xl text-xs text-slate-500 hover:text-slate-300">
-          Herinner mij later
-        </button>
+        <button type="button" onclick="applyUpdate()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg">Nu bijwerken & herladen</button>
+        <button type="button" onclick="dismissUpdate()" class="w-full py-2 rounded-xl text-xs text-slate-500 hover:text-slate-300">Herinner mij later</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULES CHEAT SHEET MODAL -->
+  <div id="rulesModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 id="rulesModalTitle" class="font-extrabold text-base text-white">ℹ️ Spelregels & Puntentelling</h3>
+        <button type="button" onclick="toggleRulesModal(false)" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
+      </div>
+      <div id="rulesModalContent" class="space-y-3 text-xs text-slate-300 leading-relaxed"></div>
+      <button type="button" onclick="toggleRulesModal(false)" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">Sluiten</button>
+    </div>
+  </div>
+
+  <!-- SAVE GAME + NOTE + REMATCH MODAL -->
+  <div id="saveGameModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <h3 class="font-extrabold text-base text-white">💾 Potje Opslaan</h3>
+        <button type="button" onclick="closeSaveModal()" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
+      </div>
+      <div id="saveModalStandingsPreview" class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 text-xs"></div>
+      <div>
+        <label class="block text-xs font-bold text-slate-300 mb-1">📝 Notitie / Huisregel / Uitbreiding (optioneel):</label>
+        <input type="text" id="saveGameNoteInput" placeholder="Bijv. Gespeeld op vakantie, met Kathedralen uitbreiding..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" />
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2 pt-1">
+        <button type="button" onclick="confirmSaveGame(false)" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs">💾 Opslaan & naar Stats</button>
+        <button type="button" onclick="confirmSaveGame(true)" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">🔄 Opslaan + Direct Revanche!</button>
       </div>
     </div>
   </div>
@@ -51,27 +103,23 @@
         <button type="button" onclick="toggleInstallModal(false)" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
       </div>
       <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+        <p class="text-amber-300 font-semibold">✨ Nieuw in v1.3: De app heeft nu het echte Scoreblok/Meeple/Dobbelsteen-icoon! Verwijder eventueel eerst je oude snelkoppeling en voeg hem opnieuw toe:</p>
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1">
           <p class="font-bold text-indigo-300">🍎 iPhone / iPad (Safari):</p>
           <p>1. Tik onderin op het <b>Deel-icoon</b> (vierkantje met pijltje omhoog).</p>
-          <p>2. Scroll iets omlaag en tik op <b>'Zet op beginscherm'</b>.</p>
+          <p>2. Scroll omlaag en tik op <b>'Zet op beginscherm'</b>.</p>
         </div>
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1">
           <p class="font-bold text-emerald-300">🤖 Android (Chrome / Samsung Internet):</p>
-          <p>1. Tik rechtsonder of rechtsboven op het <b>menu (⋮ of ≡)</b>.</p>
-          <p>2. Kies <b>'Toevoegen aan startscherm'</b> of <b>'Pagina toevoegen aan -> Startscherm'</b>.</p>
+          <p>1. Tik op het <b>menu (⋮ of ≡)</b>.</p>
+          <p>2. Kies <b>'Toevoegen aan startscherm'</b> of <b>'App installeren'</b>.</p>
         </div>
-        <p class="text-[11px] text-slate-400 text-center pt-1">
-          🔒 Al je favorieten, spelersnamen en scores worden privé op je eigen telefoon opgeslagen.
-        </p>
       </div>
-      <button type="button" onclick="toggleInstallModal(false)" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">
-        Begrepen!
-      </button>
+      <button type="button" onclick="toggleInstallModal(false)" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">Begrepen!</button>
     </div>
   </div>
 
-  <!-- TABLE TOOLS MODAL (START PLAYER, DICE, TIMER) -->
+  <!-- TABLE TOOLS MODAL -->
   <div id="toolsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -83,13 +131,9 @@
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-amber-300">🎯 Wie mag er beginnen?</span>
-          <button type="button" onclick="pickRandomStarter()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
-            🎲 Loten!
-          </button>
+          <button type="button" onclick="pickRandomStarter()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">🎲 Loten!</button>
         </div>
-        <div id="starterResultBox" class="text-xs text-slate-400 py-1">
-          Tik op "Loten!" om een startspeler en speelvolgorde te bepalen uit de actieve spelers.
-        </div>
+        <div id="starterResultBox" class="text-xs text-slate-400 py-1">Tik op "Loten!" om een startspeler en speelvolgorde te bepalen uit de actieve spelers.</div>
       </div>
 
       <!-- 2. Dice Roller -->
@@ -109,12 +153,10 @@
         <div id="diceResultArea" class="flex items-center justify-center gap-2 py-2 min-h-[48px]">
           <span class="text-xs text-slate-500">Tik hieronder om te gooien</span>
         </div>
-        <button type="button" onclick="rollDiceNow()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition active:scale-95">
-          Gooi Dobbelstenen
-        </button>
+        <button type="button" onclick="rollDiceNow()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition active:scale-95">Gooi Dobbelstenen</button>
       </div>
 
-      <!-- 3. Turn Timer / Sandglass -->
+      <!-- 3. Turn Timer -->
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-emerald-300">⏳ Zandloper / Beurt-timer</span>
@@ -127,18 +169,12 @@
           <button type="button" onclick="startTurnTimer(120)" class="py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">2 min</button>
         </div>
         <div class="flex gap-2">
-          <button type="button" onclick="togglePauseTimer()" id="timerPauseBtn" class="flex-1 py-1.5 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
-            ▶️ Start / Pauze
-          </button>
-          <button type="button" onclick="stopTurnTimer()" class="px-3 py-1.5 rounded-xl bg-rose-600/20 text-rose-300 text-xs font-bold">
-            ⏹ Reset
-          </button>
+          <button type="button" onclick="togglePauseTimer()" class="flex-1 py-1.5 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold">▶️ Start / Pauze</button>
+          <button type="button" onclick="stopTurnTimer()" class="px-3 py-1.5 rounded-xl bg-rose-600/20 text-rose-300 text-xs font-bold">⏹ Reset</button>
         </div>
       </div>
 
-      <button type="button" onclick="toggleToolsModal(false)" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
-        Sluiten
-      </button>
+      <button type="button" onclick="toggleToolsModal(false)" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">Sluiten</button>
     </div>
   </div>
 
@@ -149,13 +185,11 @@
         <h3 class="font-extrabold text-base text-white">➕ Eigen Spel Toevoegen</h3>
         <button type="button" onclick="toggleCustomGameModal(false)" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
       </div>
-
       <div class="space-y-3 text-xs">
         <div>
           <label class="block text-slate-300 font-bold mb-1">Naam van het spel:</label>
-          <input type="text" id="cgName" placeholder="Bijv. Saboteur, Koehandel, Machi Koro..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
+          <input type="text" id="cgName" placeholder="Bijv. Saboteur, Machi Koro, Boonanza..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
         </div>
-
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="block text-slate-300 font-bold mb-1">Soort spel:</label>
@@ -172,7 +206,6 @@
             </select>
           </div>
         </div>
-
         <div>
           <label class="block text-slate-300 font-bold mb-1">Type scoreblad:</label>
           <select id="cgType" onchange="toggleCgCategoriesInput()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
@@ -181,76 +214,55 @@
             <option value="categories">📊 Categorie-teller (eigen categorieën opgeven)</option>
           </select>
         </div>
-
         <div id="cgCategoriesWrapper" class="hidden">
           <label class="block text-slate-300 font-bold mb-1">Categorieën (gescheiden door komma's):</label>
           <input type="text" id="cgCategories" placeholder="Bijv. Munten, Gebouwen, Bonuskaarten, Strafpunten" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
         </div>
-
         <div>
           <label class="block text-slate-300 font-bold mb-1">Puntenlimiet / Doel (optioneel):</label>
           <input type="number" id="cgLimit" placeholder="Laat leeg als er geen vaste limiet is" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
         </div>
       </div>
-
       <div class="flex gap-2 pt-2">
-        <button type="button" onclick="saveCustomGame()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">
-          Spel Opslaan
-        </button>
-        <button type="button" onclick="toggleCustomGameModal(false)" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">
-          Annuleren
-        </button>
+        <button type="button" onclick="saveCustomGame()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">Spel Opslaan</button>
+        <button type="button" onclick="toggleCustomGameModal(false)" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">Annuleren</button>
       </div>
     </div>
   </div>
 
-  <!-- TOP HEADER (GEOPTIMALISEERD VOOR MOBIEL ZODAT KNOPPEN NIET OVERLAPPEN) -->
+  <!-- TOP HEADER -->
   <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-3 py-2.5">
     <div class="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-      <!-- Top Row on Mobile: Title + Quick Icon Tools -->
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchMainView('picker')">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
-            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-              <rect x="3" y="3" width="18" height="18" rx="4"/>
-              <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
-              <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/>
-              <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-              <circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/>
-              <circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/>
-            </svg>
-          </div>
+          <div id="headerBrandIcon" class="w-10 h-10 rounded-xl overflow-hidden shadow-lg shrink-0 flex items-center justify-center bg-slate-800"></div>
           <div>
             <div class="flex items-center gap-1.5">
               <h1 class="font-extrabold text-sm sm:text-base leading-tight text-white">Spellen Scoreblok</h1>
-              <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">v1.2</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">v1.3</span>
             </div>
             <p id="headerSubtitle" class="text-[11px] text-slate-400">Kies een spel of beheer je favorieten</p>
           </div>
         </div>
 
-        <!-- Utility Icons Right -->
+        <!-- Mobile Quick Icons -->
         <div class="flex items-center gap-1 sm:hidden">
-          <button type="button" onclick="toggleToolsModal(true)" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-amber-300">🧰</button>
-          <button type="button" onclick="toggleWakeLock()" id="wakeLockBtnMobile" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400">☀️</button>
-          <button type="button" onclick="toggleInstallModal(true)" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-indigo-300">📲</button>
+          <button type="button" onclick="toggleToolsModal(true)" title="Tafel-Tools" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-amber-300">🧰</button>
+          <button type="button" onclick="toggleTheme()" id="themeBtnMobile" title="Dag/Nacht Thema" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300">🌓</button>
+          <button type="button" onclick="toggleWakeLock()" id="wakeLockBtnMobile" title="Scherm wakker houden" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400">☀️</button>
+          <button type="button" onclick="toggleInstallModal(true)" title="Als App installeren" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-indigo-300">📲</button>
         </div>
       </div>
 
-      <!-- Navigation Buttons Row -->
+      <!-- Navigation Row -->
       <div class="flex items-center gap-1.5">
-        <button type="button" onclick="switchMainView('picker')" id="navBtnPicker" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center">
-          🎲 Spellen
-        </button>
-        <button type="button" onclick="switchMainView('players')" id="navBtnPlayers" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">
-          👥 Spelers
-        </button>
-        <button type="button" onclick="switchMainView('history')" id="navBtnHistory" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">
-          🏆 Stats
-        </button>
+        <button type="button" onclick="switchMainView('picker')" id="navBtnPicker" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center">🎲 Spellen</button>
+        <button type="button" onclick="switchMainView('players')" id="navBtnPlayers" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">👥 Spelers</button>
+        <button type="button" onclick="switchMainView('history')" id="navBtnHistory" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">🏆 Stats</button>
         <div class="hidden sm:flex items-center gap-1">
           <button type="button" onclick="toggleToolsModal(true)" title="Tafel-Tools" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-amber-300 hover:bg-slate-700 transition">🧰</button>
-          <button type="button" onclick="toggleWakeLock()" id="wakeLockBtn" title="Houd scherm wakker" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 transition">☀️</button>
+          <button type="button" onclick="toggleTheme()" id="themeBtnDesktop" title="Dag/Nacht Thema" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">🌓</button>
+          <button type="button" onclick="toggleWakeLock()" id="wakeLockBtn" title="Scherm wakker houden" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 transition">☀️</button>
           <button type="button" onclick="toggleInstallModal(true)" title="Zet als App op telefoon" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-indigo-300 hover:bg-slate-700 transition">📲</button>
         </div>
       </div>
@@ -262,37 +274,48 @@
 
     <!-- ================= VIEW 1: GAME PICKER ================= -->
     <section id="viewPicker" class="space-y-3">
+      <!-- Quick Favorites Bar -->
+      <div id="quickFavWidget" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-2.5">
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar" id="quickFavList"></div>
+      </div>
+
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 space-y-3 shadow-lg">
         <div class="flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
           <div class="flex items-center gap-1.5">
             <button type="button" onclick="setPickerTab('fav')" id="tab-fav" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300">
               ⭐ Favorieten <span id="favCountBadge" class="px-1.5 py-0.5 text-[10px] rounded-full bg-amber-500/20 text-amber-300">0</span>
             </button>
-            <button type="button" onclick="setPickerTab('board')" id="tab-board" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300">
-              🎲 Bordspellen
-            </button>
-            <button type="button" onclick="setPickerTab('card')" id="tab-card" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300">
-              🃏 Kaart & Dobbel
-            </button>
-            <button type="button" onclick="setPickerTab('all')" id="tab-all" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-indigo-600 text-white">
-              📚 Alle (A-Z)
-            </button>
+            <button type="button" onclick="setPickerTab('board')" id="tab-board" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300">🎲 Bordspellen</button>
+            <button type="button" onclick="setPickerTab('card')" id="tab-card" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300">🃏 Kaart & Dobbel</button>
+            <button type="button" onclick="setPickerTab('all')" id="tab-all" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-indigo-600 text-white">📚 Alle (A-Z)</button>
           </div>
-          <button type="button" onclick="toggleCustomGameModal(true)" class="px-3 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-600/30 transition shrink-0">
-            + Eigen Spel
-          </button>
+          <button type="button" onclick="toggleCustomGameModal(true)" class="px-3 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-600/30 transition shrink-0">+ Eigen Spel</button>
         </div>
 
-        <div class="relative">
-          <input
-            type="text"
-            id="gameSearchInput"
-            oninput="renderGamePicker()"
-            placeholder="Zoek op alfabet (bijv. Beverbende, Carcassonne, Everdell)..."
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-          />
-          <span class="absolute left-3 top-2.5 text-slate-500 text-sm">🔍</span>
-          <button type="button" onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs px-1.5 py-0.5">✕</button>
+        <!-- Search + Kast-kiezer Filter Row -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <div class="relative sm:col-span-6">
+            <input type="text" id="gameSearchInput" oninput="renderGamePicker()" placeholder="Zoek op alfabet (bijv. Lost Cities, Koehandel, Catan)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500" />
+            <span class="absolute left-3 top-2.5 text-slate-500 text-xs">🔍</span>
+            <button type="button" onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs px-1.5 py-0.5">✕</button>
+          </div>
+          <div class="flex items-center gap-1.5 sm:col-span-6">
+            <select id="filterPlayersSelect" onchange="renderGamePicker()" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-slate-200">
+              <option value="0">👥 Alle aantallen</option>
+              <option value="active">👥 Past bij tafel (<span id="activePlayerCntLabel">4</span>p)</option>
+              <option value="2">2 spelers</option>
+              <option value="3">3 spelers</option>
+              <option value="4">4 spelers</option>
+              <option value="5">5+ spelers</option>
+            </select>
+            <select id="filterDurationSelect" onchange="renderGamePicker()" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-xs text-slate-200">
+              <option value="all">⏱️ Alle tijden</option>
+              <option value="short">⚡ Kort (&lt;20m)</option>
+              <option value="medium">⏳ Middel (20-45m)</option>
+              <option value="long">🏰 Lang (45m+)</option>
+            </select>
+            <button type="button" onclick="surpriseMeGame()" title="Kies willekeurig een passend spel!" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs whitespace-nowrap transition active:scale-95">🎲 Verras!</button>
+          </div>
         </div>
       </div>
 
@@ -304,36 +327,35 @@
     </section>
 
     <!-- ================= VIEW 2: ACTIVE GAME SCOREBOARD ================= -->
-    <section id="viewScoreboard" class="hidden space-y-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3">
-          <button type="button" onclick="switchMainView('picker')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1">
-            ← Spellen
-          </button>
-          <div id="activeGameIcon" class="w-11 h-11 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center shrink-0"></div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h2 id="activeGameTitle" class="font-extrabold text-base sm:text-lg text-white"></h2>
-              <button type="button" id="activeGameFavBtn" onclick="toggleFavoriteCurrent()" class="text-lg"></button>
+    <section id="viewScoreboard" class="hidden space-y-3.5">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2.5">
+            <button type="button" onclick="switchMainView('picker')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">← Spellen</button>
+            <div id="activeGameIcon" class="w-11 h-11 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center shrink-0"></div>
+            <div>
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <h2 id="activeGameTitle" class="font-extrabold text-base sm:text-lg text-white"></h2>
+                <button type="button" id="activeGameFavBtn" onclick="toggleFavoriteCurrent()" class="text-lg"></button>
+                <button type="button" onclick="toggleRulesModal(true)" class="px-2 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-[11px] font-bold">ℹ️ Regels</button>
+              </div>
+              <p id="activeGameRuleInfo" class="text-xs text-slate-400"></p>
             </div>
-            <p id="activeGameRuleInfo" class="text-xs text-slate-400"></p>
+          </div>
+
+          <div class="flex items-center gap-1.5 ml-auto flex-wrap">
+            <button type="button" onclick="toggleTableMode()" id="tableModeBtn" title="Grote Tafel-modus voor leesbaarheid op afstand" class="px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold transition">📺 Groot</button>
+            <button type="button" onclick="shareCurrentStandings()" class="px-2.5 py-1.5 rounded-xl bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30 text-xs font-bold transition">💬 Deel</button>
+            <button type="button" onclick="openSaveGameModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">💾 Opslaan</button>
+            <button type="button" onclick="resetCurrentGame()" class="px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition">🔄 Reset</button>
           </div>
         </div>
 
-        <div class="flex items-center gap-1.5 ml-auto flex-wrap">
-          <button type="button" onclick="toggleToolsModal(true)" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold transition">
-            🎲 Wie begint?
-          </button>
-          <button type="button" onclick="shareCurrentStandings()" class="px-2.5 py-1.5 rounded-xl bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30 text-xs font-bold transition">
-            💬 Deel
-          </button>
-          <button type="button" onclick="saveCurrentGameToHistory()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
-            💾 Opslaan
-          </button>
-          <button type="button" onclick="resetCurrentGame()" class="px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
-            🔄 Reset
-          </button>
-        </div>
+        <!-- Expansions Toggle Bar (indien beschikbaar voor dit spel) -->
+        <div id="expansionsBar" class="hidden pt-2 border-t border-slate-800 flex items-center gap-2 flex-wrap"></div>
+
+        <!-- Smart Dealer / Starter Tracker Bar -->
+        <div id="starterTrackerBar" class="pt-2 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs"></div>
       </div>
 
       <div id="liveLeaderboard" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
@@ -345,24 +367,14 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h2 class="font-bold text-base text-white">👥 Spelers & Meeple-kleuren</h2>
-            <p class="text-xs text-slate-400">Tik op het gekleurde bolletje om een spelerskleur te kiezen.</p>
+            <h2 class="font-bold text-base text-white">👥 Spelers, Kleuren (incl. Zwart) & Handicap</h2>
+            <p class="text-xs text-slate-400">Tik op het kleurbolletje om van pionkleur te wisselen, of geef een speler een vaste start-voorsprong (handicap).</p>
           </div>
-          <button type="button" onclick="toggleToolsModal(true); pickRandomStarter();" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold">
-            🎯 Loten wie begint
-          </button>
+          <button type="button" onclick="toggleToolsModal(true); pickRandomStarter();" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold">🎯 Loten wie begint</button>
         </div>
         <div class="flex gap-2">
-          <input
-            type="text"
-            id="newPlayerInput"
-            placeholder="Naam nieuwe speler..."
-            onkeydown="if(event.key==='Enter') addNewPlayer()"
-            class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
-          />
-          <button type="button" onclick="addNewPlayer()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold">
-            + Toevoegen
-          </button>
+          <input type="text" id="newPlayerInput" placeholder="Naam nieuwe speler..." onkeydown="if(event.key==='Enter') addNewPlayer()" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500" />
+          <button type="button" onclick="addNewPlayer()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold">+ Toevoegen</button>
         </div>
         <div id="playersListContainer" class="space-y-2"></div>
       </div>
@@ -370,20 +382,14 @@
       <!-- Backup & Restore Card -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
         <h3 class="font-bold text-sm text-white">💾 Back-up & Overzetten naar ander toestel</h3>
-        <p class="text-xs text-slate-400">Kopieer of download al je favorieten, eigen spellen, spelers en historie om ze veilig te bewaren of op een andere telefoon in te laden.</p>
+        <p class="text-xs text-slate-400">Kopieer of download al je favorieten, eigen spellen, spelers en historie.</p>
         <div class="flex flex-wrap gap-2">
-          <button type="button" onclick="exportDataBackup()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">
-            📋 Kopieer Back-up Code
-          </button>
-          <button type="button" onclick="downloadDataFile()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">
-            ⬇️ Download .json bestand
-          </button>
+          <button type="button" onclick="exportDataBackup()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">📋 Kopieer Back-up Code</button>
+          <button type="button" onclick="downloadDataFile()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">⬇️ Download .json bestand</button>
         </div>
         <div class="pt-2 border-t border-slate-800 space-y-2">
           <textarea id="backupInputArea" rows="2" placeholder="Plak hier een back-up code om te herstellen..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
-          <button type="button" onclick="importDataBackup()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
-            🔄 Back-up Inladen & Herstellen
-          </button>
+          <button type="button" onclick="importDataBackup()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">🔄 Back-up Inladen & Herstellen</button>
         </div>
       </div>
     </section>
@@ -405,11 +411,9 @@
         <div class="flex items-center justify-between">
           <div>
             <h2 class="font-bold text-base text-white">📜 Gespeelde Potjes</h2>
-            <p class="text-xs text-slate-400">Tik op 💬 om de eindstand op WhatsApp te delen.</p>
+            <p class="text-xs text-slate-400">Tik op 🔄 voor directe revanche of op 💬 om te delen via WhatsApp.</p>
           </div>
-          <button type="button" onclick="clearAllHistory()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">
-            Alles wissen
-          </button>
+          <button type="button" onclick="clearAllHistory()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">Alles wissen</button>
         </div>
         <div id="historyListContainer" class="space-y-2.5"></div>
       </div>
@@ -419,17 +423,97 @@
 
   <script>
     // =========================================================================
-    // 1. PLAYER MEEPLE COLORS & CUSTOM SVG ICONS
+    // 0. APP ICON GENERATOR (MEEPLE + DICE + SCORE SHEET) & PWA MANIFEST
+    // =========================================================================
+    const BRAND_ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-full h-full">
+      <defs>
+        <linearGradient id="bgG" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#475569"/>
+          <stop offset="100%" stop-color="#0f172a"/>
+        </linearGradient>
+      </defs>
+      <rect width="512" height="512" rx="115" fill="url(#bgG)" stroke="#94a3b8" stroke-width="10"/>
+      <!-- Score Sheet -->
+      <g transform="translate(275,245) rotate(8) translate(-135,-165)">
+        <rect width="265" height="325" rx="22" fill="#f8fafc" stroke="#cbd5e1" stroke-width="6"/>
+        <line x1="25" y1="78" x2="240" y2="78" stroke="#fca5a5" stroke-width="5"/>
+        <line x1="25" y1="142" x2="240" y2="142" stroke="#86efac" stroke-width="5"/>
+        <line x1="25" y1="206" x2="240" y2="206" stroke="#93c5fd" stroke-width="5"/>
+        <line x1="165" y1="25" x2="165" y2="300" stroke="#cbd5e1" stroke-width="4"/>
+        <text x="35" y="65" font-family="Arial,sans-serif" font-weight="900" font-size="38" fill="#ef4444">P1: 24</text>
+        <text x="35" y="128" font-family="Arial,sans-serif" font-weight="900" font-size="38" fill="#16a34a">P2: 38</text>
+        <text x="35" y="192" font-family="Arial,sans-serif" font-weight="900" font-size="38" fill="#2563eb">P3: 19</text>
+        <path d="M185 52 l12 12 l24 -24" stroke="#475569" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M185 115 l12 12 l24 -24" stroke="#475569" stroke-width="7" fill="none" stroke-linecap="round"/>
+        <path d="M185 178 l12 12 l24 -24" stroke="#475569" stroke-width="7" fill="none" stroke-linecap="round"/>
+      </g>
+      <!-- Blue Meeple -->
+      <path d="M135 200 c24 0 42 18 42 40 c0 12 -6 22 -15 28 l48 36 c10 8 6 24 -7 24 h-26 l18 92 c2 11 -6 20 -17 20 h-32 l-11 -55 l-11 55 h-32 c-11 0 -19 -9 -17 -20 l18 -92 h-26 c-13 0 -17 -16 -7 -24 l48 -36 c-9 -6 -15 -16 -15 -28 c0 -22 18 -40 42 -40 z" fill="#38bdf8" stroke="#0284c7" stroke-width="10" stroke-linejoin="round"/>
+      <!-- Red Die -->
+      <rect x="220" y="255" width="98" height="98" rx="20" fill="#ef4444" stroke="#b91c1c" stroke-width="8"/>
+      <circle cx="246" cy="281" r="8" fill="#fff"/><circle cx="292" cy="281" r="8" fill="#fff"/>
+      <circle cx="269" cy="304" r="8" fill="#fff"/>
+      <circle cx="246" cy="327" r="8" fill="#fff"/><circle cx="292" cy="327" r="8" fill="#fff"/>
+      <!-- Green Die -->
+      <rect x="220" y="355" width="98" height="98" rx="20" fill="#22c55e" stroke="#15803d" stroke-width="8"/>
+      <circle cx="246" cy="381" r="8" fill="#fff"/><circle cx="292" cy="381" r="8" fill="#fff"/>
+      <circle cx="246" cy="427" r="8" fill="#fff"/><circle cx="292" cy="427" r="8" fill="#fff"/>
+      <!-- Pen -->
+      <g transform="translate(412,285) rotate(24)">
+        <rect x="-13" y="-135" width="26" height="240" rx="8" fill="#d97706" stroke="#78350f" stroke-width="6"/>
+        <rect x="-13" y="-10" width="26" height="16" fill="#cbd5e1"/>
+        <polygon points="-13,105 13,105 0,145" fill="#e2e8f0" stroke="#475569" stroke-width="4"/>
+      </g>
+    </svg>`;
+
+    function setupCustomAppIcon() {
+      const brandEl = document.getElementById('headerBrandIcon');
+      if (brandEl) brandEl.innerHTML = BRAND_ICON_SVG;
+
+      const svgBlob = new Blob([BRAND_ICON_SVG], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 512, 512);
+        const pngDataUrl = canvas.toDataURL('image/png');
+        document.getElementById('faviconLink').href = pngDataUrl;
+        document.getElementById('appleTouchIconLink').href = pngDataUrl;
+
+        const manifest = {
+          name: 'Spellen Scoreblok Pro',
+          short_name: 'Scoreblok',
+          start_url: '.',
+          display: 'standalone',
+          background_color: '#0f172a',
+          theme_color: '#1e293b',
+          icons: [{ src: pngDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }]
+        };
+        const mBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        document.getElementById('manifestLink').href = URL.createObjectURL(mBlob);
+        URL.revokeObjectURL(url);
+      };
+      img.src = url;
+    }
+
+    // =========================================================================
+    // 1. PLAYER MEEPLE COLORS (INCL. ZWART, WIT, TURQUOISE, BRUIN)
     // =========================================================================
     const PLAYER_COLORS = [
-      { id: 'indigo', name: 'Blauw', hex: '#3b82f6' },
-      { id: 'rose', name: 'Rood', hex: '#ef4444' },
-      { id: 'emerald', name: 'Groen', hex: '#10b981' },
-      { id: 'amber', name: 'Geel', hex: '#f59e0b' },
+      { id: 'blue', name: 'Blauw', hex: '#3b82f6' },
+      { id: 'red', name: 'Rood', hex: '#ef4444' },
+      { id: 'green', name: 'Groen', hex: '#10b981' },
+      { id: 'yellow', name: 'Geel', hex: '#f59e0b' },
+      { id: 'black', name: 'Zwart', hex: '#1e293b' },
+      { id: 'white', name: 'Wit', hex: '#f8fafc' },
       { id: 'purple', name: 'Paars', hex: '#a855f7' },
       { id: 'orange', name: 'Oranje', hex: '#f97316' },
       { id: 'pink', name: 'Roze', hex: '#ec4899' },
-      { id: 'slate', name: 'Wit/Grijs', hex: '#cbd5e1' }
+      { id: 'cyan', name: 'Turquoise', hex: '#06b6d4' },
+      { id: 'brown', name: 'Bruin', hex: '#92400e' }
     ];
 
     const SVG_ICONS = {
@@ -463,49 +547,64 @@
       eldorado: '<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,6 38,38 10,38" fill="#facc15"/><circle cx="24" cy="25" r="6" fill="#16a34a"/></svg>',
       harmonies: '<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="24" r="18" fill="#047857"/><circle cx="18" cy="20" r="5" fill="#facc15"/><circle cx="30" cy="20" r="5" fill="#38bdf8"/><circle cx="24" cy="30" r="5" fill="#f87171"/></svg>',
       everdell: '<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="20" r="13" fill="#9333ea"/><rect x="20" y="28" width="8" height="12" rx="2" fill="#78350f"/><circle cx="19" cy="18" r="2.5" fill="#facc15"/><circle cx="29" cy="18" r="2.5" fill="#facc15"/></svg>',
+      lostcities: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="5" y="10" width="7" height="28" rx="2" fill="#eab308"/><rect x="13" y="10" width="7" height="28" rx="2" fill="#3b82f6"/><rect x="21" y="10" width="7" height="28" rx="2" fill="#f8fafc"/><rect x="29" y="10" width="7" height="28" rx="2" fill="#22c55e"/><rect x="37" y="10" width="7" height="28" rx="2" fill="#ef4444"/></svg>',
+      koehandel: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="10" width="36" height="28" rx="5" fill="#16a34a"/><circle cx="24" cy="24" r="9" fill="#bbf7d0"/><text x="24" y="29" text-anchor="middle" fill="#065f46" font-size="13" font-weight="900">🐄</text></svg>',
+      themind: '<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="24" r="18" fill="#312e81" stroke="#818cf8" stroke-width="2"/><text x="24" y="30" text-anchor="middle" font-size="18">🧠</text></svg>',
+      explodingkittens: '<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="24" r="18" fill="#dc2626"/><text x="24" y="30" text-anchor="middle" font-size="18">💣</text></svg>',
+      machiavelli: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="8" width="36" height="32" rx="6" fill="#7c2d12"/><polygon points="12,32 16,16 24,26 32,16 36,32" fill="#facc15"/></svg>',
       free: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="8" y="6" width="32" height="36" rx="5" fill="#6366f1"/><path d="M16 18h16M16 26h16M16 34h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>'
     };
 
+    // =========================================================================
+    // 2. COMPLETE 36 GAMES CATALOG WITH PLAYERS, DURATION & RULES CHEAT SHEETS
+    // =========================================================================
     const BASE_GAMES_CATALOG = [
-      { id: 'beverbende', name: 'Beverbende', category: 'card', type: 'rounds', lowestWins: true, limit: 66, subtitle: 'Rondeteller • Laagste score wint', icon: 'beverbende' },
-      { id: 'clever', name: 'Clever', category: 'card', type: 'clever', lowestWins: false, subtitle: '5 kleuren + automatische Vossen-bonus', icon: 'clever' },
-      { id: 'forestshuffle', name: 'Forest Shuffle (Bosbende)', category: 'card', type: 'categories', lowestWins: false, categories: ['🌲 Bomen & Struiken', '🦅 Boven / 🐾 Onder', '🦌 Links / 🦊 Rechts', '🦋 Vlinders', '🦇 Grot / 🌰 Eikels'], subtitle: 'Eindtelling habitatkaarten & bomen', icon: 'forestshuffle' },
-      { id: 'kok1', name: 'Keer op Keer', category: 'card', type: 'kok1', lowestWins: false, subtitle: 'Kleurenbonussen, kolommen A-O, ! en ★', icon: 'kok1' },
-      { id: 'kok2', name: 'Keer op Keer 2', category: 'card', type: 'kok2', lowestWins: false, subtitle: 'Inclusief bonusrij, kolommen A-O en ❤️/?', icon: 'kok2' },
-      { id: 'klaverjassen', name: 'Klaverjassen / Boerenbridge', category: 'card', type: 'rounds', lowestWins: false, subtitle: 'Slagen, punten en roem per ronde', icon: 'klaverjassen' },
-      { id: 'lama', name: 'L.A.M.A.', category: 'card', type: 'rounds', lowestWins: true, limit: 40, subtitle: 'Fiches afleggen • Laagste score wint (40)', icon: 'lama' },
-      { id: 'qwixx', name: 'Qwixx', category: 'card', type: 'qwixx', lowestWins: false, subtitle: '4 kleurenrijen met automatische puntentabel', icon: 'qwixx' },
-      { id: 'regenwormen', name: 'Regenwormen (1 & 2)', category: 'card', type: 'regenwormen', lowestWins: false, subtitle: 'Klikbare tegels 21-36 (1-4 wormen) & bonustegels', icon: 'regenwormen' },
-      { id: 'seasalt', name: 'Sea Salt & Paper', category: 'card', type: 'rounds', lowestWins: false, limit: 35, subtitle: 'Rondeteller met doelpuntentelling', icon: 'seasalt' },
-      { id: 'skipbo', name: 'Skip-Bo / Pesten', category: 'card', type: 'rounds', lowestWins: false, subtitle: 'Snelle potjes- en puntenteller', icon: 'skipbo' },
-      { id: 'skyjo', name: 'Skyjo', category: 'card', type: 'rounds', lowestWins: true, limit: 100, subtitle: 'Rondeteller (incl. minpunten) • Limiet 100', icon: 'skyjo' },
-      { id: 'sushigo', name: 'Sushi Go! (Party)', category: 'card', type: 'categories', lowestWins: false, categories: ['🍣 Ronde 1', '🍱 Ronde 2', '🥟 Ronde 3', '🍮 Pudding (Toetjes)'], subtitle: '3 Rondes + Toetjes eindtelling', icon: 'sushigo' },
-      { id: 'take5', name: 'Take 5! (6 Nimmt!)', category: 'card', type: 'rounds', lowestWins: true, limit: 66, subtitle: 'Koeienkoppen tellen • Laagste wint (66)', icon: 'take5' },
-      { id: 'uno', name: 'UNO / Flip / Phase 10', category: 'card', type: 'rounds', lowestWins: false, limit: 500, subtitle: 'Rondeteller per potje', icon: 'uno' },
-      { id: 'valsemotten', name: 'Valse Motten', category: 'card', type: 'rounds', lowestWins: true, limit: 50, subtitle: 'Strafpunten tellen • Laagste score wint', icon: 'valsemotten' },
-      { id: 'yahtzee', name: 'Yahtzee / Duizenden', category: 'card', type: 'yahtzee', lowestWins: false, subtitle: 'Officieel scoreblad met 63+ bonus', icon: 'yahtzee' },
+      { id: 'beverbende', name: 'Beverbende', category: 'card', type: 'rounds', lowestWins: true, limit: 66, minP: 2, maxP: 6, dur: 'short', defaultDealerRule: 'highest_total', subtitle: 'Rondeteller • Laagste score wint (66)', icon: 'beverbende', rules: { prep: 'Elke speler krijgt 4 gedekte kaarten voor zich en mag alleen de buitenste 2 één keer bekijken.', end: 'Een ronde stopt na nog 1 laatste beurt zodra iemand op tafel klopt. Het spel stopt bij 66 punten.', score: 'Draai alle kaarten open (ruil eventuele Macht-kaarten voor de bovenste van de stapel). Laagste totaal wint!' } },
+      { id: 'clever', name: 'Clever', category: 'card', type: 'clever', lowestWins: false, minP: 1, maxP: 4, dur: 'medium', subtitle: '5 kleuren (Groen auto) + Vossen-bonus', icon: 'clever', rules: { prep: '4 rondes bij 4 spelers, 5 rondes bij 3 spelers, 6 rondes bij 1-2 spelers.', end: 'Na de laatste ronde volgt de eindtelling.', score: 'Groen telt op basis van aantal kruisjes (1, 3, 6... 66). Elke Vos is jouw laagste kleurscore waard!' } },
+      { id: 'explodingkittens', name: 'Exploding Kittens', category: 'card', type: 'rounds', lowestWins: false, minP: 2, maxP: 5, dur: 'short', defaultDealerRule: 'winner_round', subtitle: 'Potjes- en overlevingsteller', icon: 'explodingkittens', rules: { prep: 'Iedereen krijgt 7 kaarten + 1 Ontmantelkaart. Stop (Aantal spelers - 1) Exploding Kittens in de stapel.', end: 'Wie als laatste overblijft zonder te ontploffen wint het potje!', score: 'Geef de winnaar van elk potje 1 punt (of geef punten op basis van volgorde van uitvallen).' } },
+      { id: 'forestshuffle', name: 'Forest Shuffle (Bosbende)', category: 'card', type: 'categories', lowestWins: false, minP: 2, maxP: 5, dur: 'medium', categories: ['🌲 Bomen & Struiken', '🦅 Boven / 🐾 Onder', '🦌 Links / 🦊 Rechts', '🦋 Vlinders', '🦇 Grot / 🌰 Eikels'], subtitle: 'Eindtelling habitatkaarten & bomen', icon: 'forestshuffle', rules: { prep: '3 Winterkaarten gaan in het onderste deel van de stapel.', end: 'Het spel stopt direct zodra de 3e Winterkaart wordt getrokken.', score: 'Tel alle bomen, gekoppelde dieren, vlindersets en kaarten in je grot bij elkaar op.' } },
+      { id: 'kok1', name: 'Keer op Keer', category: 'card', type: 'kok1', lowestWins: false, minP: 1, maxP: 6, dur: 'short', subtitle: 'Kleuren, kolommen A-O (1e & 2e score), ! en ★', icon: 'kok1', rules: { prep: '1 startspeler gooit 6 dobbelstenen (3 kleur, 3 cijfers) en mag als eerste kiezen; anderen kiezen uit de overgebleven.', end: 'Stopt zodra iemand 2 kleuren helemaal vol heeft OF alle 8 zijn uitroeptekens heeft gebruikt.', score: 'Volle kleur = 5 (1e) of 3 (later). Kolommen A-O = hoog (1e) of laag (later). Uitroepteken over = +1. Open ster = -2.' } },
+      { id: 'kok2', name: 'Keer op Keer 2', category: 'card', type: 'kok2', lowestWins: false, minP: 1, maxP: 6, dur: 'short', subtitle: 'Inclusief 1e/2e kolomscore, bonusrij en ❤️/?', icon: 'kok2', rules: { prep: 'Zelfde basis als Keer op Keer 1, maar met Harten in plaats van minpunten voor sterren.', end: 'Stopt zodra iemand 2 kleuren vol heeft of alle jokers (!) op zijn.', score: 'Aangekruiste harten spelen vakjes vrij op je onderste bonusrij voor elke kolom die je daarna vol maakt!' } },
+      { id: 'klaverjassen', name: 'Klaverjassen / Boerenbridge', category: 'card', type: 'rounds', lowestWins: false, minP: 2, maxP: 6, dur: 'long', defaultDealerRule: 'clockwise', subtitle: 'Slagen, punten en roem per ronde', icon: 'klaverjassen', rules: { prep: 'Klaverjassen: 16 potjes (32 kaarten). Boerenbridge: opbouwen van 1 naar max kaarten.', end: 'Na het afgesproken aantal rondes.', score: 'Voer per ronde de behaalde punten (incl. roem of pit) in.' } },
+      { id: 'koehandel', name: 'Koehandel (Master)', category: 'card', type: 'koehandel', lowestWins: false, minP: 3, maxP: 5, dur: 'medium', subtitle: 'Klikbare dierensets (met dubbele-set bonus)', icon: 'koehandel', rules: { prep: 'Iedereen start met 7 geldkaarten (2x 0, 4x 10, 1x 50). Bij elke Ezel krijgt iedereen extra startgeld (50, 100, 200, 500).', end: 'Stopt zodra alle 10 de dierensets van 4 kaarten compleet zijn.', score: 'Een kwartet is zijn waarde waard (bijv. Koe = 800). Heb je 2 kwartetten? Dan verdubbelt hun som!' } },
+      { id: 'lama', name: 'L.A.M.A.', category: 'card', type: 'rounds', lowestWins: true, limit: 40, minP: 2, maxP: 6, dur: 'short', defaultDealerRule: 'winner_round', subtitle: 'Fiches afleggen • Laagste score wint (40)', icon: 'lama', rules: { prep: 'Iedereen krijgt 6 handkaarten.', end: 'Ronde stopt als iemand leeg is of iedereen is uitgestapt. Spel stopt bij 40 strafpunten.', score: 'Elke kaartsoort telt maar 1 keer (Lama = 10). Wie uitgespeeld is mag 1 fiche (wit=1 of zwart=10) inleveren!' } },
+      { id: 'lostcities', name: 'Lost Cities (Kaartspel)', category: 'card', type: 'lostcities', lowestWins: false, minP: 2, maxP: 2, dur: 'short', subtitle: '5 expedities (-20 start, ×2/×3/×4 & 8+ bonus)', icon: 'lostcities', rules: { prep: '2 spelers, ieder 8 handkaarten. 5 expeditiekleuren.', end: 'Ronde stopt zodra de trekstapel leeg is (vaak 3 rondes totaal).', score: 'Elke gestarte expeditie kost -20 pnt + som van kaarten, vermenigvuldigd met 2, 3 of 4 bij 1, 2 of 3 weddenschappen. 8+ kaarten = +20 bonus!' } },
+      { id: 'machiavelli', name: 'Machiavelli', category: 'card', type: 'machiavelli', lowestWins: false, minP: 2, maxP: 7, dur: 'medium', subtitle: 'Gebouwen, 5-kleuren bonus (+3) & 1e klaar (+4)', icon: 'machiavelli', rules: { prep: 'Iedereen start met 4 handkaarten en 2 goudstukken.', end: 'Eindigt na de ronde waarin iemand zijn 8e (of 7e) gebouw bouwt.', score: 'Totaalwaarde gebouwen + 3 pnt voor alle 5 de kleuren + 4 pnt voor wie als 1e klaar was (of +2 pnt voor wie ook 8 gebouwen heeft).' } },
+      { id: 'qwixx', name: 'Qwixx', category: 'card', type: 'qwixx', lowestWins: false, minP: 2, maxP: 5, dur: 'short', subtitle: '4 kleurenrijen met automatische puntentabel', icon: 'qwixx', rules: { prep: 'Rechts kruisen! Een rij sluiten mag pas bij minimaal 5 kruisjes in die rij (het slotje telt als extra kruisje).', end: 'Stopt direct bij 2 gesloten rijen OF bij 4 mislukte worpen.', score: 'Kruisjes tabel (1=1, 2=3, 3=6... 12=78) min 5 punten per mislukte worp.' } },
+      { id: 'regenwormen', name: 'Regenwormen (1 & 2)', category: 'card', type: 'regenwormen', lowestWins: false, minP: 2, maxP: 7, dur: 'short', subtitle: 'Klikbare tegels 21-36 (1-4 wormen) & bonustegels', icon: 'regenwormen', rules: { prep: 'Leg tegels 21 t/m 36 open op een rij. Gooi met 8 dobbelstenen (je móét minimaal 1 worm hebben).', end: 'Stopt zodra er geen open tegels meer in het midden liggen.', score: 'Tel het aantal wormen op je behouden tegels.' } },
+      { id: 'seasalt', name: 'Sea Salt & Paper', category: 'card', type: 'rounds', lowestWins: false, limit: 35, minP: 2, maxP: 4, dur: 'short', defaultDealerRule: 'clockwise', subtitle: 'Rondeteller (Doel: 40/35/30 pnt op basis van spelers)', icon: 'seasalt', rules: { prep: '2 aflegstapels naast de trekstapel.', end: 'Vanaf 7 pnt mag je STOP of LAATSTE KANS roepen. Einddoel: 40p (2 sp.), 35p (3 sp.), 30p (4 sp.).', score: 'Kaartcombinaties + zeemeerminnen (kleurbonus).' } },
+      { id: 'skipbo', name: 'Skip-Bo / Pesten', category: 'card', type: 'rounds', lowestWins: false, minP: 2, maxP: 6, dur: 'short', defaultDealerRule: 'winner_round', subtitle: 'Snelle potjes- en puntenteller', icon: 'skipbo', rules: { prep: 'Skip-Bo: stok van 20 of 30 kaarten per speler.', end: 'Wie zijn eigen stok als eerste leeg speelt wint.', score: '1 punt per gewonnen potje (of 25 pnt + 5 pnt per overgebleven kaart van tegenstanders).' } },
+      { id: 'skyjo', name: 'Skyjo', category: 'card', type: 'rounds', lowestWins: true, limit: 100, minP: 2, maxP: 8, dur: 'medium', defaultDealerRule: 'highest_total', subtitle: 'Rondeteller (incl. minpunten) • Limiet 100', icon: 'skyjo', rules: { prep: '12 gedekte kaarten (4x3) per speler, draai er 2 open.', end: 'Wie de ronde uitmaakt móét de strikt laagste score hebben, anders verdubbelt zijn positieve ronde-score!', score: '3 gelijke kaarten onder elkaar verdwijnen. Spel stopt bij 100 punten; laagste totaal wint.' } },
+      { id: 'sushigo', name: 'Sushi Go! (Party)', category: 'card', type: 'sushigo', lowestWins: false, minP: 2, maxP: 5, dur: 'short', subtitle: '3 Rondes + snelle Pudding-knoppen (+6 / -6)', icon: 'sushigo', rules: { prep: '3 rondes van telkens nieuwe kaarten doorgeven (Pudding blijft liggen tot het einde!).', end: 'Na 3 rondes volgt de Pudding-eindtelling.', score: 'Meeste pudding = +6 pnt, minste pudding = -6 pnt (bij 2 spelers geen minpunten).' } },
+      { id: 'take5', name: 'Take 5! (6 Nimmt!)', category: 'card', type: 'rounds', lowestWins: true, limit: 66, minP: 2, maxP: 10, dur: 'short', defaultDealerRule: 'clockwise', subtitle: 'Koeienkoppen tellen • Laagste wint (66)', icon: 'take5', rules: { prep: '10 handkaarten per speler, 4 startkaarten op tafel.', end: 'Na 10 beurten tel je je gepakte koeienkoppen. Spel stopt bij 66 strafpunten.', score: 'Elke koeienkop op je gepakte kaarten is 1 strafpunt.' } },
+      { id: 'themind', name: 'The Mind', category: 'card', type: 'themind', lowestWins: false, minP: 2, maxP: 4, dur: 'short', subtitle: 'Coöperatieve Level-, Levens- & Shuriken-tracker', icon: 'themind', rules: { prep: '2 spelers = 12 levels (3 levens), 3 spelers = 10 levels (3 levens), 4 spelers = 8 levels (4 levens).', end: 'Jullie winnen samen als het laatste level is gehaald!', score: 'Beloningen na level 2, 3, 5, 6, 8, 9 (extra leven of shuriken).' } },
+      { id: 'uno', name: 'UNO / Flip / Phase 10', category: 'card', type: 'rounds', lowestWins: false, limit: 500, minP: 2, maxP: 10, dur: 'short', defaultDealerRule: 'winner_round', subtitle: 'Rondeteller per potje', icon: 'uno', rules: { prep: '7 handkaarten per speler.', end: 'Wie het eerst zijn kaarten kwijt is wint de ronde.', score: 'Cijferkaarten = waarde, actiekaarten = 20, zwarte kaarten = 50 punten.' } },
+      { id: 'valsemotten', name: 'Valse Motten', category: 'card', type: 'rounds', lowestWins: true, limit: 50, minP: 3, maxP: 5, dur: 'short', defaultDealerRule: 'clockwise', subtitle: 'Strafpunten tellen • Laagste score wint', icon: 'valsemotten', rules: { prep: '8 kaarten per speler, oudste speler begint met de Bewakingskever.', end: 'Er worden net zoveel rondes gespeeld als er spelers zijn.', score: 'Motten = -10, Actiekaarten = -5, Gewone kaarten = -1 (laagste strafscore wint).' } },
+      { id: 'yahtzee', name: 'Yahtzee / Duizenden', category: 'card', type: 'yahtzee', lowestWins: false, minP: 1, maxP: 6, dur: 'medium', subtitle: 'Volledig scoreblad met 63+ bonus & 1-klik knoppen', icon: 'yahtzee', rules: { prep: 'Maximaal 3 worpen per beurt met 5 dobbelstenen.', end: 'Na 13 beurten zijn alle vakjes gevuld.', score: 'Bovenste helft 63 of meer punten = +35 bonus! Full House=25, Kl. Straat=30, Gr. Straat=40, Yahtzee=50.' } },
 
-      { id: 'wonders7', name: '7 Wonders', category: 'board', type: 'wonders7', lowestWins: false, subtitle: '7 categorieën + automatische Wetenschap-rekenhulp', icon: 'wonders7' },
-      { id: 'azul', name: 'Azul', category: 'board', type: 'carcassonne', lowestWins: false, subtitle: 'Live tegelteller + rijen, kolommen en vloerlijn', icon: 'azul' },
-      { id: 'carcassonne', name: 'Carcassonne', category: 'board', type: 'carcassonne', lowestWins: false, subtitle: 'Live teller + Steden, Wegen, Kloosters & Boeren', icon: 'carcassonne' },
-      { id: 'cascadia', name: 'Cascadia', category: 'board', type: 'cascadia', lowestWins: false, subtitle: '5 Dieren, 5 Leefgebieden (+ bonus) & Dennenappels', icon: 'cascadia' },
-      { id: 'catan', name: 'Catan', category: 'board', type: 'categories', lowestWins: false, categories: ['🏠 Dorpen (1p)', '🏛️ Steden (2p)', '🛣️ Langste Route (2p)', '⚔️ Riddermacht (2p)', '📜 Ontwikkeling (1p)'], subtitle: 'Overwinningspunten tot 10 of 12', icon: 'catan' },
-      { id: 'eldorado', name: 'De Zoektocht naar El Dorado', category: 'board', type: 'rounds', lowestWins: false, subtitle: 'Barrières, munten en tempel-overwinningen', icon: 'eldorado' },
-      { id: 'everdell', name: 'Everdell', category: 'board', type: 'categories', lowestWins: false, categories: ['🃏 Stadskaarten', '🟣 Welvaartbonussen', '🍂 Events', '🥾 Reis (Journey)', '🍒 Bezette fiches'], subtitle: 'Grote eindtelling stadskaarten & bonussen', icon: 'everdell' },
-      { id: 'harmonies', name: 'Harmonies', category: 'board', type: 'categories', lowestWins: false, categories: ['🌳 Bomen', '⛰️ Bergen', '🌾 Gele Velden', '🏠 Gebouwen', '🌊 Rivier / Eiland', '🐾 Dierenkubussen', '🦋 Natuurgeesten'], subtitle: 'Eindtelling landschappen en dieren', icon: 'harmonies' },
-      { id: 'qwirkle', name: 'Qwirkle', category: 'board', type: 'carcassonne', lowestWins: false, subtitle: 'Beurtteller met snelle +6 Qwirkle bonus', icon: 'qwirkle' },
-      { id: 'rummikub', name: 'Rummikub', category: 'board', type: 'rounds', lowestWins: false, subtitle: 'Rondeteller voor plus- en minpunten', icon: 'rummikub' },
-      { id: 'scrabble', name: 'Scrabble / Wordfeud', category: 'board', type: 'rounds', lowestWins: false, subtitle: 'Woord- en rondenpunten bijhouden', icon: 'scrabble' },
-      { id: 'ttr', name: 'Ticket to Ride', category: 'board', type: 'ttr', lowestWins: false, subtitle: 'Routesnelknoppen (1-8), Bestemmingen & Stations', icon: 'ttr' },
-      { id: 'free', name: 'Vrij Scoreblok (Universeel)', category: 'board', type: 'carcassonne', lowestWins: false, subtitle: 'Geschikt voor elk ander bord- of kaartspel', icon: 'free' },
-      { id: 'wingspan', name: 'Wingspan', category: 'board', type: 'categories', lowestWins: false, categories: ['🦅 Vogels', '📜 Bonuskaarten', '🎯 Einde-ronde doelen', '🥚 Eieren', '🍒 Voedsel op kaarten', '🃏 Weggestopte kaarten'], subtitle: 'Volledige eindtelling per categorie', icon: 'wingspan' }
+      // Bordspellen
+      { id: 'wonders7', name: '7 Wonders', category: 'board', type: 'wonders7', lowestWins: false, minP: 2, maxP: 7, dur: 'medium', subtitle: '7 categorieën + automatische Wetenschap-rekenhulp', icon: 'wonders7', rules: { prep: '3 Tijdperken (I, II en III) van elk 6 kaarten.', end: 'Na tijdperk III volgt de eindtelling.', score: 'Wetenschap: aantal per symbool in het kwadraat + 7 punten per setje van 3 verschillende symbolen!' } },
+      { id: 'azul', name: 'Azul', category: 'board', type: 'carcassonne', lowestWins: false, minP: 2, maxP: 4, dur: 'medium', subtitle: 'Live tegelteller + rijen, kolommen en vloerlijn', icon: 'azul', rules: { prep: '2s=5 fabrieken, 3s=7 fabrieken, 4s=9 fabrieken.', end: 'Stopt na de ronde waarin iemand minimaal 1 horizontale rij van 5 tegels vol heeft.', score: 'Eindbonussen: Horizontale rij (+2), Verticale kolom (+7), Alle 5 van 1 kleur (+10).' } },
+      { id: 'carcassonne', name: 'Carcassonne', category: 'board', type: 'carcassonne', lowestWins: false, minP: 2, maxP: 6, dur: 'medium', expansions: ['⛪ Kathedralen & Herbergen', '🍷 Kooplieden & Bouwmeesters'], subtitle: 'Live teller + Steden, Wegen, Kloosters & Boeren', icon: 'carcassonne', rules: { prep: '7 meeples per speler (1 op het scorebord).', end: 'Stopt nadat de allerlaatste landtegel is gelegd.', score: 'Tijdens spel: Stad=2p/tegel, Weg=1p, Klooster=9p. Eindtelling: Boeren = 3p per afgebouwde stad op hun weiland!' } },
+      { id: 'cascadia', name: 'Cascadia', category: 'board', type: 'cascadia', lowestWins: false, minP: 1, maxP: 4, dur: 'medium', subtitle: '5 Dieren, 5 Leefgebieden (+ bonus) & Dennenappels', icon: 'cascadia', rules: { prep: 'Iedereen krijgt 1 starttegel en er zijn precies 20 beurten per speler.', end: 'Als de trekstapels op zijn na 20 beurten.', score: 'Dierenkaarten + Grootste aaneengesloten groep per leefgebied (met automatische meerderheidsbonus!) + Dennenappels.' } },
+      { id: 'catan', name: 'Catan', category: 'board', type: 'catan', lowestWins: false, limit: 10, minP: 3, maxP: 6, dur: 'long', expansions: ['⚔️ Steden & Ridders (13p)', '⛵ Zeevaarders (12p)'], subtitle: 'Dorpen, Steden & automatische Route/Ridder-toggle', icon: 'catan', rules: { prep: 'Iedereen bouwt 2 startdorpen met elk 1 straat (tweede dorp geeft startgrondstoffen).', end: 'Wie in zijn eigen beurt op 10 (of 12/13 met uitbreiding) punten komt, wint direct!', score: 'Dorp=1p, Stad=2p, Langste Handelsroute (min. 5)=2p, Grootste Riddermacht (min. 3)=2p, Ontwikkeling=1p.' } },
+      { id: 'eldorado', name: 'De Zoektocht naar El Dorado', category: 'board', type: 'rounds', lowestWins: false, minP: 2, maxP: 4, dur: 'medium', expansions: ['😈 Helden & Demonen', '🐊 Gevaren & Muizen'], subtitle: 'Barrières, munten en tempel-overwinningen', icon: 'eldorado', rules: { prep: 'Iedereen start met dezelfde 8 expeditiekaarten (4x Geel, 3x Groen, 1x Blauw).', end: 'Zodra iemand El Dorado bereikt wordt de lopende ronde nog afgemaakt.', score: 'Bij gelijke aankomst in El Dorado wint degene met de meeste verzamelde barrières!' } },
+      { id: 'everdell', name: 'Everdell', category: 'board', type: 'categories', lowestWins: false, minP: 1, maxP: 4, dur: 'long', categories: ['🃏 Stadskaarten', '🟣 Welvaartbonussen', '🍂 Events', '🥾 Reis (Journey)', '🍒 Bezette fiches'], subtitle: 'Grote eindtelling stadskaarten & bonussen', icon: 'everdell', rules: { prep: 'Start met 2 werkers; je krijgt er 1 bij in de Lente, 1 in de Zomer en 2 in de Herfst (max 15 kaarten in je stad).', end: 'Als iedereen na de Herfst is gepast.', score: 'Basiswaarden kaarten + Paarse welvaartbonussen + Events + Reis + Puntfiches.' } },
+      { id: 'harmonies', name: 'Harmonies', category: 'board', type: 'categories', lowestWins: false, minP: 1, maxP: 4, dur: 'medium', categories: ['🌳 Bomen', '⛰️ Bergen', '🌾 Gele Velden', '🏠 Gebouwen', '🌊 Rivier / Eiland', '🐾 Dierenkubussen', '🦋 Natuurgeesten'], subtitle: 'Eindtelling landschappen en dieren', icon: 'harmonies', rules: { prep: 'Pak elke beurt 3 stenen uit een cirkel en plaats eventueel een dierenkaart en dierenkubus.', end: 'Stopt als het zakje leeg is OF als iemand nog maar 2 of minder lege velden op zijn bord heeft.', score: 'Tel per landschapstype én tel alle geplaatste dierenkubussen.' } },
+      { id: 'qwirkle', name: 'Qwirkle', category: 'board', type: 'carcassonne', lowestWins: false, minP: 2, maxP: 4, dur: 'medium', subtitle: 'Beurtteller met snelle +6 Qwirkle bonus', icon: 'qwirkle', rules: { prep: '6 blokjes per speler.', end: 'Wie het allerlaatste blokje aanlegt krijgt +6 bonuspunten.', score: '1 punt per blokje in elke gevormde rij. Een rij van 6 compleet (Qwirkle!) = 12 punten (6 + 6 bonus).' } },
+      { id: 'rummikub', name: 'Rummikub', category: 'board', type: 'rounds', lowestWins: false, minP: 2, maxP: 4, dur: 'medium', defaultDealerRule: 'clockwise', subtitle: 'Rondeteller voor plus- en minpunten', icon: 'rummikub', rules: { prep: '14 stenen per speler. Eerste uitleg moet minimaal 30 punten waard zijn.', end: 'Zodra een speler zijn rekje helemaal leeg speelt.', score: 'Verliezers tellen hun overgebleven stenen als minpunten (Joker = -30); de winnaar krijgt de som daarvan als pluspunten.' } },
+      { id: 'scrabble', name: 'Scrabble / Wordfeud', category: 'board', type: 'rounds', lowestWins: false, minP: 2, maxP: 4, dur: 'long', defaultDealerRule: 'clockwise', subtitle: 'Woord- en rondenpunten bijhouden', icon: 'scrabble', rules: { prep: '7 letterblokjes per speler. Eerste woord moet over de middelste ster liggen (dubbele woordwaarde).', end: 'Als het zakje leeg is en 1 speler al zijn letters heeft gelegd.', score: 'Alle 7 letters in 1 beurt leggen (Bingo) = +50 punten bonus!' } },
+      { id: 'ttr', name: 'Ticket to Ride', category: 'board', type: 'ttr', lowestWins: false, minP: 2, maxP: 5, dur: 'medium', expansions: ['🏢 Europe 1912 / Warehouses'], subtitle: 'Routesnelknoppen (1-8), Bestemmingen & Stations', icon: 'ttr', rules: { prep: '45 treintjes per speler, 4 treinkaarten en bestemmingskaarten.', end: 'Als iemand aan het eind van zijn beurt nog maar 0, 1 of 2 treintjes over heeft, volgt 1 laatste ronde.', score: 'Routes (1=1, 2=2, 3=4, 4=7, 6=15, 8=21) + Gehaalde bestemmingen - Gemiste bestemmingen + (Stations over × 4) + Langste Route (+10).' } },
+      { id: 'free', name: 'Vrij Scoreblok (Universeel)', category: 'board', type: 'carcassonne', lowestWins: false, minP: 1, maxP: 10, dur: 'medium', subtitle: 'Geschikt voor elk ander bord- of kaartspel', icon: 'free', rules: { prep: 'Universele teller voor elk spel.', end: 'Sla het potje op wanneer jullie klaar zijn.', score: 'Gebruik de snelknoppen en kies zelf of de hoogste of laagste score wint.' } },
+      { id: 'wingspan', name: 'Wingspan', category: 'board', type: 'categories', lowestWins: false, minP: 1, maxP: 5, dur: 'long', categories: ['🦅 Vogels', '📜 Bonuskaarten', '🎯 Einde-ronde doelen', '🥚 Eieren', '🍒 Voedsel op kaarten', '🃏 Weggestopte kaarten'], subtitle: 'Volledige eindtelling per categorie', icon: 'wingspan', rules: { prep: 'Start met 5 kaarten/voedsel in totaal (elke bewaarde vogelkaart kost 1 start-voedsel). 4 rondes (8, 7, 6, 5 acties).', end: 'Na ronde 4 volgt de eindtelling.', score: 'Vogelpunten + Bonuskaarten + Doelen + 1p per ei, voedsel op vogel en weggestopte kaart.' } }
     ];
 
+    // KEER OP KEER 1 & 2 KOLOMMEN MET 1E EN 2E SCORE!
     const KOK_COLS = [
-      { id: 'A', pts: 5 }, { id: 'B', pts: 3 }, { id: 'C', pts: 3 }, { id: 'D', pts: 3 },
-      { id: 'E', pts: 2 }, { id: 'F', pts: 2 }, { id: 'G', pts: 2 }, { id: 'H', pts: 1 },
-      { id: 'I', pts: 2 }, { id: 'J', pts: 2 }, { id: 'K', pts: 2 }, { id: 'L', pts: 3 },
-      { id: 'M', pts: 3 }, { id: 'N', pts: 3 }, { id: 'O', pts: 5 }
+      { id: 'A', pts1: 5, pts2: 3 }, { id: 'B', pts1: 3, pts2: 2 }, { id: 'C', pts1: 3, pts2: 2 }, { id: 'D', pts1: 3, pts2: 2 },
+      { id: 'E', pts1: 2, pts2: 1 }, { id: 'F', pts1: 2, pts2: 1 }, { id: 'G', pts1: 2, pts2: 1 }, { id: 'H', pts1: 1, pts2: 0 },
+      { id: 'I', pts1: 2, pts2: 1 }, { id: 'J', pts1: 2, pts2: 1 }, { id: 'K', pts1: 2, pts2: 1 }, { id: 'L', pts1: 3, pts2: 2 },
+      { id: 'M', pts1: 3, pts2: 2 }, { id: 'N', pts1: 3, pts2: 2 }, { id: 'O', pts1: 5, pts2: 3 }
     ];
     const KOK_COLORS = [
       { id: 'green', name: 'Groen', bg: 'bg-emerald-500' },
@@ -520,21 +619,44 @@
       { t: 29, w: 3 }, { t: 30, w: 3 }, { t: 31, w: 3 }, { t: 32, w: 3 },
       { t: 33, w: 4 }, { t: 34, w: 4 }, { t: 35, w: 4 }, { t: 36, w: 4 }
     ];
+    const KOEHANDEL_ANIMALS = [
+      { id: 'haan', name: '🐓 Haan', val: 10 },
+      { id: 'gans', name: '🪿 Gans', val: 40 },
+      { id: 'kat', name: '🐈 Kat', val: 90 },
+      { id: 'hond', name: '🐕 Hond', val: 160 },
+      { id: 'schaap', name: '🐑 Schaap', val: 250 },
+      { id: 'geit', name: '🐐 Geit', val: 350 },
+      { id: 'ezel', name: '🫏 Ezel', val: 500 },
+      { id: 'varken', name: '🐖 Varken', val: 650 },
+      { id: 'koe', name: '🐄 Koe', val: 800 },
+      { id: 'paard', name: '🐎 Paard', val: 1000 }
+    ];
+    const LOST_CITIES_COLORS = [
+      { id: 'yellow', name: '🟨 Geel', bg: 'bg-amber-500/20 border-amber-500/40' },
+      { id: 'blue', name: '🟦 Blauw', bg: 'bg-blue-500/20 border-blue-500/40' },
+      { id: 'white', name: '⬜ Wit', bg: 'bg-slate-400/20 border-slate-400/40' },
+      { id: 'green', name: '🟩 Groen', bg: 'bg-emerald-500/20 border-emerald-500/40' },
+      { id: 'red', name: '🟥 Rood', bg: 'bg-rose-500/20 border-rose-500/40' }
+    ];
+    const QWIXX_TABLE = [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78];
+    const CLEVER_GREEN_TABLE = [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66];
 
     // =========================================================================
-    // 2. STATE & LOCALSTORAGE
+    // 3. STATE & LOCALSTORAGE
     // =========================================================================
     const STORAGE_KEY = 'spellen_scoreblok_pro_v2';
     let state = {
       pickerTab: 'all',
       activeGameId: 'kok1',
+      theme: 'dark',
+      tableMode: false,
       favorites: [],
       customGames: [],
       players: [
-        { id: 'p1', name: 'Speler 1', active: true, color: '#3b82f6' },
-        { id: 'p2', name: 'Speler 2', active: true, color: '#ef4444' },
-        { id: 'p3', name: 'Speler 3', active: true, color: '#10b981' },
-        { id: 'p4', name: 'Speler 4', active: true, color: '#f59e0b' }
+        { id: 'p1', name: 'Speler 1', active: true, color: '#3b82f6', handicap: 0 },
+        { id: 'p2', name: 'Speler 2', active: true, color: '#ef4444', handicap: 0 },
+        { id: 'p3', name: 'Speler 3', active: true, color: '#10b981', handicap: 0 },
+        { id: 'p4', name: 'Speler 4', active: true, color: '#f59e0b', handicap: 0 }
       ],
       gameStates: {},
       history: []
@@ -552,6 +674,31 @@
       setTimeout(() => el.classList.add('hidden'), 2600);
     }
 
+    function applyThemeAndModeClasses() {
+      document.body.classList.toggle('light-mode', state.theme === 'light');
+      document.body.classList.toggle('table-mode', !!state.tableMode);
+      const tBtn = document.getElementById('tableModeBtn');
+      if (tBtn) {
+        tBtn.className = state.tableMode
+          ? 'px-2.5 py-1.5 rounded-xl bg-amber-500 text-slate-950 text-xs font-extrabold transition'
+          : 'px-2.5 py-1.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold transition';
+      }
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'light' ? 'dark' : 'light';
+      saveState();
+      applyThemeAndModeClasses();
+      showToast(state.theme === 'light' ? '☀️ Licht thema geactiveerd' : '🌙 Donker thema geactiveerd');
+    }
+
+    function toggleTableMode() {
+      state.tableMode = !state.tableMode;
+      saveState();
+      applyThemeAndModeClasses();
+      showToast(state.tableMode ? '📺 Grote Tafel-modus AAN' : '📺 Normale weergave');
+    }
+
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -561,10 +708,11 @@
           if (!Array.isArray(state.favorites)) state.favorites = [];
           if (!Array.isArray(state.customGames)) state.customGames = [];
           if (!Array.isArray(state.players) || state.players.length === 0) {
-            state.players = [{ id: 'p1', name: 'Speler 1', active: true, color: '#3b82f6' }];
+            state.players = [{ id: 'p1', name: 'Speler 1', active: true, color: '#3b82f6', handicap: 0 }];
           }
           state.players.forEach((p, idx) => {
             if (!p.color) p.color = PLAYER_COLORS[idx % PLAYER_COLORS.length].hex;
+            if (p.handicap === undefined) p.handicap = 0;
           });
           if (state.favorites.length > 0 && !sessionStorage.getItem('tab_initialized')) {
             state.pickerTab = 'fav';
@@ -574,6 +722,8 @@
           }
         }
       } catch (e) { console.error(e); }
+
+      applyThemeAndModeClasses();
 
       const lastSeenVersion = localStorage.getItem('spellen_scoreblok_version');
       if (lastSeenVersion && lastSeenVersion !== APP_VERSION) {
@@ -603,6 +753,30 @@
       document.getElementById('installModal').classList.toggle('hidden', !show);
     }
 
+    function toggleRulesModal(show) {
+      const modal = document.getElementById('rulesModal');
+      modal.classList.toggle('hidden', !show);
+      if (show) {
+        const def = getGameDef();
+        document.getElementById('rulesModalTitle').textContent = `ℹ️ ${def.name} – Spiekbriefje`;
+        const r = def.rules || { prep: 'Zie doos voor voorbereiding.', end: 'Standaard einde.', score: def.subtitle };
+        document.getElementById('rulesModalContent').innerHTML = `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1">
+            <div class="font-bold text-indigo-300">🃏 1. Voorbereiding & Start</div>
+            <p>${r.prep}</p>
+          </div>
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1">
+            <div class="font-bold text-amber-300">🏁 2. Einde van het spel</div>
+            <p>${r.end}</p>
+          </div>
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1">
+            <div class="font-bold text-emerald-300">🧮 3. Puntentelling</div>
+            <p>${r.score}</p>
+          </div>
+        `;
+      }
+    }
+
     function getActivePlayers() {
       const act = state.players.filter(p => p.active);
       return act.length > 0 ? act : state.players.slice(0, 1);
@@ -622,35 +796,61 @@
     }
 
     function ensureGameState(gameId) {
+      const def = getGameDef(gameId);
       if (!state.gameStates[gameId]) {
-        state.gameStates[gameId] = { rounds: [], playerData: {}, lowestWinsOverride: null };
+        state.gameStates[gameId] = {
+          rounds: [],
+          playerData: {},
+          lowestWinsOverride: null,
+          dealerRule: def.defaultDealerRule || 'clockwise',
+          manualStarterIdx: 0,
+          activeExpansions: {},
+          theMind: { level: 1, lives: 3, shurikens: 1 }
+        };
       }
       const gs = state.gameStates[gameId];
+      if (!gs.dealerRule) gs.dealerRule = def.defaultDealerRule || 'clockwise';
+      if (gs.manualStarterIdx === undefined) gs.manualStarterIdx = 0;
+      if (!gs.activeExpansions) gs.activeExpansions = {};
+      if (!gs.theMind) gs.theMind = { level: 1, lives: 3, shurikens: 1 };
+
       state.players.forEach(p => {
         if (!gs.playerData[p.id]) {
-          gs.playerData[p.id] = {
-            kokColors: {}, kokCols: {}, exclamations: 0, stars: 0, bonusRow: 0,
-            qwixx: { red: 0, yellow: 0, green: 0, blue: 0, fails: 0 },
-            clever: { yellow: 0, blue: 0, green: 0, orange: 0, purple: 0, foxes: 0 },
-            cascadia: { bear: 0, elk: 0, salmon: 0, hawk: 0, fox: 0, hab_mountain: 0, hab_forest: 0, hab_prairie: 0, hab_wetland: 0, hab_river: 0, cones: 0 },
-            regenwormen: { tiles: {}, bonus: 0 },
-            categories: {},
-            wonders: { military: 0, coins: 0, wonder: 0, civil: 0, trade: 0, guild: 0, sci_a: 0, sci_b: 0, sci_c: 0 },
-            ttr: { routes: 0, destPlus: 0, destMinus: 0, stations: 3, longest: false },
-            yahtzee: { ones: 0, twos: 0, threes: 0, fours: 0, fives: 0, sixes: 0, lower: 0 },
-            liveScore: 0,
-            carcCats: { stad: 0, weg: 0, klooster: 0, boer: 0, extra: 0 }
-          };
+          gs.playerData[p.id] = {};
         }
-        if (!gs.playerData[p.id].regenwormen) {
-          gs.playerData[p.id].regenwormen = { tiles: {}, bonus: 0 };
-        }
+        const pd = gs.playerData[p.id];
+        if (!pd.kokColors) pd.kokColors = {};
+        if (!pd.kokCols) pd.kokCols = {};
+        if (pd.exclamations === undefined) pd.exclamations = 0;
+        if (pd.stars === undefined) pd.stars = 0;
+        if (pd.bonusRow === undefined) pd.bonusRow = 0;
+        if (!pd.qwixx) pd.qwixx = { red: 0, yellow: 0, green: 0, blue: 0, fails: 0 };
+        if (!pd.clever) pd.clever = { yellow: 0, blue: 0, greenCount: 0, orange: 0, purple: 0, foxes: 0 };
+        if (!pd.cascadia) pd.cascadia = { bear: 0, elk: 0, salmon: 0, hawk: 0, fox: 0, hab_mountain: 0, hab_forest: 0, hab_prairie: 0, hab_wetland: 0, hab_river: 0, cones: 0 };
+        if (!pd.regenwormen) pd.regenwormen = { tiles: {}, bonus: 0 };
+        if (!pd.categories) pd.categories = {};
+        if (!pd.wonders) pd.wonders = { military: 0, coins: 0, wonder: 0, civil: 0, trade: 0, guild: 0, sci_a: 0, sci_b: 0, sci_c: 0 };
+        if (!pd.ttr) pd.ttr = { routes: 0, destPlus: 0, destMinus: 0, stations: 3, longest: false, warehouse: 0 };
+        if (!pd.yahtzee) pd.yahtzee = { ones: 0, twos: 0, threes: 0, fours: 0, fives: 0, sixes: 0, toak: 0, foak: 0, fh: 0, smStr: 0, lgStr: 0, yahtzee: 0, chance: 0, extraY: 0 };
+        if (!pd.catan) pd.catan = { villages: 2, cities: 0, dev: 0, longestRoad: false, largestArmy: false, extra: 0 };
+        if (!pd.sushigo) pd.sushigo = { r1: 0, r2: 0, r3: 0, pudding: 0 };
+        if (!pd.lostcities) pd.lostcities = {
+          yellow: { started: false, wagers: 0, pts: 0, bonus8: false },
+          blue: { started: false, wagers: 0, pts: 0, bonus8: false },
+          white: { started: false, wagers: 0, pts: 0, bonus8: false },
+          green: { started: false, wagers: 0, pts: 0, bonus8: false },
+          red: { started: false, wagers: 0, pts: 0, bonus8: false }
+        };
+        if (!pd.koehandel) pd.koehandel = { sets: {}, doubleBonus: false, cashBonus: 0 };
+        if (!pd.machiavelli) pd.machiavelli = { buildings: 0, allColors: false, first8: 0, extra: 0 };
+        if (pd.liveScore === undefined) pd.liveScore = 0;
+        if (!pd.carcCats) pd.carcCats = { stad: 0, weg: 0, klooster: 0, boer: 0, extra: 0 };
       });
       return gs;
     }
 
     // =========================================================================
-    // 3. TABLE TOOLS
+    // 4. TABLE TOOLS: WAKE LOCK, START PLAYER, DICE & TIMER
     // =========================================================================
     let wakeLockSentinel = null;
     async function toggleWakeLock() {
@@ -695,8 +895,7 @@
         [active[i], active[j]] = [active[j], active[i]];
       }
       const first = active[0];
-      const box = document.getElementById('starterResultBox');
-      box.innerHTML = `
+      document.getElementById('starterResultBox').innerHTML = `
         <div class="bg-amber-500/15 border border-amber-500/40 rounded-xl p-2.5 text-amber-200 space-y-1">
           <div class="text-sm font-extrabold flex items-center gap-2">
             🎉 <span style="color:${first.color}">${first.name}</span> mag beginnen!
@@ -776,7 +975,7 @@
     }
 
     // =========================================================================
-    // 4. CUSTOM GAME BUILDER
+    // 5. CUSTOM GAME BUILDER
     // =========================================================================
     function toggleCustomGameModal(show) {
       document.getElementById('customGameModal').classList.toggle('hidden', !show);
@@ -802,6 +1001,7 @@
         category,
         type,
         lowestWins,
+        minP: 1, maxP: 10, dur: 'medium',
         limit: limitRaw > 0 ? limitRaw : undefined,
         categories: type === 'categories' ? (catsRaw.length ? catsRaw : ['Categorie 1', 'Categorie 2', 'Bonus']) : undefined,
         subtitle: `Eigen spel • ${lowestWins ? 'Laagste wint' : 'Hoogste wint'}`,
@@ -827,10 +1027,8 @@
     }
 
     // =========================================================================
-    // 5. SCORE CALCULATIONS
+    // 6. SCORE CALCULATIONS (INCL. HANDICAP & NIEUWE SPELLEN)
     // =========================================================================
-    const QWIXX_TABLE = [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78];
-
     function computeCascadiaHabitatBonuses(gameId) {
       const gs = ensureGameState(gameId);
       const activePlayers = getActivePlayers();
@@ -871,77 +1069,103 @@
       return bonuses;
     }
 
-    function calculatePlayerTotal(gameId, playerId) {
+    function calculateLostCitiesExpScore(exp) {
+      if (!exp || (!exp.started && !exp.pts && !exp.wagers && !exp.bonus8)) return 0;
+      const base = Number(exp.pts || 0) - 20;
+      const mult = 1 + Number(exp.wagers || 0);
+      return (base * mult) + (exp.bonus8 ? 20 : 0);
+    }
+
+        function calculatePlayerTotal(gameId, playerId) {
       const def = getGameDef(gameId);
       const gs = ensureGameState(gameId);
       const pd = gs.playerData[playerId];
       if (!pd) return 0;
 
+      const playerObj = state.players.find(p => p.id === playerId);
+      const handicap = Number(playerObj?.handicap || 0);
+      let rawScore = 0;
+
       if (def.type === 'kok1' || def.type === 'kok2') {
-        let sum = 0;
-        Object.values(pd.kokColors || {}).forEach(v => sum += Number(v || 0));
-        KOK_COLS.forEach(c => { if (pd.kokCols?.[c.id]) sum += c.pts; });
-        sum += Number(pd.exclamations || 0) * 1;
-        if (def.type === 'kok1') sum -= Number(pd.stars || 0) * 2;
-        else { sum += Number(pd.bonusRow || 0); sum += Number(pd.stars || 0); }
-        return sum;
-      }
-      if (def.type === 'rounds') {
-        return (gs.rounds || []).reduce((acc, r) => acc + Number(r[playerId] || 0), 0);
-      }
-      if (def.type === 'qwixx') {
-        const q = pd.qwixx;
-        return (QWIXX_TABLE[q.red]||0) + (QWIXX_TABLE[q.yellow]||0) + (QWIXX_TABLE[q.green]||0) + (QWIXX_TABLE[q.blue]||0) - (Number(q.fails||0)*5);
-      }
-      if (def.type === 'clever') {
-        const c = pd.clever;
-        const arr = [Number(c.yellow||0), Number(c.blue||0), Number(c.green||0), Number(c.orange||0), Number(c.purple||0)];
-        const minColor = Math.min(...arr);
-        return arr.reduce((a, b) => a + b, 0) + (Number(c.foxes||0) * minColor);
-      }
-      if (def.type === 'regenwormen') {
-        const rw = pd.regenwormen || { tiles: {}, bonus: 0 };
-        let worms = 0;
-        REGENWORMEN_TILES.forEach(tile => {
-          if (rw.tiles?.[tile.t]) worms += tile.w;
+        Object.values(pd.kokColors || {}).forEach(v => rawScore += Number(v || 0));
+        KOK_COLS.forEach(c => {
+          const st = pd.kokCols?.[c.id];
+          if (st === 1 || st === true) rawScore += c.pts1;
+          else if (st === 2) rawScore += c.pts2;
         });
-        return worms + Number(rw.bonus || 0);
-      }
-      if (def.type === 'cascadia') {
+        rawScore += Number(pd.exclamations || 0) * 1;
+        if (def.type === 'kok1') rawScore -= Number(pd.stars || 0) * 2;
+        else { rawScore += Number(pd.bonusRow || 0); rawScore += Number(pd.stars || 0); }
+      } else if (def.type === 'rounds') {
+        rawScore = (gs.rounds || []).reduce((acc, r) => acc + Number(r[playerId] || 0), 0);
+      } else if (def.type === 'qwixx') {
+        const q = pd.qwixx;
+        rawScore = (QWIXX_TABLE[q.red]||0) + (QWIXX_TABLE[q.yellow]||0) + (QWIXX_TABLE[q.green]||0) + (QWIXX_TABLE[q.blue]||0) - (Number(q.fails||0)*5);
+      } else if (def.type === 'clever') {
+        const c = pd.clever;
+        const greenScore = CLEVER_GREEN_TABLE[Math.min(11, Math.max(0, Number(c.greenCount || 0)))] || 0;
+        const arr = [Number(c.yellow||0), Number(c.blue||0), greenScore, Number(c.orange||0), Number(c.purple||0)];
+        const minColor = Math.min(...arr);
+        rawScore = arr.reduce((a, b) => a + b, 0) + (Number(c.foxes||0) * minColor);
+      } else if (def.type === 'regenwormen') {
+        const rw = pd.regenwormen || { tiles: {}, bonus: 0 };
+        REGENWORMEN_TILES.forEach(tile => { if (rw.tiles?.[tile.t]) rawScore += tile.w; });
+        rawScore += Number(rw.bonus || 0);
+      } else if (def.type === 'cascadia') {
         const c = pd.cascadia;
         const animals = Number(c.bear||0) + Number(c.elk||0) + Number(c.salmon||0) + Number(c.hawk||0) + Number(c.fox||0);
         const habs = Number(c.hab_mountain||0) + Number(c.hab_forest||0) + Number(c.hab_prairie||0) + Number(c.hab_wetland||0) + Number(c.hab_river||0);
         const bonuses = computeCascadiaHabitatBonuses(gameId);
-        return animals + habs + (bonuses[playerId] || 0) + Number(c.cones || 0);
-      }
-      if (def.type === 'carcassonne') {
+        rawScore = animals + habs + (bonuses[playerId] || 0) + Number(c.cones || 0);
+      } else if (def.type === 'carcassonne') {
         const cc = pd.carcCats || {};
         const catSum = Number(cc.stad||0) + Number(cc.weg||0) + Number(cc.klooster||0) + Number(cc.boer||0) + Number(cc.extra||0);
-        return Number(pd.liveScore || 0) + catSum;
-      }
-      if (def.type === 'categories') {
-        return Object.values(pd.categories || {}).reduce((a, b) => a + Number(b || 0), 0);
-      }
-      if (def.type === 'wonders7') {
+        rawScore = Number(pd.liveScore || 0) + catSum;
+      } else if (def.type === 'categories') {
+        rawScore = Object.values(pd.categories || {}).reduce((a, b) => a + Number(b || 0), 0);
+      } else if (def.type === 'wonders7') {
         const w = pd.wonders;
         const base = Number(w.military||0) + Number(w.coins||0) + Number(w.wonder||0) + Number(w.civil||0) + Number(w.trade||0) + Number(w.guild||0);
         const a = Number(w.sci_a||0), b = Number(w.sci_b||0), c = Number(w.sci_c||0);
-        return base + (a*a) + (b*b) + (c*c) + (Math.min(a, b, c) * 7);
-      }
-      if (def.type === 'ttr') {
+        rawScore = base + (a*a) + (b*b) + (c*c) + (Math.min(a, b, c) * 7);
+      } else if (def.type === 'ttr') {
         const t = pd.ttr;
-        return Number(t.routes||0) + Number(t.destPlus||0) - Number(t.destMinus||0) + (Number(t.stations||0) * 4) + (t.longest ? 10 : 0);
-      }
-      if (def.type === 'yahtzee') {
+        rawScore = Number(t.routes||0) + Number(t.destPlus||0) - Number(t.destMinus||0) + (Number(t.stations||0) * 4) + (t.longest ? 10 : 0) + Number(t.warehouse||0);
+      } else if (def.type === 'yahtzee') {
         const y = pd.yahtzee;
         const upper = Number(y.ones||0) + Number(y.twos||0) + Number(y.threes||0) + Number(y.fours||0) + Number(y.fives||0) + Number(y.sixes||0);
-        return upper + (upper >= 63 ? 35 : 0) + Number(y.lower||0);
+        const upperBonus = upper >= 63 ? 35 : 0;
+        const lower = Number(y.toak||0) + Number(y.foak||0) + Number(y.fh||0) + Number(y.smStr||0) + Number(y.lgStr||0) + Number(y.yahtzee||0) + Number(y.chance||0) + (Number(y.extraY||0) * 100);
+        rawScore = upper + upperBonus + lower;
+      } else if (def.type === 'catan') {
+        const ct = pd.catan;
+        rawScore = (Number(ct.villages||0) * 1) + (Number(ct.cities||0) * 2) + (Number(ct.dev||0) * 1) + (ct.longestRoad ? 2 : 0) + (ct.largestArmy ? 2 : 0) + Number(ct.extra||0);
+      } else if (def.type === 'sushigo') {
+        const sg = pd.sushigo;
+        rawScore = Number(sg.r1||0) + Number(sg.r2||0) + Number(sg.r3||0) + Number(sg.pudding||0);
+      } else if (def.type === 'lostcities') {
+        const lc = pd.lostcities;
+        LOST_CITIES_COLORS.forEach(col => { rawScore += calculateLostCitiesExpScore(lc?.[col.id]); });
+      } else if (def.type === 'koehandel') {
+        const kh = pd.koehandel;
+        let setSum = 0;
+        let setCount = 0;
+        KOEHANDEL_ANIMALS.forEach(a => {
+          if (kh.sets?.[a.id]) { setSum += a.val; setCount++; }
+        });
+        rawScore = (setSum * Math.max(1, setCount)) + Number(kh.cashBonus || 0);
+      } else if (def.type === 'machiavelli') {
+        const m = pd.machiavelli;
+        rawScore = Number(m.buildings||0) + (m.allColors ? 3 : 0) + Number(m.first8||0) + Number(m.extra||0);
+      } else if (def.type === 'themind') {
+        rawScore = Number(gs.theMind?.level || 1);
       }
-      return 0;
+
+      return rawScore + handicap;
     }
 
     // =========================================================================
-    // 6. NAVIGATION & PICKER RENDERING
+    // 7. NAVIGATION & PICKER RENDERING (MET KAST-KIEZER & SNEL-FAVORIETEN)
     // =========================================================================
     function switchMainView(view) {
       ['Picker', 'Scoreboard', 'Players', 'History'].forEach(v => {
@@ -1020,11 +1244,70 @@
       return [...arr].sort((a, b) => a.name.localeCompare(b.name, 'nl'));
     }
 
+    function getFilteredGamesList() {
+      const allGames = getAllGames();
+      const searchVal = (document.getElementById('gameSearchInput')?.value || '').trim().toLowerCase();
+      const pFilter = document.getElementById('filterPlayersSelect')?.value || '0';
+      const dFilter = document.getElementById('filterDurationSelect')?.value || 'all';
+      const activeCnt = getActivePlayers().length;
+
+      let base = [];
+      if (searchVal) {
+        base = sortAlphabetically(allGames.filter(g => g.name.toLowerCase().includes(searchVal) || g.subtitle.toLowerCase().includes(searchVal)));
+      } else if (state.pickerTab === 'fav') {
+        base = state.favorites.map(fid => allGames.find(g => g.id === fid)).filter(Boolean);
+      } else if (state.pickerTab === 'board') {
+        base = sortAlphabetically(allGames.filter(g => g.category === 'board'));
+      } else if (state.pickerTab === 'card') {
+        base = sortAlphabetically(allGames.filter(g => g.category === 'card'));
+      } else {
+        base = sortAlphabetically(allGames);
+      }
+
+      return base.filter(g => {
+        if (pFilter !== '0') {
+          const targetP = pFilter === 'active' ? activeCnt : Number(pFilter);
+          const minP = g.minP || 1;
+          const maxP = g.maxP || 10;
+          if (targetP < minP || targetP > maxP) return false;
+        }
+        if (dFilter !== 'all' && g.dur && g.dur !== dFilter) return false;
+        return true;
+      });
+    }
+
+    function surpriseMeGame() {
+      const list = getFilteredGamesList();
+      const pool = list.length > 0 ? list : getAllGames();
+      const chosen = pool[Math.floor(Math.random() * pool.length)];
+      if (chosen) {
+        showToast(`🎲 Verrassing: We spelen ${chosen.name}!`);
+        openGame(chosen.id);
+      }
+    }
+
     function renderGamePicker() {
       const allGames = getAllGames();
       const searchVal = (document.getElementById('gameSearchInput')?.value || '').trim().toLowerCase();
       document.getElementById('clearSearchBtn').classList.toggle('hidden', !searchVal);
       document.getElementById('favCountBadge').textContent = state.favorites.length;
+      const cntLbl = document.getElementById('activePlayerCntLabel');
+      if (cntLbl) cntLbl.textContent = getActivePlayers().length;
+
+      // Render Snel-favorieten bar
+      const qWidget = document.getElementById('quickFavWidget');
+      const qList = document.getElementById('quickFavList');
+      if (state.favorites.length > 0 && state.pickerTab !== 'fav') {
+        qWidget.classList.remove('hidden');
+        qList.innerHTML = `<span class="text-[11px] font-bold text-amber-300 shrink-0 mr-1">⭐ Snelstart:</span>` +
+          state.favorites.map(fid => {
+            const g = allGames.find(x => x.id === fid);
+            if (!g) return '';
+            return `<button type="button" onclick="openGame('${g.id}')" class="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 hover:border-amber-400/50 text-xs font-bold text-white whitespace-nowrap flex items-center gap-1.5 shrink-0">${g.name}</button>`;
+          }).join('');
+      } else {
+        qWidget.classList.add('hidden');
+      }
 
       ['fav', 'board', 'card', 'all'].forEach(t => {
         const el = document.getElementById('tab-' + t);
@@ -1038,30 +1321,14 @@
       const isFavTab = state.pickerTab === 'fav' && !searchVal;
       document.getElementById('favOrderBanner').classList.toggle('hidden', !isFavTab || state.favorites.length < 2);
 
-      let list = [];
-      if (searchVal) {
-        list = sortAlphabetically(
-          allGames.filter(g => g.name.toLowerCase().includes(searchVal) || g.subtitle.toLowerCase().includes(searchVal))
-        );
-      } else if (state.pickerTab === 'fav') {
-        list = state.favorites.map(fid => allGames.find(g => g.id === fid)).filter(Boolean);
-      } else if (state.pickerTab === 'board') {
-        list = sortAlphabetically(allGames.filter(g => g.category === 'board'));
-      } else if (state.pickerTab === 'card') {
-        list = sortAlphabetically(allGames.filter(g => g.category === 'card'));
-      } else {
-        list = sortAlphabetically(allGames);
-      }
-
+      const list = getFilteredGamesList();
       const grid = document.getElementById('gamesGrid');
       if (list.length === 0) {
         grid.innerHTML = `
           <div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
-            <p class="text-slate-200 font-bold text-sm">Geen spellen gevonden in deze weergave</p>
-            <p class="text-xs text-slate-400 max-w-md mx-auto">Tik hieronder om alle 31 spellen te bekijken of tik op het sterretje ☆ bij een spel om je eigen favorietenlijst te maken.</p>
-            <button type="button" onclick="clearSearch(); setPickerTab('all');" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">
-              Bekijk Alle 31 Spellen (A-Z)
-            </button>
+            <p class="text-slate-200 font-bold text-sm">Geen spellen gevonden met deze filters</p>
+            <p class="text-xs text-slate-400 max-w-md mx-auto">Pas het spelersaantal/speelduur-filter aan of bekijk alle 36 spellen.</p>
+            <button type="button" onclick="document.getElementById('filterPlayersSelect').value='0'; document.getElementById('filterDurationSelect').value='all'; clearSearch(); setPickerTab('all');" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">Toon Alle 36 Spellen (A-Z)</button>
           </div>`;
         return;
       }
@@ -1069,8 +1336,9 @@
       grid.innerHTML = list.map((g, idx) => {
         const isFav = state.favorites.includes(g.id);
         const catBadge = g.category === 'board'
-          ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 text-emerald-300">🎲 Bordspel</span>'
-          : '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/15 text-purple-300">🃏 Kaart & Dobbel</span>';
+          ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 text-emerald-300">🎲 Bord</span>'
+          : '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/15 text-purple-300">🃏 Kaart/Dobbel</span>';
+        const metaBadge = `<span class="text-[10px] text-slate-400">${g.minP || 2}-${g.maxP || 6}p</span>`;
 
         const orderControls = isFavTab ? `
           <div class="flex items-center gap-1 mr-1">
@@ -1090,14 +1358,14 @@
                 ${SVG_ICONS[g.icon] || SVG_ICONS.free}
               </div>
               <div class="min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
+                <div class="flex items-center gap-1.5 flex-wrap">
                   <h3 class="font-bold text-sm sm:text-base text-white truncate">${g.name}</h3>
                   ${catBadge}
+                  ${metaBadge}
                 </div>
                 <p class="text-xs text-slate-400 truncate mt-0.5">${g.subtitle}</p>
               </div>
             </div>
-
             <div class="flex items-center shrink-0">
               ${deleteCustomBtn}
               ${orderControls}
@@ -1111,20 +1379,135 @@
     }
 
     // =========================================================================
-    // 7. RENDER SCOREBOARD & ALL SPECIFIC GAME SHEETS
+    // 8. SMART DEALER / STARTER TRACKER & EXPANSIONS BAR
+    // =========================================================================
+    function computeCurrentStarterPlayer(gameId) {
+      const gs = ensureGameState(gameId);
+      const active = getActivePlayers();
+      if (active.length === 0) return null;
+      const rule = gs.dealerRule || 'clockwise';
+      const rounds = gs.rounds || [];
+      const lowWins = isLowestWins(gameId);
+
+      if (rule === 'manual') {
+        return active[gs.manualStarterIdx % active.length] || active[0];
+      }
+      if (rule === 'clockwise' || rounds.length === 0) {
+        const idx = (gs.manualStarterIdx + rounds.length) % active.length;
+        return active[idx] || active[0];
+      }
+      if (rule === 'winner_round' && rounds.length > 0) {
+        const last = rounds[rounds.length - 1];
+        const sorted = [...active].sort((a, b) => lowWins ? Number(last[a.id]||0) - Number(last[b.id]||0) : Number(last[b.id]||0) - Number(last[a.id]||0));
+        return sorted[0];
+      }
+      if (rule === 'loser_round' && rounds.length > 0) {
+        const last = rounds[rounds.length - 1];
+        const sorted = [...active].sort((a, b) => lowWins ? Number(last[b.id]||0) - Number(last[a.id]||0) : Number(last[a.id]||0) - Number(last[b.id]||0));
+        return sorted[0];
+      }
+      if (rule === 'highest_total') {
+        const sorted = [...active].sort((a, b) => calculatePlayerTotal(gameId, b.id) - calculatePlayerTotal(gameId, a.id));
+        return sorted[0];
+      }
+      if (rule === 'lowest_total') {
+        const sorted = [...active].sort((a, b) => calculatePlayerTotal(gameId, a.id) - calculatePlayerTotal(gameId, b.id));
+        return sorted[0];
+      }
+      return active[0];
+    }
+
+    function changeDealerRule(newRule) {
+      const gs = ensureGameState(state.activeGameId);
+      gs.dealerRule = newRule;
+      saveState();
+      renderScoreboard();
+    }
+
+    function stepManualStarter() {
+      const gs = ensureGameState(state.activeGameId);
+      const active = getActivePlayers();
+      gs.manualStarterIdx = ((gs.manualStarterIdx || 0) + 1) % active.length;
+      saveState();
+      renderScoreboard();
+    }
+
+    function toggleExpansion(expName) {
+      const gs = ensureGameState(state.activeGameId);
+      gs.activeExpansions[expName] = !gs.activeExpansions[expName];
+      saveState();
+      renderScoreboard();
+    }
+
+    function getEffectiveLimit(def, gs) {
+      if (def.id === 'seasalt') {
+        const n = getActivePlayers().length;
+        return n <= 2 ? 40 : (n === 3 ? 35 : 30);
+      }
+      if (def.id === 'catan') {
+        if (gs.activeExpansions?.['⚔️ Steden & Ridders (13p)']) return 13;
+        if (gs.activeExpansions?.['⛵ Zeevaarders (12p)']) return 12;
+        return 10;
+      }
+      return def.limit;
+    }
+
+    // =========================================================================
+    // 9. RENDER SCOREBOARD & ALL SPECIFIC GAME SHEETS
     // =========================================================================
     function renderScoreboardHeader() {
       const def = getGameDef();
+      const gs = ensureGameState(def.id);
       const isFav = state.favorites.includes(def.id);
       document.getElementById('activeGameIcon').innerHTML = SVG_ICONS[def.icon] || SVG_ICONS.free;
       document.getElementById('activeGameTitle').textContent = def.name;
       document.getElementById('activeGameRuleInfo').textContent = def.subtitle;
       document.getElementById('activeGameFavBtn').innerHTML = isFav ? '⭐' : '<span class="opacity-40">☆</span>';
       document.getElementById('headerSubtitle').textContent = `Nu bezig: ${def.name}`;
+
+      // Expansions bar
+      const expBar = document.getElementById('expansionsBar');
+      if (def.expansions && def.expansions.length > 0) {
+        expBar.classList.remove('hidden');
+        expBar.innerHTML = `<span class="text-[11px] font-bold text-slate-400">🧩 Uitbreidingen:</span>` +
+          def.expansions.map(ex => {
+            const on = !!gs.activeExpansions?.[ex];
+            return `<button type="button" onclick="toggleExpansion('${ex}')" class="px-2.5 py-1 rounded-lg text-xs font-bold border transition ${on ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-400'}">${on ? '✓ ' : ''}${ex}</button>`;
+          }).join('');
+      } else {
+        expBar.classList.add('hidden');
+      }
+
+      // Starter / Dealer Tracker Bar
+      const stBar = document.getElementById('starterTrackerBar');
+      const starter = computeCurrentStarterPlayer(def.id);
+      const rNum = (gs.rounds?.length || 0) + 1;
+      stBar.innerHTML = `
+        <div class="flex items-center gap-2">
+          <span class="text-slate-400">🃏 Start / Deler ${def.type === 'rounds' ? `(Ronde #${rNum})` : ''}:</span>
+          <button type="button" onclick="stepManualStarter()" title="Tik om handmatig 1 speler door te schuiven" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 font-extrabold flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:${starter?.color || '#3b82f6'}"></span>
+            ${starter ? starter.name : '-'} ↻
+          </button>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="text-[11px] text-slate-400">Volgende ronde start:</span>
+          <select onchange="changeDealerRule(this.value)" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-[11px] text-slate-200 font-semibold">
+            <option value="clockwise" ${gs.dealerRule === 'clockwise' ? 'selected' : ''}>🔄 Volgende (Klok mee)</option>
+            <option value="winner_round" ${gs.dealerRule === 'winner_round' ? 'selected' : ''}>🏆 Winnaar vorige ronde</option>
+            <option value="loser_round" ${gs.dealerRule === 'loser_round' ? 'selected' : ''}>😰 Verliezer vorige ronde</option>
+            <option value="highest_total" ${gs.dealerRule === 'highest_total' ? 'selected' : ''}>📈 Meeste punten (Totaal)</option>
+            <option value="lowest_total" ${gs.dealerRule === 'lowest_total' ? 'selected' : ''}>📉 Minste punten (Totaal)</option>
+            <option value="manual" ${gs.dealerRule === 'manual' ? 'selected' : ''}>✋ Handmatig</option>
+          </select>
+        </div>
+      `;
     }
 
     function renderLeaderboard() {
       const def = getGameDef();
+      const gs = ensureGameState(def.id);
+      const effLimit = getEffectiveLimit(def, gs);
       const lowWins = isLowestWins(def.id);
       const activePlayers = getActivePlayers();
       const scores = activePlayers.map(p => ({ ...p, score: calculatePlayerTotal(def.id, p.id) }));
@@ -1133,18 +1516,21 @@
 
       document.getElementById('liveLeaderboard').innerHTML = scores.map(p => {
         const isLeader = p.score === topScore && scores.some(x => x.score !== 0);
-        const overLimit = def.limit && p.score >= def.limit;
+        const overLimit = effLimit && p.score >= effLimit;
         return `
-          <div class="rounded-2xl p-3 border transition ${isLeader ? 'bg-indigo-950/60 border-amber-400/60 shadow-lg shadow-amber-500/5' : 'bg-slate-900 border-slate-800'}" style="border-left: 4px solid ${p.color || '#6366f1'}">
+          <div class="rounded-2xl p-3 border transition ${isLeader ? 'bg-indigo-950/60 border-amber-400/60 shadow-lg shadow-amber-500/5' : 'bg-slate-900 border-slate-800'}" style="border-left: 5px solid ${p.color || '#6366f1'}">
             <div class="flex items-center justify-between text-xs text-slate-400">
-              <span class="font-bold text-slate-200 truncate flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0" style="background:${p.color || '#6366f1'}"></span>
+              <span class="player-title font-bold text-slate-200 truncate flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full inline-block shrink-0 border border-white/30" style="background:${p.color || '#6366f1'}"></span>
                 ${p.name}
               </span>
               <span>${isLeader ? '👑' : ''} ${overLimit ? '⚠️' : ''}</span>
             </div>
-            <div class="text-2xl font-extrabold mt-1 ${isLeader ? 'text-amber-300' : 'text-white'}">${p.score}</div>
-            <div class="text-[10px] text-slate-500">${lowWins ? 'Laagste wint' : 'Hoogste wint'}</div>
+            <div class="score-number text-2xl font-extrabold mt-1 ${isLeader ? 'text-amber-300' : 'text-white'}">${p.score}</div>
+            <div class="text-[10px] text-slate-500 flex justify-between">
+              <span>${lowWins ? 'Laagste wint' : 'Hoogste wint'}</span>
+              ${p.handicap ? `<span class="text-indigo-300">Handicap: ${p.handicap > 0 ? '+'+p.handicap : p.handicap}</span>` : ''}
+            </div>
           </div>
         `;
       }).join('');
@@ -1181,13 +1567,25 @@
             </button>
           </div>
         ` : '';
-        container.innerHTML = freeModeToggle + activePlayers.map(p => renderCarcassonneCard(def, p, gs.playerData[p.id])).join('');
+        container.innerHTML = freeModeToggle + activePlayers.map(p => renderCarcassonneCard(def, p, gs.playerData[p.id], gs)).join('');
       } else if (def.type === 'wonders7') {
         container.innerHTML = activePlayers.map(p => renderWondersCard(def, p, gs.playerData[p.id])).join('');
       } else if (def.type === 'ttr') {
-        container.innerHTML = activePlayers.map(p => renderTtrCard(def, p, gs.playerData[p.id])).join('');
+        container.innerHTML = activePlayers.map(p => renderTtrCard(def, p, gs.playerData[p.id], gs)).join('');
       } else if (def.type === 'yahtzee') {
         container.innerHTML = activePlayers.map(p => renderYahtzeeCard(def, p, gs.playerData[p.id])).join('');
+      } else if (def.type === 'catan') {
+        container.innerHTML = activePlayers.map(p => renderCatanCard(def, p, gs.playerData[p.id], gs)).join('');
+      } else if (def.type === 'sushigo') {
+        container.innerHTML = activePlayers.map(p => renderSushiGoCard(def, p, gs.playerData[p.id])).join('');
+      } else if (def.type === 'lostcities') {
+        container.innerHTML = activePlayers.map(p => renderLostCitiesCard(def, p, gs.playerData[p.id])).join('');
+      } else if (def.type === 'koehandel') {
+        container.innerHTML = activePlayers.map(p => renderKoehandelCard(def, p, gs.playerData[p.id])).join('');
+      } else if (def.type === 'machiavelli') {
+        container.innerHTML = activePlayers.map(p => renderMachiavelliCard(def, p, gs.playerData[p.id])).join('');
+      } else if (def.type === 'themind') {
+        container.innerHTML = renderTheMindSheet(def, gs);
       } else if (def.type === 'categories') {
         container.innerHTML = activePlayers.map(p => renderCategoriesCard(def, p, gs.playerData[p.id])).join('');
       }
@@ -1201,9 +1599,10 @@
     }
 
     function playerHeaderBadge(player) {
-      return `<span class="flex items-center gap-2 font-bold text-base text-white"><span class="w-3 h-3 rounded-full inline-block" style="background:${player.color || '#6366f1'}"></span>${player.name}</span>`;
+      return `<span class="flex items-center gap-2 font-bold text-base text-white"><span class="w-3.5 h-3.5 rounded-full inline-block border border-white/30" style="background:${player.color || '#6366f1'}"></span>${player.name}</span>`;
     }
 
+    // --- 1. KEER OP KEER 1 & 2 (MET 1E EN 2E KOLOMSCORE!) ---
     function renderKokCard(def, player, pd) {
       const total = calculatePlayerTotal(def.id, player.id);
       return `
@@ -1213,7 +1612,7 @@
             <span class="px-3 py-1 rounded-xl bg-indigo-500/20 text-indigo-300 font-extrabold text-sm">${total} pnt</span>
           </div>
           <div>
-            <p class="text-xs text-slate-400 mb-1.5">Kleurenbonus (tik voor 0 → 5 → 3):</p>
+            <p class="text-xs text-slate-400 mb-1.5">Kleurenbonus (tik voor 0 → 1e (+5) → Later (+3)):</p>
             <div class="flex gap-1.5">
               ${KOK_COLORS.map(c => `
                 <button type="button" onclick="cycleKokColor('${player.id}', '${c.id}')" class="flex-1 py-2 rounded-xl font-extrabold text-xs text-slate-950 ${c.bg} shadow active:scale-95 transition">
@@ -1223,34 +1622,52 @@
             </div>
           </div>
           <div>
-            <p class="text-xs text-slate-400 mb-1.5">Kolommen A t/m O:</p>
-            <div class="grid grid-cols-8 sm:grid-cols-15 gap-1">
-              ${KOK_COLS.map(col => `
-                <button type="button" onclick="toggleKokCol('${player.id}', '${col.id}')" class="py-1.5 rounded-lg border text-center transition ${pd.kokCols?.[col.id] ? 'bg-indigo-600 border-indigo-400 text-white font-bold' : 'bg-slate-950 border-slate-800 text-slate-400'}">
-                  <div class="text-[10px]">${col.id}</div>
-                  <div class="text-xs font-extrabold">${col.pts}</div>
-                </button>
-              `).join('')}
+            <p class="text-xs text-slate-400 mb-1.5">Kolommen A t/m O (tik: Uit → 🥇 1e score → 🥈 2e score):</p>
+            <div class="grid grid-cols-5 sm:grid-cols-15 gap-1">
+              ${KOK_COLS.map(col => {
+                const st = pd.kokCols?.[col.id] || 0;
+                const isFirst = st === 1 || st === true;
+                const isSecond = st === 2;
+                const curPts = isFirst ? col.pts1 : (isSecond ? col.pts2 : 0);
+                const btnStyle = isFirst
+                  ? 'bg-indigo-600 border-indigo-400 text-white font-bold shadow'
+                  : (isSecond ? 'bg-amber-500/25 border-amber-400 text-amber-300 font-bold' : 'bg-slate-950 border-slate-800 text-slate-400');
+                return `
+                  <button type="button" onclick="cycleKokCol('${player.id}', '${col.id}')" class="py-1.5 rounded-lg border text-center transition ${btnStyle}">
+                    <div class="text-[10px] font-bold">${col.id}</div>
+                    <div class="text-xs font-extrabold">${st ? '+' + curPts : `${col.pts1}/${col.pts2}`}</div>
+                    <div class="text-[9px] opacity-75">${isFirst ? '1e' : (isSecond ? '2e' : '-')}</div>
+                  </button>
+                `;
+              }).join('')}
             </div>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
               <span class="text-xs text-slate-300 font-semibold">❗ Uitroeptekens (+1)</span>
-              <input type="number" value="${pd.exclamations || 0}" oninput="updateNested('${player.id}', 'exclamations', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="stepNested('${player.id}','exclamations',-1,0,8)" class="w-6 h-6 rounded bg-slate-800 font-bold">-</button>
+                <span class="w-6 text-center font-extrabold text-sm">${pd.exclamations || 0}</span>
+                <button type="button" onclick="stepNested('${player.id}','exclamations',1,0,8)" class="w-6 h-6 rounded bg-slate-800 font-bold">+</button>
+              </div>
             </div>
             ${def.type === 'kok1' ? `
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
                 <span class="text-xs text-amber-300 font-semibold">★ Open Sterren (-2)</span>
-                <input type="number" value="${pd.stars || 0}" oninput="updateNested('${player.id}', 'stars', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="stepNested('${player.id}','stars',-1,0,15)" class="w-6 h-6 rounded bg-slate-800 font-bold">-</button>
+                  <span class="w-6 text-center font-extrabold text-sm">${pd.stars || 0}</span>
+                  <button type="button" onclick="stepNested('${player.id}','stars',1,0,15)" class="w-6 h-6 rounded bg-slate-800 font-bold">+</button>
+                </div>
               </div>
             ` : `
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
-                <span class="text-xs text-pink-300 font-semibold">➕ Bonusrij punten</span>
-                <input type="number" value="${pd.bonusRow || 0}" oninput="updateNested('${player.id}', 'bonusRow', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
+                <span class="text-xs text-pink-300 font-semibold">❤️ Bonusrij punten</span>
+                <input type="number" value="${pd.bonusRow \vert{}\vert{} 0}" oninput="updateNested('${player.id}', 'bonusRow', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
-                <span class="text-xs text-rose-300 font-semibold">❤️ / ? Punten</span>
-                <input type="number" value="${pd.stars || 0}" oninput="updateNested('${player.id}', 'stars', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
+                <span class="text-xs text-rose-300 font-semibold">➕ Extra / Bom</span>
+                <input type="number" value="${pd.stars \vert{}\vert{} 0}" oninput="updateNested('${player.id}', 'stars', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
               </div>
             `}
           </div>
@@ -1261,14 +1678,38 @@
     function cycleKokColor(pid, colorId) {
       const gs = ensureGameState(state.activeGameId);
       const cur = gs.playerData[pid].kokColors[colorId] || 0;
-      gs.playerData[pid].kokColors[colorId] = cur === 0 ? 5 : (cur === 5 ? 3 : 0);
+      if (cur === 0) {
+        const someoneHas5 = state.players.some(p => p.id !== pid && gs.playerData[p.id]?.kokColors?.[colorId] === 5);
+        gs.playerData[pid].kokColors[colorId] = someoneHas5 ? 3 : 5;
+      } else if (cur === 5) {
+        gs.playerData[pid].kokColors[colorId] = 3;
+      } else {
+        gs.playerData[pid].kokColors[colorId] = 0;
+      }
       saveState();
       renderScoreboard();
     }
 
-    function toggleKokCol(pid, colId) {
+    function cycleKokCol(pid, colId) {
       const gs = ensureGameState(state.activeGameId);
-      gs.playerData[pid].kokCols[colId] = !gs.playerData[pid].kokCols[colId];
+      const raw = gs.playerData[pid].kokCols[colId];
+      const cur = raw === true ? 1 : (raw || 0);
+      if (cur === 0) {
+        const someoneHas1st = state.players.some(p => p.id !== pid && (gs.playerData[p.id]?.kokCols?.[colId] === 1 || gs.playerData[p.id]?.kokCols?.[colId] === true));
+        gs.playerData[pid].kokCols[colId] = someoneHas1st ? 2 : 1;
+      } else if (cur === 1) {
+        gs.playerData[pid].kokCols[colId] = 2;
+      } else {
+        gs.playerData[pid].kokCols[colId] = 0;
+      }
+      saveState();
+      renderScoreboard();
+    }
+
+    function stepNested(pid, key, delta, min, max) {
+      const gs = ensureGameState(state.activeGameId);
+      const cur = Number(gs.playerData[pid][key] || 0);
+      gs.playerData[pid][key] = Math.max(min, Math.min(max, cur + delta));
       saveState();
       renderScoreboard();
     }
@@ -1280,6 +1721,367 @@
       renderLeaderboard();
     }
 
+    // --- 2. CATAN (MET AUTOMATISCHE ROUTE & RIDDERMACHT WISSEL-TOGGLE!) ---
+    function renderCatanCard(def, player, pd, gs) {
+      const ct = pd.catan;
+      const effLimit = getEffectiveLimit(def, gs);
+      const total = calculatePlayerTotal(def.id, player.id);
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            ${playerHeaderBadge(player)}
+            <span class="px-3 py-1 rounded-xl ${total >= effLimit ? 'bg-amber-500 text-slate-950' : 'bg-indigo-500/20 text-indigo-300'} font-extrabold text-sm">${total} / ${effLimit} pnt</span>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+              <span class="text-xs font-bold">🏠 Dorpen (1p)</span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="stepSubObj('${player.id}','catan','villages',-1,0,5)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">-</button>
+                <span class="font-extrabold text-sm w-4 text-center">${ct.villages ?? 2}</span>
+                <button type="button" onclick="stepSubObj('${player.id}','catan','villages',1,0,5)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">+</button>
+              </div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+              <span class="text-xs font-bold">🏛️ Steden (2p)</span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="stepSubObj('${player.id}','catan','cities',-1,0,4)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">-</button>
+                <span class="font-extrabold text-sm w-4 text-center">${ct.cities || 0}</span>
+                <button type="button" onclick="stepSubObj('${player.id}','catan','cities',1,0,4)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">+</button>
+              </div>
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+              <span class="text-xs font-bold">📜 Ontwikkeling (1p)</span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="stepSubObj('${player.id}','catan','dev',-1,0,10)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">-</button>
+                <span class="font-extrabold text-sm w-4 text-center">${ct.dev || 0}</span>
+                <button type="button" onclick="stepSubObj('${player.id}','catan','dev',1,0,10)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button type="button" onclick="claimCatanExclusive('${player.id}', 'longestRoad')" class="py-2.5 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-between transition ${ct.longestRoad ? 'bg-amber-500 text-slate-950 border-amber-300 shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+              <span>🛣️ Langste Handelsroute (+2 pnt)</span>
+              <span>${ct.longestRoad ? '✓ IN BEZIT' : 'Claim'}</span>
+            </button>
+            <button type="button" onclick="claimCatanExclusive('${player.id}', 'largestArmy')" class="py-2.5 px-3 rounded-xl border text-xs font-extrabold flex items-center justify-between transition ${ct.largestArmy ? 'bg-rose-600 text-white border-rose-400 shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+              <span>⚔️ Grootste Riddermacht (+2 pnt)</span>
+              <span>${ct.largestArmy ? '✓ IN BEZIT' : 'Claim'}</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function claimCatanExclusive(pid, key) {
+      const gs = ensureGameState('catan');
+      const currentlyHas = !!gs.playerData[pid].catan[key];
+      state.players.forEach(p => {
+        if (gs.playerData[p.id]?.catan) gs.playerData[p.id].catan[key] = false;
+      });
+      gs.playerData[pid].catan[key] = !currentlyHas;
+      saveState();
+      renderScoreboard();
+    }
+
+    // --- 3. YAHTZEE (VOLLEDIGE BOVEN- EN ONDERKANT MET 1-KLIK KNOPPEN) ---
+    function renderYahtzeeCard(def, player, pd) {
+      const y = pd.yahtzee;
+      const upper = Number(y.ones||0)+Number(y.twos||0)+Number(y.threes||0)+Number(y.fours||0)+Number(y.fives||0)+Number(y.sixes||0);
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            ${playerHeaderBadge(player)}
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">Boven: ${upper}/63 ${upper >= 63 ? '(+35!)' : ''}</span>
+              <span class="text-sm font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+            ${[{ k: 'ones', n: '⚀ Enen' }, { k: 'twos', n: '⚁ Tweeën' }, { k: 'threes', n: '⚂ Drieën' }, { k: 'fours', n: '⚃ Vieren' }, { k: 'fives', n: '⚄ Vijven' }, { k: 'sixes', n: '⚅ Zessen' }].map(f => `
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
+                <div class="text-[11px] text-slate-400 mb-1">${f.n}</div>
+                <input type="number" value="${y[f.k]||0}" oninput="setSubObj('${player.id}','yahtzee','${f.k}',this.value,true)" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-xs" />
+              </div>
+            `).join('')}
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between"><span class="text-xs">3 of a Kind</span><input type="number" value="${y.toak||0}" oninput="setSubObj('${player.id}','yahtzee','toak',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-xs" /></div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between"><span class="text-xs">Carré (4)</span><input type="number" value="${y.foak||0}" oninput="setSubObj('${player.id}','yahtzee','foak',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-xs" /></div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between"><span class="text-xs">❓ Kans</span><input type="number" value="${y.chance||0}" oninput="setSubObj('${player.id}','yahtzee','chance',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-xs" /></div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between"><span class="text-xs">⭐ Bonus Y.</span><input type="number" value="${y.extraY||0}" oninput="setSubObj('${player.id}','yahtzee','extraY',this.value,true)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-xs" /></div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            ${[
+              { k: 'fh', label: '🏠 Full House', pts: 25 },
+              { k: 'smStr', label: '📏 Kl. Straat', pts: 30 },
+              { k: 'lgStr', label: '📐 Gr. Straat', pts: 40 },
+              { k: 'yahtzee', label: '🎲 YAHTZEE!', pts: 50 }
+            ].map(btn => {
+              const on = Number(y[btn.k] || 0) === btn.pts;
+              return `
+                <button type="button" onclick="setSubObj('${player.id}','yahtzee','${btn.k}',${on ? 0 : btn.pts},true)" class="py-2 px-2.5 rounded-xl border text-xs font-extrabold transition ${on ? 'bg-indigo-600 border-indigo-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+                  ${btn.label} (${on ? '+'+btn.pts : btn.pts})
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // --- 4. LOST CITIES KAARTSPEL (5 EXPEDITIES MET AUTOMATISCHE -20 & WEDDENSCHAPPEN) ---
+    function renderLostCitiesCard(def, player, pd) {
+      const lc = pd.lostcities;
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            ${playerHeaderBadge(player)}
+            <span class="text-sm font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span>
+          </div>
+          <p class="text-[11px] text-slate-400">Vul de som van je gelegde cijferkaarten per expeditie in. De app trekt automatisch -20 startkosten af en vermenigvuldigt met je weddenschappen:</p>
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-2">
+            ${LOST_CITIES_COLORS.map(col => {
+              const exp = lc[col.id] || { started: false, wagers: 0, pts: 0, bonus8: false };
+              const expScore = calculateLostCitiesExpScore(exp);
+              return `
+                <div class="rounded-xl border p-2.5 space-y-2 ${col.bg}">
+                  <div class="flex items-center justify-between text-xs font-bold">
+                    <span>${col.name}</span>
+                    <span class="${expScore >= 0 ? 'text-emerald-300' : 'text-rose-300'} font-extrabold">${expScore}p</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px]">
+                    <span>Kaartsom:</span>
+                    <input type="number" value="${exp.pts || 0}" oninput="updateLostCity('${player.id}','${col.id}','pts',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded px-1.5 py-0.5 text-center font-bold text-xs text-white" />
+                  </div>
+                  <div class="flex items-center justify-between gap-1">
+                    <button type="button" onclick="cycleLostCityWager('${player.id}','${col.id}')" class="flex-1 py-1 rounded bg-slate-900/90 border border-slate-700 text-[10px] font-bold text-white">
+                      🤝 ×${1 + Number(exp.wagers || 0)}
+                    </button>
+                    <button type="button" onclick="toggleLostCity8('${player.id}','${col.id}')" class="px-2 py-1 rounded border text-[10px] font-bold ${exp.bonus8 ? 'bg-amber-500 text-slate-950 border-amber-300' : 'bg-slate-900/90 border-slate-700 text-slate-400'}">
+                      8+ (+20)
+                    </button>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function updateLostCity(pid, colId, field, val) {
+      const gs = ensureGameState('lostcities');
+      const exp = gs.playerData[pid].lostcities[colId];
+      exp[field] = Number(val || 0);
+      exp.started = exp.pts > 0 || exp.wagers > 0 || exp.bonus8;
+      saveState();
+      renderScoreboard();
+    }
+
+    function cycleLostCityWager(pid, colId) {
+      const gs = ensureGameState('lostcities');
+      const exp = gs.playerData[pid].lostcities[colId];
+      exp.wagers = ((exp.wagers || 0) + 1) % 4;
+      exp.started = exp.pts > 0 || exp.wagers > 0 || exp.bonus8;
+      saveState();
+      renderScoreboard();
+    }
+
+    function toggleLostCity8(pid, colId) {
+      const gs = ensureGameState('lostcities');
+      const exp = gs.playerData[pid].lostcities[colId];
+      exp.bonus8 = !exp.bonus8;
+      exp.started = exp.pts > 0 || exp.wagers > 0 || exp.bonus8;
+      saveState();
+      renderScoreboard();
+    }
+
+    // --- 5. KOEHANDEL (KLIKBARE DIERENSETS MET VERMENIGVULDIGING OP AANTAL SETS!) ---
+    function renderKoehandelCard(def, player, pd) {
+      const kh = pd.koehandel;
+      const setCount = KOEHANDEL_ANIMALS.filter(a => kh.sets?.[a.id]).length;
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            ${playerHeaderBadge(player)}
+            <div class="flex items-center gap-2">
+              <span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">${setCount} kwartetten (×${Math.max(1, setCount)})</span>
+              <span class="text-sm font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+            ${KOEHANDEL_ANIMALS.map(a => {
+              const has = !!kh.sets?.[a.id];
+              return `
+                <button type="button" onclick="claimKoehandelSet('${player.id}','${a.id}')" class="py-2 px-2 rounded-xl border text-xs font-bold transition ${has ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+                  <div>${a.name}</div>
+                  <div class="text-[10px] font-extrabold">${a.val} pnt</div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function claimKoehandelSet(pid, animalId) {
+      const gs = ensureGameState('koehandel');
+      const has = !!gs.playerData[pid].koehandel.sets[animalId];
+      state.players.forEach(p => {
+        if (gs.playerData[p.id]?.koehandel?.sets) delete gs.playerData[p.id].koehandel.sets[animalId];
+      });
+      if (!has) gs.playerData[pid].koehandel.sets[animalId] = true;
+      saveState();
+      renderScoreboard();
+    }
+
+    // --- 6. MACHIAVELLI ---
+    function renderMachiavelliCard(def, player, pd) {
+      const m = pd.machiavelli;
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            ${playerHeaderBadge(player)}
+            <span class="text-sm font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+              <span class="text-xs font-bold">🏛️ Waarde Gebouwen</span>
+              <input type="number" value="${m.buildings||0}" oninput="setSubObj('${player.id}','machiavelli','buildings',this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
+            </div>
+            <button type="button" onclick="setSubObj('${player.id}','machiavelli','allColors',${m.allColors ? 0 : 1},true)" class="py-2.5 px-3 rounded-xl border text-xs font-extrabold transition ${m.allColors ? 'bg-purple-600 border-purple-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+              🌈 Alle 5 de kleuren (+3)
+            </button>
+            <button type="button" onclick="cycleMachiavelli8('${player.id}')" class="py-2.5 px-3 rounded-xl border text-xs font-extrabold transition ${m.first8 ? 'bg-amber-500 text-slate-950 border-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+              🏆 Stad vol: ${m.first8 === 4 ? '1e klaar (+4)' : (m.first8 === 2 ? 'Ook vol (+2)' : 'Uit (0)')}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function cycleMachiavelli8(pid) {
+      const gs = ensureGameState('machiavelli');
+      const cur = Number(gs.playerData[pid].machiavelli.first8 || 0);
+      gs.playerData[pid].machiavelli.first8 = cur === 0 ? 4 : (cur === 4 ? 2 : 0);
+      saveState();
+      renderScoreboard();
+    }
+
+    // --- 7. THE MIND (COÖPERATIEVE TRACKER) ---
+    function renderTheMindSheet(def, gs) {
+      const tm = gs.theMind || { level: 1, lives: 3, shurikens: 1 };
+      const pCnt = getActivePlayers().length;
+      const maxLvl = pCnt <= 2 ? 12 : (pCnt === 3 ? 10 : 8);
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 text-center">
+          <h3 class="font-extrabold text-base text-white">🧠 Coöperatieve Team-Tracker (${pCnt} spelers = Doel Level ${maxLvl})</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <div class="bg-slate-950 border border-indigo-500/40 rounded-2xl p-3 space-y-2">
+              <div class="text-xs font-bold text-indigo-300">🚀 Huidig Level</div>
+              <div class="text-3xl font-extrabold text-white">${tm.level} <span class="text-xs text-slate-500">/ ${maxLvl}</span></div>
+              <div class="flex justify-center gap-2">
+                <button type="button" onclick="stepTheMind('level', -1, 1, 12)" class="w-8 h-8 rounded-lg bg-slate-800 font-bold">-</button>
+                <button type="button" onclick="stepTheMind('level', 1, 1, 12)" class="w-8 h-8 rounded-lg bg-indigo-600 text-white font-bold">+</button>
+              </div>
+            </div>
+            <div class="bg-slate-950 border border-rose-500/40 rounded-2xl p-3 space-y-2">
+              <div class="text-xs font-bold text-rose-300">❤️ Levens over</div>
+              <div class="text-3xl font-extrabold text-white">${tm.lives}</div>
+              <div class="flex justify-center gap-2">
+                <button type="button" onclick="stepTheMind('lives', -1, 0, 5)" class="w-8 h-8 rounded-lg bg-slate-800 font-bold">-</button>
+                <button type="button" onclick="stepTheMind('lives', 1, 0, 5)" class="w-8 h-8 rounded-lg bg-rose-600 text-white font-bold">+</button>
+              </div>
+            </div>
+            <div class="bg-slate-950 border border-amber-500/40 rounded-2xl p-3 space-y-2">
+              <div class="text-xs font-bold text-amber-300">🥷 Shurikens</div>
+              <div class="text-3xl font-extrabold text-white">${tm.shurikens}</div>
+              <div class="flex justify-center gap-2">
+                <button type="button" onclick="stepTheMind('shurikens', -1, 0, 3)" class="w-8 h-8 rounded-lg bg-slate-800 font-bold">-</button>
+                <button type="button" onclick="stepTheMind('shurikens', 1, 0, 3)" class="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 font-bold">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function stepTheMind(field, delta, min, max) {
+      const gs = ensureGameState('themind');
+      gs.theMind[field] = Math.max(min, Math.min(max, Number(gs.theMind[field] || 0) + delta));
+      saveState();
+      renderScoreboard();
+    }
+
+    // --- 8. SUSHI GO (MET +6 / -6 PUDDING KNOPPEN) ---
+    function renderSushiGoCard(def, player, pd) {
+      const sg = pd.sushigo;
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+            ${playerHeaderBadge(player)}
+            <span class="text-sm font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            ${[{ k: 'r1', n: '🍣 Ronde 1' }, { k: 'r2', n: '🍱 Ronde 2' }, { k: 'r3', n: '🥟 Ronde 3' }].map(r => `
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
+                <div class="text-[11px] text-slate-400 mb-1">${r.n}</div>
+                <input type="number" value="${sg[r.k]||0}" oninput="setSubObj('${player.id}','sushigo','${r.k}',this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-xs" />
+              </div>
+            `).join('')}
+          </div>
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <span class="text-xs font-bold text-pink-300">🍮 Pudding eindbonus:</span>
+            <div class="flex gap-1.5">
+              ${[-6, -3, 0, +3, +6].map(val => `
+                <button type="button" onclick="setSubObj('${player.id}','sushigo','pudding',${val},true)" class="px-2.5 py-1 rounded-lg text-xs font-bold border ${Number(sg.pudding||0) === val ? 'bg-pink-600 border-pink-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+                  ${val > 0 ? '+'+val : val}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- 9. CLEVER (MET AUTOMATISCHE GROENE RIJ!) ---
+    function renderCleverCard(def, player, pd) {
+      const c = pd.clever;
+      const greenScore = CLEVER_GREEN_TABLE[Math.min(11, Math.max(0, Number(c.greenCount || 0)))] || 0;
+      const arr = [Number(c.yellow||0), Number(c.blue||0), greenScore, Number(c.orange||0), Number(c.purple||0)];
+      const minColor = Math.min(...arr);
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex justify-between items-center">${playerHeaderBadge(player)}<span class="text-sm font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span></div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            ${[{ k: 'yellow', n: '🟨 Geel' }, { k: 'blue', n: '🟦 Blauw' }, { k: 'orange', n: '🟧 Oranje' }, { k: 'purple', n: '🟪 Paars' }].map(f => `
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <span class="text-xs font-semibold">${f.n}</span>
+                <input type="number" value="${c[f.k]||0}" oninput="setSubObj('${player.id}','clever','${f.k}',this.value,true)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
+              </div>
+            `).join('')}
+            <div class="bg-slate-950 border border-emerald-500/30 rounded-xl p-2.5 flex items-center justify-between">
+              <span class="text-xs font-semibold text-emerald-300">🟩 Groen (${greenScore}p)</span>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="stepSubObj('${player.id}','clever','greenCount',-1,0,11)" class="w-6 h-6 rounded bg-slate-800 font-bold">-</button>
+                <span class="text-xs font-extrabold w-6 text-center">${c.greenCount||0}✖</span>
+                <button type="button" onclick="stepSubObj('${player.id}','clever','greenCount',1,0,11)" class="w-6 h-6 rounded bg-slate-800 font-bold">+</button>
+              </div>
+            </div>
+            <div class="bg-slate-950 border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-between">
+              <span class="text-xs font-semibold text-amber-300">🦊 Vossen (×${minColor})</span>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="stepSubObj('${player.id}','clever','foxes',-1,0,5)" class="w-6 h-6 rounded bg-slate-800 font-bold">-</button>
+                <span class="text-xs font-extrabold w-5 text-center">${c.foxes||0}</span>
+                <button type="button" onclick="stepSubObj('${player.id}','clever','foxes',1,0,5)" class="w-6 h-6 rounded bg-slate-800 font-bold">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- 10. REGENWORMEN, ROUNDS, QWIXX, CASCADIA, CARCASSONNE, 7 WONDERS, TTR, CATEGORIES ---
     function renderRegenwormenCard(def, player, pd) {
       const rw = pd.regenwormen || { tiles: {}, bonus: 0 };
       const total = calculatePlayerTotal(def.id, player.id);
@@ -1289,12 +2091,11 @@
             ${playerHeaderBadge(player)}
             <span class="px-3 py-1 rounded-xl bg-amber-500/20 text-amber-300 font-extrabold text-sm">🪱 ${total} wormen</span>
           </div>
-          <p class="text-xs text-slate-400">Tik op gepakte tegels (21 t/m 36). Afgepakte tegels verhuizen automatisch mee:</p>
           <div class="grid grid-cols-8 gap-1.5">
             ${REGENWORMEN_TILES.map(tile => {
               const hasTile = !!rw.tiles?.[tile.t];
               return `
-                <button type="button" onclick="toggleRegenwormTile('${player.id}',${tile.t})" class="py-1.5 rounded-xl border text-center transition ${hasTile ? 'bg-amber-500 border-amber-300 text-slate-950 font-extrabold shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+                <button type="button" onclick="toggleRegenwormTile('${player.id}', ${tile.t})" class="py-1.5 rounded-xl border text-center transition ${hasTile ? 'bg-amber-500 border-amber-300 text-slate-950 font-extrabold shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
                   <div class="text-xs font-bold">${tile.t}</div>
                   <div class="text-[10px]">${tile.w}🪱</div>
                 </button>
@@ -1313,13 +2114,9 @@
       const gs = ensureGameState(state.activeGameId);
       const currentlyHas = !!gs.playerData[pid].regenwormen.tiles[tileNum];
       state.players.forEach(p => {
-        if (gs.playerData[p.id]?.regenwormen?.tiles) {
-          delete gs.playerData[p.id].regenwormen.tiles[tileNum];
-        }
+        if (gs.playerData[p.id]?.regenwormen?.tiles) delete gs.playerData[p.id].regenwormen.tiles[tileNum];
       });
-      if (!currentlyHas) {
-        gs.playerData[pid].regenwormen.tiles[tileNum] = true;
-      }
+      if (!currentlyHas) gs.playerData[pid].regenwormen.tiles[tileNum] = true;
       saveState();
       renderScoreboard();
     }
@@ -1332,11 +2129,12 @@
     }
 
     function renderRoundsSheet(def, activePlayers, gs) {
+      const effLimit = getEffectiveLimit(def, gs);
       return `
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="font-bold text-sm text-white">Nieuwe Ronde Invoeren</h3>
-            ${def.limit ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold">Doel/Limiet: ${def.limit} pnt</span>` : ''}
+            <h3 class="font-bold text-sm text-white">Ronde #${(gs.rounds?.length || 0) + 1} Invoeren</h3>
+            ${effLimit ? `<span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-semibold">Doel/Limiet: ${effLimit} pnt</span>` : ''}
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
             ${activePlayers.map(p => `
@@ -1348,9 +2146,7 @@
               </div>
             `).join('')}
           </div>
-          <button type="button" onclick="addRound()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow">
-            + Ronde Toevoegen
-          </button>
+          <button type="button" onclick="addRound()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow">+ Ronde Opslaan & Volgende Startspeler</button>
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse mt-2">
               <thead>
@@ -1363,7 +2159,8 @@
               <tbody>
                 ${(gs.rounds || []).map((r, idx) => `
                   <tr class="border-t border-slate-800/80 text-center text-sm">
-                    <td class="py-2 text-xs text-slate-400 font-bold">#${idx + 1}</td>${activePlayers.map(p => `<td class="py-2 font-semibold">${r[p.id] ?? 0}</td>`).join('')}
+                    <td class="py-2 text-xs text-slate-400 font-bold">#${idx + 1}</td>
+                    ${activePlayers.map(p => `<td class="py-2 font-semibold">${r[p.id] ?? 0}</td>`).join('')}
                     <td class="py-2"><button type="button" onclick="deleteRound(${idx})" class="text-xs text-rose-400">✕</button></td>
                   </tr>
                 `).join('') || `<tr><td colspan="${activePlayers.length + 2}" class="py-6 text-center text-xs text-slate-500">Nog geen rondes gespeeld.</td></tr>`}
@@ -1428,29 +2225,6 @@
       `;
     }
 
-    function renderCleverCard(def, player, pd) {
-      const c = pd.clever;
-      const arr = [Number(c.yellow||0), Number(c.blue||0), Number(c.green||0), Number(c.orange||0), Number(c.purple||0)];
-      const minColor = Math.min(...arr);
-      return `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-          <div class="flex justify-between items-center">${playerHeaderBadge(player)}<span class="text-sm font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span></div>
-          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            ${[
-              { k: 'yellow', n: '🟨 Geel' }, { k: 'blue', n: '🟦 Blauw' },
-              { k: 'green', n: '🟩 Groen' }, { k: 'orange', n: '🟧 Oranje' },
-              { k: 'purple', n: '🟪 Paars' }, { k: 'foxes', n: `🦊 Vossen (×${minColor})` }
-            ].map(f => `
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
-                <span class="text-xs font-semibold">${f.n}</span>
-                <input type="number" value="${c[f.k]||0}" oninput="setSubObj('${player.id}','clever','${f.k}',this.value,true)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
-    }
-
     function renderCascadiaCard(def, player, pd, autoBonus) {
       const c = pd.cascadia;
       return `
@@ -1486,18 +2260,21 @@
       `;
     }
 
-    function renderCarcassonneCard(def, player, pd) {
+    function renderCarcassonneCard(def, player, pd, gs) {
       const cc = pd.carcCats || {};
       const showCats = def.id === 'carcassonne';
+      const hasKath = !!gs?.activeExpansions?.['⛪ Kathedralen & Herbergen'];
+      const deltas = hasKath ? [-5, -1, +1, +2, +3, +6, +9, +12] : [-5, -1, +1, +2, +3, +5, +6, +10];
       return `
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
           <div class="flex justify-between items-center">${playerHeaderBadge(player)}<span class="text-lg font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span></div>
           <div class="flex flex-wrap gap-1.5">
-            ${[-5, -1, +1, +2, +3, +5, +6, +10].map(delta => `
-              <button type="button" onclick="addLiveScore('${player.id}',${delta})" class="flex-1 min-w-[48px] py-2 rounded-xl font-bold text-xs ${delta > 0 ? 'bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/30' : 'bg-rose-600/20 text-rose-300 border border-rose-500/30'}">
+            ${deltas.map(delta => `
+              <button type="button" onclick="addLiveScore('${player.id}', ${delta})" class="flex-1 min-w-[46px] py-2 rounded-xl font-bold text-xs ${delta > 0 ? 'bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/30' : 'bg-rose-600/20 text-rose-300 border border-rose-500/30'}">
                 ${delta > 0 ? '+' + delta : delta}
               </button>
             `).join('')}
+            ${def.id === 'qwirkle' ? `<button type="button" onclick="addLiveScore('${player.id}', 12)" class="px-3 py-2 rounded-xl font-extrabold text-xs bg-amber-500 text-slate-950">🌟 Qwirkle! (+12)</button>` : ''}
           </div>
           ${showCats ? `
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 pt-1">
@@ -1528,10 +2305,20 @@
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
           <div class="flex justify-between items-center">${playerHeaderBadge(player)}<span class="text-sm font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt (Wetenschap: +${sciPts})</span></div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            ${[{ k: 'military', n: '⚔️ Militair' }, { k: 'coins', n: '🪙 Munten' }, { k: 'wonder', n: '🏛️ Wonder' }, { k: 'civil', n: '🟦 Burger' }, { k: 'trade', n: '🟨 Handel' }, { k: 'guild', n: '🟪 Gilden' }, { k: 'sci_a', n: '📐 Passers' }, { k: 'sci_b', n: '⚙️ Tandwielen' }, { k: 'sci_c', n: '🪨 Tabletten' }].map(f => `
+            ${[{ k: 'military', n: '⚔️ Militair' }, { k: 'coins', n: '🪙 Munten' }, { k: 'wonder', n: '🏛️ Wonder' }, { k: 'civil', n: '🟦 Burger' }, { k: 'trade', n: '🟨 Handel' }, { k: 'guild', n: '🟪 Gilden' }].map(f => `
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
                 <span class="text-xs">${f.n}</span>
                 <input type="number" value="${w[f.k]||0}" oninput="setSubObj('${player.id}','wonders','${f.k}',this.value,true)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-xs" />
+              </div>
+            `).join('')}
+            ${[{ k: 'sci_a', n: '📐 Passers' }, { k: 'sci_b', n: '⚙️ Tandwielen' }, { k: 'sci_c', n: '🪨 Tabletten' }].map(sc => `
+              <div class="bg-slate-950 border border-emerald-500/30 rounded-xl p-2 flex items-center justify-between">
+                <span class="text-xs text-emerald-300">${sc.n}</span>
+                <div class="flex items-center gap-1">
+                  <button type="button" onclick="stepSubObj('${player.id}','wonders','${sc.k}',-1,0,10)" class="w-6 h-6 rounded bg-slate-800 font-bold">-</button>
+                  <span class="text-xs font-extrabold w-4 text-center">${w[sc.k]||0}</span>
+                  <button type="button" onclick="stepSubObj('${player.id}','wonders','${sc.k}',1,0,10)" class="w-6 h-6 rounded bg-slate-800 font-bold">+</button>
+                </div>
               </div>
             `).join('')}
           </div>
@@ -1539,7 +2326,7 @@
       `;
     }
 
-    function renderTtrCard(def, player, pd) {
+    function renderTtrCard(def, player, pd, gs) {
       const t = pd.ttr;
       const routeButtons = [
         { len: 1, pts: 1 }, { len: 2, pts: 2 }, { len: 3, pts: 4 },
@@ -1554,7 +2341,7 @@
                 🚂 Lengte ${rb.len} (+${rb.pts})
               </button>
             `).join('')}
-            <button type="button" onclick="toggleTtrLongest('${player.id}')" class="px-2.5 py-1.5 rounded-xl text-xs font-bold border ${t.longest ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+            <button type="button" onclick="toggleTtrLongest('${player.id}')" class="px-2.5 py-1.5 rounded-xl text-xs font-bold border ${t.longest ? 'bg-amber-500 text-slate-950 border-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}">
               🏆 Langste Route (+10)
             </button>
           </div>
@@ -1570,27 +2357,13 @@
 
     function toggleTtrLongest(pid) {
       const gs = ensureGameState(state.activeGameId);
-      gs.playerData[pid].ttr.longest = !gs.playerData[pid].ttr.longest;
+      const currentlyHas = !!gs.playerData[pid].ttr.longest;
+      state.players.forEach(p => {
+        if (gs.playerData[p.id]?.ttr) gs.playerData[p.id].ttr.longest = false;
+      });
+      gs.playerData[pid].ttr.longest = !currentlyHas;
       saveState();
       renderScoreboard();
-    }
-
-    function renderYahtzeeCard(def, player, pd) {
-      const y = pd.yahtzee;
-      const upper = Number(y.ones||0)+Number(y.twos||0)+Number(y.threes||0)+Number(y.fours||0)+Number(y.fives||0)+Number(y.sixes||0);
-      return `
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-          <div class="flex justify-between items-center">${playerHeaderBadge(player)}<span class="text-xs text-emerald-300 font-bold">Bovenste helft: ${upper}/63 ${upper >= 63 ? '(+35 BONUS!)' : ''}</span></div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            ${[{ k: 'ones', n: '⚀ Enen' }, { k: 'twos', n: '⚁ Tweeën' }, { k: 'threes', n: '⚂ Drieën' }, { k: 'fours', n: '⚃ Vieren' }, { k: 'fives', n: '⚄ Vijven' }, { k: 'sixes', n: '⚅ Zessen' }, { k: 'lower', n: '🎲 Onderste helft' }].map(f => `
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
-                <span class="text-xs">${f.n}</span>
-                <input type="number" value="${y[f.k]||0}" oninput="setSubObj('${player.id}','yahtzee','${f.k}',this.value,true)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-xs" />
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `;
     }
 
     function renderCategoriesCard(def, player, pd) {
@@ -1626,20 +2399,29 @@
     }
 
     // =========================================================================
-    // 8. PLAYERS, COLORS, BACKUP & WHATSAPP SHARING
+    // 10. PLAYERS (MET KLEUR ZWART & HANDICAP), BACKUP, SAVE + REMATCH & WHATSAPP
     // =========================================================================
     function renderPlayersManager() {
       const container = document.getElementById('playersListContainer');
-      container.innerHTML = state.players.map(p => `
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-2">
-          <div class="flex items-center gap-3 flex-1 min-w-0">
-            <input type="checkbox" ${p.active ? 'checked' : ''} onchange="togglePlayerActive('${p.id}')" class="w-4 h-4 accent-indigo-600 rounded shrink-0" />
-            <button type="button" onclick="cyclePlayerColor('${p.id}')" title="Tik om van spelerskleur te wisselen" class="w-6 h-6 rounded-full border-2 border-white/30 shrink-0 transition transform active:scale-90" style="background:${p.color || '#3b82f6'}"></button>
-            <input type="text" value="${p.name}" onchange="renamePlayer('${p.id}', this.value)" class="bg-transparent font-bold text-sm text-white focus:outline-none border-b border-transparent focus:border-indigo-500 truncate w-full" />
+      container.innerHTML = state.players.map(p => {
+        const cInfo = PLAYER_COLORS.find(c => c.hex === p.color) || PLAYER_COLORS[0];
+        return `
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 flex-1 min-w-[170px]">
+              <input type="checkbox" ${p.active ? 'checked' : ''} onchange="togglePlayerActive('${p.id}')" class="w-4 h-4 accent-indigo-600 rounded shrink-0" />
+              <button type="button" onclick="cyclePlayerColor('${p.id}')" title="Kleur: ${cInfo.name} (tik om te wisselen)" class="w-6 h-6 rounded-full border-2 border-white/40 shrink-0 transition transform active:scale-90" style="background:${p.color || '#3b82f6'}"></button>
+              <input type="text" value="${p.name}" onchange="renamePlayer('${p.id}', this.value)" class="bg-transparent font-bold text-sm text-white focus:outline-none border-b border-transparent focus:border-indigo-500 truncate w-full" />
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1">
+                <span class="text-[10px] text-slate-400">Handicap:</span>
+                <input type="number" value="${p.handicap || 0}" onchange="setPlayerHandicap('${p.id}', this.value)" class="w-10 bg-transparent text-center font-bold text-xs text-indigo-300 focus:outline-none" />
+              </div>
+              <button type="button" onclick="removePlayer('${p.id}')" class="text-xs text-rose-400 hover:text-rose-300 px-1">✕</button>
+            </div>
           </div>
-          <button type="button" onclick="removePlayer('${p.id}')" class="text-xs text-rose-400 hover:text-rose-300 shrink-0">Verwijder</button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function cyclePlayerColor(pid) {
@@ -1650,6 +2432,14 @@
       p.color = next.hex;
       saveState();
       renderPlayersManager();
+      showToast(`🎨 Kleur van ${p.name}: ${next.name}`);
+    }
+
+    function setPlayerHandicap(pid, val) {
+      const p = state.players.find(x => x.id === pid);
+      if (!p) return;
+      p.handicap = Number(val || 0);
+      saveState();
     }
 
     function addNewPlayer() {
@@ -1657,7 +2447,7 @@
       const name = (inp.value || '').trim();
       if (!name) return;
       const color = PLAYER_COLORS[state.players.length % PLAYER_COLORS.length].hex;
-      state.players.push({ id: 'p_' + Date.now(), name, active: true, color });
+      state.players.push({ id: 'p_' + Date.now(), name, active: true, color, handicap: 0 });
       inp.value = '';
       saveState();
       renderPlayersManager();
@@ -1722,10 +2512,10 @@
       showToast('🔄 Nieuw potje gestart');
     }
 
-    function formatWhatsAppText(gameName, standings) {
+    function formatWhatsAppText(gameName, standings, note) {
       const medals = ['🥇', '🥈', '🥉'];
       const lines = standings.map((s, idx) => `${medals[idx] || '🔹'} ${s.name}: *${s.score} pnt*${idx === 0 ? ' 👑' : ''}`);
-      return `🎲 *Potje ${gameName} gespeeld!*\n\n${lines.join('\n')}`;
+      return `🎲 *Potje ${gameName} gespeeld!*\n\n${lines.join('\n')}${note ? `\n\n📝 _${note}_` : ''}`;
     }
 
     function shareTextViaWhatsAppOrCopy(text) {
@@ -1748,30 +2538,74 @@
     function shareHistoryItem(id) {
       const item = (state.history || []).find(h => h.id === id);
       if (!item) return;
-      shareTextViaWhatsAppOrCopy(formatWhatsAppText(item.gameName, item.standings));
+      shareTextViaWhatsAppOrCopy(formatWhatsAppText(item.gameName, item.standings, item.note));
     }
 
-    function saveCurrentGameToHistory() {
+    function openSaveGameModal() {
+      const def = getGameDef();
+      const lowWins = isLowestWins(def.id);
+      const standings = getActivePlayers().map(p => ({
+        name: p.name, score: calculatePlayerTotal(def.id, p.id)
+      })).sort((a, b) => lowWins ? a.score - b.score : b.score - a.score);
+
+      document.getElementById('saveModalStandingsPreview').innerHTML = standings.map((s, i) => `
+        <div class="flex justify-between items-center">
+          <span class="font-bold ${i === 0 ? 'text-amber-300' : 'text-slate-300'}">${i === 0 ? '👑 ' : ''}${i + 1}. ${s.name}</span>
+          <span class="font-extrabold">${s.score} pnt</span>
+        </div>
+      `).join('');
+      document.getElementById('saveGameNoteInput').value = '';
+      document.getElementById('saveGameModal').classList.remove('hidden');
+    }
+
+    function closeSaveModal() {
+      document.getElementById('saveGameModal').classList.add('hidden');
+    }
+
+    function confirmSaveGame(startRematch) {
       const def = getGameDef();
       const lowWins = isLowestWins(def.id);
       const activePlayers = getActivePlayers();
       const standings = activePlayers.map(p => ({
         name: p.name, score: calculatePlayerTotal(def.id, p.id)
       })).sort((a, b) => lowWins ? a.score - b.score : b.score - a.score);
+      const note = (document.getElementById('saveGameNoteInput')?.value || '').trim();
 
       state.history.unshift({
         id: Date.now(),
+        gameId: def.id,
         gameName: def.name,
+        note,
         date: new Date().toLocaleString('nl-NL', { dateStyle: 'short', timeStyle: 'short' }),
         standings
       });
+      closeSaveModal();
+
+      if (startRematch) {
+        delete state.gameStates[def.id];
+        ensureGameState(def.id);
+        saveState();
+        renderScoreboard();
+        showToast(`🔄 Eindstand opgeslagen & Revanche ${def.name} gestart!`);
+      } else {
+        saveState();
+        switchMainView('history');
+        showToast('🏆 Eindstand opgeslagen in Stats & Hall of Fame!');
+      }
+    }
+
+    function rematchFromHistory(gameId) {
+      if (!gameId) return;
+      state.activeGameId = gameId;
+      delete state.gameStates[gameId];
+      ensureGameState(gameId);
       saveState();
-      switchMainView('history');
-      showToast('🏆 Eindstand opgeslagen in Stats & Hall of Fame!');
+      switchMainView('scoreboard');
+      showToast('🔄 Nieuw revanche-potje gestart!');
     }
 
     // =========================================================================
-    // 9. HALL OF FAME & HISTORY RENDERING
+    // 11. HALL OF FAME & HISTORY RENDERING
     // =========================================================================
     function renderHistory() {
       const hList = state.history || [];
@@ -1823,13 +2657,15 @@
       }
       container.innerHTML = hList.map(h => `
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-2">
-          <div class="flex justify-between items-center text-xs">
+          <div class="flex justify-between items-center text-xs flex-wrap gap-1">
             <span class="font-bold text-white">${h.gameName}</span>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
               <span class="text-slate-500">${h.date}</span>
+              ${h.gameId ? `<button type="button" onclick="rematchFromHistory('${h.gameId}')" class="px-2 py-0.5 rounded bg-indigo-600/25 text-indigo-300 font-bold text-[11px]">🔄 Revanche</button>` : ''}
               <button type="button" onclick="shareHistoryItem(${h.id})" class="px-2 py-0.5 rounded bg-green-600/20 text-green-300 font-bold text-[11px]">💬 Deel</button>
             </div>
           </div>
+          ${h.note ? `<p class="text-[11px] text-amber-300/90 italic">📝 "${h.note}"</p>` : ''}
           <div class="flex flex-wrap gap-2">
             ${(h.standings || []).map((s, idx) => `
               <span class="px-2.5 py-1 rounded-lg text-xs font-semibold ${idx === 0 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-slate-900 text-slate-300'}">
@@ -1850,6 +2686,7 @@
 
     // INIT
     window.addEventListener('DOMContentLoaded', () => {
+      setupCustomAppIcon();
       loadState();
       renderGamePicker();
     });
