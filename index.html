@@ -16,8 +16,8 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen pb-24 select-none">
 
-  <!-- APP VERSION: Verhoog dit nummer bij een volgende update op GitHub -->
-  <script>const APP_VERSION = '1.1';</script>
+  <!-- APP VERSION -->
+  <script>const APP_VERSION = '1.2';</script>
 
   <!-- TOAST MESSAGE -->
   <div id="toastBar" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden bg-emerald-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-2xl border border-emerald-400/40"></div>
@@ -29,14 +29,14 @@
         🌟
       </div>
       <div class="space-y-1">
-        <h3 class="font-extrabold text-lg text-white">Nieuwe versie beschikbaar! (v1.1)</h3>
-        <p class="text-xs text-slate-400">Er is een update voor het Spellen Scoreblok met Tafel-Tools, Hall of Fame, WhatsApp-delen, Spelerskleuren en Eigen Spellen. Je gegevens blijven gewoon bewaard!</p>
+        <h3 class="font-extrabold text-lg text-white">Nieuwe versie beschikbaar! (v1.2)</h3>
+        <p class="text-xs text-slate-400">Er is een update voor het Spellen Scoreblok. Je favorieten, spelers en historie blijven gewoon bewaard!</p>
       </div>
       <div class="pt-2 flex flex-col gap-2">
-        <button onclick="applyUpdate()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg">
+        <button type="button" onclick="applyUpdate()" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow-lg">
           Nu bijwerken & herladen
         </button>
-        <button onclick="dismissUpdate()" class="w-full py-2 rounded-xl text-xs text-slate-500 hover:text-slate-300">
+        <button type="button" onclick="dismissUpdate()" class="w-full py-2 rounded-xl text-xs text-slate-500 hover:text-slate-300">
           Herinner mij later
         </button>
       </div>
@@ -48,7 +48,7 @@
     <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
         <h3 class="font-extrabold text-base text-white">📲 Zet als App op je telefoon</h3>
-        <button onclick="toggleInstallModal(false)" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
+        <button type="button" onclick="toggleInstallModal(false)" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
       </div>
       <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1">
@@ -57,15 +57,15 @@
           <p>2. Scroll iets omlaag en tik op <b>'Zet op beginscherm'</b>.</p>
         </div>
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1">
-          <p class="font-bold text-emerald-300">🤖 Android (Chrome):</p>
-          <p>1. Tik rechtsboven op de <b>drie puntjes (⋮)</b>.</p>
-          <p>2. Kies <b>'Toevoegen aan startscherm'</b> of <b>'App installeren'</b>.</p>
+          <p class="font-bold text-emerald-300">🤖 Android (Chrome / Samsung Internet):</p>
+          <p>1. Tik rechtsonder of rechtsboven op het <b>menu (⋮ of ≡)</b>.</p>
+          <p>2. Kies <b>'Toevoegen aan startscherm'</b> of <b>'Pagina toevoegen aan -> Startscherm'</b>.</p>
         </div>
         <p class="text-[11px] text-slate-400 text-center pt-1">
           🔒 Al je favorieten, spelersnamen en scores worden privé op je eigen telefoon opgeslagen.
         </p>
       </div>
-      <button onclick="toggleInstallModal(false)" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">
+      <button type="button" onclick="toggleInstallModal(false)" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">
         Begrepen!
       </button>
     </div>
@@ -76,14 +76,14 @@
     <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="font-extrabold text-base text-white">🧰 Tafel-Tools</h3>
-        <button onclick="toggleToolsModal(false)" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
+        <button type="button" onclick="toggleToolsModal(false)" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
       </div>
 
       <!-- 1. Start Player Picker -->
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-amber-300">🎯 Wie mag er beginnen?</span>
-          <button onclick="pickRandomStarter()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
+          <button type="button" onclick="pickRandomStarter()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition active:scale-95">
             🎲 Loten!
           </button>
         </div>
@@ -94,17 +94,22 @@
 
       <!-- 2. Dice Roller -->
       <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-indigo-300">🎲 Dobbelstenen gooien</span>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <span class="text-xs font-bold text-indigo-300">🎲 Dobbelstenen</span>
           <div class="flex items-center gap-1">
             <span class="text-[11px] text-slate-400 mr-1">Aantal:</span>
-            ${[1,2,3,4,5,6].map(n => `<button onclick="setDiceCount(${n})" id="diceCntBtn_${n}" class="w-6 h-6 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">${n}</button>`).join('')}
+            <button type="button" onclick="setDiceCount(1)" id="diceCntBtn_1" class="w-6 h-6 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">1</button>
+            <button type="button" onclick="setDiceCount(2)" id="diceCntBtn_2" class="w-6 h-6 rounded-lg text-xs font-extrabold bg-indigo-600 text-white">2</button>
+            <button type="button" onclick="setDiceCount(3)" id="diceCntBtn_3" class="w-6 h-6 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">3</button>
+            <button type="button" onclick="setDiceCount(4)" id="diceCntBtn_4" class="w-6 h-6 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">4</button>
+            <button type="button" onclick="setDiceCount(5)" id="diceCntBtn_5" class="w-6 h-6 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">5</button>
+            <button type="button" onclick="setDiceCount(6)" id="diceCntBtn_6" class="w-6 h-6 rounded-lg text-xs font-bold bg-slate-800 text-slate-300">6</button>
           </div>
         </div>
         <div id="diceResultArea" class="flex items-center justify-center gap-2 py-2 min-h-[48px]">
           <span class="text-xs text-slate-500">Tik hieronder om te gooien</span>
         </div>
-        <button onclick="rollDiceNow()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition active:scale-95">
+        <button type="button" onclick="rollDiceNow()" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition active:scale-95">
           Gooi Dobbelstenen
         </button>
       </div>
@@ -116,22 +121,22 @@
           <span id="timerDisplay" class="font-mono font-extrabold text-lg text-white">01:00</span>
         </div>
         <div class="grid grid-cols-4 gap-1.5">
-          <button onclick="startTurnTimer(30)" class="py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">30 sec</button>
-          <button onclick="startTurnTimer(60)" class="py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">60 sec</button>
-          <button onclick="startTurnTimer(90)" class="py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">90 sec</button>
-          <button onclick="startTurnTimer(120)" class="py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">2 min</button>
+          <button type="button" onclick="startTurnTimer(30)" class="py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">30 sec</button>
+          <button type="button" onclick="startTurnTimer(60)" class="py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">60 sec</button>
+          <button type="button" onclick="startTurnTimer(90)" class="py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">90 sec</button>
+          <button type="button" onclick="startTurnTimer(120)" class="py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">2 min</button>
         </div>
         <div class="flex gap-2">
-          <button onclick="togglePauseTimer()" id="timerPauseBtn" class="flex-1 py-1.5 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+          <button type="button" onclick="togglePauseTimer()" id="timerPauseBtn" class="flex-1 py-1.5 rounded-xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
             ▶️ Start / Pauze
           </button>
-          <button onclick="stopTurnTimer()" class="px-3 py-1.5 rounded-xl bg-rose-600/20 text-rose-300 text-xs font-bold">
+          <button type="button" onclick="stopTurnTimer()" class="px-3 py-1.5 rounded-xl bg-rose-600/20 text-rose-300 text-xs font-bold">
             ⏹ Reset
           </button>
         </div>
       </div>
 
-      <button onclick="toggleToolsModal(false)" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
+      <button type="button" onclick="toggleToolsModal(false)" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
         Sluiten
       </button>
     </div>
@@ -142,7 +147,7 @@
     <div class="bg-slate-900 border border-slate-700 rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <h3 class="font-extrabold text-base text-white">➕ Eigen Spel Toevoegen</h3>
-        <button onclick="toggleCustomGameModal(false)" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
+        <button type="button" onclick="toggleCustomGameModal(false)" class="text-slate-400 hover:text-white text-sm font-bold px-2">✕</button>
       </div>
 
       <div class="space-y-3 text-xs">
@@ -189,84 +194,91 @@
       </div>
 
       <div class="flex gap-2 pt-2">
-        <button onclick="saveCustomGame()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">
+        <button type="button" onclick="saveCustomGame()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs">
           Spel Opslaan
         </button>
-        <button onclick="toggleCustomGameModal(false)" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">
+        <button type="button" onclick="toggleCustomGameModal(false)" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">
           Annuleren
         </button>
       </div>
     </div>
   </div>
 
-  <!-- TOP HEADER -->
-  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-3 sm:px-4 py-3">
-    <div class="max-w-4xl mx-auto flex items-center justify-between gap-2">
-      <div class="flex items-center gap-2.5 cursor-pointer min-w-0" onclick="switchMainView('picker')">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
-          <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <rect x="3" y="3" width="18" height="18" rx="4"/>
-            <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
-            <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/>
-            <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-            <circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/>
-            <circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/>
-          </svg>
-        </div>
-        <div class="min-w-0">
-          <div class="flex items-center gap-1.5">
-            <h1 class="font-extrabold text-sm sm:text-lg leading-tight tracking-tight truncate">Spellen Scoreblok</h1>
-            <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">v1.1</span>
+  <!-- TOP HEADER (GEOPTIMALISEERD VOOR MOBIEL ZODAT KNOPPEN NIET OVERLAPPEN) -->
+  <header class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur border-b border-slate-800 px-3 py-2.5">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      <!-- Top Row on Mobile: Title + Quick Icon Tools -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2.5 cursor-pointer" onclick="switchMainView('picker')">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20 shrink-0">
+            <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <rect x="3" y="3" width="18" height="18" rx="4"/>
+              <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+              <circle cx="15.5" cy="8.5" r="1.5" fill="currentColor"/>
+              <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+              <circle cx="8.5" cy="15.5" r="1.5" fill="currentColor"/>
+              <circle cx="15.5" cy="15.5" r="1.5" fill="currentColor"/>
+            </svg>
           </div>
-          <p id="headerSubtitle" class="text-[11px] sm:text-xs text-slate-400 truncate">Kies een spel of beheer je favorieten</p>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <h1 class="font-extrabold text-sm sm:text-base leading-tight text-white">Spellen Scoreblok</h1>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">v1.2</span>
+            </div>
+            <p id="headerSubtitle" class="text-[11px] text-slate-400">Kies een spel of beheer je favorieten</p>
+          </div>
+        </div>
+
+        <!-- Utility Icons Right -->
+        <div class="flex items-center gap-1 sm:hidden">
+          <button type="button" onclick="toggleToolsModal(true)" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-amber-300">🧰</button>
+          <button type="button" onclick="toggleWakeLock()" id="wakeLockBtnMobile" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400">☀️</button>
+          <button type="button" onclick="toggleInstallModal(true)" class="p-2 rounded-lg text-xs font-semibold bg-slate-800 text-indigo-300">📲</button>
         </div>
       </div>
 
-      <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
-        <button onclick="switchMainView('picker')" id="navBtnPicker" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition">
-          Spellen
+      <!-- Navigation Buttons Row -->
+      <div class="flex items-center gap-1.5">
+        <button type="button" onclick="switchMainView('picker')" id="navBtnPicker" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center">
+          🎲 Spellen
         </button>
-        <button onclick="switchMainView('players')" id="navBtnPlayers" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+        <button type="button" onclick="switchMainView('players')" id="navBtnPlayers" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">
           👥 Spelers
         </button>
-        <button onclick="switchMainView('history')" id="navBtnHistory" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+        <button type="button" onclick="switchMainView('history')" id="navBtnHistory" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">
           🏆 Stats
         </button>
-        <button onclick="toggleToolsModal(true)" title="Tafel-Tools (Loten, Dobbelsteen, Timer)" class="px-2 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-amber-300 hover:bg-slate-700 transition">
-          🧰
-        </button>
-        <button onclick="toggleWakeLock()" id="wakeLockBtn" title="Houd scherm aan tijdens het spelen" class="px-2 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 transition">
-          ☀️
-        </button>
-        <button onclick="toggleInstallModal(true)" title="Zet als App op telefoon" class="px-2 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-indigo-300 hover:bg-slate-700 transition">
-          📲
-        </button>
+        <div class="hidden sm:flex items-center gap-1">
+          <button type="button" onclick="toggleToolsModal(true)" title="Tafel-Tools" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-amber-300 hover:bg-slate-700 transition">🧰</button>
+          <button type="button" onclick="toggleWakeLock()" id="wakeLockBtn" title="Houd scherm wakker" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 transition">☀️</button>
+          <button type="button" onclick="toggleInstallModal(true)" title="Zet als App op telefoon" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-indigo-300 hover:bg-slate-700 transition">📲</button>
+        </div>
       </div>
     </div>
   </header>
 
   <!-- MAIN CONTAINER -->
-  <main class="max-w-4xl mx-auto px-3 sm:px-4 pt-4">
+  <main class="max-w-4xl mx-auto px-3 sm:px-4 pt-3">
 
     <!-- ================= VIEW 1: GAME PICKER ================= -->
-    <section id="viewPicker" class="space-y-4">
+    <section id="viewPicker" class="space-y-3">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 space-y-3 shadow-lg">
-        <div class="flex items-center justify-between gap-2 overflow-x-auto no-scrollbar pb-0.5">
+        <div class="flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
           <div class="flex items-center gap-1.5">
-            <button onclick="setPickerTab('fav')" id="tab-fav" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-1.5">
+            <button type="button" onclick="setPickerTab('fav')" id="tab-fav" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300">
               ⭐ Favorieten <span id="favCountBadge" class="px-1.5 py-0.5 text-[10px] rounded-full bg-amber-500/20 text-amber-300">0</span>
             </button>
-            <button onclick="setPickerTab('board')" id="tab-board" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-1.5">
+            <button type="button" onclick="setPickerTab('board')" id="tab-board" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300">
               🎲 Bordspellen
             </button>
-            <button onclick="setPickerTab('card')" id="tab-card" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-1.5">
+            <button type="button" onclick="setPickerTab('card')" id="tab-card" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300">
               🃏 Kaart & Dobbel
             </button>
-            <button onclick="setPickerTab('all')" id="tab-all" class="px-3 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-1.5">
+            <button type="button" onclick="setPickerTab('all')" id="tab-all" class="px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-indigo-600 text-white">
               📚 Alle (A-Z)
             </button>
           </div>
-          <button onclick="toggleCustomGameModal(true)" class="px-3 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-600/30 transition shrink-0">
+          <button type="button" onclick="toggleCustomGameModal(true)" class="px-3 py-2 rounded-xl text-xs font-extrabold whitespace-nowrap bg-emerald-600/20 border border-emerald-500/40 text-emerald-300 hover:bg-emerald-600/30 transition shrink-0">
             + Eigen Spel
           </button>
         </div>
@@ -276,11 +288,11 @@
             type="text"
             id="gameSearchInput"
             oninput="renderGamePicker()"
-            placeholder="Zoek op alfabet (bijv. Beverbende, Carcassonne, Everdell, Keer op Keer)..."
+            placeholder="Zoek op alfabet (bijv. Beverbende, Carcassonne, Everdell)..."
             class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
           <span class="absolute left-3 top-2.5 text-slate-500 text-sm">🔍</span>
-          <button onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs px-1.5 py-0.5">✕</button>
+          <button type="button" onclick="clearSearch()" id="clearSearchBtn" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-white text-xs px-1.5 py-0.5">✕</button>
         </div>
       </div>
 
@@ -295,30 +307,30 @@
     <section id="viewScoreboard" class="hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
-          <button onclick="switchMainView('picker')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1">
+          <button type="button" onclick="switchMainView('picker')" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1">
             ← Spellen
           </button>
           <div id="activeGameIcon" class="w-11 h-11 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center shrink-0"></div>
           <div>
             <div class="flex items-center gap-2">
               <h2 id="activeGameTitle" class="font-extrabold text-base sm:text-lg text-white"></h2>
-              <button id="activeGameFavBtn" onclick="toggleFavoriteCurrent()" class="text-lg"></button>
+              <button type="button" id="activeGameFavBtn" onclick="toggleFavoriteCurrent()" class="text-lg"></button>
             </div>
             <p id="activeGameRuleInfo" class="text-xs text-slate-400"></p>
           </div>
         </div>
 
         <div class="flex items-center gap-1.5 ml-auto flex-wrap">
-          <button onclick="toggleToolsModal(true)" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold transition">
+          <button type="button" onclick="toggleToolsModal(true)" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-xs font-bold transition">
             🎲 Wie begint?
           </button>
-          <button onclick="shareCurrentStandings()" class="px-2.5 py-1.5 rounded-xl bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30 text-xs font-bold transition">
+          <button type="button" onclick="shareCurrentStandings()" class="px-2.5 py-1.5 rounded-xl bg-green-600/20 hover:bg-green-600/30 text-green-300 border border-green-500/30 text-xs font-bold transition">
             💬 Deel
           </button>
-          <button onclick="saveCurrentGameToHistory()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
+          <button type="button" onclick="saveCurrentGameToHistory()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition">
             💾 Opslaan
           </button>
-          <button onclick="resetCurrentGame()" class="px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
+          <button type="button" onclick="resetCurrentGame()" class="px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition">
             🔄 Reset
           </button>
         </div>
@@ -331,12 +343,12 @@
     <!-- ================= VIEW 3: PLAYERS & BACKUP MANAGER ================= -->
     <section id="viewPlayers" class="hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h2 class="font-bold text-base text-white">👥 Spelers & Meeple-kleuren</h2>
             <p class="text-xs text-slate-400">Tik op het gekleurde bolletje om een spelerskleur te kiezen.</p>
           </div>
-          <button onclick="toggleToolsModal(true); pickRandomStarter();" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold">
+          <button type="button" onclick="toggleToolsModal(true); pickRandomStarter();" class="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold">
             🎯 Loten wie begint
           </button>
         </div>
@@ -348,7 +360,7 @@
             onkeydown="if(event.key==='Enter') addNewPlayer()"
             class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
           />
-          <button onclick="addNewPlayer()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold">
+          <button type="button" onclick="addNewPlayer()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold">
             + Toevoegen
           </button>
         </div>
@@ -360,16 +372,16 @@
         <h3 class="font-bold text-sm text-white">💾 Back-up & Overzetten naar ander toestel</h3>
         <p class="text-xs text-slate-400">Kopieer of download al je favorieten, eigen spellen, spelers en historie om ze veilig te bewaren of op een andere telefoon in te laden.</p>
         <div class="flex flex-wrap gap-2">
-          <button onclick="exportDataBackup()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">
+          <button type="button" onclick="exportDataBackup()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">
             📋 Kopieer Back-up Code
           </button>
-          <button onclick="downloadDataFile()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">
+          <button type="button" onclick="downloadDataFile()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">
             ⬇️ Download .json bestand
           </button>
         </div>
         <div class="pt-2 border-t border-slate-800 space-y-2">
           <textarea id="backupInputArea" rows="2" placeholder="Plak hier een back-up code om te herstellen..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
-          <button onclick="importDataBackup()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
+          <button type="button" onclick="importDataBackup()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
             🔄 Back-up Inladen & Herstellen
           </button>
         </div>
@@ -378,7 +390,6 @@
 
     <!-- ================= VIEW 4: HALL OF FAME & HISTORY ================= -->
     <section id="viewHistory" class="hidden space-y-4">
-      <!-- Hall of Fame Card -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between">
           <div>
@@ -390,14 +401,13 @@
         <div id="hallOfFameContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
       </div>
 
-      <!-- Played Games History List -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="font-bold text-base text-white">📜 Gespeelde Potjes</h2>
             <p class="text-xs text-slate-400">Tik op 💬 om de eindstand op WhatsApp te delen.</p>
           </div>
-          <button onclick="clearAllHistory()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">
+          <button type="button" onclick="clearAllHistory()" class="text-xs text-rose-400 hover:text-rose-300 font-semibold">
             Alles wissen
           </button>
         </div>
@@ -423,37 +433,37 @@
     ];
 
     const SVG_ICONS = {
-      kok1: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="3" y="6" width="12" height="12" rx="3" fill="#22c55e"/><rect x="18" y="6" width="12" height="12" rx="3" fill="#eab308"/><rect x="33" y="6" width="12" height="12" rx="3" fill="#3b82f6"/><rect x="10" y="21" width="12" height="12" rx="3" fill="#ec4899"/><rect x="25" y="21" width="12" height="12" rx="3" fill="#f97316"/><path d="M13 24l6 6m0-6l-6 6" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><polygon points="24,36 26,41 31,41 27,44 28.5,48 24,45.5 19.5,48 21,44 17,41 22,41" fill="#facc15"/></svg>`,
-      kok2: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="3" y="6" width="12" height="12" rx="3" fill="#22c55e"/><rect x="18" y="6" width="12" height="12" rx="3" fill="#eab308"/><rect x="33" y="6" width="12" height="12" rx="3" fill="#3b82f6"/><rect x="6" y="22" width="16" height="16" rx="4" fill="#ec4899"/><text x="14" y="35" text-anchor="middle" fill="#fff" font-size="13" font-weight="900">2</text><path d="M35 37c-4-3.2-7-5.7-7-9a4 4 0 0 1 7-2.5A4 4 0 0 1 42 28c0 3.3-3 5.8-7 9z" fill="#ef4444"/></svg>`,
-      beverbende: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="5" width="24" height="34" rx="4" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/><text x="13" y="18" fill="#0f172a" font-size="11" font-weight="800">0</text><circle cx="31" cy="30" r="12" fill="#b45309"/><circle cx="26" cy="22" r="3.5" fill="#92400e"/><circle cx="36" cy="22" r="3.5" fill="#92400e"/><rect x="28" y="33" width="2.8" height="4.5" rx="1" fill="#fff"/><rect x="31.5" y="33" width="2.8" height="4.5" rx="1" fill="#fff"/></svg>`,
-      qwixx: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="5" y="6" width="30" height="7" rx="3.5" fill="#ef4444"/><rect x="5" y="16" width="30" height="7" rx="3.5" fill="#eab308"/><rect x="5" y="26" width="30" height="7" rx="3.5" fill="#22c55e"/><rect x="5" y="36" width="30" height="7" rx="3.5" fill="#3b82f6"/><circle cx="40" cy="24" r="4.5" fill="#cbd5e1"/></svg>`,
-      clever: `<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,8 10,38 38,38" fill="#f97316"/><polygon points="10,12 16,24 10,38" fill="#ea580c"/><polygon points="38,12 32,24 38,38" fill="#ea580c"/><circle cx="20" cy="27" r="2" fill="#fff"/><circle cx="28" cy="27" r="2" fill="#fff"/></svg>`,
-      take5: `<svg viewBox="0 0 48 48" class="w-9 h-9"><path d="M8 14c-4-4-4-9 0-9 3 0 5 4 7 7h18c2-3 4-7 7-7 4 0 4 5 0 9l-3 18c-1 5-5 8-13 8s-12-3-13-8L8 14z" fill="#7c3aed"/><text x="24" y="31" text-anchor="middle" fill="#facc15" font-size="14" font-weight="900">66</text></svg>`,
-      skyjo: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="10" height="14" rx="2" fill="#3b82f6"/><rect x="19" y="6" width="10" height="14" rx="2" fill="#22c55e"/><rect x="32" y="6" width="10" height="14" rx="2" fill="#eab308"/><rect x="6" y="24" width="10" height="14" rx="2" fill="#ef4444"/><rect x="19" y="24" width="10" height="14" rx="2" fill="#38bdf8"/><rect x="32" y="24" width="10" height="14" rx="2" fill="#f97316"/></svg>`,
-      sushigo: `<svg viewBox="0 0 48 48" class="w-9 h-9"><ellipse cx="24" cy="28" rx="16" ry="10" fill="#1e293b"/><ellipse cx="24" cy="23" rx="16" ry="10" fill="#f8fafc"/><ellipse cx="24" cy="23" rx="8" ry="5" fill="#fb7185"/></svg>`,
-      uno: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="10" y="6" width="26" height="36" rx="5" fill="#ef4444" stroke="#fff" stroke-width="1.5"/><text x="23" y="28" text-anchor="middle" fill="#facc15" font-size="10" font-weight="900">UNO</text></svg>`,
-      yahtzee: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="17" height="17" rx="4" fill="#f8fafc"/><circle cx="14.5" cy="14.5" r="2.2" fill="#ef4444"/><rect x="25" y="23" width="17" height="17" rx="4" fill="#f8fafc"/><circle cx="30" cy="28" r="1.8" fill="#0f172a"/><circle cx="37" cy="35" r="1.8" fill="#0f172a"/></svg>`,
-      klaverjassen: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="8" y="5" width="32" height="38" rx="5" fill="#f8fafc"/><text x="17" y="22" font-size="14" fill="#0f172a">♠</text><text x="31" y="22" font-size="14" fill="#ef4444">♥</text><text x="17" y="37" font-size="14" fill="#0f172a">♣</text><text x="31" y="37" font-size="14" fill="#ef4444">♦</text></svg>`,
-      skipbo: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="7" y="10" width="22" height="30" rx="4" fill="#3b82f6"/><rect x="17" y="6" width="22" height="30" rx="4" fill="#f59e0b"/><text x="28" y="26" text-anchor="middle" fill="#fff" font-size="13" font-weight="900">12</text></svg>`,
-      seasalt: `<svg viewBox="0 0 48 48" class="w-9 h-9"><path d="M6 34l12-14 12 14H6z" fill="#0ea5e9"/><path d="M18 22l12-14 12 14H18z" fill="#38bdf8"/></svg>`,
-      valsemotten: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="8" y="8" width="32" height="32" rx="6" fill="#4338ca"/><circle cx="18" cy="24" r="6" fill="#a5b4fc"/><circle cx="30" cy="24" r="6" fill="#a5b4fc"/></svg>`,
-      lama: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="8" y="8" width="32" height="32" rx="6" fill="#b45309"/><text x="24" y="29" text-anchor="middle" fill="#facc15" font-size="11" font-weight="900">LAMA</text></svg>`,
-      forestshuffle: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="36" height="36" rx="6" fill="#065f46"/><polygon points="24,10 36,28 12,28" fill="#10b981"/><rect x="21" y="28" width="6" height="8" fill="#78350f"/></svg>`,
-      regenwormen: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="9" y="5" width="30" height="38" rx="6" fill="#fde68a" stroke="#d97706" stroke-width="2"/><text x="24" y="19" text-anchor="middle" fill="#0f172a" font-size="12" font-weight="900">36</text><path d="M15 31c3-4 6 4 9 0s6 4 9 0" stroke="#dc2626" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>`,
-      carcassonne: `<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="13" r="6" fill="#facc15"/><path d="M12 24c0-4 5-5 12-5s12 1 12 5l-4 7 3 10h-7l-4-7-4 7h-7l3-10-4-7z" fill="#facc15"/></svg>`,
-      rummikub: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="9" y="5" width="30" height="38" rx="5" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="24" y="27" text-anchor="middle" fill="#ef4444" font-size="17" font-weight="900">13</text></svg>`,
-      cascadia: `<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,4 42,14 42,34 24,44 6,34 6,14" fill="#15803d" stroke="#86efac" stroke-width="2"/><polygon points="24,13 33,29 15,29" fill="#bbf7d0"/></svg>`,
-      ttr: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="20" width="28" height="14" rx="3" fill="#ef4444"/><rect x="26" y="12" width="12" height="12" rx="2" fill="#3b82f6"/><circle cx="14" cy="36" r="4" fill="#facc15"/><circle cx="28" cy="36" r="4" fill="#facc15"/></svg>`,
-      catan: `<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,4 42,14 42,34 24,44 6,34 6,14" fill="#eab308" stroke="#fef08a" stroke-width="2"/><polygon points="24,15 33,23 33,34 15,34 15,23" fill="#dc2626"/></svg>`,
-      azul: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="16" height="16" rx="3" fill="#0284c7"/><rect x="26" y="6" width="16" height="16" rx="3" fill="#facc15"/><rect x="6" y="26" width="16" height="16" rx="3" fill="#ef4444"/><rect x="26" y="26" width="16" height="16" rx="3" fill="#14b8a6"/></svg>`,
-      wingspan: `<svg viewBox="0 0 48 48" class="w-9 h-9"><path d="M8 28c8-14 20-16 32-12-6 6-10 14-18 18-6 2-11 0-14-6z" fill="#38bdf8"/><ellipse cx="32" cy="33" rx="6" ry="8" fill="#fef3c7"/></svg>`,
-      wonders7: `<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,6 6,16 42,16" fill="#f59e0b"/><rect x="10" y="18" width="5" height="18" fill="#fde68a"/><rect x="21.5" y="18" width="5" height="18" fill="#fde68a"/><rect x="33" y="18" width="5" height="18" fill="#fde68a"/><rect x="6" y="36" width="36" height="5" fill="#d97706"/></svg>`,
-      qwirkle: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="36" height="36" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2"/><polygon points="24,10 28,20 38,24 28,28 24,38 20,28 10,24 20,20" fill="#ec4899"/></svg>`,
-      scrabble: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="7" y="7" width="34" height="34" rx="5" fill="#fde68a" stroke="#d97706" stroke-width="2"/><text x="22" y="31" text-anchor="middle" fill="#0f172a" font-size="20" font-weight="900">W</text><text x="34" y="36" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="800">4</text></svg>`,
-      eldorado: `<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,6 38,38 10,38" fill="#facc15"/><circle cx="24" cy="25" r="6" fill="#16a34a"/></svg>`,
-      harmonies: `<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="24" r="18" fill="#047857"/><circle cx="18" cy="20" r="5" fill="#facc15"/><circle cx="30" cy="20" r="5" fill="#38bdf8"/><circle cx="24" cy="30" r="5" fill="#f87171"/></svg>`,
-      everdell: `<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="20" r="13" fill="#9333ea"/><rect x="20" y="28" width="8" height="12" rx="2" fill="#78350f"/><circle cx="19" cy="18" r="2.5" fill="#facc15"/><circle cx="29" cy="18" r="2.5" fill="#facc15"/></svg>`,
-      free: `<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="8" y="6" width="32" height="36" rx="5" fill="#6366f1"/><path d="M16 18h16M16 26h16M16 34h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>`
+      kok1: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="3" y="6" width="12" height="12" rx="3" fill="#22c55e"/><rect x="18" y="6" width="12" height="12" rx="3" fill="#eab308"/><rect x="33" y="6" width="12" height="12" rx="3" fill="#3b82f6"/><rect x="10" y="21" width="12" height="12" rx="3" fill="#ec4899"/><rect x="25" y="21" width="12" height="12" rx="3" fill="#f97316"/><path d="M13 24l6 6m0-6l-6 6" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><polygon points="24,36 26,41 31,41 27,44 28.5,48 24,45.5 19.5,48 21,44 17,41 22,41" fill="#facc15"/></svg>',
+      kok2: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="3" y="6" width="12" height="12" rx="3" fill="#22c55e"/><rect x="18" y="6" width="12" height="12" rx="3" fill="#eab308"/><rect x="33" y="6" width="12" height="12" rx="3" fill="#3b82f6"/><rect x="6" y="22" width="16" height="16" rx="4" fill="#ec4899"/><text x="14" y="35" text-anchor="middle" fill="#fff" font-size="13" font-weight="900">2</text><path d="M35 37c-4-3.2-7-5.7-7-9a4 4 0 0 1 7-2.5A4 4 0 0 1 42 28c0 3.3-3 5.8-7 9z" fill="#ef4444"/></svg>',
+      beverbende: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="5" width="24" height="34" rx="4" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/><text x="13" y="18" fill="#0f172a" font-size="11" font-weight="800">0</text><circle cx="31" cy="30" r="12" fill="#b45309"/><circle cx="26" cy="22" r="3.5" fill="#92400e"/><circle cx="36" cy="22" r="3.5" fill="#92400e"/><rect x="28" y="33" width="2.8" height="4.5" rx="1" fill="#fff"/><rect x="31.5" y="33" width="2.8" height="4.5" rx="1" fill="#fff"/></svg>',
+      qwixx: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="5" y="6" width="30" height="7" rx="3.5" fill="#ef4444"/><rect x="5" y="16" width="30" height="7" rx="3.5" fill="#eab308"/><rect x="5" y="26" width="30" height="7" rx="3.5" fill="#22c55e"/><rect x="5" y="36" width="30" height="7" rx="3.5" fill="#3b82f6"/><circle cx="40" cy="24" r="4.5" fill="#cbd5e1"/></svg>',
+      clever: '<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,8 10,38 38,38" fill="#f97316"/><polygon points="10,12 16,24 10,38" fill="#ea580c"/><polygon points="38,12 32,24 38,38" fill="#ea580c"/><circle cx="20" cy="27" r="2" fill="#fff"/><circle cx="28" cy="27" r="2" fill="#fff"/></svg>',
+      take5: '<svg viewBox="0 0 48 48" class="w-9 h-9"><path d="M8 14c-4-4-4-9 0-9 3 0 5 4 7 7h18c2-3 4-7 7-7 4 0 4 5 0 9l-3 18c-1 5-5 8-13 8s-12-3-13-8L8 14z" fill="#7c3aed"/><text x="24" y="31" text-anchor="middle" fill="#facc15" font-size="14" font-weight="900">66</text></svg>',
+      skyjo: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="10" height="14" rx="2" fill="#3b82f6"/><rect x="19" y="6" width="10" height="14" rx="2" fill="#22c55e"/><rect x="32" y="6" width="10" height="14" rx="2" fill="#eab308"/><rect x="6" y="24" width="10" height="14" rx="2" fill="#ef4444"/><rect x="19" y="24" width="10" height="14" rx="2" fill="#38bdf8"/><rect x="32" y="24" width="10" height="14" rx="2" fill="#f97316"/></svg>',
+      sushigo: '<svg viewBox="0 0 48 48" class="w-9 h-9"><ellipse cx="24" cy="28" rx="16" ry="10" fill="#1e293b"/><ellipse cx="24" cy="23" rx="16" ry="10" fill="#f8fafc"/><ellipse cx="24" cy="23" rx="8" ry="5" fill="#fb7185"/></svg>',
+      uno: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="10" y="6" width="26" height="36" rx="5" fill="#ef4444" stroke="#fff" stroke-width="1.5"/><text x="23" y="28" text-anchor="middle" fill="#facc15" font-size="10" font-weight="900">UNO</text></svg>',
+      yahtzee: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="17" height="17" rx="4" fill="#f8fafc"/><circle cx="14.5" cy="14.5" r="2.2" fill="#ef4444"/><rect x="25" y="23" width="17" height="17" rx="4" fill="#f8fafc"/><circle cx="30" cy="28" r="1.8" fill="#0f172a"/><circle cx="37" cy="35" r="1.8" fill="#0f172a"/></svg>',
+      klaverjassen: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="8" y="5" width="32" height="38" rx="5" fill="#f8fafc"/><text x="17" y="22" font-size="14" fill="#0f172a">♠</text><text x="31" y="22" font-size="14" fill="#ef4444">♥</text><text x="17" y="37" font-size="14" fill="#0f172a">♣</text><text x="31" y="37" font-size="14" fill="#ef4444">♦</text></svg>',
+      skipbo: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="7" y="10" width="22" height="30" rx="4" fill="#3b82f6"/><rect x="17" y="6" width="22" height="30" rx="4" fill="#f59e0b"/><text x="28" y="26" text-anchor="middle" fill="#fff" font-size="13" font-weight="900">12</text></svg>',
+      seasalt: '<svg viewBox="0 0 48 48" class="w-9 h-9"><path d="M6 34l12-14 12 14H6z" fill="#0ea5e9"/><path d="M18 22l12-14 12 14H18z" fill="#38bdf8"/></svg>',
+      valsemotten: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="8" y="8" width="32" height="32" rx="6" fill="#4338ca"/><circle cx="18" cy="24" r="6" fill="#a5b4fc"/><circle cx="30" cy="24" r="6" fill="#a5b4fc"/></svg>',
+      lama: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="8" y="8" width="32" height="32" rx="6" fill="#b45309"/><text x="24" y="29" text-anchor="middle" fill="#facc15" font-size="11" font-weight="900">LAMA</text></svg>',
+      forestshuffle: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="36" height="36" rx="6" fill="#065f46"/><polygon points="24,10 36,28 12,28" fill="#10b981"/><rect x="21" y="28" width="6" height="8" fill="#78350f"/></svg>',
+      regenwormen: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="9" y="5" width="30" height="38" rx="6" fill="#fde68a" stroke="#d97706" stroke-width="2"/><text x="24" y="19" text-anchor="middle" fill="#0f172a" font-size="12" font-weight="900">36</text><path d="M15 31c3-4 6 4 9 0s6 4 9 0" stroke="#dc2626" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>',
+      carcassonne: '<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="13" r="6" fill="#facc15"/><path d="M12 24c0-4 5-5 12-5s12 1 12 5l-4 7 3 10h-7l-4-7-4 7h-7l3-10-4-7z" fill="#facc15"/></svg>',
+      rummikub: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="9" y="5" width="30" height="38" rx="5" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/><text x="24" y="27" text-anchor="middle" fill="#ef4444" font-size="17" font-weight="900">13</text></svg>',
+      cascadia: '<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,4 42,14 42,34 24,44 6,34 6,14" fill="#15803d" stroke="#86efac" stroke-width="2"/><polygon points="24,13 33,29 15,29" fill="#bbf7d0"/></svg>',
+      ttr: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="20" width="28" height="14" rx="3" fill="#ef4444"/><rect x="26" y="12" width="12" height="12" rx="2" fill="#3b82f6"/><circle cx="14" cy="36" r="4" fill="#facc15"/><circle cx="28" cy="36" r="4" fill="#facc15"/></svg>',
+      catan: '<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,4 42,14 42,34 24,44 6,34 6,14" fill="#eab308" stroke="#fef08a" stroke-width="2"/><polygon points="24,15 33,23 33,34 15,34 15,23" fill="#dc2626"/></svg>',
+      azul: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="16" height="16" rx="3" fill="#0284c7"/><rect x="26" y="6" width="16" height="16" rx="3" fill="#facc15"/><rect x="6" y="26" width="16" height="16" rx="3" fill="#ef4444"/><rect x="26" y="26" width="16" height="16" rx="3" fill="#14b8a6"/></svg>',
+      wingspan: '<svg viewBox="0 0 48 48" class="w-9 h-9"><path d="M8 28c8-14 20-16 32-12-6 6-10 14-18 18-6 2-11 0-14-6z" fill="#38bdf8"/><ellipse cx="32" cy="33" rx="6" ry="8" fill="#fef3c7"/></svg>',
+      wonders7: '<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,6 6,16 42,16" fill="#f59e0b"/><rect x="10" y="18" width="5" height="18" fill="#fde68a"/><rect x="21.5" y="18" width="5" height="18" fill="#fde68a"/><rect x="33" y="18" width="5" height="18" fill="#fde68a"/><rect x="6" y="36" width="36" height="5" fill="#d97706"/></svg>',
+      qwirkle: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="6" y="6" width="36" height="36" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2"/><polygon points="24,10 28,20 38,24 28,28 24,38 20,28 10,24 20,20" fill="#ec4899"/></svg>',
+      scrabble: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="7" y="7" width="34" height="34" rx="5" fill="#fde68a" stroke="#d97706" stroke-width="2"/><text x="22" y="31" text-anchor="middle" fill="#0f172a" font-size="20" font-weight="900">W</text><text x="34" y="36" text-anchor="middle" fill="#0f172a" font-size="9" font-weight="800">4</text></svg>',
+      eldorado: '<svg viewBox="0 0 48 48" class="w-9 h-9"><polygon points="24,6 38,38 10,38" fill="#facc15"/><circle cx="24" cy="25" r="6" fill="#16a34a"/></svg>',
+      harmonies: '<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="24" r="18" fill="#047857"/><circle cx="18" cy="20" r="5" fill="#facc15"/><circle cx="30" cy="20" r="5" fill="#38bdf8"/><circle cx="24" cy="30" r="5" fill="#f87171"/></svg>',
+      everdell: '<svg viewBox="0 0 48 48" class="w-9 h-9"><circle cx="24" cy="20" r="13" fill="#9333ea"/><rect x="20" y="28" width="8" height="12" rx="2" fill="#78350f"/><circle cx="19" cy="18" r="2.5" fill="#facc15"/><circle cx="29" cy="18" r="2.5" fill="#facc15"/></svg>',
+      free: '<svg viewBox="0 0 48 48" class="w-9 h-9"><rect x="8" y="6" width="32" height="36" rx="5" fill="#6366f1"/><path d="M16 18h16M16 26h16M16 34h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>'
     };
 
     const BASE_GAMES_CATALOG = [
@@ -536,6 +546,7 @@
 
     function showToast(msg) {
       const el = document.getElementById('toastBar');
+      if (!el) return;
       el.textContent = msg;
       el.classList.remove('hidden');
       setTimeout(() => el.classList.add('hidden'), 2600);
@@ -547,14 +558,18 @@
         if (raw) {
           const parsed = JSON.parse(raw);
           state = { ...state, ...parsed };
-          if (!state.customGames) state.customGames = [];
+          if (!Array.isArray(state.favorites)) state.favorites = [];
+          if (!Array.isArray(state.customGames)) state.customGames = [];
+          if (!Array.isArray(state.players) || state.players.length === 0) {
+            state.players = [{ id: 'p1', name: 'Speler 1', active: true, color: '#3b82f6' }];
+          }
           state.players.forEach((p, idx) => {
             if (!p.color) p.color = PLAYER_COLORS[idx % PLAYER_COLORS.length].hex;
           });
-          if (state.favorites && state.favorites.length > 0 && !sessionStorage.getItem('tab_initialized')) {
+          if (state.favorites.length > 0 && !sessionStorage.getItem('tab_initialized')) {
             state.pickerTab = 'fav';
             sessionStorage.setItem('tab_initialized', '1');
-          } else if (!state.favorites || state.favorites.length === 0) {
+          } else if (state.favorites.length === 0 && state.pickerTab === 'fav') {
             state.pickerTab = 'all';
           }
         }
@@ -576,7 +591,7 @@
 
     function applyUpdate() {
       localStorage.setItem('spellen_scoreblok_version', APP_VERSION);
-      window.location.reload(true);
+      window.location.reload();
     }
 
     function dismissUpdate() {
@@ -635,11 +650,12 @@
     }
 
     // =========================================================================
-    // 3. TABLE TOOLS: WAKE LOCK, START PLAYER, DICE & TIMER
+    // 3. TABLE TOOLS
     // =========================================================================
     let wakeLockSentinel = null;
     async function toggleWakeLock() {
       const btn = document.getElementById('wakeLockBtn');
+      const btnMob = document.getElementById('wakeLockBtnMobile');
       if (!('wakeLock' in navigator)) {
         showToast('⚠️ Scherm-wakker-houder niet ondersteund op deze browser');
         return;
@@ -648,12 +664,14 @@
         if (wakeLockSentinel) {
           await wakeLockSentinel.release();
           wakeLockSentinel = null;
-          btn.className = 'px-2 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:bg-slate-700 transition';
-          showToast('🌙 Scherm-wakker-houder uitgeschakeld');
+          if (btn) btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400';
+          if (btnMob) btnMob.className = 'p-2 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400';
+          showToast('🌙 Scherm-wakker-houder uit');
         } else {
           wakeLockSentinel = await navigator.wakeLock.request('screen');
-          btn.className = 'px-2 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 shadow transition';
-          showToast('☀️ Scherm blijft nu wakker tijdens het spelen!');
+          if (btn) btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 shadow';
+          if (btnMob) btnMob.className = 'p-2 rounded-lg text-xs font-semibold bg-amber-500 text-slate-950 shadow';
+          showToast('☀️ Scherm blijft nu aan tijdens het spelen!');
         }
       } catch (err) {
         showToast('Kon scherm-wakker-houder niet activeren');
@@ -744,15 +762,6 @@
           clearInterval(timerInterval);
           timerInterval = null;
           showToast('⏰ Tijd is om!');
-          try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(880, ctx.currentTime);
-            osc.connect(ctx.destination);
-            osc.start();
-            osc.stop(ctx.currentTime + 0.4);
-          } catch (e) {}
         }
       }, 1000);
     }
@@ -805,7 +814,7 @@
       document.getElementById('cgName').value = '';
       toggleCustomGameModal(false);
       renderGamePicker();
-      showToast(`✅ "${name}" toegevoegd aan je spellen!`);
+      showToast(`✅ "${name}" toegevoegd!`);
     }
 
     function deleteCustomGame(gameId, ev) {
@@ -940,12 +949,12 @@
       });
       ['Picker', 'Players', 'History'].forEach(v => {
         const btn = document.getElementById('navBtn' + v);
-        if (btn) btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center';
       });
 
       if (view === 'picker') {
         document.getElementById('viewPicker').classList.remove('hidden');
-        document.getElementById('navBtnPicker').className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition';
+        document.getElementById('navBtnPicker').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
         document.getElementById('headerSubtitle').textContent = 'Kies een spel of beheer je favorieten';
         renderGamePicker();
       } else if (view === 'scoreboard') {
@@ -953,11 +962,11 @@
         renderScoreboard();
       } else if (view === 'players') {
         document.getElementById('viewPlayers').classList.remove('hidden');
-        document.getElementById('navBtnPlayers').className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition';
+        document.getElementById('navBtnPlayers').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
         renderPlayersManager();
       } else if (view === 'history') {
         document.getElementById('viewHistory').classList.remove('hidden');
-        document.getElementById('navBtnHistory').className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition';
+        document.getElementById('navBtnHistory').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
         renderHistory();
       }
     }
@@ -1020,9 +1029,9 @@
       ['fav', 'board', 'card', 'all'].forEach(t => {
         const el = document.getElementById('tab-' + t);
         if (state.pickerTab === t && !searchVal) {
-          el.className = 'px-3 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-indigo-600 text-white shadow';
+          el.className = 'px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-indigo-600 text-white shadow';
         } else {
-          el.className = 'px-3 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700';
+          el.className = 'px-3 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition flex items-center gap-1.5 bg-slate-800 text-slate-300 hover:bg-slate-700';
         }
       });
 
@@ -1048,10 +1057,10 @@
       if (list.length === 0) {
         grid.innerHTML = `
           <div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
-            <p class="text-slate-200 font-bold text-sm">Nog geen favorieten geselecteerd</p>
-            <p class="text-xs text-slate-400 max-w-md mx-auto">Ga naar <b>🎲 Bordspellen</b>, <b>🃏 Kaart & Dobbel</b> of <b>📚 Alle</b> en tik op het sterretje <b>☆</b> om jouw eigen favorietenlijst samen te stellen.</p>
-            <button onclick="setPickerTab('all')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">
-              Bekijk Alle Spellen (A-Z)
+            <p class="text-slate-200 font-bold text-sm">Geen spellen gevonden in deze weergave</p>
+            <p class="text-xs text-slate-400 max-w-md mx-auto">Tik hieronder om alle 31 spellen te bekijken of tik op het sterretje ☆ bij een spel om je eigen favorietenlijst te maken.</p>
+            <button type="button" onclick="clearSearch(); setPickerTab('all');" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">
+              Bekijk Alle 31 Spellen (A-Z)
             </button>
           </div>`;
         return;
@@ -1060,18 +1069,18 @@
       grid.innerHTML = list.map((g, idx) => {
         const isFav = state.favorites.includes(g.id);
         const catBadge = g.category === 'board'
-          ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 text-emerald-300">🎲 Bordspel</span>`
-          : `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/15 text-purple-300">🃏 Kaart & Dobbel</span>`;
+          ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/15 text-emerald-300">🎲 Bordspel</span>'
+          : '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/15 text-purple-300">🃏 Kaart & Dobbel</span>';
 
         const orderControls = isFavTab ? `
           <div class="flex items-center gap-1 mr-1">
-            <button onclick="moveFavorite('${g.id}', -1, event)" ${idx === 0 ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-slate-200 text-xs font-bold flex items-center justify-center">▲</button>
-            <button onclick="moveFavorite('${g.id}', 1, event)" ${idx === list.length - 1 ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-slate-200 text-xs font-bold flex items-center justify-center">▼</button>
+            <button type="button" onclick="moveFavorite('${g.id}', -1, event)" ${idx === 0 ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-slate-200 text-xs font-bold flex items-center justify-center">▲</button>
+            <button type="button" onclick="moveFavorite('${g.id}', 1, event)" ${idx === list.length - 1 ? 'disabled' : ''} class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-30 text-slate-200 text-xs font-bold flex items-center justify-center">▼</button>
           </div>
         ` : '';
 
         const deleteCustomBtn = g.isCustom ? `
-          <button onclick="deleteCustomGame('${g.id}', event)" title="Verwijder eigen spel" class="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-300 text-xs font-bold mr-1">🗑</button>
+          <button type="button" onclick="deleteCustomGame('${g.id}', event)" title="Verwijder eigen spel" class="w-7 h-7 rounded-lg bg-rose-500/15 text-rose-300 text-xs font-bold mr-1">🗑</button>
         ` : '';
 
         return `
@@ -1092,7 +1101,7 @@
             <div class="flex items-center shrink-0">
               ${deleteCustomBtn}
               ${orderControls}
-              <button onclick="toggleFavorite('${g.id}', event)" title="Favoriet" class="w-9 h-9 rounded-xl bg-slate-950/80 hover:bg-slate-800 flex items-center justify-center text-base transition">
+              <button type="button" onclick="toggleFavorite('${g.id}', event)" title="Favoriet" class="w-9 h-9 rounded-xl bg-slate-950/80 hover:bg-slate-800 flex items-center justify-center text-base transition">
                 ${isFav ? '⭐' : '<span class="opacity-30 hover:opacity-80">☆</span>'}
               </button>
             </div>
@@ -1167,7 +1176,7 @@
         const freeModeToggle = def.id === 'free' ? `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
             <span class="text-xs text-slate-300 font-semibold">Winnaar-instelling voor dit spel:</span>
-            <button onclick="toggleFreeLowestWins()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-indigo-300">
+            <button type="button" onclick="toggleFreeLowestWins()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-indigo-300">
               ${isLowestWins('free') ? '👑 Laagste score wint' : '👑 Hoogste score wint'} (Tik om te wisselen)
             </button>
           </div>
@@ -1207,7 +1216,7 @@
             <p class="text-xs text-slate-400 mb-1.5">Kleurenbonus (tik voor 0 → 5 → 3):</p>
             <div class="flex gap-1.5">
               ${KOK_COLORS.map(c => `
-                <button onclick="cycleKokColor('${player.id}', '${c.id}')" class="flex-1 py-2 rounded-xl font-extrabold text-xs text-slate-950 ${c.bg} shadow active:scale-95 transition">
+                <button type="button" onclick="cycleKokColor('${player.id}', '${c.id}')" class="flex-1 py-2 rounded-xl font-extrabold text-xs text-slate-950 ${c.bg} shadow active:scale-95 transition">
                   ${c.name}<br><span class="text-sm">+${pd.kokColors?.[c.id] || 0}</span>
                 </button>
               `).join('')}
@@ -1217,7 +1226,7 @@
             <p class="text-xs text-slate-400 mb-1.5">Kolommen A t/m O:</p>
             <div class="grid grid-cols-8 sm:grid-cols-15 gap-1">
               ${KOK_COLS.map(col => `
-                <button onclick="toggleKokCol('${player.id}', '${col.id}')" class="py-1.5 rounded-lg border text-center transition ${pd.kokCols?.[col.id] ? 'bg-indigo-600 border-indigo-400 text-white font-bold' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+                <button type="button" onclick="toggleKokCol('${player.id}', '${col.id}')" class="py-1.5 rounded-lg border text-center transition ${pd.kokCols?.[col.id] ? 'bg-indigo-600 border-indigo-400 text-white font-bold' : 'bg-slate-950 border-slate-800 text-slate-400'}">
                   <div class="text-[10px]">${col.id}</div>
                   <div class="text-xs font-extrabold">${col.pts}</div>
                 </button>
@@ -1232,16 +1241,16 @@
             ${def.type === 'kok1' ? `
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
                 <span class="text-xs text-amber-300 font-semibold">★ Open Sterren (-2)</span>
-                <input type="number" value="${pd.stars \vert{}\vert{} 0}" oninput="updateNested('${player.id}', 'stars', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
+                <input type="number" value="${pd.stars || 0}" oninput="updateNested('${player.id}', 'stars', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
               </div>
             ` : `
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
                 <span class="text-xs text-pink-300 font-semibold">➕ Bonusrij punten</span>
-                <input type="number" value="${pd.bonusRow \vert{}\vert{} 0}" oninput="updateNested('${player.id}', 'bonusRow', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
+                <input type="number" value="${pd.bonusRow || 0}" oninput="updateNested('${player.id}', 'bonusRow', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
                 <span class="text-xs text-rose-300 font-semibold">❤️ / ? Punten</span>
-                <input type="number" value="${pd.stars \vert{}\vert{} 0}" oninput="updateNested('${player.id}', 'stars', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
+                <input type="number" value="${pd.stars || 0}" oninput="updateNested('${player.id}', 'stars', this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-sm" />
               </div>
             `}
           </div>
@@ -1285,7 +1294,7 @@
             ${REGENWORMEN_TILES.map(tile => {
               const hasTile = !!rw.tiles?.[tile.t];
               return `
-                <button onclick="toggleRegenwormTile('${player.id}',${tile.t})" class="py-1.5 rounded-xl border text-center transition ${hasTile ? 'bg-amber-500 border-amber-300 text-slate-950 font-extrabold shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+                <button type="button" onclick="toggleRegenwormTile('${player.id}',${tile.t})" class="py-1.5 rounded-xl border text-center transition ${hasTile ? 'bg-amber-500 border-amber-300 text-slate-950 font-extrabold shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
                   <div class="text-xs font-bold">${tile.t}</div>
                   <div class="text-[10px]">${tile.w}🪱</div>
                 </button>
@@ -1339,7 +1348,7 @@
               </div>
             `).join('')}
           </div>
-          <button onclick="addRound()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow">
+          <button type="button" onclick="addRound()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition shadow">
             + Ronde Toevoegen
           </button>
           <div class="overflow-x-auto">
@@ -1355,7 +1364,7 @@
                 ${(gs.rounds || []).map((r, idx) => `
                   <tr class="border-t border-slate-800/80 text-center text-sm">
                     <td class="py-2 text-xs text-slate-400 font-bold">#${idx + 1}</td>${activePlayers.map(p => `<td class="py-2 font-semibold">${r[p.id] ?? 0}</td>`).join('')}
-                    <td class="py-2"><button onclick="deleteRound(${idx})" class="text-xs text-rose-400">✕</button></td>
+                    <td class="py-2"><button type="button" onclick="deleteRound(${idx})" class="text-xs text-rose-400">✕</button></td>
                   </tr>
                 `).join('') || `<tr><td colspan="${activePlayers.length + 2}" class="py-6 text-center text-xs text-slate-500">Nog geen rondes gespeeld.</td></tr>`}
               </tbody>
@@ -1400,9 +1409,9 @@
               <div class="${r.bg} rounded-xl p-2.5 text-white flex flex-col justify-between">
                 <div class="flex justify-between items-center text-xs font-bold"><span>${r.label}</span><span>${QWIXX_TABLE[q[r.key]] || 0} pnt</span></div>
                 <div class="flex items-center justify-between mt-2">
-                  <button onclick="stepSubObj('${player.id}','qwixx','${r.key}',-1,0,12)" class="w-7 h-7 rounded-lg bg-black/30 font-bold">-</button>
+                  <button type="button" onclick="stepSubObj('${player.id}','qwixx','${r.key}',-1,0,12)" class="w-7 h-7 rounded-lg bg-black/30 font-bold">-</button>
                   <span class="font-extrabold text-sm">${q[r.key]} ✖</span>
-                  <button onclick="stepSubObj('${player.id}','qwixx','${r.key}',1,0,12)" class="w-7 h-7 rounded-lg bg-black/30 font-bold">+</button>
+                  <button type="button" onclick="stepSubObj('${player.id}','qwixx','${r.key}',1,0,12)" class="w-7 h-7 rounded-lg bg-black/30 font-bold">+</button>
                 </div>
               </div>
             `).join('')}
@@ -1410,9 +1419,9 @@
           <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
             <span class="text-xs text-slate-300 font-semibold">❌ Mislukte worpen (-5 pnt per stuk, max 4):</span>
             <div class="flex items-center gap-2">
-              <button onclick="stepSubObj('${player.id}','qwixx','fails',-1,0,4)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">-</button>
+              <button type="button" onclick="stepSubObj('${player.id}','qwixx','fails',-1,0,4)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">-</button>
               <span class="font-extrabold text-sm w-6 text-center">${q.fails || 0}</span>
-              <button onclick="stepSubObj('${player.id}','qwixx','fails',1,0,4)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">+</button>
+              <button type="button" onclick="stepSubObj('${player.id}','qwixx','fails',1,0,4)" class="w-7 h-7 rounded-lg bg-slate-800 font-bold">+</button>
             </div>
           </div>
         </div>
@@ -1485,7 +1494,7 @@
           <div class="flex justify-between items-center">${playerHeaderBadge(player)}<span class="text-lg font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span></div>
           <div class="flex flex-wrap gap-1.5">
             ${[-5, -1, +1, +2, +3, +5, +6, +10].map(delta => `
-              <button onclick="addLiveScore('${player.id}',${delta})" class="flex-1 min-w-[48px] py-2 rounded-xl font-bold text-xs ${delta > 0 ? 'bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/30' : 'bg-rose-600/20 text-rose-300 border border-rose-500/30'}">
+              <button type="button" onclick="addLiveScore('${player.id}',${delta})" class="flex-1 min-w-[48px] py-2 rounded-xl font-bold text-xs ${delta > 0 ? 'bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-200 border border-indigo-500/30' : 'bg-rose-600/20 text-rose-300 border border-rose-500/30'}">
                 ${delta > 0 ? '+' + delta : delta}
               </button>
             `).join('')}
@@ -1541,11 +1550,11 @@
           <div class="flex justify-between items-center">${playerHeaderBadge(player)}<span class="text-sm font-extrabold text-indigo-300">${calculatePlayerTotal(def.id, player.id)} pnt</span></div>
           <div class="flex flex-wrap gap-1.5">
             ${routeButtons.map(rb => `
-              <button onclick="stepSubObj('${player.id}','ttr','routes',${rb.pts},0,999)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">
+              <button type="button" onclick="stepSubObj('${player.id}','ttr','routes',${rb.pts},0,999)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold">
                 🚂 Lengte ${rb.len} (+${rb.pts})
               </button>
             `).join('')}
-            <button onclick="toggleTtrLongest('${player.id}')" class="px-2.5 py-1.5 rounded-xl text-xs font-bold border ${t.longest ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+            <button type="button" onclick="toggleTtrLongest('${player.id}')" class="px-2.5 py-1.5 rounded-xl text-xs font-bold border ${t.longest ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}">
               🏆 Langste Route (+10)
             </button>
           </div>
@@ -1625,10 +1634,10 @@
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-2">
           <div class="flex items-center gap-3 flex-1 min-w-0">
             <input type="checkbox" ${p.active ? 'checked' : ''} onchange="togglePlayerActive('${p.id}')" class="w-4 h-4 accent-indigo-600 rounded shrink-0" />
-            <button onclick="cyclePlayerColor('${p.id}')" title="Tik om van spelerskleur te wisselen" class="w-6 h-6 rounded-full border-2 border-white/30 shrink-0 transition transform active:scale-90" style="background:${p.color || '#3b82f6'}"></button>
+            <button type="button" onclick="cyclePlayerColor('${p.id}')" title="Tik om van spelerskleur te wisselen" class="w-6 h-6 rounded-full border-2 border-white/30 shrink-0 transition transform active:scale-90" style="background:${p.color || '#3b82f6'}"></button>
             <input type="text" value="${p.name}" onchange="renamePlayer('${p.id}', this.value)" class="bg-transparent font-bold text-sm text-white focus:outline-none border-b border-transparent focus:border-indigo-500 truncate w-full" />
           </div>
-          <button onclick="removePlayer('${p.id}')" class="text-xs text-rose-400 hover:text-rose-300 shrink-0">Verwijder</button>
+          <button type="button" onclick="removePlayer('${p.id}')" class="text-xs text-rose-400 hover:text-rose-300 shrink-0">Verwijder</button>
         </div>
       `).join('');
     }
@@ -1758,7 +1767,7 @@
       });
       saveState();
       switchMainView('history');
-      showToast('🏆 Eindstand opgeslagen in Historie & Hall of Fame!');
+      showToast('🏆 Eindstand opgeslagen in Stats & Hall of Fame!');
     }
 
     // =========================================================================
@@ -1768,10 +1777,9 @@
       const hList = state.history || [];
       document.getElementById('totalGamesPlayedBadge').textContent = `${hList.length} potjes`;
 
-      // Compute Hall of Fame
       const hofBox = document.getElementById('hallOfFameContainer');
       if (!hList.length) {
-        hofBox.innerHTML = `<p class="col-span-full text-xs text-slate-500 py-3 text-center">Sla een gespeeld potje op om de Eeuwige Ranglijst te activeren.</p>`;
+        hofBox.innerHTML = '<p class="col-span-full text-xs text-slate-500 py-3 text-center">Sla een gespeeld potje op om de Eeuwige Ranglijst te activeren.</p>';
       } else {
         const stats = {};
         const gameCounts = {};
@@ -1794,7 +1802,7 @@
               <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
                 ${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '🏅'} ${p.name}
               </div>
-              <div class="text-[11px] text-slate-400 mt-0.5">${p.played} gespeeld • Hoogste: ${p.bestScore} pnt</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">${p.played} gespeeld • Beste: ${p.bestScore} pnt</div>
             </div>
             <div class="text-right">
               <span class="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 font-extrabold text-xs">👑 ${p.wins}× winst</span>
@@ -1810,7 +1818,7 @@
 
       const container = document.getElementById('historyListContainer');
       if (!hList.length) {
-        container.innerHTML = `<p class="text-xs text-slate-500 py-6 text-center">Nog geen opgeslagen potjes.</p>`;
+        container.innerHTML = '<p class="text-xs text-slate-500 py-6 text-center">Nog geen opgeslagen potjes.</p>';
         return;
       }
       container.innerHTML = hList.map(h => `
@@ -1819,7 +1827,7 @@
             <span class="font-bold text-white">${h.gameName}</span>
             <div class="flex items-center gap-2">
               <span class="text-slate-500">${h.date}</span>
-              <button onclick="shareHistoryItem(${h.id})" class="px-2 py-0.5 rounded bg-green-600/20 text-green-300 font-bold text-[11px]">💬 Deel</button>
+              <button type="button" onclick="shareHistoryItem(${h.id})" class="px-2 py-0.5 rounded bg-green-600/20 text-green-300 font-bold text-[11px]">💬 Deel</button>
             </div>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -1841,8 +1849,10 @@
     }
 
     // INIT
-    loadState();
-    renderGamePicker();
+    window.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      renderGamePicker();
+    });
   </script>
 </body>
 </html>
