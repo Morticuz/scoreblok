@@ -314,7 +314,6 @@
               <option value="medium">⏳ Middel (20-45m)</option>
               <option value="long">🏰 Lang (45m+)</option>
             </select>
-            <button type="button" onclick="surpriseMeGame()" title="Kies willekeurig een passend spel!" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs whitespace-nowrap transition active:scale-95">🎲 Verras!</button>
           </div>
         </div>
       </div>
@@ -1076,7 +1075,7 @@
       return (base * mult) + (exp.bonus8 ? 20 : 0);
     }
 
-        function calculatePlayerTotal(gameId, playerId) {
+    function calculatePlayerTotal(gameId, playerId) {
       const def = getGameDef(gameId);
       const gs = ensureGameState(gameId);
       const pd = gs.playerData[playerId];
