@@ -3,77 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Scoreblok Pro</title>
+  <title>Scoreblok</title>
   <meta name="theme-color" content="#020617" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Scoreblok" />
 
-  <!-- Standaard SVG voor browser-tabblad -->
-  <link id="dynamicFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%234f46e5'/%3E%3Crect x='96' y='96' width='320' height='320' rx='64' fill='none' stroke='%23ffffff' stroke-width='20'/%3E%3Ccircle cx='176' cy='176' r='36' fill='%23ffffff'/%3E%3Ccircle cx='336' cy='176' r='36' fill='%23ffffff'/%3E%3Ccircle cx='256' cy='256' r='36' fill='%23ffffff'/%3E%3Ccircle cx='176' cy='336' r='36' fill='%23ffffff'/%3E%3Ccircle cx='336' cy='336' r='36' fill='%23ffffff'/%3E%3C/svg%3E">
-  <link id="dynamicAppleIcon" rel="apple-touch-icon" href="" />
-  <link id="dynamicManifest" rel="manifest" href="" />
-
-  <!-- Script dat direct een ECHTE 512x512 PNG genereert voor Android & iOS startscherm -->
-  <script>
-    (function() {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
-        const ctx = canvas.getContext('2d');
-
-        // 1. Indigo-blauwe achtergrond met afgeronde hoeken
-        const grad = ctx.createLinearGradient(0, 0, 512, 512);
-        grad.addColorStop(0, '#4f46e5');
-        grad.addColorStop(1, '#1e1b4b');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.roundRect(0, 0, 512, 512, 110);
-        ctx.fill();
-
-        // 2. Dobbelsteen kader
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.lineWidth = 20;
-        ctx.beginPath();
-        ctx.roundRect(96, 96, 320, 320, 64);
-        ctx.fill();
-        ctx.stroke();
-
-        // 3. Vijf witte dobbelsteen-ogen
-        ctx.fillStyle = '#ffffff';
-        [[176, 176], [336, 176], [256, 256], [176, 336], [336, 336]].forEach(([x, y]) => {
-          ctx.beginPath();
-          ctx.arc(x, y, 34, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
-        // Zet om naar echte PNG Data-URL
-        const pngUrl = canvas.toDataURL('image/png');
-        document.getElementById('dynamicAppleIcon').href = pngUrl;
-        document.getElementById('dynamicFavicon').type = 'image/png';
-        document.getElementById('dynamicFavicon').href = pngUrl;
-
-        // Bouw Web App Manifest met PNG voor Android
-        const manifest = {
-          name: "Scoreblok Pro",
-          short_name: "Scoreblok",
-          start_url: window.location.href,
-          display: "standalone",
-          background_color: "#020617",
-          theme_color: "#4f46e5",
-          icons: [
-            { src: pngUrl, sizes: "192x192", type: "image/png", purpose: "any maskable" },
-            { src: pngUrl, sizes: "512x512", type: "image/png", purpose: "any maskable" }
-          ]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-        document.getElementById('dynamicManifest').href = URL.createObjectURL(manifestBlob);
-      } catch (e) {
-        console.error('Icoon generatie fout:', e);
-      }
-    })();
-  </script>
+  <!-- Directe verwijzingen naar je eigen bestanden op GitHub -->
+  <link rel="icon" type="image/png" href="./icon.png" />
+  <link rel="apple-touch-icon" href="./icon.png" />
+  <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Scoreblok%22%2C%22short_name%22%3A%22Scoreblok%22%2C%22start_url%22%3A%22.%2Findex.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23020617%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fmorticuz.github.io%2Fscoreblok%2Ficon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D' />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -83,15 +21,32 @@
       color: #f8fafc;
       overscroll-behavior-y: contain;
     }
+    /* Azul 5x5 Muur Kleuren & Tegel-stijlen */
     .azul-blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); border-color: #93c5fd; }
     .azul-yellow { background: linear-gradient(135deg, #eab308, #ca8a04); border-color: #fef08a; }
     .azul-red { background: linear-gradient(135deg, #dc2626, #b91c1c); border-color: #fca5a5; }
     .azul-black { background: linear-gradient(135deg, #1e293b, #0f172a); border-color: #64748b; }
     .azul-teal { background: linear-gradient(135deg, #0d9488, #0f766e); border-color: #99f6e4; }
-    .azul-tile { opacity: 0.25; transform: scale(0.92); transition: all 0.15s ease; }
-    .azul-tile.locked { opacity: 1; transform: scale(1); border-width: 2px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45); }
-    .azul-tile.pending { opacity: 0.88; transform: scale(0.98); outline: 3px dashed #38bdf8; }
-    .sm\:grid-cols-15 { grid-template-columns: repeat(15, minmax(0, 1fr)); }
+
+    .azul-tile {
+      opacity: 0.25;
+      transform: scale(0.92);
+      transition: all 0.15s ease;
+    }
+    .azul-tile.locked {
+      opacity: 1;
+      transform: scale(1);
+      border-width: 2px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    }
+    .azul-tile.pending {
+      opacity: 0.88;
+      transform: scale(0.98);
+      outline: 3px dashed #38bdf8;
+    }
+    .sm\:grid-cols-15 {
+      grid-template-columns: repeat(15, minmax(0, 1fr));
+    }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
@@ -106,18 +61,10 @@
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">      
       <div class="flex items-center justify-between">        
         <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainView('picker')">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-slate-900 flex items-center justify-center shadow-lg shadow-indigo-600/30 border border-indigo-500/40 p-1.5">
-            <svg viewBox="0 0 512 512" class="w-full h-full">
-              <rect x="64" y="64" width="384" height="384" rx="64" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-width="24"/>
-              <circle cx="160" cy="160" r="40" fill="#ffffff"/>
-              <circle cx="352" cy="160" r="40" fill="#ffffff"/>
-              <circle cx="256" cy="256" r="40" fill="#ffffff"/>
-              <circle cx="160" cy="352" r="40" fill="#ffffff"/>
-              <circle cx="352" cy="352" r="40" fill="#ffffff"/>
-            </svg>
-          </div>
+          <!-- Nieuw professioneel logo linksboven -->
+          <img src="./icon.png" alt="Scoreblok" class="w-10 h-10 rounded-2xl shadow-lg shadow-indigo-600/30 border border-indigo-500/40 object-cover" />
           <div>
-            <h1 class="font-black text-lg tracking-tight text-white">Scoreblok <span class="text-indigo-400">Pro</span></h1>
+            <h1 class="font-black text-lg tracking-tight text-white">Scoreblok</h1>
             <p id="headerSubtitle" class="text-xs text-slate-400">Kies een spel of beheer je favorieten</p>
           </div>
         </div>
@@ -257,7 +204,7 @@
       <!-- Uitleg: Opslaan als App op je Beginscherm -->
       <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-4 space-y-3">
         <h3 class="font-bold text-sm text-indigo-300 flex items-center gap-2">
-          <span>📱 Scoreblok Pro installeren als App</span>
+          <span>📱 Scoreblok installeren als App</span>
         </h3>
         <p class="text-xs text-slate-300">Zet de app op je beginscherm zodat hij opent zonder web-adresbalk en altijd snel bereikbaar is:</p>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
@@ -1769,7 +1716,7 @@
       renderScoreboard();
     }
 
-    // =========================================================================
+        // =========================================================================
     // 10E. REGENWORMEN (INCL. DEEL 2: STENEN 11 & 13 + RAAF)
     // =========================================================================
     function renderRegenwormenSheet(container) {
@@ -1806,7 +1753,7 @@
                 const on = !!(r.tiles && r.tiles[item.t]);
                 const takenByOther = !on && owners[item.t];
                 return `
-                  <button type="button" onclick="toggleRegenwormenTile('${p.id}', ${item.t})"
+                  <button type="button" onclick="toggleRegenwormenTile('${p.id}',${item.t})"
                     class="p-1.5 rounded-xl border text-center transition ${on ? 'bg-amber-500 text-slate-950 border-amber-300 font-extrabold shadow' : (takenByOther ? 'bg-slate-950/40 border-slate-900 text-slate-600 line-through' : (item.special ? 'bg-indigo-950/60 border-indigo-500/50 text-indigo-200' : 'bg-slate-950 border-slate-800 text-slate-300'))}">
                     <div class="text-xs font-bold">${item.t}</div>
                     <div class="text-[10px]">${'🐛'.repeat(item.w)}</div>
@@ -1817,7 +1764,7 @@
             ${expOn ? `
               <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
                 <span class="text-slate-300 font-semibold">Extra bonuswormen:</span>
-                <input type="number" value="${r.bonus || 0}" oninput="setRegenwormenBonus('${p.id}', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-amber-300" />
+                <input type="number" value="${r.bonus \vert{}\vert{} 0}" oninput="setRegenwormenBonus('${p.id}', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-amber-300" />
               </div>` : ''}
           </div>`;
       }).join('');
@@ -1876,7 +1823,7 @@
               ${cats.map(cat => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
                   <label class="block text-[11px] font-bold text-slate-300 truncate">${cat}</label>
-                  <input type="number" value="${cMap[cat] || 0}" oninput="setCategoryVal('${def.id}','${p.id}','${cat.replace(/'/g, "\\'")}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white" />
+                  <input type="number" value="${cMap[cat] \vert{}\vert{} 0}" oninput="setCategoryVal('${def.id}','${p.id}','${cat.replace(/'/g, "\\'")}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white" />
                 </div>`).join('')}
             </div>
           </div>`;
@@ -2310,7 +2257,7 @@
               <div class="flex gap-1">
                 ${[1,2,3,4,5,6].map(pos => {
                   const pts = podiumPts[pos - 1];
-                  return `<button type="button" onclick="setHeatFinish('${p.id}', ${pos}, ${pts})" class="px-2.5 py-1.5 rounded-xl text-xs font-extrabold border ${h.pts === pts ? 'bg-red-600 border-red-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-400'}">P${pos}</button>`;
+                  return `<button type="button" onclick="setHeatFinish('${p.id}', ${pos},${pts})" class="px-2.5 py-1.5 rounded-xl text-xs font-extrabold border ${h.pts === pts ? 'bg-red-600 border-red-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-400'}">P${pos}</button>`;
                 }).join('')}
               </div>
               <input type="number" value="${h.pts || 0}" oninput="setHeatPts('${p.id}', this.value)" class="w-16 bg-slate-950 border border-slate-800 rounded-xl py-1.5 text-center font-black text-sm text-red-400" />
@@ -2355,7 +2302,7 @@
             ${fields.map(f => `
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
                 <label class="block text-[11px] font-bold text-slate-300 truncate">${f.l}</label>
-                <input type="number" value="${d[f.k] || 0}" oninput="setDorfVal('${f.k}', this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white" />
+                <input type="number" value="${d[f.k] \vert{}\vert{} 0}" oninput="setDorfVal('${f.k}', this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white" />
               </div>`).join('')}
           </div>
         </div>`;
@@ -2471,7 +2418,6 @@
       renderScoreboard();
     }
 
-    // CARCASSONNE
     function renderCarcassonneSheet(container, def) {
       const gs = ensureGameState(def.id);
       const isCarc = def.id === 'carcassonne';
@@ -2955,7 +2901,7 @@
       const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
       const dl = document.createElement('a');
       dl.setAttribute('href', dataStr);
-      dl.setAttribute('download', `scoreblok-pro-backup-${new Date().toISOString().slice(0, 10)}.json`);
+      dl.setAttribute('download', `scoreblok-backup-${new Date().toISOString().slice(0, 10)}.json`);
       document.body.appendChild(dl);
       dl.click();
       dl.remove();
