@@ -1442,7 +1442,7 @@
                   <div class="text-xs font-bold text-rose-400">★ Open (-2)</div>
                   <div class="text-[10px] text-slate-400">Niet aangekruist</div>
                 </div>
-                <input type="number" value="${pd.stars \vert{}\vert{} 0}" oninput="updateKokField('${p.id}','stars',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
+                <input type="number" value="${pd.stars || 0}" oninput="updateKokField('${p.id}','stars',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
               </div>
               ` : `
               <div class="bg-slate-950 border border-rose-500/40 rounded-xl p-2.5 flex items-center justify-between">
@@ -1450,7 +1450,7 @@
                   <div class="text-xs font-bold text-rose-400">❤️ Hartjes-bonus</div>
                   <div class="text-[10px] text-slate-400">Behaalde punten</div>
                 </div>
-                <input type="number" value="${pd.heartBonus \vert{}\vert{} 0}" oninput="updateKokField('${p.id}','heartBonus',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
+                <input type="number" value="${pd.heartBonus || 0}" oninput="updateKokField('${p.id}','heartBonus',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
               </div>
 
               <div class="bg-slate-950 border border-indigo-500/40 rounded-xl p-2.5 flex items-center justify-between">
@@ -1458,7 +1458,7 @@
                   <div class="text-xs font-bold text-indigo-300">📏 Bonusrij</div>
                   <div class="text-[10px] text-slate-400">Behaalde punten</div>
                 </div>
-                <input type="number" value="${pd.bonusRow \vert{}\vert{} 0}" oninput="updateKokField('${p.id}','bonusRow',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
+                <input type="number" value="${pd.bonusRow || 0}" oninput="updateKokField('${p.id}','bonusRow',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
               </div>
 
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
@@ -1466,7 +1466,7 @@
                   <div class="text-xs font-bold text-amber-300">⭐ Extra / Straf</div>
                   <div class="text-[10px] text-slate-400">Losse aanpassing</div>
                 </div>
-                <input type="number" value="${pd.stars \vert{}\vert{} 0}" oninput="updateKokField('${p.id}','stars',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
+                <input type="number" value="${pd.stars || 0}" oninput="updateKokField('${p.id}','stars',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
               </div>
               `}
             </div>
@@ -2493,7 +2493,6 @@
             </div>
             <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
               ${btns.map(b => `
-                <button type="
                                 <button type="button" onclick="addLivePoints('${p.id}',${b})" class="py-2 rounded-xl font-extrabold text-xs transition active:scale-95 ${b < 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30'}">${b > 0 ? '+' + b : b}</button>
               `).join('')}
             </div>
