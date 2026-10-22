@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Scoreblok" />
 
-  <!-- Directe verwijzingen naar je eigen bestanden op GitHub -->
+  <!-- Directe koppeling naar je app-icoon -->
   <link rel="icon" type="image/png" href="./icon.png" />
   <link rel="apple-touch-icon" href="./icon.png" />
   <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Scoreblok%22%2C%22short_name%22%3A%22Scoreblok%22%2C%22start_url%22%3A%22.%2Findex.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23020617%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fmorticuz.github.io%2Fscoreblok%2Ficon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D' />
@@ -21,36 +21,49 @@
       color: #f8fafc;
       overscroll-behavior-y: contain;
     }
-    /* Azul 5x5 Muur Kleuren & Tegel-stijlen */
     .azul-blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); border-color: #93c5fd; }
     .azul-yellow { background: linear-gradient(135deg, #eab308, #ca8a04); border-color: #fef08a; }
     .azul-red { background: linear-gradient(135deg, #dc2626, #b91c1c); border-color: #fca5a5; }
     .azul-black { background: linear-gradient(135deg, #1e293b, #0f172a); border-color: #64748b; }
     .azul-teal { background: linear-gradient(135deg, #0d9488, #0f766e); border-color: #99f6e4; }
-
-    .azul-tile {
-      opacity: 0.25;
-      transform: scale(0.92);
-      transition: all 0.15s ease;
-    }
-    .azul-tile.locked {
-      opacity: 1;
-      transform: scale(1);
-      border-width: 2px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
-    }
-    .azul-tile.pending {
-      opacity: 0.88;
-      transform: scale(0.98);
-      outline: 3px dashed #38bdf8;
-    }
-    .sm\:grid-cols-15 {
-      grid-template-columns: repeat(15, minmax(0, 1fr));
-    }
+    .azul-tile { opacity: 0.25; transform: scale(0.92); transition: all 0.15s ease; }
+    .azul-tile.locked { opacity: 1; transform: scale(1); border-width: 2px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45); }
+    .azul-tile.pending { opacity: 0.88; transform: scale(0.98); outline: 3px dashed #38bdf8; }
+    .sm\:grid-cols-15 { grid-template-columns: repeat(15, minmax(0, 1fr)); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
+
+<body class="min-h-screen pb-16">  
+  <!-- Toast Melding -->  
+  <div id="toastBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-indigo-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-2xl border border-indigo-400/40"></div>   
+  
+  <!-- Top Header -->  
+  <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3">    
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">      
+      <div class="flex items-center justify-between">        
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainView('picker')">
+          <!-- Perfect hersteld logo linksboven -->
+          <img src="./icon.png" alt="Scoreblok" class="w-10 h-10 rounded-2xl shadow-lg shadow-indigo-600/30 border border-indigo-500/40 object-cover" />
+          <div>
+            <h1 class="font-black text-lg tracking-tight text-white">Scoreblok</h1>
+            <p id="headerSubtitle" class="text-xs text-slate-400">Kies een spel of beheer je favorieten</p>
+          </div>
+        </div>
+        <button type="button" onclick="openStartPlayerModal()" class="sm:hidden px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">
+          🎲 Wie begint?
+        </button>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <button type="button" id="navBtnPicker" onclick="switchMainView('picker')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center">🎮 Spellen</button>
+        <button type="button" id="navBtnPlayers" onclick="switchMainView('players')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">👥 Spelers (<span id="activePlayerCntLabel">4</span>)</button>
+        <button type="button" id="navBtnHistory" onclick="switchMainView('history')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">🏆 Statistieken</button>
+        <button type="button" onclick="openStartPlayerModal()" class="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-extrabold transition">🎲 Wie begint?</button>
+      </div>
+    </div>
+  </header>
 
 <body class="min-h-screen pb-16">  
   <!-- Toast Melding -->  
