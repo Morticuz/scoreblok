@@ -44,38 +44,8 @@
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">      
       <div class="flex items-center justify-between">        
         <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainView('picker')">
-          <!-- Perfect hersteld logo linksboven -->
-          <img src="./icon.png" alt="Scoreblok" class="w-10 h-10 rounded-2xl shadow-lg shadow-indigo-600/30 border border-indigo-500/40 object-cover" />
-          <div>
-            <h1 class="font-black text-lg tracking-tight text-white">Scoreblok</h1>
-            <p id="headerSubtitle" class="text-xs text-slate-400">Kies een spel of beheer je favorieten</p>
-          </div>
-        </div>
-        <button type="button" onclick="openStartPlayerModal()" class="sm:hidden px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">
-          🎲 Wie begint?
-        </button>
-      </div>
-
-      <div class="flex items-center gap-1.5">
-        <button type="button" id="navBtnPicker" onclick="switchMainView('picker')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center">🎮 Spellen</button>
-        <button type="button" id="navBtnPlayers" onclick="switchMainView('players')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">👥 Spelers (<span id="activePlayerCntLabel">4</span>)</button>
-        <button type="button" id="navBtnHistory" onclick="switchMainView('history')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">🏆 Statistieken</button>
-        <button type="button" onclick="openStartPlayerModal()" class="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-extrabold transition">🎲 Wie begint?</button>
-      </div>
-    </div>
-  </header>
-
-<body class="min-h-screen pb-16">  
-  <!-- Toast Melding -->  
-  <div id="toastBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-indigo-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-2xl border border-indigo-400/40"></div>   
-  
-  <!-- Top Header -->  
-  <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3">    
-    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">      
-      <div class="flex items-center justify-between">        
-        <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainView('picker')">
-          <!-- Nieuw professioneel logo linksboven -->
-          <img src="./icon.png" alt="Scoreblok" class="w-10 h-10 rounded-2xl shadow-lg shadow-indigo-600/30 border border-indigo-500/40 object-cover" />
+          <!-- Strak en volledig logo -->
+          <img src="./icon.png" alt="Scoreblok" class="w-11 h-11 rounded-xl shadow-lg shadow-indigo-600/30 border border-indigo-500/40 bg-slate-900" />
           <div>
             <h1 class="font-black text-lg tracking-tight text-white">Scoreblok</h1>
             <p id="headerSubtitle" class="text-xs text-slate-400">Kies een spel of beheer je favorieten</p>
