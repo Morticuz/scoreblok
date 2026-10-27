@@ -9,9 +9,9 @@
   <meta name="apple-mobile-web-app-title" content="Scoreblok" />
 
   <!-- Directe verwijzingen naar je eigen bestanden op GitHub -->
-  <link rel="icon" type="image/png" href="./icon.png" />
-  <link rel="apple-touch-icon" href="./icon.png" />
-  <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Scoreblok%22%2C%22short_name%22%3A%22Scoreblok%22%2C%22start_url%22%3A%22.%2Findex.html%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%23020617%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fmorticuz.github.io%2Fscoreblok%2Ficon.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D' />
+  <link rel="icon" type="image/png" href="./icon.png?v=3" />
+  <link rel="apple-touch-icon" href="./icon.png?v=3" />
+  <link rel="manifest" href="./manifest.json?v=3" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -27,38 +27,38 @@
     .azul-black { background: linear-gradient(135deg, #1e293b, #0f172a); border-color: #64748b; }
     .azul-teal { background: linear-gradient(135deg, #0d9488, #0f766e); border-color: #99f6e4; }
 
-    .azul-tile {
-      opacity: 0.25;
-      transform: scale(0.92);
-      transition: all 0.15s ease;
-    }
-    .azul-tile.locked {
-      opacity: 1;
-      transform: scale(1);
-      border-width: 2px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
-    }
-    .azul-tile.pending {
-      opacity: 0.88;
-      transform: scale(0.98);
-      outline: 3px dashed #38bdf8;
-    }
-    .sm\:grid-cols-15 {
-      grid-template-columns: repeat(15, minmax(0, 1fr));
-    }
+    .azul-tile { opacity: 0.25; transform: scale(0.92); transition: all 0.15s ease; }
+    .azul-tile.locked { opacity: 1; transform: scale(1); border-width: 2px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45); }
+    .azul-tile.pending { opacity: 0.88; transform: scale(0.98); outline: 3px dashed #38bdf8; }
+    .sm\:grid-cols-15 { grid-template-columns: repeat(15, minmax(0, 1fr)); }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    .confetti-piece {
+      position: fixed;
+      top: -10px;
+      z-index: 60;
+      pointer-events: none;
+      animation: confettiFall 2.8s ease-out forwards;
+    }
   </style>
 </head>
 
-<body class="min-h-screen pb-16">  
-  <!-- Toast Melding -->  
-  <div id="toastBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-indigo-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-2xl border border-indigo-400/40"></div>   
-  
-  <!-- Top Header -->  
-  <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3">    
-    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">      
-      <div class="flex items-center justify-between">        
+<body class="min-h-screen pb-16">
+  <!-- Confetti Container -->
+  <div id="confettiContainer"></div>
+
+  <!-- Toast Melding -->
+  <div id="toastBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-indigo-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-2xl border border-indigo-400/40"></div>
+
+  <!-- Top Header -->
+  <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center justify-between">
         <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainView('picker')">
           <img src="./icon.png" alt="Scoreblok" class="w-11 h-11 rounded-xl shadow-lg shadow-indigo-600/30 border border-indigo-500/40 bg-slate-900 object-cover" />
           <div>
@@ -112,7 +112,8 @@
               <option value="medium">🎲 Middel (30-60m)</option>
               <option value="long">🏰 Lang (60m+)</option>
             </select>
-            <button type="button" onclick="openCustomGameModal()" class="col-span-full sm:col-auto px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 text-xs font-extrabold whitespace-nowrap">+ Eigen Spel</button>
+            <button type="button" onclick="openQuickWinModal()" class="col-span-1 sm:col-auto px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-extrabold whitespace-nowrap">⚡ Snel Winnaar</button>
+            <button type="button" onclick="openCustomGameModal()" class="col-span-1 sm:col-auto px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 text-xs font-extrabold whitespace-nowrap">+ Eigen Spel</button>
           </div>
         </div>
 
@@ -143,19 +144,25 @@
           <button type="button" onclick="switchMainView('picker')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">← Spellen</button>
           <div id="activeGameIcon" class="w-10 h-10 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center"></div>
           <div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
               <h2 id="activeGameTitle" class="font-black text-base text-white">Spelnaam</h2>
               <button type="button" id="activeGameFavBtn" onclick="toggleFavoriteCurrent()" class="text-base leading-none">☆</button>
+              <span id="wakeLockBadge" onclick="toggleWakeLockManual()" class="cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold">📱 Scherm blijft aan</span>
             </div>
             <p id="activeGameRuleInfo" class="text-[11px] text-slate-400"></p>
           </div>
         </div>
-        <div class="flex items-center gap-2 ml-auto">
-          <button type="button" onclick="switchMainView('players')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold" title="Wijzig tafelvolgorde">🪑 Tafelvolgorde</button>
+        <div class="flex flex-wrap items-center gap-1.5 ml-auto">
+          <button type="button" id="undoActionBtn" onclick="undoLastScoreAction()" disabled class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-35 text-amber-300 text-xs font-extrabold transition" title="Maak laatste actie ongedaan">↩️ Oeps</button>
+          <button type="button" onclick="switchMainView('players')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold" title="Wijzig tafelvolgorde">🪑 Tafel</button>
           <button type="button" onclick="resetCurrentGameConfirm()" class="px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold">🧹 Reset</button>
-          <button type="button" onclick="saveFinishedMatch()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-lg shadow-emerald-600/20">💾 Potje Opslaan</button>
+          <button type="button" onclick="openQuickWinModal(state.activeGameId)" class="px-3 py-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-extrabold">👑 Winnaar</button>
+          <button type="button" onclick="openPodiumModal()" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-lg shadow-emerald-600/20">💾 Opslaan</button>
         </div>
       </div>
+
+      <!-- Eindspel / Laatste Ronde Melding Balk -->
+      <div id="endgameAlertBanner" class="hidden bg-amber-500/15 border border-amber-500/40 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-200"></div>
 
       <div id="expansionsBar" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center gap-2"></div>
       <div id="starterTrackerBar" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs"></div>
@@ -163,8 +170,20 @@
       <div id="gameSheetContainer" class="space-y-4"></div>
     </section>
 
-    <!-- VIEW 3: SPELERS & TAFELVOLGORDE -->
+    <!-- VIEW 3: SPELERS, GROEPEN & TAFELVOLGORDE -->
     <section id="viewPlayers" class="hidden space-y-4">
+      <!-- Spelersgroepen (Presets) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h2 class="font-black text-sm text-white">⚡ Snelkoppelingen Spelersgroepen</h2>
+            <p class="text-xs text-slate-400">Activeer met één tik precies wie er nu meespelen.</p>
+          </div>
+          <button type="button" onclick="saveCurrentGroupPreset()" class="px-3 py-1.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 text-xs font-extrabold">+ Huidige selectie opslaan als groep</button>
+        </div>
+        <div id="playerPresetsBar" class="flex flex-wrap gap-2"></div>
+      </div>
+
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-2">
           <div>
@@ -198,41 +217,15 @@
           </label>
         </div>
       </div>
-
-      <!-- Uitleg: Opslaan als App op je Beginscherm -->
-      <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-4 space-y-3">
-        <h3 class="font-bold text-sm text-indigo-300 flex items-center gap-2">
-          <span>📱 Scoreblok installeren als App</span>
-        </h3>
-        <p class="text-xs text-slate-300">Zet de app op je beginscherm zodat hij opent zonder web-adresbalk en altijd snel bereikbaar is:</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
-            <div class="font-bold text-white">🍎 iPhone / iPad (Safari)</div>
-            <ol class="list-decimal list-inside text-slate-400 space-y-1">
-              Open de pagina in Safari.<br>
-              Tik onderin op het <b>Deel-icoon</b> (vierkant met pijl omhoog).<br>
-              Scroll omlaag en tik op <b>'Zet op beginscherm'</b>.
-            </ol>
-          </div>
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1.5">
-            <div class="font-bold text-white">🤖 Android / Samsung (Chrome)</div>
-            <ol class="list-decimal list-inside text-slate-400 space-y-1">
-              Open de pagina in Chrome.<br>
-              Tik rechtsboven op de <b>drie puntjes</b> (menu).<br>
-              Tik op <b>'Toevoegen aan startscherm'</b> of <b>'App installeren'</b>.
-            </ol>
-          </div>
-        </div>
-      </div>
     </section>
 
-    <!-- VIEW 4: STATISTIEKEN & ERELIJST -->
+    <!-- VIEW 4: STATISTIEKEN, WIN-STREAKS, RIVALS & RECORDS -->
     <section id="viewHistory" class="hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="font-black text-base text-white">🏆 Hall of Fame & Ranglijst</h2>
-            <p class="text-xs text-slate-400">Kies hieronder of je sorteert op <b>Meeste Wins</b> of op <b>Winpercentage (Win %)</b>.</p>
+            <h2 class="font-black text-base text-white">🏆 Hall of Fame & Win-streaks</h2>
+            <p class="text-xs text-slate-400">💡 <b>Tik op een speler</b> voor het onderlinge Rivals-rapport & profiel!</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
             <select id="historyGameFilter" onchange="renderHistoryView()" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200"></select>
@@ -246,9 +239,18 @@
         <div id="hallOfFameList" class="space-y-2"></div>
       </div>
 
+      <!-- ALL-TIME SPELRECORDS -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div>
+          <h3 class="font-black text-sm text-white flex items-center gap-2">🏅 All-Time Spelrecords & Ronderecords</h3>
+          <p class="text-xs text-slate-400">De beste eindscores aller tijden per gespeeld spel.</p>
+        </div>
+        <div id="gameRecordsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
+      </div>
+
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div class="flex items-center justify-between">
-          <h3 class="font-bold text-sm text-white">📜 Gespeelde Potjes</h3>
+          <h3 class="font-bold text-sm text-white">📜 Gespeelde Potjes & Notities</h3>
           <button type="button" onclick="clearAllHistoryConfirm()" class="text-xs font-bold text-rose-400 hover:underline">Wis alles</button>
         </div>
         <div id="historyMatchesList" class="space-y-2"></div>
@@ -314,6 +316,99 @@
     </div>
   </div>
 
+  <!-- MODAL 3: SNEL WINNAAR KIEZEN (ZONDER SCORES) -->
+  <div id="quickWinModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between">
+        <h3 class="font-black text-base text-white flex items-center gap-2">
+          <span>👑</span>
+          <span>Snel Winnaar Opslaan</span>
+        </h3>
+        <button type="button" onclick="closeQuickWinModal()" class="text-slate-400 hover:text-white text-xs font-bold">✕</button>
+      </div>
+      <p class="text-xs text-slate-400">Registreer direct een gespeeld potje voor de statistieken zonder scores in te vullen.</p>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-slate-400 mb-1 font-semibold">1. Welk spel hebben jullie gespeeld?</label>
+          <select id="qwGameSelect" onchange="toggleQwCustomNameInput()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white font-bold focus:outline-none focus:border-indigo-500"></select>
+        </div>
+
+        <div id="qwCustomNameWrap" class="hidden">
+          <label class="block text-slate-400 mb-1 font-semibold">Typ de naam van het spel:</label>
+          <input type="text" id="qwCustomGameInput" placeholder="Bijv. Halli Galli, 30 Seconds, Beverbende..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1.5 font-semibold">2. Wie heeft er gewonnen? <span class="font-normal text-slate-500">(meerdere mogelijk)</span></label>
+          <div id="qwWinnersList" class="grid grid-cols-2 gap-2"></div>
+        </div>
+
+        <div>
+          <label class="block text-slate-400 mb-1 font-semibold">3. Notitie / Herinnering (optioneel):</label>
+          <input type="text" id="qwNoteInput" placeholder="Bijv. Gespeeld op de camping, spannende finale!" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500" />
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeQuickWinModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Annuleer</button>
+        <button type="button" onclick="saveQuickWinMatch()" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-lg shadow-emerald-600/20">🏆 Winnaar Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: PODIUM, CONFETTI & POTJES-NOTITIE BIJ OPSLAAN -->
+  <div id="podiumModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl text-center">
+      <div class="text-3xl">🎉</div>
+      <div>
+        <h3 id="podiumModalTitle" class="font-black text-lg text-white">Eindstand & Podium</h3>
+        <p id="podiumTieBreakNotice" class="text-[11px] text-amber-300 font-bold mt-0.5 hidden"></p>
+      </div>
+
+      <div id="podiumRecordBanner" class="hidden bg-amber-500/20 border border-amber-400 text-amber-200 rounded-xl px-3 py-2 text-xs font-extrabold"></div>
+
+      <div id="podiumStandingsList" class="space-y-2 text-left"></div>
+
+      <div class="text-left space-y-1 pt-1">
+        <label class="block text-xs font-bold text-slate-300">📝 Voeg een herinnering of notitie toe (optioneel):</label>
+        <input type="text" id="matchNoteInput" placeholder="Bijv. Mikai pakte op het nippertje de winst!" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" />
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="closePodiumModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">Terug</button>
+        <button type="button" onclick="confirmSaveFinishedMatch()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-lg shadow-emerald-600/20">🏆 Definitief Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: SPELER PROFIEL & HEAD-TO-HEAD RIVALS -->
+  <div id="playerProfileModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span id="profColorDot" class="w-4 h-4 rounded-full inline-block"></span>
+          <h3 id="profPlayerName" class="font-black text-base text-white">Spelernaam</h3>
+        </div>
+        <button type="button" onclick="closePlayerProfileModal()" class="text-slate-400 hover:text-white text-xs font-bold">✕</button>
+      </div>
+
+      <div id="profSummaryGrid" class="grid grid-cols-3 gap-2 text-center"></div>
+
+      <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 space-y-1 text-xs">
+        <div class="text-slate-400">🎯 Beste / Favoriete spel:</div>
+        <div id="profFavGame" class="font-extrabold text-indigo-300 text-sm">-</div>
+      </div>
+
+      <div class="space-y-2">
+        <h4 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">⚔️ Onderlinge Duels (Head-to-Head)</h4>
+        <div id="profRivalsList" class="space-y-1.5 max-h-56 overflow-y-auto pr-1"></div>
+      </div>
+
+      <button type="button" onclick="closePlayerProfileModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">Sluiten</button>
+    </div>
+  </div>
+
   <script>
     // =========================================================================
     // 1. SVG ICONS & CONSTANTS
@@ -376,7 +471,7 @@
     const KOK_COLS = [
       { id: 'A', pts1: 5, pts2: 3 }, { id: 'B', pts1: 3, pts2: 2 }, { id: 'C', pts1: 3, pts2: 2 },
       { id: 'D', pts1: 3, pts2: 2 }, { id: 'E', pts1: 2, pts2: 1 }, { id: 'F', pts1: 2, pts2: 1 },
-      { id: 'G', pts1: 2, pts2: 1 }, { id: 'H', pts1: 1, pts2: 0 }, { id: 'I', pts1: 2, pts2: 1 },
+      { id: 'G', pts1: 2, pts2: 1 }, { id: 'H', pts1: 2, pts2: 1 }, { id: 'I', pts1: 2, pts2: 1 },
       { id: 'J', pts1: 2, pts2: 1 }, { id: 'K', pts1: 2, pts2: 1 }, { id: 'L', pts1: 3, pts2: 2 },
       { id: 'M', pts1: 3, pts2: 2 }, { id: 'N', pts1: 3, pts2: 2 }, { id: 'O', pts1: 5, pts2: 3 }
     ];
@@ -420,20 +515,20 @@
     // 2. VOLLEDIGE SPELLEN CATALOGUS
     // =========================================================================
     const BUILTIN_GAMES = [
-      { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + vloerlijn óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium' },
-      { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, jokers & sterren', category: 'card', type: 'kok1', icon: 'kok', minP: 1, maxP: 6, dur: 'short' },
-      { id: 'keeropkeer2', name: 'Keer op Keer 2', subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O', category: 'card', type: 'kok2', icon: 'kok2', minP: 1, maxP: 6, dur: 'short' },
-      { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Raaf, 11 & 13)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Raaf + Stenen 11 & 13)'] },
+      { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + vloerlijn óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
+      { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, jokers & sterren', category: 'card', type: 'kok1', icon: 'kok', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
+      { id: 'keeropkeer2', name: 'Keer op Keer 2', subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O', category: 'card', type: 'kok2', icon: 'kok2', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
+      { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Raaf, 11 & 13)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Raaf + Stenen 11 & 13)'], tieBreakerDesc: 'Hoogste tegelnummer in bezit' },
       { id: 'carcassonne', name: 'Carcassonne', subtitle: 'Live teller met uitbreidings-snelknoppen', category: 'board', type: 'carcassonne', icon: 'carcassonne', minP: 2, maxP: 6, dur: 'medium', expansions: ['⛪ Kathedralen & Herbergen', '🍷 Kooplieden & Bouwmeesters'] },
-      { id: 'cascadia', name: 'Cascadia', subtitle: 'Dieren, leefgebieden (+ automatische meerderheid) & appels', category: 'board', type: 'cascadia', icon: 'cascadia', minP: 1, maxP: 4, dur: 'medium' },
-      { id: 'beverbende', name: 'Beverbende', subtitle: 'Rondeteller (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'beverbende', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short' },
+      { id: 'cascadia', name: 'Cascadia', subtitle: 'Dieren, leefgebieden (+ automatische meerderheid) & appels', category: 'board', type: 'cascadia', icon: 'cascadia', minP: 1, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste dennenappels (natuurfiches)' },
+      { id: 'beverbende', name: 'Beverbende', subtitle: 'Rondeteller (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'beverbende', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
       { id: 'rummikub', name: 'Rummikub', subtitle: 'Rondeteller voor gelegde stenen', category: 'board', type: 'rounds', icon: 'rummikub', minP: 2, maxP: 4, dur: 'medium' },
-      { id: 'eldorado', name: 'De Zoektocht naar El Dorado', subtitle: 'Barrières & trofeeën bij gelijkspel', category: 'board', type: 'categories', icon: 'eldorado', minP: 2, maxP: 4, dur: 'medium', categories: ['🏁 El Dorado bereikt (10p)', '🚧 Barrières (aantal)', '💎 Extra munten / grotten'] },
+      { id: 'eldorado', name: 'De Zoektocht naar El Dorado', subtitle: 'Barrières & trofeeën bij gelijkspel', category: 'board', type: 'categories', icon: 'eldorado', minP: 2, maxP: 4, dur: 'medium', categories: ['🏁 El Dorado bereikt (10p)', '🚧 Barrières (aantal)', '💎 Extra munten / grotten'], tieBreakerDesc: 'Meeste verzamelde barrières' },
       { id: 'burgundy', name: 'Castles of Burgundy', subtitle: 'Spoor, goederen, zilverlingen, werkers & gele tegels', category: 'board', type: 'categories', icon: 'burgundy', minP: 1, maxP: 4, dur: 'long', categories: ['🚩 Score op spoor', '📦 Onverkochte goederen (1p)', '🪙 Zilverlingen (1p)', '👷 Werkers (1p per 2)', '🟨 Gele Kennis-tegels'] },
       { id: 'agricola', name: 'Agricola', subtitle: 'Akkers, weides, graan, vee, kamers & familieleden', category: 'board', type: 'categories', icon: 'agricola', minP: 1, maxP: 5, dur: 'long', categories: ['🌾 Akkers & Oogst', '🐑 Weides & Vee', '🟫 Ongebruikte velden (-)', '🏠 Stallen & Kamers', '👨‍👩‍👧‍👦 Familieleden (3p)', '🃏 Kaarten & Bonus', '🥣 Bedelkaarten (-3p)'] },
-      { id: 'wingspan', name: 'Wingspan', subtitle: 'Vogels, bonuskaarten, rondedoelen, eieren & voedsel', category: 'board', type: 'categories', icon: 'wingspan', minP: 1, maxP: 5, dur: 'medium', expansions: ['🌺 Oceanië (Nectar)'], categories: ['🐦 Vogels', '📜 Bonuskaarten', '🎯 Rondedoelen', '🥚 Eieren (1p)', '🍒 Voedsel op kaarten (1p)', '🃏 Weggestopte kaarten (1p)'] },
+      { id: 'wingspan', name: 'Wingspan', subtitle: 'Vogels, bonuskaarten, rondedoelen, eieren & voedsel', category: 'board', type: 'categories', icon: 'wingspan', minP: 1, maxP: 5, dur: 'medium', expansions: ['🌺 Oceanië (Nectar)'], categories: ['🐦 Vogels', '📜 Bonuskaarten', '🎯 Rondedoelen', '🥚 Eieren (1p)', '🍒 Voedsel op kaarten (1p)', '🃏 Weggestopte kaarten (1p)'], tieBreakerDesc: 'Meeste ongebruikte voedselfiches' },
       { id: 'wyrmspan', name: 'Wyrmspan', subtitle: 'Draken, drakengilde, doelen, eieren & schatten', category: 'board', type: 'categories', icon: 'wyrmspan', minP: 1, maxP: 5, dur: 'long', categories: ['🐉 Draken', '🛡️ Drakengilde', '🎯 Doeltegels', '⏳ Eindspel-krachten', '🥚 Eieren (1p)', '💎 Opgeslagen grondstoffen (1p)', '🃏 Weggestopte kaarten (1p)', '🪙 Munten & Items'] },
-      { id: 'arknova', name: 'Ark Nova', subtitle: 'Aantrekkingskracht, Natuurbehoud (×2) & Eindkaarten', category: 'board', type: 'arknova', icon: 'arknova', minP: 1, maxP: 4, dur: 'long' },
+      { id: 'arknova', name: 'Ark Nova', subtitle: 'Aantrekkingskracht, Natuurbehoud (×2) & Eindkaarten', category: 'board', type: 'arknova', icon: 'arknova', minP: 1, maxP: 4, dur: 'long', tieBreakerDesc: 'Meeste ondersteunde natuurbehoudsprojecten' },
       { id: 'brass', name: 'Brass: Birmingham', subtitle: 'Kanaaltijdperk, Spoorwegtijdperk & Industrie-tegels', category: 'board', type: 'categories', icon: 'brass', minP: 2, maxP: 4, dur: 'long', categories: ['⛵ Kanaal-verbindingen (R1)', '🏭 Industrie-tegels (R1)', '🚂 Spoor-verbindingen (R2)', '🏭 Industrie-tegels (R2)', '💷 Bonus VP'] },
       { id: 'heat', name: 'Heat: Pedal to the Metal', subtitle: 'Finishpositie (P1-P6) & Kampioenschapspunten', category: 'board', type: 'heat', icon: 'heat', minP: 1, maxP: 6, dur: 'medium' },
       { id: 'dorfromantik', name: 'Dorfromantik', subtitle: 'Coöperatief campagne-scoreblad (bos, graan, dorp, vlaggen)', category: 'board', type: 'dorfromantik', icon: 'dorfromantik', minP: 1, maxP: 6, dur: 'medium' },
@@ -444,17 +539,17 @@
       { id: 'catan', name: 'Catan', subtitle: 'Dorpen, steden, handelsroute & riddermacht', category: 'board', type: 'catan', icon: 'catan', limit: 10, minP: 3, maxP: 6, dur: 'medium', expansions: ['⛵ Zeevaarders (12p)', '⚔️ Steden & Ridders (13p)'] },
       { id: 'qwixx', name: 'Qwixx', subtitle: 'Automatische kruisjestabel & mislukte worpen (-5)', category: 'card', type: 'qwixx', icon: 'qwixx', minP: 2, maxP: 5, dur: 'short' },
       { id: 'clever', name: 'Clever', subtitle: 'Kleuren + automatische vossen-vermenigvuldiger', category: 'card', type: 'clever', icon: 'clever', minP: 1, maxP: 4, dur: 'medium' },
-      { id: 'ttr', name: 'Ticket to Ride', subtitle: 'Routes, bestemmingskaarten, stations & langste route', category: 'board', type: 'ttr', icon: 'ttr', minP: 2, maxP: 5, dur: 'medium' },
-      { id: 'wonders7', name: '7 Wonders', subtitle: 'Militair, wonder, gilden & automatische wetenschap-formule', category: 'board', type: 'wonders7', icon: 'wonders7', minP: 2, maxP: 7, dur: 'medium' },
+      { id: 'ttr', name: 'Ticket to Ride', subtitle: 'Routes, bestemmingskaarten, stations & langste route', category: 'board', type: 'ttr', icon: 'ttr', minP: 2, maxP: 5, dur: 'medium', tieBreakerDesc: 'Langste route bonus' },
+      { id: 'wonders7', name: '7 Wonders', subtitle: 'Militair, wonder, gilden & automatische wetenschap-formule', category: 'board', type: 'wonders7', icon: 'wonders7', minP: 2, maxP: 7, dur: 'medium', tieBreakerDesc: 'Meeste munten in de schatkist' },
       { id: 'yahtzee', name: 'Yahtzee', subtitle: 'Volledig scoreblok met automatische +35 bovenbonus', category: 'card', type: 'yahtzee', icon: 'yahtzee', minP: 1, maxP: 6, dur: 'short' },
-      { id: 'skyjo', name: 'Skyjo', subtitle: 'Rondeteller tot 100 punten (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'skyjo', lowestWins: true, limit: 100, minP: 2, maxP: 8, dur: 'short' },
-      { id: 'sushigo', name: 'Sushi Go!', subtitle: '3 rondes + pudding bonus (+6 / -6)', category: 'card', type: 'sushigo', icon: 'sushigo', minP: 2, maxP: 5, dur: 'short' },
+      { id: 'skyjo', name: 'Skyjo', subtitle: 'Rondeteller tot 100 punten (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'skyjo', lowestWins: true, limit: 100, minP: 2, maxP: 8, dur: 'short', hasLastRoundKnock: true },
+      { id: 'sushigo', name: 'Sushi Go!', subtitle: '3 rondes + pudding bonus (+6 / -6)', category: 'card', type: 'sushigo', icon: 'sushigo', minP: 2, maxP: 5, dur: 'short', tieBreakerDesc: 'Meeste pudding-punten' },
       { id: 'lostcities', name: 'Lost Cities', subtitle: '5 expedities met weddenschappen (×2, ×3, ×4) & +20 bonus', category: 'card', type: 'lostcities', icon: 'lostcities', minP: 2, maxP: 2, dur: 'short' },
       { id: 'koehandel', name: 'Koehandel', subtitle: 'Dierenkwartetten met automatische set-vermenigvuldiger', category: 'card', type: 'koehandel', icon: 'koehandel', minP: 3, maxP: 5, dur: 'medium' },
       { id: 'machiavelli', name: 'Machiavelli', subtitle: 'Gebouwen, 5-kleurenbonus (+3) & eerste met 8 gebouwen (+4)', category: 'card', type: 'machiavelli', icon: 'machiavelli', minP: 2, maxP: 7, dur: 'medium' },
       { id: 'themind', name: 'The Mind', subtitle: 'Coöperatieve level-, levens- en shuriken-tracker', category: 'card', type: 'themind', icon: 'themind', minP: 2, maxP: 4, dur: 'short' },
       { id: 'qwirkle', name: 'Qwirkle', subtitle: 'Live teller met Qwirkle (+12) snelknop', category: 'board', type: 'carcassonne', icon: 'free', minP: 2, maxP: 4, dur: 'medium' },
-      { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium' }
+      { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
 
     // =========================================================================
@@ -464,10 +559,11 @@
 
     let state = {
       players: [
-        { id: 'p1', name: 'Maarten', color: '#6366f1', active: true, handicap: 0 },
-        { id: 'p2', name: 'Mariska', color: '#ec4899', active: true, handicap: 0 },
-        { id: 'p3', name: 'Maylin', color: '#10b981', active: true, handicap: 0 },
-        { id: 'p4', name: 'Mikai', color: '#f59e0b', active: true, handicap: 0 }
+        { id: 'p1', name: 'Speler 1', color: '#6366f1', active: true, handicap: 0 },
+        { id: 'p2', name: 'Speler 2', color: '#ec4899', active: true, handicap: 0 }
+      ],
+      playerPresets: [
+        { id: 'pres_duo', name: '👥 Duo (2p)', names: ['Speler 1', 'Speler 2'] }
       ],
       favorites: ['azul', 'keeropkeer2', 'regenwormen', 'carcassonne', 'cascadia', 'beverbende', 'rummikub', 'eldorado'],
       customGames: [],
@@ -484,6 +580,11 @@
         if (raw) {
           const parsed = JSON.parse(raw);
           state = { ...state, ...parsed };
+          if (!Array.isArray(state.playerPresets)) {
+            state.playerPresets = [
+              { id: 'pres_duo', name: '👥 Duo (2p)', names: ['Speler 1', 'Speler 2'] }
+            ];
+          }
         }
       } catch (e) {
         console.error('Kon state niet laden:', e);
@@ -515,6 +616,10 @@
       const gs = state.gamesState[gameId];
       if (gs && typeof gs.lowestWinsOverride === 'boolean') return gs.lowestWinsOverride;
       return !!def.lowestWins;
+    }
+
+    function valOrEmpty(v) {
+      return (v !== undefined && v !== null && Number(v) !== 0) ? v : '';
     }
 
     // =========================================================================
@@ -563,6 +668,7 @@
           rounds: [],
           dealerRule: 'clockwise',
           manualStarterIdx: 0,
+          knockerPlayerId: null,
           activeExpansions: {},
           azulMode: 'wall',
           azulRound: 1,
@@ -588,7 +694,7 @@
     }
 
     // =========================================================================
-    // 5. HELPER CALCULATIONS (AZUL, CASCADIA, LOST CITIES)
+    // 5. HELPER CALCULATIONS (AZUL, CASCADIA, LOST CITIES, TIE-BREAKERS)
     // =========================================================================
     function scoreSingleAzulPlacement(wall, r, c) {
       let horiz = 1;
@@ -691,6 +797,40 @@
       return base + (exp.bonus8 ? 20 : 0);
     }
 
+    function getTieBreakerValue(gameId, playerId) {
+      const gs = ensureGameState(gameId);
+      const pd = gs.playerData[playerId];
+      if (!pd) return 0;
+
+      if (gameId === 'azul' && gs.azulMode !== 'manual') {
+        return computeAzulEndBonuses(pd.azul.wall).rows;
+      }
+      if (gameId === 'cascadia') {
+        return Number(pd.cascadia?.cones || 0);
+      }
+      if (gameId === 'eldorado') {
+        return Number(pd.categories?.['🚧 Barrières (aantal)'] || 0);
+      }
+      if (gameId === 'keeropkeer' || gameId === 'keeropkeer2') {
+        return Number(pd.exclamations || 0);
+      }
+      if (gameId === 'wonders7') {
+        return Number(pd.wonders?.coins || 0);
+      }
+      if (gameId === 'sushigo') {
+        return Number(pd.sushigo?.pudding || 0);
+      }
+      if (gameId === 'ttr') {
+        return pd.ttr?.longest ? 1 : 0;
+      }
+      if (gameId === 'regenwormen') {
+        const tMap = pd.regenwormen?.tiles || {};
+        const owned = Object.keys(tMap).filter(k => tMap[k]).map(Number);
+        return owned.length ? Math.max(...owned) : 0;
+      }
+      return 0;
+    }
+
     // =========================================================================
     // 6. SCORE CALCULATIONS PER GAME
     // =========================================================================
@@ -715,8 +855,10 @@
         let colSum = 0;
         KOK_COLS.forEach(c => {
           const st = pd.kokCols[c.id];
-          if (st === 1 || st === true) colSum += c.pts1;
-          else if (st === 2) colSum += c.pts2;
+          const p1 = (def.type === 'kok1' && c.id === 'H') ? 1 : c.pts1;
+          const p2 = (def.type === 'kok1' && c.id === 'H') ? 0 : c.pts2;
+          if (st === 1 || st === true) colSum += p1;
+          else if (st === 2) colSum += p2;
         });
         let colorSum = 0;
         KOK_COLORS.forEach(c => { colorSum += Number(pd.kokColors[c.id] || 0); });
@@ -820,9 +962,15 @@
       const activePlayers = getActivePlayers();
       const list = activePlayers.map(p => ({
         ...p,
-        score: calculatePlayerTotal(gameId, p.id)
+        score: calculatePlayerTotal(gameId, p.id),
+        tieVal: getTieBreakerValue(gameId, p.id)
       }));
-      list.sort((a, b) => lowWins ? a.score - b.score : b.score - a.score);
+      list.sort((a, b) => {
+        if (a.score !== b.score) {
+          return lowWins ? a.score - b.score : b.score - a.score;
+        }
+        return b.tieVal - a.tieVal;
+      });
       return list;
     }
 
@@ -830,6 +978,7 @@
     // 7. VIEWS & NAVIGATION
     // =========================================================================
     function switchMainView(view) {
+      releaseAppWakeLock();
       ['viewPicker', 'viewScoreboard', 'viewPlayers', 'viewHistory'].forEach(id => {
         document.getElementById(id).classList.add('hidden');
       });
@@ -846,16 +995,18 @@
       } else if (view === 'scoreboard') {
         document.getElementById('viewScoreboard').classList.remove('hidden');
         document.getElementById('navBtnPicker').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
+        requestAppWakeLock();
+        updateUndoButtonUI();
         renderScoreboard();
       } else if (view === 'players') {
         document.getElementById('viewPlayers').classList.remove('hidden');
         document.getElementById('navBtnPlayers').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
-        document.getElementById('headerSubtitle').textContent = 'Spelers, Tafelvolgorde & Back-up';
+        document.getElementById('headerSubtitle').textContent = 'Spelers, Groepen & Tafelvolgorde';
         renderPlayersManager();
       } else if (view === 'history') {
         document.getElementById('viewHistory').classList.remove('hidden');
         document.getElementById('navBtnHistory').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
-        document.getElementById('headerSubtitle').textContent = 'Hall of Fame & Gespeelde potjes';
+        document.getElementById('headerSubtitle').textContent = 'Hall of Fame, Rivals & Spelrecords';
         renderHistoryView();
       }
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1031,7 +1182,7 @@
     }
 
     // =========================================================================
-    // 9. SCOREBOARD RENDERING & DEALER / STARTER / EXPANSIONS TRACKER
+    // 9. SCOREBOARD RENDERING & DEALER / STARTER / ENDGAME ALERTS
     // =========================================================================
     function updateActiveFavStar() {
       const isFav = state.favorites.includes(state.activeGameId);
@@ -1040,6 +1191,7 @@
     }
 
     function toggleExpansion(expName) {
+      pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       gs.activeExpansions[expName] = !gs.activeExpansions[expName];
       if (state.activeGameId === 'regenwormen' && !gs.activeExpansions[expName]) {
@@ -1053,6 +1205,57 @@
       }
       saveState();
       renderScoreboard();
+    }
+
+    function setLastRoundKnocker(playerId) {
+      pushUndoSnapshot();
+      const gs = ensureGameState(state.activeGameId);
+      gs.knockerPlayerId = gs.knockerPlayerId === playerId ? null : playerId;
+      saveState();
+      renderScoreboard();
+    }
+
+    function renderEndgameAlertBanner(def, gs) {
+      const banner = document.getElementById('endgameAlertBanner');
+      if (!banner) return;
+      const activePlayers = getActivePlayers();
+
+      if (def.type === 'azul' && gs.azulMode !== 'manual') {
+        const completedBy = activePlayers.filter(p => {
+          const az = gs.playerData[p.id]?.azul;
+          if (!az) return false;
+          for (let r = 0; r < 5; r++) {
+            const rowFull = [0, 1, 2, 3, 4].every(c => az.wall[r][c] || az.pending[r][c]);
+            if (rowFull) return true;
+          }
+          return false;
+        });
+        if (completedBy.length > 0) {
+          banner.classList.remove('hidden');
+          banner.innerHTML = `<span>🏁 <b>Einde spel bereikt!</b> ${completedBy.map(p => p.name).join(', ')} heeft een horizontale rij van 5 tegels compleet. Dit is de laatste ronde!</span>`;
+          return;
+        }
+      }
+
+      if (def.hasLastRoundKnock || def.type === 'rounds') {
+        banner.classList.remove('hidden');
+        const knocker = activePlayers.find(p => p.id === gs.knockerPlayerId);
+        const others = activePlayers.filter(p => p.id !== gs.knockerPlayerId).map(p => p.name).join(', ');
+        banner.innerHTML = `
+          <div class="flex items-center gap-2 flex-wrap">
+            <span>🔔 <b>Laatste ronde geklopt:</b></span>
+            ${activePlayers.map(p => `
+              <button type="button" onclick="setLastRoundKnocker('${p.id}')" class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border transition ${gs.knockerPlayerId === p.id ? 'bg-amber-400 text-slate-950 border-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+                ${gs.knockerPlayerId === p.id ? '🔔 ' : ''}${p.name}
+              </button>
+            `).join('')}
+          </div>
+          ${knocker ? `<div class="text-[11px] text-amber-300 font-bold">👉 ${knocker.name} klopte! Nog 1 beurt voor: <b>${others || '-'}</b></div>` : `<div class="text-[11px] text-slate-400">Tik op een naam zodra iemand klopt / laatste ronde inzet.</div>`}
+        `;
+        return;
+      }
+
+      banner.classList.add('hidden');
     }
 
     function computeCurrentStarterPlayer(gameId = state.activeGameId) {
@@ -1120,11 +1323,15 @@
       document.getElementById('activeGameIcon').innerHTML = SVG_ICONS[def.icon] || SVG_ICONS.free;
       document.getElementById('activeGameTitle').textContent = def.name;
       updateActiveFavStar();
+      updateUndoButtonUI();
 
       const lowWins = isLowestWins();
       let ruleTxt = lowWins ? '👑 Laagste score wint' : '👑 Hoogste score wint';
       if (def.limit) ruleTxt += ` • Doel/Limiet: ${def.limit} pnt`;
+      if (def.tieBreakerDesc) ruleTxt += ` • ⚖️ Gelijkspel: ${def.tieBreakerDesc}`;
       document.getElementById('activeGameRuleInfo').textContent = ruleTxt;
+
+      renderEndgameAlertBanner(def, gs);
 
       const expBar = document.getElementById('expansionsBar');
       if (def.expansions && def.expansions.length > 0) {
@@ -1194,7 +1401,8 @@
     function renderLiveLeaderboard() {
       const def = getGameDef();
       const standings = getStandings();
-      const topScore = standings.length ? standings[0].score : 0;
+      const topPlayer = standings[0];
+      const hasTieBreakAtTop = standings.length > 1 && standings[0].score === standings[1].score && standings[0].tieVal !== standings[1].tieVal && standings[0].score !== 0;
       const activePlayers = getActivePlayers();
 
       const gs = ensureGameState(def.id);
@@ -1206,7 +1414,8 @@
 
       document.getElementById('liveLeaderboard').innerHTML = activePlayers.map((p, idx) => {
         const pScore = calculatePlayerTotal(def.id, p.id);
-        const isLeader = pScore === topScore && standings.some(x => x.score !== 0);
+        const pTie = getTieBreakerValue(def.id, p.id);
+        const isLeader = standings.some(x => x.score !== 0) && pScore === topPlayer.score && pTie === topPlayer.tieVal;
         const reachedLimit = activeLimit && pScore >= activeLimit;
         return `
           <div class="rounded-2xl p-3 border transition ${isLeader ? 'bg-indigo-950/60 border-indigo-500/60 shadow-lg' : 'bg-slate-900 border-slate-800'}" style="border-left: 5px solid ${p.color || '#6366f1'}">
@@ -1218,6 +1427,7 @@
               <span>${isLeader ? '👑' : ''}</span>
             </div>
             <div class="score-number text-2xl font-black mt-1 ${isLeader ? 'text-indigo-300' : 'text-white'}">${pScore}</div>
+            ${isLeader && hasTieBreakAtTop ? `<div class="text-[10px] text-emerald-300 font-bold">⚖️ Wint tie-breaker (${pTie})</div>` : ''}
             ${p.handicap ? `<div class="text-[10px] text-slate-400">incl. start-handicap (${p.handicap > 0 ? '+' : ''}${p.handicap})</div>` : ''}
             ${reachedLimit ? `<div class="text-[10px] text-amber-300 font-bold mt-0.5">⚠️ Limiet (${activeLimit}) bereikt!</div>` : ''}
           </div>`;
@@ -1395,7 +1605,7 @@
                 <span class="w-3 h-3 rounded-full inline-block" style="background:${p.color}"></span>
                 <span>${p.name}</span>
               </h3>
-              <span class="text-sm font-extrabold text-indigo-400">Totaal: ${calculatePlayerTotal(def.id, p.id)} pnt</span>
+              <span id="kokPlayerTotal_${p.id}" class="text-sm font-extrabold text-indigo-400">Totaal: ${calculatePlayerTotal(def.id, p.id)} pnt</span>
             </div>
 
             <div>
@@ -1421,14 +1631,16 @@
               <div class="grid grid-cols-5 sm:grid-cols-15 gap-1">
                 ${KOK_COLS.map(col => {
                   const st = pd.kokCols[col.id] || 0;
+                  const p1 = (!isKok2 && col.id === 'H') ? 1 : col.pts1;
+                  const p2 = (!isKok2 && col.id === 'H') ? 0 : col.pts2;
                   let btnCls = 'bg-slate-950 border-slate-800 text-slate-400';
-                  let subTxt = `${col.pts1}/${col.pts2}`;
+                  let subTxt = `${p1}/${p2}`;
                   if (st === 1 || st === true) {
                     btnCls = 'bg-emerald-600 border-emerald-400 text-white shadow';
-                    subTxt = `+${col.pts1}`;
+                    subTxt = `+${p1}`;
                   } else if (st === 2) {
                     btnCls = 'bg-amber-500 border-amber-300 text-slate-950 shadow';
-                    subTxt = `+${col.pts2}`;
+                    subTxt = `+${p2}`;
                   }
                   return `
                     <button type="button" onclick="cycleKokCol('${p.id}','${col.id}')" class="p-1.5 rounded-xl border text-center transition ${btnCls}">
@@ -1442,28 +1654,28 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
                 <div><div class="text-xs font-bold text-emerald-400">❗ Over (+1)</div></div>
-                <input type="number" value="${pd.exclamations || 0}" oninput="updateKokField('${p.id}','exclamations',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
+                <input type="number" value="${valOrEmpty(pd.exclamations)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="updateKokField('${p.id}','exclamations',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white placeholder-slate-600" />
               </div>
 
               ${!isKok2 ? `
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
                 <div><div class="text-xs font-bold text-rose-400">★ Open (-2)</div></div>
-                <input type="number" value="${pd.stars || 0}" oninput="updateKokField('${p.id}','stars',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
+                <input type="number" value="${valOrEmpty(pd.stars)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="updateKokField('${p.id}','stars',this.value)" class="w-12 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white placeholder-slate-600" />
               </div>
               ` : `
               <div class="bg-slate-950 border border-rose-500/40 rounded-xl p-2.5 flex items-center justify-between">
                 <div><div class="text-xs font-bold text-rose-400">❤️ Hartjes</div></div>
-                <input type="number" value="${pd.heartBonus || 0}" oninput="updateKokField('${p.id}','heartBonus',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
+                <input type="number" value="${valOrEmpty(pd.heartBonus)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="updateKokField('${p.id}','heartBonus',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white placeholder-slate-600" />
               </div>
 
               <div class="bg-slate-950 border border-indigo-500/40 rounded-xl p-2.5 flex items-center justify-between">
                 <div><div class="text-xs font-bold text-indigo-300">📏 Bonusrij</div></div>
-                <input type="number" value="${pd.bonusRow || 0}" oninput="updateKokField('${p.id}','bonusRow',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
+                <input type="number" value="${valOrEmpty(pd.bonusRow)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="updateKokField('${p.id}','bonusRow',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white placeholder-slate-600" />
               </div>
 
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
                 <div><div class="text-xs font-bold text-amber-300">⭐ Extra</div></div>
-                <input type="number" value="${pd.stars || 0}" oninput="updateKokField('${p.id}','stars',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white" />
+                <input type="number" value="${valOrEmpty(pd.stars)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="updateKokField('${p.id}','stars',this.value)" class="w-14 bg-slate-900 border border-slate-700 rounded-lg text-center font-bold text-sm py-1 text-white placeholder-slate-600" />
               </div>
               `}
             </div>
@@ -1472,6 +1684,7 @@
     }
 
     function setKokColor(playerId, colorId, pts) {
+      pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       const cur = gs.playerData[playerId].kokColors[colorId] || 0;
       gs.playerData[playerId].kokColors[colorId] = cur === pts ? 0 : pts;
@@ -1480,6 +1693,7 @@
     }
 
     function cycleKokCol(playerId, colId) {
+      pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       const cur = gs.playerData[playerId].kokCols[colId] || 0;
       const next = (cur === 0 || cur === false) ? 1 : (cur === 1 || cur === true ? 2 : 0);
@@ -1493,6 +1707,10 @@
       gs.playerData[playerId][field] = Number(val || 0);
       saveState();
       renderLiveLeaderboard();
+      const totEl = document.getElementById('kokPlayerTotal_' + playerId);
+      if (totEl) {
+        totEl.textContent = `Totaal: ${calculatePlayerTotal(state.activeGameId, playerId)} pnt`;
+      }
     }
 
     // =========================================================================
@@ -1541,11 +1759,10 @@
         </div>`;
     }
 
-    function renderFlip7Sheet(container, def) {
-      renderRoundsSheet(container, def);
-    }
+    function renderFlip7Sheet(container, def) { renderRoundsSheet(container, def); }
 
     function addRoundNow() {
+      pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       const activePlayers = getActivePlayers();
       const roundObj = {};
@@ -1563,6 +1780,7 @@
     }
 
     function deleteRound(idx) {
+      pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       gs.rounds.splice(idx, 1);
       saveState();
@@ -1608,6 +1826,7 @@
     }
 
     function setQwixxVal(playerId, key, val) {
+      pushUndoSnapshot();
       const gs = ensureGameState('qwixx');
       gs.playerData[playerId].qwixx[key] = Number(val || 0);
       saveState();
@@ -1628,29 +1847,29 @@
             <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-amber-300">🟨 Geel</label>
-                <input type="number" value="${c.yellow}" oninput="setCleverVal('${p.id}','yellow',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold" />
+                <input type="number" value="${valOrEmpty(c.yellow)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCleverVal('${p.id}','yellow',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-sky-400">🟦 Blauw</label>
-                <input type="number" value="${c.blue}" oninput="setCleverVal('${p.id}','blue',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold" />
+                <input type="number" value="${valOrEmpty(c.blue)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCleverVal('${p.id}','blue',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-emerald-400">🟩 Groen (${greenPts}p)</label>
-                <select onchange="setCleverVal('${p.id}','greenCount',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-center text-xs font-bold">
+                <select onchange="setCleverVal('${p.id}','greenCount',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-center text-xs font-bold text-white">
                   ${CLEVER_GREEN_TABLE.map((pts, cnt) => `<option value="${cnt}" ${Number(c.greenCount) === cnt ? 'selected' : ''}>${cnt}x = ${pts}p</option>`).join('')}
                 </select>
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-orange-400">🟧 Oranje</label>
-                <input type="number" value="${c.orange}" oninput="setCleverVal('${p.id}','orange',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold" />
+                <input type="number" value="${valOrEmpty(c.orange)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCleverVal('${p.id}','orange',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-purple-400">🟪 Paars</label>
-                <input type="number" value="${c.purple}" oninput="setCleverVal('${p.id}','purple',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold" />
+                <input type="number" value="${valOrEmpty(c.purple)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCleverVal('${p.id}','purple',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-rose-400">🦊 Vossen</label>
-                <input type="number" value="${c.foxes}" oninput="setCleverVal('${p.id}','foxes',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold" />
+                <input type="number" value="${valOrEmpty(c.foxes)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCleverVal('${p.id}','foxes',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
             </div>
           </div>`;
@@ -1688,7 +1907,7 @@
               ${animals.map(a => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
                   <div class="text-[11px] font-bold text-slate-300">${a.l}</div>
-                  <input type="number" value="${c[a.k]}" oninput="setCascadiaVal('${p.id}','${a.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                  <input type="number" value="${valOrEmpty(c[a.k])}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCascadiaVal('${p.id}','${a.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
                 </div>`).join('')}
             </div>
             <div class="text-xs font-semibold text-slate-400">Leefgebieden + Appels</div>
@@ -1696,11 +1915,11 @@
               ${habs.map(h => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
                   <div class="text-[11px] font-bold text-slate-300">${h.l}</div>
-                  <input type="number" value="${c[h.k]}" oninput="setCascadiaVal('${p.id}','${h.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                  <input type="number" value="${valOrEmpty(c[h.k])}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCascadiaVal('${p.id}','${h.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
                 </div>`).join('')}
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
                 <div class="text-[11px] font-bold text-amber-300">🌲 Appels</div>
-                <input type="number" value="${c.cones}" oninput="setCascadiaVal('${p.id}','cones',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(c.cones)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCascadiaVal('${p.id}','cones',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
             </div>
           </div>`;
@@ -1715,7 +1934,7 @@
     }
 
     // =========================================================================
-    // 10E. REGENWORMEN (INCL. DEEL 2: STENEN 11 & 13 + RAAF)
+    // 10E. REGENWORMEN (INCL. DEEL 2)
     // =========================================================================
     function renderRegenwormenSheet(container) {
       const gs = ensureGameState('regenwormen');
@@ -1762,13 +1981,14 @@
             ${expOn ? `
               <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
                 <span class="text-slate-300 font-semibold">Extra bonuswormen:</span>
-                <input type="number" value="${r.bonus || 0}" oninput="setRegenwormenBonus('${p.id}', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-amber-300" />
+                <input type="number" value="${valOrEmpty(r.bonus)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setRegenwormenBonus('${p.id}', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-amber-300 placeholder-slate-600" />
               </div>` : ''}
           </div>`;
       }).join('');
     }
 
     function toggleRegenwormenTile(playerId, tileNum) {
+      pushUndoSnapshot();
       const gs = ensureGameState('regenwormen');
       const cur = !!gs.playerData[playerId].regenwormen.tiles[tileNum];
       state.players.forEach(p => {
@@ -1782,6 +2002,7 @@
     }
 
     function toggleRegenwormenRaven(playerId) {
+      pushUndoSnapshot();
       const gs = ensureGameState('regenwormen');
       const cur = !!gs.playerData[playerId].regenwormen.hasRaven;
       state.players.forEach(p => {
@@ -1821,7 +2042,7 @@
               ${cats.map(cat => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
                   <label class="block text-[11px] font-bold text-slate-300 truncate">${cat}</label>
-                  <input type="number" value="${cMap[cat] || 0}" oninput="setCategoryVal('${def.id}','${p.id}','${cat.replace(/'/g, "\\'")}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white" />
+                  <input type="number" value="${valOrEmpty(cMap[cat])}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCategoryVal('${def.id}','${p.id}','${cat.replace(/'/g, "\\'")}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
                 </div>`).join('')}
             </div>
           </div>`;
@@ -1854,7 +2075,7 @@
               ${fields.map(f => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                   <label class="block text-[11px] font-bold text-slate-300 truncate">${f.l}</label>
-                  <input type="number" value="${w[f.k] || 0}" oninput="setWondersVal('${p.id}','${f.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                  <input type="number" value="${valOrEmpty(w[f.k])}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setWondersVal('${p.id}','${f.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
                 </div>`).join('')}
             </div>
           </div>`;
@@ -1888,19 +2109,19 @@
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-slate-300">Routes</label>
-                <input type="number" value="${t.routes}" oninput="setTtrVal('${p.id}','routes',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(t.routes)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setTtrVal('${p.id}','routes',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-emerald-400">Tickets (+)</label>
-                <input type="number" value="${t.destPlus}" oninput="setTtrVal('${p.id}','destPlus',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(t.destPlus)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setTtrVal('${p.id}','destPlus',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-rose-400">Gemist (-)</label>
-                <input type="number" value="${t.destMinus}" oninput="setTtrVal('${p.id}','destMinus',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(t.destMinus)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setTtrVal('${p.id}','destMinus',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-amber-300">Stations (×4)</label>
-                <input type="number" value="${t.stations}" oninput="setTtrVal('${p.id}','stations',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(t.stations)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setTtrVal('${p.id}','stations',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <button type="button" onclick="toggleTtrLongest('${p.id}')" class="rounded-xl border p-2 text-xs font-bold ${t.longest ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-400'}">🏆 Langste (+10)</button>
             </div>
@@ -1909,6 +2130,7 @@
     }
 
     function addTtrRoute(playerId, pts) {
+      pushUndoSnapshot();
       const gs = ensureGameState('ttr');
       gs.playerData[playerId].ttr.routes = Number(gs.playerData[playerId].ttr.routes || 0) + pts;
       saveState();
@@ -1923,6 +2145,7 @@
     }
 
     function toggleTtrLongest(playerId) {
+      pushUndoSnapshot();
       const gs = ensureGameState('ttr');
       gs.playerData[playerId].ttr.longest = !gs.playerData[playerId].ttr.longest;
       saveState();
@@ -1958,7 +2181,7 @@
               ${upperFields.map(f => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                   <label class="block text-[11px] font-bold text-slate-300 truncate">${f.l}</label>
-                  <input type="number" value="${y[f.k] || 0}" oninput="setYahtzeeVal('${p.id}','${f.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                  <input type="number" value="${valOrEmpty(y[f.k])}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setYahtzeeVal('${p.id}','${f.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
                 </div>`).join('')}
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -1971,7 +2194,7 @@
               ${lowerInputs.map(f => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                   <label class="block text-[11px] font-bold text-slate-300 truncate">${f.l}</label>
-                  <input type="number" value="${y[f.k] || 0}" oninput="setYahtzeeVal('${p.id}','${f.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                  <input type="number" value="${valOrEmpty(y[f.k])}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setYahtzeeVal('${p.id}','${f.k}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
                 </div>`).join('')}
             </div>
           </div>`;
@@ -1979,6 +2202,7 @@
     }
 
     function toggleYahtzeeFixed(playerId, key, pts) {
+      pushUndoSnapshot();
       const gs = ensureGameState('yahtzee');
       const cur = Number(gs.playerData[playerId].yahtzee[key] || 0);
       gs.playerData[playerId].yahtzee[key] = cur === pts ? 0 : pts;
@@ -2006,15 +2230,15 @@
             <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
                 <label class="text-[11px] font-bold text-slate-300">🏠 Dorpen (1p)</label>
-                <input type="number" value="${ct.villages}" oninput="setCatanVal('${p.id}','villages',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(ct.villages)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCatanVal('${p.id}','villages',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
                 <label class="text-[11px] font-bold text-slate-300">🏛️ Steden (2p)</label>
-                <input type="number" value="${ct.cities}" oninput="setCatanVal('${p.id}','cities',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(ct.cities)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCatanVal('${p.id}','cities',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
                 <label class="text-[11px] font-bold text-slate-300">📜 Kaarten (1p)</label>
-                <input type="number" value="${ct.dev}" oninput="setCatanVal('${p.id}','dev',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(ct.dev)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCatanVal('${p.id}','dev',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <button type="button" onclick="toggleCatanAward('${p.id}','longestRoad')" class="rounded-xl border p-2 text-xs font-bold ${ct.longestRoad ? 'bg-amber-500 text-slate-950 border-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}">🛣️ Handelsroute (+2)</button>
               <button type="button" onclick="toggleCatanAward('${p.id}','largestArmy')" class="rounded-xl border p-2 text-xs font-bold ${ct.largestArmy ? 'bg-rose-600 text-white border-rose-400' : 'bg-slate-950 border-slate-800 text-slate-400'}">⚔️ Riddermacht (+2)</button>
@@ -2031,6 +2255,7 @@
     }
 
     function toggleCatanAward(playerId, awardKey) {
+      pushUndoSnapshot();
       const gs = ensureGameState('catan');
       const cur = !!gs.playerData[playerId].catan[awardKey];
       state.players.forEach(p => {
@@ -2054,15 +2279,15 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-slate-300">🍣 Ronde 1</label>
-                <input type="number" value="${s.r1}" oninput="setSushiVal('${p.id}','r1',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(s.r1)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setSushiVal('${p.id}','r1',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-slate-300">🥟 Ronde 2</label>
-                <input type="number" value="${s.r2}" oninput="setSushiVal('${p.id}','r2',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(s.r2)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setSushiVal('${p.id}','r2',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-slate-300">🍱 Ronde 3</label>
-                <input type="number" value="${s.r3}" oninput="setSushiVal('${p.id}','r3',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(s.r3)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setSushiVal('${p.id}','r3',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-pink-300">🍮 Pudding</label>
@@ -2078,6 +2303,7 @@
     }
 
     function setSushiVal(playerId, key, val, rerender = false) {
+      if (rerender) pushUndoSnapshot();
       const gs = ensureGameState('sushigo');
       gs.playerData[playerId].sushigo[key] = Number(val || 0);
       saveState();
@@ -2111,7 +2337,7 @@
                     </label>
                     <div>
                       <span class="text-[10px] text-slate-300 block">Som kaarten:</span>
-                      <input type="number" value="${exp.pts || 0}" oninput="setLostCitiesField('${p.id}','${col.id}','pts',this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white" />
+                      <input type="number" value="${valOrEmpty(exp.pts)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setLostCitiesField('${p.id}','${col.id}','pts',this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
                     </div>
                     <div class="flex items-center justify-between gap-1">
                       ${[0,1,2,3].map(w => `<button type="button" onclick="setLostCitiesField('${p.id}','${col.id}','wagers',${w},true)" class="flex-1 py-1 rounded text-[10px] font-bold ${Number(exp.wagers) === w ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400'}">×${w + 1}</button>`).join('')}
@@ -2125,6 +2351,7 @@
     }
 
     function setLostCitiesField(playerId, colorId, field, val, fullRerender = false) {
+      pushUndoSnapshot();
       const gs = ensureGameState('lostcities');
       const exp = gs.playerData[playerId].lostcities[colorId];
       exp[field] = field === 'pts' || field === 'wagers' ? Number(val || 0) : !!val;
@@ -2161,6 +2388,7 @@
     }
 
     function toggleKoehandelSet(playerId, animalId) {
+      pushUndoSnapshot();
       const gs = ensureGameState('koehandel');
       const cur = !!gs.playerData[playerId].koehandel.sets[animalId];
       state.players.forEach(p => {
@@ -2184,7 +2412,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
                 <label class="text-[11px] font-bold text-slate-300">🏛️ Gebouwen</label>
-                <input type="number" value="${m.buildings || 0}" oninput="setMachiavelliVal('${p.id}','buildings',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold" />
+                <input type="number" value="${valOrEmpty(m.buildings)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setMachiavelliVal('${p.id}','buildings',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <button type="button" onclick="setMachiavelliVal('${p.id}','allColors',!${!!m.allColors},true)" class="rounded-xl border p-2 text-xs font-bold ${m.allColors ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-400'}">🌈 5 Kleuren (+3)</button>
               <button type="button" onclick="setMachiavelliVal('${p.id}','first8',${m.first8 === 4 ? 0 : 4},true)" class="rounded-xl border p-2 text-xs font-bold ${m.first8 === 4 ? 'bg-amber-500 text-slate-950 border-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}">🥇 1e met 8 (+4)</button>
@@ -2195,6 +2423,7 @@
     }
 
     function setMachiavelliVal(playerId, key, val, rerender = false) {
+      if (rerender) pushUndoSnapshot();
       const gs = ensureGameState('machiavelli');
       gs.playerData[playerId].machiavelli[key] = key === 'allColors' ? !!val : Number(val || 0);
       saveState();
@@ -2218,15 +2447,15 @@
             <div class="grid grid-cols-3 gap-2">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center">
                 <label class="text-[11px] font-bold text-amber-300 block">🎟️ Aantrekking</label>
-                <input type="number" value="${an.appeal || 0}" oninput="setArkNovaVal('${p.id}','appeal',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white" />
+                <input type="number" value="${valOrEmpty(an.appeal)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setArkNovaVal('${p.id}','appeal',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center">
                 <label class="text-[11px] font-bold text-emerald-400 block">🛡️ Behoud (×2)</label>
-                <input type="number" value="${an.conservation || 0}" oninput="setArkNovaVal('${p.id}','conservation',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white" />
+                <input type="number" value="${valOrEmpty(an.conservation)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setArkNovaVal('${p.id}','conservation',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center">
                 <label class="text-[11px] font-bold text-indigo-300 block">🃏 Eindkaarten</label>
-                <input type="number" value="${an.endgame || 0}" oninput="setArkNovaVal('${p.id}','endgame',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white" />
+                <input type="number" value="${valOrEmpty(an.endgame)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setArkNovaVal('${p.id}','endgame',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
             </div>
           </div>`;
@@ -2258,13 +2487,14 @@
                   return `<button type="button" onclick="setHeatFinish('${p.id}', ${pos}, ${pts})" class="px-2.5 py-1.5 rounded-xl text-xs font-extrabold border ${h.pts === pts ? 'bg-red-600 border-red-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-400'}">P${pos}</button>`;
                 }).join('')}
               </div>
-              <input type="number" value="${h.pts || 0}" oninput="setHeatPts('${p.id}', this.value)" class="w-16 bg-slate-950 border border-slate-800 rounded-xl py-1.5 text-center font-black text-sm text-red-400" />
+              <input type="number" value="${valOrEmpty(h.pts)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setHeatPts('${p.id}', this.value)" class="w-16 bg-slate-950 border border-slate-800 rounded-xl py-1.5 text-center font-black text-sm text-red-400 placeholder-slate-600" />
             </div>
           </div>`;
       }).join('');
     }
 
     function setHeatFinish(playerId, pos, pts) {
+      pushUndoSnapshot();
       const gs = ensureGameState('heat');
       gs.playerData[playerId].heat = { pos, pts };
       saveState();
@@ -2300,7 +2530,7 @@
             ${fields.map(f => `
               <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5">
                 <label class="block text-[11px] font-bold text-slate-300 truncate">${f.l}</label>
-                <input type="number" value="${d[f.k] || 0}" oninput="setDorfVal('${f.k}', this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white" />
+                <input type="number" value="${valOrEmpty(d[f.k])}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setDorfVal('${f.k}', this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>`).join('')}
           </div>
         </div>`;
@@ -2326,11 +2556,11 @@
           <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto">
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
               <div class="text-xs text-slate-400">Scenario #</div>
-              <input type="number" value="${c.mission || 1}" oninput="setCoopField('${def.id}','mission',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-center font-black text-base text-indigo-300" />
+              <input type="number" value="${valOrEmpty(c.mission)}" placeholder="1" onfocus="pushUndoSnapshot()" oninput="setCoopField('${def.id}','mission',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-center font-black text-base text-indigo-300 placeholder-slate-600" />
             </div>
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-3">
               <div class="text-xs text-slate-400">Pogingen</div>
-              <input type="number" value="${c.attempts || 1}" oninput="setCoopField('${def.id}','attempts',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-center font-black text-base text-amber-300" />
+              <input type="number" value="${valOrEmpty(c.attempts)}" placeholder="1" onfocus="pushUndoSnapshot()" oninput="setCoopField('${def.id}','attempts',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1.5 text-center font-black text-base text-amber-300 placeholder-slate-600" />
             </div>
           </div>
         </div>`;
@@ -2368,6 +2598,7 @@
     }
 
     function adjCodenames(team, delta) {
+      pushUndoSnapshot();
       const gs = ensureGameState('codenames');
       gs.codenames[team] = Math.max(0, Number(gs.codenames[team] || 0) + delta);
       saveState();
@@ -2410,6 +2641,7 @@
     }
 
     function adjTheMind(key, delta) {
+      pushUndoSnapshot();
       const gs = ensureGameState('themind');
       gs.theMind[key] = Math.max(0, Number(gs.theMind[key] || 0) + delta);
       saveState();
@@ -2462,7 +2694,7 @@
             ` : ''}
 
             <div class="flex gap-2 pt-1">
-              <input type="number" id="customLive_${p.id}" placeholder="Vrije punten (+/-)" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-bold text-white" />
+              <input type="number" id="customLive_${p.id}" placeholder="Vrije punten (+/-)" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-bold text-white placeholder-slate-600" />
               <button type="button" onclick="addCustomLivePoints('${p.id}')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200">+ Tel bij</button>
             </div>
           </div>`;
@@ -2470,6 +2702,7 @@
     }
 
     function addLivePoints(playerId, delta) {
+      pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       const pd = gs.playerData[playerId];
       pd.liveScore = Number(pd.liveScore || 0) + Number(delta || 0);
@@ -2492,7 +2725,7 @@
     }
 
     // =========================================================================
-    // 11. SPELERSBEHEER
+    // 11. SPELERSBEHEER & SPELERSGROEPEN (PRESETS)
     // =========================================================================
     function renderPlayersManager() {
       const listEl = document.getElementById('playersManagerList');
@@ -2523,6 +2756,61 @@
             </div>
           </div>`;
       }).join('');
+
+      renderPlayerPresetsBar();
+    }
+
+    function renderPlayerPresetsBar() {
+      const bar = document.getElementById('playerPresetsBar');
+      if (!bar) return;
+      const presets = state.playerPresets || [];
+      if (presets.length === 0) {
+        bar.innerHTML = `<span class="text-xs text-slate-500">Geen opgeslagen groepen.</span>`;
+        return;
+      }
+
+      bar.innerHTML = presets.map(pr => `
+        <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 gap-2">
+          <button type="button" onclick="applyGroupPreset('${pr.id}')" class="text-xs font-extrabold text-indigo-300 hover:text-white transition">${pr.name}</button>
+          <button type="button" onclick="deleteGroupPreset('${pr.id}')" class="text-slate-500 hover:text-rose-400 text-xs font-bold" title="Groep verwijderen">✕</button>
+        </div>
+      `).join('');
+    }
+
+    function saveCurrentGroupPreset() {
+      const activeNames = getActivePlayers().map(p => p.name);
+      if (activeNames.length === 0) return showToast('⚠️ Geen actieve spelers geselecteerd.');
+      const groupName = prompt('Geef een naam voor deze spelersgroep (bijv. "Spelletjesavond", "Gezin"):', 'Groep ' + (state.playerPresets.length + 1));
+      if (!groupName || !groupName.trim()) return;
+
+      const newPres = {
+        id: 'pres_' + Date.now(),
+        name: groupName.trim(),
+        names: activeNames
+      };
+      if (!state.playerPresets) state.playerPresets = [];
+      state.playerPresets.push(newPres);
+      saveState();
+      renderPlayerPresetsBar();
+      showToast(`💾 Groep "${groupName.trim()}" opgeslagen!`);
+    }
+
+    function applyGroupPreset(presetId) {
+      const pr = (state.playerPresets || []).find(x => x.id === presetId);
+      if (!pr) return;
+      state.players.forEach(p => {
+        p.active = pr.names.includes(p.name);
+      });
+      saveState();
+      renderPlayersManager();
+      showToast(`✅ Groep "${pr.name}" geactiveerd!`);
+    }
+
+    function deleteGroupPreset(presetId) {
+      state.playerPresets = (state.playerPresets || []).filter(x => x.id !== presetId);
+      saveState();
+      renderPlayerPresetsBar();
+      showToast('🗑️ Groep verwijderd.');
     }
 
     function addNewPlayer() {
@@ -2530,14 +2818,13 @@
       const name = (inp?.value || '').trim();
       if (!name) return;
       const colors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#06b6d4', '#a855f7', '#ef4444', '#84cc16'];
-      const newP = {
+      state.players.push({
         id: 'p_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
         name,
         color: colors[state.players.length % colors.length],
         active: true,
         handicap: 0
-      };
-      state.players.push(newP);
+      });
       inp.value = '';
       ensureGameState(state.activeGameId);
       saveState();
@@ -2631,8 +2918,7 @@
     }
 
     function closeStartPlayerModal() {
-      const modal = document.getElementById('startPlayerModal');
-      if (modal) modal.classList.add('hidden');
+      document.getElementById('startPlayerModal')?.classList.add('hidden');
     }
 
     function rollStartPlayer() {
@@ -2665,11 +2951,12 @@
     }
 
     // =========================================================================
-    // 12. STATISTIEKEN & GESCHIEDENIS
+    // 12. STATISTIEKEN, WIN-STREAKS, RIVALS & PODIUM / CONFETTI
     // =========================================================================
     function resetCurrentGameConfirm() {
       const def = getGameDef();
       if (!confirm(`Weet je zeker dat je alle scores van ${def.name} wilt resetten?`)) return;
+      pushUndoSnapshot();
       delete state.gamesState[def.id];
       ensureGameState(def.id);
       saveState();
@@ -2677,7 +2964,9 @@
       showToast('🧹 Scoreblad gereset!');
     }
 
-    function saveFinishedMatch() {
+    let pendingMatchRecord = null;
+
+    function openPodiumModal() {
       const def = getGameDef();
       const gs = ensureGameState(def.id);
       const activePlayers = getActivePlayers();
@@ -2700,21 +2989,129 @@
         winners = standings.filter(s => s.score === bestScore).map(s => s.name);
       }
 
-      const matchRecord = {
+      let bestRoundInfo = null;
+      if ((def.type === 'rounds' || def.type === 'flip7') && Array.isArray(gs.rounds) && gs.rounds.length > 0) {
+        const lowWins = isLowestWins(def.id);
+        gs.rounds.forEach((rObj, rIdx) => {
+          activePlayers.forEach(p => {
+            const val = Number(rObj[p.id]);
+            if (!isNaN(val)) {
+              if (!bestRoundInfo || (!lowWins && val > bestRoundInfo.score) || (lowWins && val < bestRoundInfo.score)) {
+                bestRoundInfo = { player: p.name, score: val, round: rIdx + 1 };
+              }
+            }
+          });
+        });
+      }
+
+      pendingMatchRecord = {
         id: 'm_' + Date.now(),
         gameId: def.id,
         gameName: def.name,
         date: new Date().toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         results: standings.map(s => ({ playerId: s.id, name: s.name, score: s.score, color: s.color })),
-        winners
+        winners,
+        bestRoundInfo,
+        note: ''
       };
 
-      state.history.unshift(matchRecord);
-      delete state.gamesState[def.id];
-      ensureGameState(def.id);
+      // Check of dit een All-Time Record verbreekt
+      const lowWins = isLowestWins(def.id);
+      let existingBest = null;
+      state.history.forEach(h => {
+        if (h.gameId === def.id && !h.noScores) {
+          (h.results || []).forEach(r => {
+            const sc = Number(r.score);
+            if (!isNaN(sc)) {
+              if (existingBest === null || (!lowWins && sc > existingBest) || (lowWins && sc < existingBest)) {
+                existingBest = sc;
+              }
+            }
+          });
+        }
+      });
+
+      const topScore = standings[0].score;
+      const isNewRecord = existingBest === null || (!lowWins && topScore > existingBest) || (lowWins && topScore < existingBest);
+
+      const modal = document.getElementById('podiumModal');
+      const titleEl = document.getElementById('podiumModalTitle');
+      const tieNotice = document.getElementById('podiumTieBreakNotice');
+      const recBanner = document.getElementById('podiumRecordBanner');
+      const listEl = document.getElementById('podiumStandingsList');
+      const noteInput = document.getElementById('matchNoteInput');
+
+      if (titleEl) titleEl.textContent = `🎉 Eindstand ${def.name}`;
+      if (noteInput) noteInput.value = '';
+
+      if (hasTieBreakAtTop && standings.length > 1 && standings[0].score === standings[1].score) {
+        tieNotice.classList.remove('hidden');
+        tieNotice.textContent = `⚖️ Beslist via tie-breaker (${def.tieBreakerDesc || 'secundaire waarde'})!`;
+      } else {
+        tieNotice.classList.add('hidden');
+      }
+
+      if (isNewRecord && topScore !== 0) {
+        recBanner.classList.remove('hidden');
+        recBanner.textContent = `🏅 NIEUW ALL-TIME SPELLENRECORD! (${topScore} pnt)`;
+      } else {
+        recBanner.classList.add('hidden');
+      }
+
+      const medals = ['🥇', '🥈', '🥉'];
+      listEl.innerHTML = standings.map((s, idx) => `
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between" style="border-left: 4px solid ${s.color || '#6366f1'}">
+          <div class="flex items-center gap-2.5">
+            <span class="text-base">${medals[idx] || '#' + (idx + 1)}</span>
+            <span class="font-bold text-sm text-white">${s.name}</span>
+          </div>
+          <div class="font-black text-base text-indigo-300">${s.score} <span class="text-xs font-normal text-slate-400">pnt</span></div>
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+      launchConfetti();
+    }
+
+    function closePodiumModal() {
+      document.getElementById('podiumModal')?.classList.add('hidden');
+    }
+
+    function confirmSaveFinishedMatch() {
+      if (!pendingMatchRecord) return;
+      const noteVal = (document.getElementById('matchNoteInput')?.value || '').trim();
+      pendingMatchRecord.note = noteVal;
+
+      state.history.unshift(pendingMatchRecord);
+      delete state.gamesState[state.activeGameId];
+      ensureGameState(state.activeGameId);
+      undoStack = [];
+      updateUndoButtonUI();
       saveState();
+      closePodiumModal();
       switchMainView('history');
-      showToast(`🏆 Potje opgeslagen!`);
+      showToast(`🏆 Potje opgeslagen met podium!`);
+    }
+
+    // CONFETTI EFFECT
+    function launchConfetti() {
+      const container = document.getElementById('confettiContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      const colors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#38bdf8', '#eab308'];
+      for (let i = 0; i < 45; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.width = (Math.random() * 8 + 6) + 'px';
+        piece.style.height = (Math.random() * 12 + 8) + 'px';
+        piece.style.borderRadius = Math.random() > 0.5 ? '50% 50%' : '2px';
+        piece.style.animationDelay = (Math.random() * 0.8) + 's';
+        piece.style.animationDuration = (Math.random() * 1.5 + 2) + 's';
+        container.appendChild(piece);
+      }
+      setTimeout(() => { container.innerHTML = ''; }, 3500);
     }
 
     function setStatsSortMode(mode) {
@@ -2753,17 +3150,23 @@
 
       const statsMap = {};
       state.players.forEach(p => {
-        statsMap[p.name] = { name: p.name, color: p.color, played: 0, wins: 0, pct: 0 };
+        statsMap[p.name] = { name: p.name, color: p.color, played: 0, wins: 0, pct: 0, currentStreak: 0, bestStreak: 0 };
       });
 
-      filteredHistory.forEach(h => {
+      const chronological = [...filteredHistory].reverse();
+      chronological.forEach(h => {
         (h.results || []).forEach(r => {
           if (!statsMap[r.name]) {
-            statsMap[r.name] = { name: r.name, color: r.color || '#6366f1', played: 0, wins: 0, pct: 0 };
+            statsMap[r.name] = { name: r.name, color: r.color || '#6366f1', played: 0, wins: 0, pct: 0, currentStreak: 0, bestStreak: 0 };
           }
-          statsMap[r.name].played++;
+          const st = statsMap[r.name];
+          st.played++;
           if ((h.winners || []).includes(r.name)) {
-            statsMap[r.name].wins++;
+            st.wins++;
+            st.currentStreak++;
+            if (st.currentStreak > st.bestStreak) st.bestStreak = st.currentStreak;
+          } else {
+            st.currentStreak = 0;
           }
         });
       });
@@ -2783,15 +3186,18 @@
       const hallEl = document.getElementById('hallOfFameList');
       if (hallEl) {
         hallEl.innerHTML = leaderboard.map((s, idx) => `
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3" style="border-left: 5px solid ${s.color || '#6366f1'}">
-            <div class="flex items-center gap-3">
-              <span class="w-7 h-7 rounded-xl font-black text-xs flex items-center justify-center ${idx === 0 && (s.wins > 0 || s.pct > 0) ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-900 text-slate-400'}">#${idx + 1}</span>
-              <div>
-                <div class="font-bold text-sm text-white">${s.name}</div>
-                <div class="text-[11px] text-slate-400">${s.played} potje${s.played === 1 ? '' : 's'} gespeeld</div>
+          <div onclick="openPlayerProfile('${s.name.replace(/'/g, "\\'")}')" class="group cursor-pointer bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-3.5 flex items-center justify-between gap-3 transition shadow-md" style="border-left: 5px solid ${s.color || '#6366f1'}">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="w-7 h-7 rounded-xl font-black text-xs flex items-center justify-center shrink-0 ${idx === 0 && (s.wins > 0 || s.pct > 0) ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-900 text-slate-400'}">#${idx + 1}</span>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-bold text-sm text-white truncate group-hover:text-indigo-300 transition">${s.name}</span>
+                  ${s.currentStreak >= 2 ? `<span class="px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/40 text-orange-300 text-[10px] font-extrabold">🔥 ${s.currentStreak} op rij!</span>` : ''}
+                </div>
+                <div class="text-[11px] text-slate-400">${s.played} potje${s.played === 1 ? '' : 's'} • Beste reeks: <b class="text-slate-300">${s.bestStreak}</b> (Tik voor profiel ➔)</div>
               </div>
             </div>
-            <div class="flex items-center gap-4 text-right">
+            <div class="flex items-center gap-4 text-right shrink-0">
               <div>
                 <div class="text-[10px] uppercase tracking-wider text-slate-400">Wins</div>
                 <div class="font-black text-sm ${sortMode === 'wins' ? 'text-amber-300 text-base' : 'text-slate-200'}">🏆 ${s.wins}</div>
@@ -2804,29 +3210,186 @@
           </div>`).join('');
       }
 
+      // ALL-TIME SPELRECORDS
+      const recGrid = document.getElementById('gameRecordsGrid');
+      if (recGrid) {
+        const recordsByGame = {};
+        filteredHistory.forEach(h => {
+          if (h.noScores) return;
+          const lowWins = isLowestWins(h.gameId);
+          (h.results || []).forEach(r => {
+            const numScore = Number(r.score);
+            if (isNaN(numScore)) return;
+            if (!recordsByGame[h.gameId]) {
+              recordsByGame[h.gameId] = {
+                gameId: h.gameId,
+                gameName: h.gameName,
+                lowWins,
+                bestScore: numScore,
+                holder: r.name,
+                date: h.date,
+                bestRound: h.bestRoundInfo || null
+              };
+            } else {
+              const rec = recordsByGame[h.gameId];
+              if ((!lowWins && numScore > rec.bestScore) || (lowWins && numScore < rec.bestScore)) {
+                rec.bestScore = numScore;
+                rec.holder = r.name;
+                rec.date = h.date;
+              }
+              if (h.bestRoundInfo) {
+                if (!rec.bestRound || (!lowWins && h.bestRoundInfo.score > rec.bestRound.score) || (lowWins && h.bestRoundInfo.score < rec.bestRound.score)) {
+                  rec.bestRound = h.bestRoundInfo;
+                }
+              }
+            }
+          });
+        });
+
+        const recList = Object.values(recordsByGame);
+        if (recList.length === 0) {
+          recGrid.innerHTML = `<div class="col-span-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center text-xs text-slate-400">Speel en bewaar een potje met scores om jullie All-Time Spelrecords te zien!</div>`;
+        } else {
+          recGrid.innerHTML = recList.map(rec => {
+            const gDef = getGameDef(rec.gameId);
+            return `
+              <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+                    ${SVG_ICONS[gDef?.icon] || SVG_ICONS.free}
+                  </div>
+                  <div class="min-w-0">
+                    <div class="font-bold text-xs text-white truncate">${rec.gameName}</div>
+                    <div class="text-[11px] text-amber-300 font-bold truncate">👑 ${rec.holder}</div>
+                    ${rec.bestRound ? `<div class="text-[10px] text-slate-400 truncate">⚡ Beste ronde: <b>${rec.bestRound.score}p</b> (${rec.bestRound.player})</div>` : ''}
+                  </div>
+                </div>
+                <div class="text-right shrink-0">
+                  <div class="text-[10px] text-slate-400 uppercase">${rec.lowWins ? 'Beste (Laag)' : 'Record'}</div>
+                  <div class="text-lg font-black text-indigo-400">${rec.bestScore} <span class="text-[10px] font-normal">pnt</span></div>
+                </div>
+              </div>`;
+          }).join('');
+        }
+      }
+
       const histListEl = document.getElementById('historyMatchesList');
       if (histListEl) {
         if (filteredHistory.length === 0) {
           histListEl.innerHTML = `<div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">Nog geen potjes opgeslagen.</div>`;
         } else {
           histListEl.innerHTML = filteredHistory.map(h => `
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-2">
-              <div>
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2">
+              <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
                   <span class="font-bold text-sm text-indigo-300">${h.gameName}</span>
                   <span class="text-[11px] text-slate-500">${h.date}</span>
                 </div>
-                <div class="text-xs text-slate-300 mt-1">
-                  ${(h.results || []).map(r => `${r.name}: <b>${r.score}</b>`).join(' • ')}
+                <div class="flex items-center gap-2">
+                  ${(h.winners && h.winners.length) ? `<span class="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">👑 ${h.winners.join(', ')}</span>` : ''}
+                  <button type="button" onclick="deleteHistoryItem('${h.id}')" class="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-xs" title="Verwijder">🗑️</button>
                 </div>
               </div>
-              <div class="flex items-center gap-2 ml-auto">
-                ${(h.winners && h.winners.length) ? `<span class="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">👑 ${h.winners.join(', ')}</span>` : ''}
-                <button type="button" onclick="deleteHistoryItem('${h.id}')" class="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-xs" title="Verwijder">🗑️</button>
+              <div class="text-xs text-slate-300">
+                ${h.noScores ? `<span class="text-slate-400 italic">Alleen winnaar geregistreerd (${(h.results || []).map(r => r.name).join(', ')})</span>` : (h.results || []).map(r => `${r.name}: <b>${r.score}</b>`).join(' • ')}
               </div>
+              ${h.note ? `<div class="text-[11px] text-indigo-200/90 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 italic">💬 "${h.note}"</div>` : ''}
             </div>`).join('');
         }
       }
+    }
+
+    // SPELER PROFIEL & HEAD-TO-HEAD RIVALS
+    function openPlayerProfile(playerName) {
+      const modal = document.getElementById('playerProfileModal');
+      if (!modal) return;
+      const pObj = state.players.find(x => x.name === playerName) || { name: playerName, color: '#6366f1' };
+
+      document.getElementById('profPlayerName').textContent = pObj.name;
+      document.getElementById('profColorDot').style.backgroundColor = pObj.color || '#6366f1';
+
+      let totalPlayed = 0;
+      let totalWins = 0;
+      const gameWinCounts = {};
+
+      state.history.forEach(h => {
+        const inMatch = (h.results || []).some(r => r.name === pObj.name);
+        if (inMatch) {
+          totalPlayed++;
+          if ((h.winners || []).includes(pObj.name)) {
+            totalWins++;
+            gameWinCounts[h.gameName] = (gameWinCounts[h.gameName] || 0) + 1;
+          }
+        }
+      });
+
+      const winPct = totalPlayed > 0 ? Math.round((totalWins / totalPlayed) * 100) : 0;
+      document.getElementById('profSummaryGrid').innerHTML = `
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+          <div class="text-[10px] uppercase text-slate-400">Potjes</div>
+          <div class="text-lg font-black text-white">${totalPlayed}</div>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+          <div class="text-[10px] uppercase text-slate-400">Wins</div>
+          <div class="text-lg font-black text-amber-300">🏆 ${totalWins}</div>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+          <div class="text-[10px] uppercase text-slate-400">Win %</div>
+          <div class="text-lg font-black text-emerald-400">${winPct}%</div>
+        </div>
+      `;
+
+      let favGame = '-';
+      let maxW = -1;
+      Object.entries(gameWinCounts).forEach(([gName, wCnt]) => {
+        if (wCnt > maxW) {
+          maxW = wCnt;
+          favGame = `${gName} (${wCnt}x win)`;
+        }
+      });
+      document.getElementById('profFavGame').textContent = favGame;
+
+      // HEAD-TO-HEAD RIVALS
+      const rivalsMap = {};
+      state.history.forEach(h => {
+        const namesInMatch = (h.results || []).map(r => r.name);
+        if (namesInMatch.includes(pObj.name)) {
+          namesInMatch.forEach(otherName => {
+            if (otherName !== pObj.name) {
+              if (!rivalsMap[otherName]) rivalsMap[otherName] = { played: 0, wins: 0, losses: 0 };
+              rivalsMap[otherName].played++;
+              const pWon = (h.winners || []).includes(pObj.name);
+              const otherWon = (h.winners || []).includes(otherName);
+              if (pWon && !otherWon) rivalsMap[otherName].wins++;
+              else if (!pWon && otherWon) rivalsMap[otherName].losses++;
+            }
+          });
+        }
+      });
+
+      const rivalListEl = document.getElementById('profRivalsList');
+      const rivalEntries = Object.entries(rivalsMap);
+      if (rivalEntries.length === 0) {
+        rivalListEl.innerHTML = `<div class="text-xs text-slate-500 text-center py-2">Nog geen onderlinge duels geregistreerd.</div>`;
+      } else {
+        rivalEntries.sort((a, b) => b[1].played - a[1].played);
+        rivalListEl.innerHTML = rivalEntries.map(([rName, dat]) => `
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs">
+            <span class="font-bold text-white">${rName}</span>
+            <div class="flex items-center gap-3">
+              <span class="text-slate-400">${dat.played} duel${dat.played === 1 ? '' : 's'}</span>
+              <span class="font-extrabold text-emerald-400">${dat.wins}W</span>
+              <span class="font-extrabold text-rose-400">${dat.losses}V</span>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closePlayerProfileModal() {
+      document.getElementById('playerProfileModal')?.classList.add('hidden');
     }
 
     function deleteHistoryItem(matchId) {
@@ -2845,8 +3408,200 @@
     }
 
     // =========================================================================
-    // 13. EIGEN SPEL & BACK-UP
+    // 13. EIGEN SPEL, BACK-UP, OEPS-KNOP (UNDO), SNEL WINNAAR & SCHERM AAN-HOUDER
     // =========================================================================
+    let undoStack = [];
+    let isRestoringUndo = false;
+
+    function pushUndoSnapshot() {
+      if (isRestoringUndo) return;
+      const gs = state.gamesState[state.activeGameId];
+      if (!gs) return;
+      const snap = JSON.stringify(gs);
+      if (undoStack.length > 0 && undoStack[undoStack.length - 1].snap === snap) return;
+      undoStack.push({ gameId: state.activeGameId, snap });
+      if (undoStack.length > 25) undoStack.shift();
+      updateUndoButtonUI();
+    }
+
+    function undoLastScoreAction() {
+      for (let i = undoStack.length - 1; i >= 0; i--) {
+        if (undoStack[i].gameId === state.activeGameId) {
+          const item = undoStack.splice(i, 1)[0];
+          isRestoringUndo = true;
+          state.gamesState[state.activeGameId] = JSON.parse(item.snap);
+          saveState();
+          renderScoreboard();
+          isRestoringUndo = false;
+          updateUndoButtonUI();
+          showToast('↩️ Laatste actie ongedaan gemaakt!');
+          return;
+        }
+      }
+      showToast('⚠️ Geen eerdere stap om terug te draaien.');
+    }
+
+    function updateUndoButtonUI() {
+      const btn = document.getElementById('undoActionBtn');
+      if (!btn) return;
+      const hasSteps = undoStack.some(x => x.gameId === state.activeGameId);
+      btn.disabled = !hasSteps;
+    }
+
+    document.addEventListener('pointerdown', (e) => {
+      const sb = document.getElementById('gameSheetContainer');
+      if (sb && sb.contains(e.target)) {
+        const btn = e.target.closest('button');
+        if (btn) pushUndoSnapshot();
+      }
+    }, true);
+
+    // SCHERM AAN-HOUDER (WAKE LOCK API)
+    let wakeLockSentinel = null;
+    let wakeLockWanted = true;
+
+    async function requestAppWakeLock() {
+      if (!('wakeLock' in navigator) || !wakeLockWanted) {
+        updateWakeLockBadge(false);
+        return;
+      }
+      try {
+        wakeLockSentinel = await navigator.wakeLock.request('screen');
+        updateWakeLockBadge(true);
+        wakeLockSentinel.addEventListener('release', () => updateWakeLockBadge(false));
+      } catch (err) {
+        updateWakeLockBadge(false);
+      }
+    }
+
+    async function releaseAppWakeLock() {
+      if (wakeLockSentinel) {
+        try { await wakeLockSentinel.release(); } catch (e) {}
+        wakeLockSentinel = null;
+      }
+      updateWakeLockBadge(false);
+    }
+
+    function toggleWakeLockManual() {
+      wakeLockWanted = !wakeLockWanted;
+      if (wakeLockWanted) {
+        requestAppWakeLock();
+        showToast('📱 Scherm blijft nu aan tijdens het spelen!');
+      } else {
+        releaseAppWakeLock();
+        showToast('🌙 Scherm aan-houder uitgeschakeld.');
+      }
+    }
+
+    function updateWakeLockBadge(active) {
+      const badge = document.getElementById('wakeLockBadge');
+      if (!badge) return;
+      if (active) {
+        badge.textContent = '📱 Scherm blijft aan';
+        badge.className = 'cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold';
+      } else {
+        badge.textContent = '🌙 Scherm-lock uit (tik)';
+        badge.className = 'cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 font-semibold';
+      }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      const sbVisible = !document.getElementById('viewScoreboard')?.classList.contains('hidden');
+      if (document.visibilityState === 'visible' && sbVisible && wakeLockWanted) {
+        requestAppWakeLock();
+      }
+    });
+
+    // SNEL WINNAAR FUNCTIES
+    let qwSelectedWinners = [];
+
+    function openQuickWinModal(preselectGameId = null) {
+      const modal = document.getElementById('quickWinModal');
+      if (!modal) return;
+      const selectEl = document.getElementById('qwGameSelect');
+      const allGames = [...getAllGames()].sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+      const defaultGameId = preselectGameId || state.activeGameId || 'azul';
+
+      selectEl.innerHTML = `<option value="__custom__">✍️ Ander spel (zelf naam intypen)...</option>` +
+        allGames.map(g => `<option value="${g.id}" ${g.id === defaultGameId ? 'selected' : ''}>${g.name}</option>`).join('');
+
+      document.getElementById('qwCustomGameInput').value = '';
+      document.getElementById('qwNoteInput').value = '';
+      toggleQwCustomNameInput();
+      qwSelectedWinners = [];
+      renderQwWinnersList();
+      modal.classList.remove('hidden');
+    }
+
+    function closeQuickWinModal() {
+      document.getElementById('quickWinModal')?.classList.add('hidden');
+    }
+
+    function toggleQwCustomNameInput() {
+      const val = document.getElementById('qwGameSelect')?.value;
+      const wrap = document.getElementById('qwCustomNameWrap');
+      if (wrap) wrap.classList.toggle('hidden', val !== '__custom__');
+    }
+
+    function toggleQwWinner(playerName) {
+      const idx = qwSelectedWinners.indexOf(playerName);
+      if (idx === -1) qwSelectedWinners.push(playerName);
+      else qwSelectedWinners.splice(idx, 1);
+      renderQwWinnersList();
+    }
+
+    function renderQwWinnersList() {
+      const listEl = document.getElementById('qwWinnersList');
+      if (!listEl) return;
+      listEl.innerHTML = getActivePlayers().map(p => {
+        const isPicked = qwSelectedWinners.includes(p.name);
+        return `
+          <button type="button" onclick="toggleQwWinner('${p.name.replace(/'/g, "\\'")}')"
+            class="p-2.5 rounded-xl border text-left flex items-center justify-between transition ${isPicked ? 'bg-amber-500/20 border-amber-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}"
+            style="border-left: 4px solid ${p.color || '#6366f1'}">
+            <span class="font-bold truncate">${p.name}</span>
+            <span class="text-sm">${isPicked ? '👑' : '○'}</span>
+          </button>`;
+      }).join('');
+    }
+
+    function saveQuickWinMatch() {
+      const activePlayers = getActivePlayers();
+      if (!activePlayers.length) return;
+      if (qwSelectedWinners.length === 0) return showToast('⚠️ Kies minimaal 1 winnaar!');
+
+      const selVal = document.getElementById('qwGameSelect')?.value;
+      let gameId = selVal;
+      let gameName = '';
+
+      if (selVal === '__custom__') {
+        const customName = (document.getElementById('qwCustomGameInput')?.value || '').trim();
+        if (!customName) return showToast('⚠️ Typ eerst een spelnaam in!');
+        gameName = customName;
+        gameId = 'quick_' + customName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+      } else {
+        gameName = getGameDef(selVal).name;
+      }
+
+      const noteVal = (document.getElementById('qwNoteInput')?.value || '').trim();
+
+      state.history.unshift({
+        id: 'm_' + Date.now(),
+        gameId,
+        gameName,
+        noScores: true,
+        date: new Date().toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        results: activePlayers.map(p => ({ playerId: p.id, name: p.name, score: qwSelectedWinners.includes(p.name) ? '👑' : '-', color: p.color })),
+        winners: [...qwSelectedWinners],
+        note: noteVal
+      });
+
+      saveState();
+      closeQuickWinModal();
+      switchMainView('history');
+      showToast(`🏆 Winst voor ${qwSelectedWinners.join(', ')} opgeslagen!`);
+    }
+
     function openCustomGameModal() {
       document.getElementById('customGameModal')?.classList.remove('hidden');
     }
@@ -2864,7 +3619,7 @@
       const catsRaw = (document.getElementById('cgCategoriesInput')?.value || '').trim();
       const categories = catsRaw ? catsRaw.split(',').map(s => s.trim()).filter(Boolean) : ['Punten'];
 
-      const newGame = {
+      state.customGames.push({
         id: 'custom_' + Date.now(),
         name,
         subtitle: 'Eigen toegevoegd spel',
@@ -2877,9 +3632,7 @@
         dur: 'medium',
         categories,
         isCustom: true
-      };
-
-      state.customGames.push(newGame);
+      });
       saveState();
       closeCustomGameModal();
       renderGamePicker();
