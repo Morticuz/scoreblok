@@ -2727,14 +2727,34 @@
     // =========================================================================
     // 11. SPELERSBEHEER & SPELERSGROEPEN (PRESETS)
     // =========================================================================
+    const PLAYER_PALETTE = [
+      '#6366f1', // Indigo
+      '#4f46e5', // Diepblauw/Paars
+      '#3b82f6', // Blauw
+      '#06b6d4', // Cyaan / Turquoise
+      '#10b981', // Groen
+      '#84cc16', // Limoengroen
+      '#eab308', // Goud / Geel
+      '#f97316', // Oranje
+      '#ef4444', // Rood
+      '#991b1b', // Bordeauxrood
+      '#ec4899', // Roze
+      '#a855f7', // Paars
+      '#d946ef', // Fuchsiapaars
+      '#78716c', // Grijs / Zilver
+      '#0f172a', // Strak Zwart
+      '#f8fafc'  // Helder Wit
+    ];
+
     function renderPlayersManager() {
       const listEl = document.getElementById('playersManagerList');
       if (!listEl) return;
 
       listEl.innerHTML = state.players.map((p, idx) => {
         const isActive = p.active !== false;
+        const curColor = p.color || '#6366f1';
         return `
-          <div class="bg-slate-950 border ${isActive ? 'border-slate-800' : 'border-slate-900 opacity-55'} rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2" style="border-left: 5px solid ${p.color || '#6366f1'}">
+          <div class="bg-slate-950 border ${isActive ? 'border-slate-800' : 'border-slate-900 opacity-55'} rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2" style="border-left: 5px solid ${curColor}">
             <div class="flex items-center gap-2.5 min-w-0">
               <button type="button" onclick="togglePlayerActive('${p.id}')" title="Speelt mee aan/uit" class="w-6 h-6 rounded-lg border flex items-center justify-center text-xs font-bold ${isActive ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-500'}">
                 ${isActive ? '✓' : ''}
@@ -2744,12 +2764,21 @@
               ${idx === 0 && isActive ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold">Start</span>' : ''}
             </div>
 
-            <div class="flex items-center gap-1.5 ml-auto">
+            <div class="flex items-center gap-2 ml-auto flex-wrap">
               <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl px-2 py-1" title="Handicap">
                 <span class="text-[10px] text-slate-400">Hcp:</span>
                 <input type="number" value="${p.handicap || 0}" onchange="setPlayerHandicap('${p.id}', this.value)" class="w-8 bg-transparent text-center text-xs font-bold text-amber-300 outline-none" />
               </div>
-              <input type="color" value="${p.color || '#6366f1'}" onchange="setPlayerColor('${p.id}', this.value)" class="w-7 h-7 rounded-lg bg-transparent border-0 cursor-pointer" title="Kleur" />
+
+              <!-- Uitgebreid kleurenpalet met 16 opties -->
+              <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl px-2 py-1.5 max-w-[210px] overflow-x-auto no-scrollbar">
+                ${PLAYER_PALETTE.map(hex => `
+                  <button type="button" onclick="setPlayerColor('${p.id}', '${hex}')" 
+                    class="w-4 h-4 rounded-full border shrink-0 transition ${curColor === hex ? 'scale-125 border-white ring-2 ring-indigo-500' : 'border-slate-700 hover:scale-110'}" 
+                    style="background-color: ${hex};" title="Kies kleur"></button>
+                `).join('')}
+              </div>
+
               <button type="button" onclick="movePlayerOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 text-xs font-bold text-slate-200">▲</button>
               <button type="button" onclick="movePlayerOrder(${idx}, 1)" ${idx === state.players.length - 1 ? 'disabled' : ''} class="px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 text-xs font-bold text-slate-200">▼</button>
               <button type="button" onclick="removePlayer('${p.id}')" class="px-2 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-bold">🗑️</button>
@@ -2759,6 +2788,7 @@
 
       renderPlayerPresetsBar();
     }
+
 
     function renderPlayerPresetsBar() {
       const bar = document.getElementById('playerPresetsBar');
