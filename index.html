@@ -583,7 +583,7 @@
       { id: 'parijs', name: 'Parijs: De Lichtstad', subtitle: 'Verlichte gebouwen, grootste wijk, ansichtkaarten & schilder', category: 'board', type: 'categories', icon: 'parijs', minP: 2, maxP: 2, dur: 'short', categories: ['💡 Verlichte Gebouwen (Tegels × Lantaarns)', '🏘️ Grootste Gebouwen-groep (1p/vakje)', '🎨 Schilder & Ansichtkaart-bonussen', '🏚️ Ongebouwde tegels (-3p per stuk)'], tieBreakerDesc: 'Grootste verlichte oppervlakte' },
       { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, jokers & sterren', category: 'card', type: 'kok1', icon: 'kok', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'keeropkeer2', name: 'Keer op Keer 2', subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O', category: 'card', type: 'kok2', icon: 'kok2', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
-      { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Raaf, 11 & 13)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Raaf + Stenen 11 & 13)'], tieBreakerDesc: 'Hoogste tegelnummer in bezit' },
+      { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Stenen 11 & 13 + 7 Wormfiches)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Stenen 11 & 13 + 7 Wormfiches)'], tieBreakerDesc: 'Hoogste tegelnummer in bezit' },
       { id: 'carcassonne', name: 'Carcassonne', subtitle: 'Live teller met uitbreidings-snelknoppen', category: 'board', type: 'carcassonne', icon: 'carcassonne', minP: 2, maxP: 6, dur: 'medium', expansions: ['⛪ Kathedralen & Herbergen', '🍷 Kooplieden & Bouwmeesters'] },
       { id: 'cascadia', name: 'Cascadia', subtitle: 'Dieren, leefgebieden (+ automatische meerderheid) & appels', category: 'board', type: 'cascadia', icon: 'cascadia', minP: 1, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste dennenappels (natuurfiches)' },
       { id: 'beverbende', name: 'Beverbende', subtitle: 'Rondeteller (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'beverbende', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
@@ -2033,35 +2033,51 @@
       renderScoreboard();
     }
 
+        // =========================================================================
+    // 10E. REGENWORMEN (INCL. DEEL 2: STENEN 11 & 13 + MAX 7 WORMFICHES)
     // =========================================================================
-    // 10E. REGENWORMEN (INCL. DEEL 2)
-    // =========================================================================
+    function isRegenwormenExpActive(gs) {
+      if (!gs || !gs.activeExpansions) return false;
+      return Object.keys(gs.activeExpansions).some(k => gs.activeExpansions[k]);
+    }
+
     function renderRegenwormenSheet(container) {
       const gs = ensureGameState('regenwormen');
-      const expOn = !!gs.activeExpansions?.['🐦‍⬛ Deel 2: Uitbreiding (Raaf + Stenen 11 & 13)'];
+      const expOn = isRegenwormenExpActive(gs);
       const tilesToRender = expOn ? [...REGENWORMEN_EXP_TILES, ...REGENWORMEN_TILES] : REGENWORMEN_TILES;
       const activePlayers = getActivePlayers();
 
       const owners = {};
+      let totalTokensTaken = 0;
       activePlayers.forEach(p => {
-        const tMap = gs.playerData[p.id].regenwormen.tiles || {};
+        const r = gs.playerData[p.id].regenwormen;
+        const tMap = r.tiles || {};
         Object.keys(tMap).forEach(tKey => {
           if (tMap[tKey]) owners[tKey] = p.name;
         });
+        totalTokensTaken += Number(r.bonus || 0);
       });
+      const tokensLeft = Math.max(0, 7 - totalTokensTaken);
 
-      container.innerHTML = activePlayers.map(p => {
+      const potBanner = expOn ? `
+        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between text-xs">
+          <span class="text-slate-300 font-bold">🪙 Wormfiches in de pot (via Raaf / Dubbel):</span>
+          <span class="px-2.5 py-1 rounded-xl ${tokensLeft === 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'} font-extrabold">
+            Nog ${tokensLeft} van 7 over
+          </span>
+        </div>
+      ` : '';
+
+      container.innerHTML = potBanner + activePlayers.map(p => {
         const r = gs.playerData[p.id].regenwormen;
+        const myTokens = Number(r.bonus || 0);
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <div class="flex items-center gap-2">
-                <h3 class="font-bold text-sm text-white">${p.name}</h3>
-                ${expOn ? `
-                  <button type="button" onclick="toggleRegenwormenRaven('${p.id}')" class="px-2.5 py-1 rounded-xl text-xs font-bold border transition ${r.hasRaven ? 'bg-purple-600/30 border-purple-400 text-purple-200 shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
-                    🐦‍⬛ Raaf ${r.hasRaven ? 'in bezit!' : ''}
-                  </button>` : ''}
-              </div>
+              <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span>${p.name}</span>
+              </h3>
               <span class="text-sm font-extrabold text-amber-300">Wormen: ${calculatePlayerTotal('regenwormen', p.id)} 🐛</span>
             </div>
 
@@ -2079,9 +2095,16 @@
             </div>
 
             ${expOn ? `
-              <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-                <span class="text-slate-300 font-semibold">Extra bonuswormen:</span>
-                <input type="number" value="${valOrEmpty(r.bonus)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setRegenwormenBonus('${p.id}', this.value)" class="w-16 bg-slate-900 border border-slate-700 rounded-lg py-1 text-center font-bold text-amber-300 placeholder-slate-600" />
+              <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
+                <div>
+                  <span class="text-slate-200 font-bold">🪙 Wormfiches (Raaf / Dubbel):</span>
+                  <span class="text-[11px] text-slate-400 block">Elk fiche telt als +1 🐛 (max. 7 totaal in het spel)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', -1)" ${myTokens <= 0 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 border border-slate-700 text-white font-black text-sm">-</button>
+                  <span class="w-12 text-center font-black text-sm text-amber-300">${myTokens} 🐛</span>
+                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', 1)" ${totalTokensTaken >= 7 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-30 text-slate-950 font-black text-sm">+</button>
+                </div>
               </div>` : ''}
           </div>`;
       }).join('');
@@ -2101,23 +2124,24 @@
       renderScoreboard();
     }
 
-    function toggleRegenwormenRaven(playerId) {
+    function adjRegenwormenTokens(playerId, delta) {
       pushUndoSnapshot();
       const gs = ensureGameState('regenwormen');
-      const cur = !!gs.playerData[playerId].regenwormen.hasRaven;
-      state.players.forEach(p => {
-        if (gs.playerData[p.id]?.regenwormen) gs.playerData[p.id].regenwormen.hasRaven = false;
+      const activePlayers = getActivePlayers();
+      let totalTaken = 0;
+      activePlayers.forEach(p => {
+        totalTaken += Number(gs.playerData[p.id]?.regenwormen?.bonus || 0);
       });
-      gs.playerData[playerId].regenwormen.hasRaven = !cur;
+
+      const cur = Number(gs.playerData[playerId].regenwormen.bonus || 0);
+      if (delta > 0 && totalTaken >= 7) {
+        showToast('⚠️ Alle 7 wormfiches zijn al uit de pot!');
+        return;
+      }
+      const next = Math.max(0, Math.min(7, cur + delta));
+      gs.playerData[playerId].regenwormen.bonus = next;
       saveState();
       renderScoreboard();
-    }
-
-    function setRegenwormenBonus(playerId, val) {
-      const gs = ensureGameState('regenwormen');
-      gs.playerData[playerId].regenwormen.bonus = Number(val || 0);
-      saveState();
-      renderLiveLeaderboard();
     }
 
     // =========================================================================
