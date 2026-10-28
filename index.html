@@ -54,7 +54,7 @@
   <!-- Toast Melding -->
   <div id="toastBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-indigo-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-2xl border border-indigo-400/40"></div>
 
-  <!-- Top Header -->
+    <!-- Top Header -->
   <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3">
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-center justify-between">
@@ -65,16 +65,30 @@
             <p id="headerSubtitle" class="text-xs text-slate-400">Kies een spel of beheer je favorieten</p>
           </div>
         </div>
-        <button type="button" onclick="openStartPlayerModal()" class="sm:hidden px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">
-          🎲 Wie begint?
-        </button>
+        
+        <!-- Mobiele knoppen rechtsboven (Wie begint + Start Toernooi) -->
+        <div class="flex sm:hidden items-center gap-1.5">
+          <button type="button" onclick="openStartPlayerModal()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">
+            🎲 Wie begint?
+          </button>
+          <button type="button" onclick="openStartTournamentModal()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-extrabold">
+            🏆 Toernooi
+          </button>
+        </div>
       </div>
 
-      <div class="flex items-center gap-1.5">
-        <button type="button" id="navBtnPicker" onclick="switchMainView('picker')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center">🎮 Spellen</button>
-        <button type="button" id="navBtnPlayers" onclick="switchMainView('players')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">👥 Spelers (<span id="activePlayerCntLabel">2</span>)</button>
-        <button type="button" id="navBtnHistory" onclick="switchMainView('history')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">🏆 Statistieken</button>
-        <button type="button" onclick="openStartPlayerModal()" class="hidden sm:inline-flex px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-extrabold transition">🎲 Wie begint?</button>
+      <div class="flex items-center justify-between sm:justify-end gap-1.5">
+        <div class="flex items-center gap-1.5 flex-1 sm:flex-initial">
+          <button type="button" id="navBtnPicker" onclick="switchMainView('picker')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center">🎮 Spellen</button>
+          <button type="button" id="navBtnPlayers" onclick="switchMainView('players')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">👥 Spelers (<span id="activePlayerCntLabel">2</span>)</button>
+          <button type="button" id="navBtnHistory" onclick="switchMainView('history')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">🏆 Statistieken</button>
+        </div>
+
+        <!-- Desktop knoppen rechts (Wie begint + Start Toernooi onder elkaar of naast elkaar) -->
+        <div class="hidden sm:flex flex-col gap-1.5 shrink-0">
+          <button type="button" onclick="openStartPlayerModal()" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-extrabold transition text-center">🎲 Wie begint?</button>
+          <button type="button" onclick="openStartTournamentModal()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-extrabold transition text-center">🏆 Start Toernooi</button>
+        </div>
       </div>
     </div>
   </header>
