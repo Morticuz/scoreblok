@@ -575,12 +575,12 @@
       { id: 'paard', name: '🐎 Paard', val: 1000 }
     ];
 
-    // =========================================================================
+        // =========================================================================
     // 2. VOLLEDIGE SPELLEN CATALOGUS (TOP 20 BORD + TOP 20 KAART/DOBBEL + SPECIALS)
     // =========================================================================
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + vloerlijn óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
-      { id: 'parijs', name: 'Parijs: De Lichtstad', subtitle: 'Verlichte gebouwen, grootste wijk, ansichtkaarten & schilder', category: 'board', type: 'categories', icon: 'parijs', minP: 2, maxP: 2, dur: 'short', categories: ['💡 Verlichte Gebouwen (Tegels × Lantaarns)', '🏘️ Grootste Gebouwen-groep (1p/vakje)', '🎨 Schilder & Ansichtkaart-bonussen', '🏚️ Ongebouwde tegels (-3p per stuk)'], tieBreakerDesc: 'Grootste verlichte oppervlakte' },
+      { id: 'parijs', name: 'Parijs: De Lichtstad', subtitle: 'Verlichte gebouwen, grootste wijk, ansichtkaarten & schilder', category: 'board', type: 'categories', icon: 'parijs', minP: 2, maxP: 2, dur: 'short', categories: ['💡 Verlichte Gebouwen (Tegels × Lantaarns)', '🏘️ Grootste Gebouwen-groep (1p/vakje)', '🎨 Schilder & Ansichtkaart-bonussen', '🏚️ Strafpunten Ongebouwde tegels (-3p per stuk)'], tieBreakerDesc: 'Grootste aaneengesloten groep gebouwen' },
       { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, jokers & sterren', category: 'card', type: 'kok1', icon: 'kok', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'keeropkeer2', name: 'Keer op Keer 2', subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O', category: 'card', type: 'kok2', icon: 'kok2', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Stenen 11 & 13 + 7 Wormfiches)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Stenen 11 & 13 + 7 Wormfiches)'], tieBreakerDesc: 'Hoogste tegelnummer in bezit' },
@@ -589,7 +589,7 @@
       { id: 'beverbende', name: 'Beverbende', subtitle: 'Rondeteller (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'beverbende', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
       { id: 'beverclan', name: 'Beverclan', subtitle: 'Rondeteller met burchtkaarten & bonuspunten (Hoogste wint!)', category: 'card', type: 'rounds', icon: 'beverbende', lowestWins: false, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
       { id: 'rummikub', name: 'Rummikub', subtitle: 'Rondeteller voor gelegde stenen', category: 'board', type: 'rounds', icon: 'rummikub', minP: 2, maxP: 4, dur: 'medium' },
-      { id: 'eldorado', name: 'De Zoektocht naar El Dorado', subtitle: 'Barrières & trofeeën bij gelijkspel', category: 'board', type: 'categories', icon: 'eldorado', minP: 2, maxP: 4, dur: 'medium', categories: ['🏁 El Dorado bereikt (10p)', '🚧 Barrières (aantal)', '💎 Extra munten / grotten'], tieBreakerDesc: 'Meeste verzamelde barrières' },
+      { id: 'eldorado', name: 'De Zoektocht naar El Dorado', subtitle: 'Eindveld bereikt + Barrières als officiële tie-breaker', category: 'board', type: 'categories', icon: 'eldorado', minP: 2, maxP: 4, dur: 'medium', categories: ['🏁 Eindveld El Dorado bereikt (vul 100 in)', '🚧 Verzamelde Barrières (1p per stuk)', '🔢 Hoogste nummer op een barrière (bij gelijkspel)'], tieBreakerDesc: 'Meeste barrières, daarna hoogste barrière-nummer' },
       { id: 'take5', name: 'Take 5! (6 nimmt!)', subtitle: 'Rondeteller voor koeienkoppen tot 66 (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'take5', lowestWins: true, limit: 66, minP: 2, maxP: 10, dur: 'short' },
       { id: 'boonanza', name: 'Boonanza', subtitle: 'Geoogste bonenvelden & gouden munten per ronde', category: 'card', type: 'categories', icon: 'boonanza', minP: 2, maxP: 7, dur: 'medium', categories: ['🪙 Ronde 1 Munten', '🪙 Ronde 2 Munten', '🪙 Ronde 3 Munten', '🌱 Bonus / Uitbreiding'] },
       { id: 'pointsalad', name: 'Point Salad', subtitle: 'Doelkaarten & groente-combinaties (Tomaat, Sla, Wortel, etc.)', category: 'card', type: 'categories', icon: 'pointsalad', minP: 2, maxP: 6, dur: 'short', categories: ['🎯 Doelkaart 1', '🎯 Doelkaart 2', '🎯 Doelkaart 3', '🎯 Overige Doelkaarten'] },
@@ -605,16 +605,16 @@
       { id: 'everdell', name: 'Everdell', subtitle: 'Kaarten in stad, Gebeurtenissen, Reis, Welvaart & Bessen/Fiches', category: 'board', type: 'categories', icon: 'everdell', minP: 1, maxP: 4, dur: 'medium', categories: ['🏘️ Gebouwen & Wezens (Basis)', '🟣 Paarse Welvaart-bonussen', '🚩 Gebeurtenissen', '🍂 Herfst-reis punten', '🪙 Puntfiches'], tieBreakerDesc: 'Meeste behaalde gebeurtenissen' },
       { id: 'wondersduel', name: '7 Wonders Duel', subtitle: 'Blauw, Groen, Geel, Paars, Wonderen, Munten & Militair', category: 'board', type: 'categories', icon: 'wonders7', minP: 2, maxP: 2, dur: 'short', categories: ['🟦 Burgerlijke gebouwen', '🟩 Wetenschap & Vooruitgang', '🟨 Commerciële kaarten', '🟪 Gilden', '🏛️ Wonderen', '⚔️ Militair spoor', '🪙 Munten (1p per 3)'], tieBreakerDesc: 'Meeste punten uit Blauwe gebouwen' },
       { id: 'splendor', name: 'Splendor', subtitle: 'Live Prestige-punten teller tot 15 punten + Edelen (+3)', category: 'board', type: 'carcassonne', icon: 'splendor', limit: 15, minP: 2, maxP: 4, dur: 'short' },
-      { id: 'patchwork', name: 'Patchwork', subtitle: 'Knopen in bezit + 7x7 Bonus (+7) minus lege vakjes (× -2)', category: 'board', type: 'categories', icon: 'patchwork', minP: 2, maxP: 2, dur: 'short', categories: ['🔘 Aantal Knopen in bezit (+)', '🟩 7x7 Tegel Bonus (7p)', '🟫 Lege vakjes × -2 (vul als min-getal in)'] },
+      { id: 'patchwork', name: 'Patchwork', subtitle: 'Knopen in bezit + 7x7 Bonus (+7) minus lege vakjes (× -2)', category: 'board', type: 'categories', icon: 'patchwork', minP: 2, maxP: 2, dur: 'short', categories: ['🔘 Aantal Knopen in bezit (+)', '🟩 7x7 Tegel Bonus (7p)', '🏚️ Strafpunten Lege vakjes (-2p per stuk)'], tieBreakerDesc: 'Meeste knopen' },
       { id: 'kwakzalvers', name: 'De Kwakzalvers van Kakelenburg', subtitle: 'Ketel-score, Robijnen & Overgebleven geld/ingrediënten', category: 'board', type: 'categories', icon: 'kwakzalvers', minP: 2, maxP: 4, dur: 'medium', categories: ['🍲 Score op het Ketelspoor', '💎 Robijnen (1p per 2)', '🧪 Eindronde Ketel-bonus'] },
       { id: 'elgrande', name: 'El Grande', subtitle: 'Regio-tellingen (Ronde 3, 6 & 9), Castillo & Koningsbonus', category: 'board', type: 'rounds', icon: 'machiavelli', minP: 2, maxP: 5, dur: 'long' },
       { id: 'dixit', name: 'Dixit', subtitle: 'Live teller voor konijntjes op het scorespoor (tot 30 punten)', category: 'board', type: 'carcassonne', icon: 'dixit', limit: 30, minP: 3, maxP: 8, dur: 'short' },
       { id: 'rozenkoning', name: 'De Rozenkoning', subtitle: 'Aaneengesloten gebieden (Vakjes × Kroontjes)', category: 'board', type: 'categories', icon: 'machiavelli', minP: 2, maxP: 2, dur: 'short', categories: ['🌹 Gebied 1 (Vakjes × Kronen)', '🌹 Gebied 2', '🌹 Gebied 3', '🌹 Overige gebieden'] },
       { id: 'burgundy', name: 'Castles of Burgundy', subtitle: 'Spoor, goederen, zilverlingen, werkers & gele tegels', category: 'board', type: 'categories', icon: 'burgundy', minP: 1, maxP: 4, dur: 'long', categories: ['🚩 Score op spoor', '📦 Onverkochte goederen (1p)', '🪙 Zilverlingen (1p)', '👷 Werkers (1p per 2)', '🟨 Gele Kennis-tegels'] },
-      { id: 'agricola', name: 'Agricola', subtitle: 'Akkers, weides, graan, vee, kamers & familieleden', category: 'board', type: 'categories', icon: 'agricola', minP: 1, maxP: 5, dur: 'long', categories: ['🌾 Akkers & Oogst', '🐑 Weides & Vee', '🟫 Ongebruikte velden (-)', '🏠 Stallen & Kamers', '👨‍👩‍👧‍👦 Familieleden (3p)', '🃏 Kaarten & Bonus', '🥣 Bedelkaarten (-3p)'] },
+      { id: 'agricola', name: 'Agricola', subtitle: 'Akkers, weides, graan, vee, kamers & familieleden', category: 'board', type: 'categories', icon: 'agricola', minP: 1, maxP: 5, dur: 'long', categories: ['🌾 Akkers & Oogst', '🐑 Weides & Vee', '🏚️ Strafpunten Ongebruikte velden (-1p)', '🏠 Stallen & Kamers', '👨‍👩‍👧‍👦 Familieleden (3p)', '🃏 Kaarten & Bonus', '🥣 Strafpunten Bedelkaarten (-3p)'], tieBreakerDesc: 'Meeste voorraden/dieren' },
       { id: 'wingspan', name: 'Wingspan', subtitle: 'Vogels, bonuskaarten, rondedoelen, eieren & voedsel', category: 'board', type: 'categories', icon: 'wingspan', minP: 1, maxP: 5, dur: 'medium', expansions: ['🌺 Oceanië (Nectar)'], categories: ['🐦 Vogels', '📜 Bonuskaarten', '🎯 Rondedoelen', '🥚 Eieren (1p)', '🍒 Voedsel op kaarten (1p)', '🃏 Weggestopte kaarten (1p)'], tieBreakerDesc: 'Meeste ongebruikte voedselfiches' },
       { id: 'wyrmspan', name: 'Wyrmspan', subtitle: 'Draken, drakengilde, doelen, eieren & schatten', category: 'board', type: 'categories', icon: 'wyrmspan', minP: 1, maxP: 5, dur: 'long', categories: ['🐉 Draken', '🛡️ Drakengilde', '🎯 Doeltegels', '⏳ Eindspel-krachten', '🥚 Eieren (1p)', '💎 Opgeslagen grondstoffen (1p)', '🃏 Weggestopte kaarten (1p)', '🪙 Munten & Items'] },
-      { id: 'arknova', name: 'Ark Nova', subtitle: 'Aantrekkingskracht, Natuurbehoud (×2) & Eindkaarten', category: 'board', type: 'arknova', icon: 'arknova', minP: 1, maxP: 4, dur: 'long', tieBreakerDesc: 'Meeste ondersteunde natuurbehoudsprojecten' },
+      { id: 'arknova', name: 'Ark Nova', subtitle: 'Aantrekkingskracht, Natuurbehoud (×2/×3) & Eindkaarten', category: 'board', type: 'arknova', icon: 'arknova', minP: 1, maxP: 4, dur: 'long', tieBreakerDesc: 'Meeste ondersteunde natuurbehoudsprojecten' },
       { id: 'brass', name: 'Brass: Birmingham', subtitle: 'Kanaaltijdperk, Spoorwegtijdperk & Industrie-tegels', category: 'board', type: 'categories', icon: 'brass', minP: 2, maxP: 4, dur: 'long', categories: ['⛵ Kanaal-verbindingen (R1)', '🏭 Industrie-tegels (R1)', '🚂 Spoor-verbindingen (R2)', '🏭 Industrie-tegels (R2)', '💷 Bonus VP'] },
       { id: 'heat', name: 'Heat: Pedal to the Metal', subtitle: 'Finishpositie (P1-P6) & Kampioenschapspunten', category: 'board', type: 'heat', icon: 'heat', minP: 1, maxP: 6, dur: 'medium' },
       { id: 'dorfromantik', name: 'Dorfromantik', subtitle: 'Coöperatief campagne-scoreblad (bos, graan, dorp, vlaggen)', category: 'board', type: 'dorfromantik', icon: 'dorfromantik', minP: 1, maxP: 6, dur: 'medium' },
@@ -935,7 +935,7 @@
     // =========================================================================
     // 6. SCORE CALCULATIONS PER GAME
     // =========================================================================
-    function calculatePlayerTotal(gameId, playerId) {
+      function calculatePlayerTotal(gameId, playerId) {
       const def = getGameDef(gameId);
       const gs = ensureGameState(gameId);
       const pd = gs.playerData[playerId];
@@ -989,15 +989,23 @@
                Number(habBonuses[playerId] || 0) + Number(c.cones || 0);
       } else if (def.type === 'regenwormen') {
         const r = pd.regenwormen;
-        const expOn = !!gs.activeExpansions?.['🐦‍⬛ Deel 2: Uitbreiding (Raaf + Stenen 11 & 13)'];
+        const expOn = typeof isRegenwormenExpActive === 'function' ? isRegenwormenExpActive(gs) : !!gs.activeExpansions?.['🐦‍⬛ Deel 2: Uitbreiding (Raaf + Stenen 11 & 13)'];
         const tileList = expOn ? [...REGENWORMEN_EXP_TILES, ...REGENWORMEN_TILES] : REGENWORMEN_TILES;
         let worms = 0;
         tileList.forEach(item => {
           if (r.tiles && r.tiles[item.t]) worms += item.w;
         });
-        rawScore = worms + Number(r.bonus || 0);
+        rawScore = worms + (expOn ? Number(r.bonus || 0) : 0);
       } else if (def.type === 'categories') {
-        Object.values(pd.categories || {}).forEach(v => rawScore += Number(v || 0));
+        Object.entries(pd.categories || {}).forEach(([catName, v]) => {
+          const num = Number(v || 0);
+          const isPenaltyField = catName.includes('(-') || catName.includes('× -') || catName.toLowerCase().includes('strafpunten');
+          if (isPenaltyField) {
+            rawScore -= Math.abs(num);
+          } else {
+            rawScore += num;
+          }
+        });
       } else if (def.type === 'wonders7') {
         const w = pd.wonders;
         const a = Number(w.sci_a || 0), b = Number(w.sci_b || 0), c = Number(w.sci_c || 0);
@@ -1006,7 +1014,8 @@
         rawScore = Number(w.military || 0) + Number(w.coins || 0) + Number(w.wonder || 0) + Number(w.civil || 0) + Number(w.trade || 0) + Number(w.guild || 0) + sciScore;
       } else if (def.type === 'ttr') {
         const t = pd.ttr;
-        rawScore = Number(t.routes || 0) + Number(t.destPlus || 0) - Number(t.destMinus || 0) + (Number(t.stations || 0) * 4) + (t.longest ? 10 : 0) + Number(t.warehouse || 0);
+        const unusedStations = t.stations !== undefined && t.stations !== '' ? Number(t.stations) : 0;
+        rawScore = Number(t.routes || 0) + Number(t.destPlus || 0) - Math.abs(Number(t.destMinus || 0)) + (unusedStations * 4) + (t.longest ? 10 : 0) + Number(t.warehouse || 0);
       } else if (def.type === 'yahtzee') {
         const y = pd.yahtzee;
         const upper = Number(y.ones || 0) + Number(y.twos || 0) + Number(y.threes || 0) + Number(y.fours || 0) + Number(y.fives || 0) + Number(y.sixes || 0);
@@ -1034,7 +1043,7 @@
             baseSum += an.val;
           }
         });
-        rawScore = (baseSum * Math.max(1, setsCount)) + Number(kh.cashBonus || 0);
+        rawScore = baseSum * Math.max(1, setsCount);
       } else if (def.type === 'machiavelli') {
         const m = pd.machiavelli;
         rawScore = Number(m.buildings || 0) + (m.allColors ? 3 : 0) + Number(m.first8 || 0) + Number(m.extra || 0);
@@ -1042,7 +1051,9 @@
         rawScore = Number(pd.liveScore || 0);
       } else if (def.type === 'arknova') {
         const an = pd.arknova;
-        rawScore = Number(an.appeal || 0) + (Number(an.conservation || 0) * 2) + Number(an.endgame || 0);
+        const cons = Number(an.conservation || 0);
+        const consPts = cons <= 10 ? (cons * 2) : (20 + (cons - 10) * 3);
+        rawScore = Number(an.appeal || 0) + consPts + Number(an.endgame || 0);
       } else if (def.type === 'heat') {
         rawScore = Number(pd.heat?.pts || 0);
       } else if (def.type === 'dorfromantik') {
@@ -2033,7 +2044,7 @@
       renderScoreboard();
     }
 
-        // =========================================================================
+      // =========================================================================
     // 10E. REGENWORMEN (INCL. DEEL 2: STENEN 11 & 13 + MAX 7 WORMFICHES)
     // =========================================================================
     function isRegenwormenExpActive(gs) {
@@ -2217,7 +2228,7 @@
       const gs = ensureGameState('ttr');
       const routeBtns = [
         { len: 1, pts: 1 }, { len: 2, pts: 2 }, { len: 3, pts: 4 },
-        { len: 4, pts: 7 }, { len: 6, pts: 15 }, { len: 8, pts: 21 }
+        { len: 4, pts: 7 }, { len: 5, pts: 10 }, { len: 6, pts: 15 }, { len: 8, pts: 21 }
       ];
       container.innerHTML = getActivePlayers().map(p => {
         const t = gs.playerData[p.id].ttr;
@@ -2228,7 +2239,7 @@
               <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('ttr', p.id)} pnt</span>
             </div>
             <div class="flex flex-wrap gap-1.5">
-              ${routeBtns.map(rb => `<button type="button" onclick="addTtrRoute('${p.id}',${rb.pts})" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-200 text-xs font-bold">+${rb.len}🚂 (${rb.pts}p)</button>`).join('')}
+              ${routeBtns.map(rb => `<button type="button" onclick="addTtrRoute('${p.id}',${rb.pts})" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-200 text-xs font-bold">+${rb.len}🚂 (${rb.pts}p)</button>`).join('')}
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
@@ -2244,8 +2255,10 @@
                 <input type="number" value="${valOrEmpty(t.destMinus)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setTtrVal('${p.id}','destMinus',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
-                <label class="text-[11px] font-bold text-amber-300">Stations (×4)</label>
-                <input type="number" value="${valOrEmpty(t.stations)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setTtrVal('${p.id}','stations',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
+                <label class="text-[11px] font-bold text-amber-300" title="Elk ongebruikt station is +4 punten waard">Stations over (×4)</label>
+                <select onchange="setTtrVal('${p.id}','stations',this.value); renderScoreboard();" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white">
+                  ${[0, 1, 2, 3].map(cnt => `<option value="${cnt}" ${Number(t.stations || 0) === cnt ? 'selected' : ''}>${cnt} over (+${cnt * 4}p)</option>`).join('')}
+                </select>
               </div>
               <button type="button" onclick="toggleTtrLongest('${p.id}')" class="rounded-xl border p-2 text-xs font-bold ${t.longest ? 'bg-emerald-600 border-emerald-400 text-white' : 'bg-slate-950 border-slate-800 text-slate-400'}">🏆 Langste (+10)</button>
             </div>
