@@ -3111,7 +3111,7 @@
       showToast('👑 Startspeler ingesteld op #1!');
     }
 
-    // =========================================================================
+        // =========================================================================
     // 11B. TOERNOOI-MODUS ("DE RUMMIKUB CUP" MET SCHAKELAAR & CEREMONIE)
     // =========================================================================
     function renderTournamentTopBar() {
@@ -3124,7 +3124,7 @@
         bar.innerHTML = `
           <div class="flex items-center gap-2 text-xs text-slate-300">
             <span class="text-base">🏆</span>
-            <span>Zin in een eigen cup vanavond? (bijv. <b>De Rummikub Cup</b>)</span>
+            <span>Gamenight? Start een toernooi!</span>
           </div>
           <button type="button" onclick="openStartTournamentModal()" class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-extrabold transition">
             🏆 Start Toernooi
@@ -3171,6 +3171,37 @@
           `).join('')}
         </div>
       `;
+    }
+
+    function openStartTournamentModal() {
+      const modal = document.getElementById('tournamentModal');
+      const box = document.getElementById('tournamentModalContent');
+      if (!modal || !box) return;
+
+      box.innerHTML = `
+        <div class="flex items-center justify-between">
+          <h3 class="font-black text-base text-white flex items-center gap-2">🏆 Nieuw Toernooi Starten</h3>
+          <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white text-xs font-bold">✕</button>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block text-slate-300 font-bold mb-1">Toernooinaam:</label>
+            <input type="text" id="tournNameInput" placeholder="Bijv. De Rummikub Cup" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white font-bold focus:outline-none focus:border-amber-500 placeholder:text-slate-600" />
+          </div>
+          <label class="flex items-start gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-3 cursor-pointer">
+            <input type="checkbox" id="tournCountGlobalCheck" checked class="mt-0.5" />
+            <div>
+              <div class="font-bold text-slate-200">📊 Tellen de wins mee voor de algemene statistieken?</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Vink aan om de potjes óók mee te tellen in de Hall of Fame & Wisselbeker. Vink uit voor een volledig losstaand toernooi.</div>
+            </div>
+          </label>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Annuleer</button>
+          <button type="button" onclick="confirmStartTournament()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold">🚀 Start Toernooi</button>
+        </div>
+      `;
+      modal.classList.remove('hidden');
     }
 
     function openStartTournamentModal() {
