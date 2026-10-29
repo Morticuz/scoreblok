@@ -1109,32 +1109,58 @@
         btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center';
       });
 
-      renderTournamentTopBar();
+          function renderTournamentTopBar() {
+      const bar = document.getElementById('tournamentTopBar');
+      if (!bar) return; // Als de balk er op dit scherm niet is, stopt hij direct en zie je geen leeg balkje meer!
+      
+      const t = state.tournament || { active: false };
 
-      if (view === 'picker') {
-        document.getElementById('viewPicker').classList.remove('hidden');
-        document.getElementById('navBtnPicker').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
-        document.getElementById('headerSubtitle').textContent = 'Kies een spel of beheer je favorieten';
-        renderGamePicker();
-      } else if (view === 'scoreboard') {
-        document.getElementById('viewScoreboard').classList.remove('hidden');
-        document.getElementById('navBtnPicker').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
-        requestAppWakeLock();
-        updateUndoButtonUI();
-        renderScoreboard();
-      } else if (view === 'players') {
-        document.getElementById('viewPlayers').classList.remove('hidden');
-        document.getElementById('navBtnPlayers').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
-        document.getElementById('headerSubtitle').textContent = 'Spelers, Groepen & Tafelvolgorde';
-        renderPlayersManager();
-      } else if (view === 'history') {
-        document.getElementById('viewHistory').classList.remove('hidden');
-        document.getElementById('navBtnHistory').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
-        document.getElementById('headerSubtitle').textContent = 'Hall of Fame, Wisselbeker & Spelrecords';
-        renderHistoryView();
+      if (!t.active) {
+        bar.style.display = 'none';
+        return;
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      bar.style.display = 'flex';
+      const winsMap = {};
+      state.players.forEach(p => { winsMap[p.name] = { name: p.name, color: p.color, wins: 0 }; });
+      (t.matches || []).forEach(m => {
+        (m.winners || []).forEach(wName => {
+          if (!winsMap[wName]) winsMap[wName] = { name: wName, color: '#6366f1', wins: 0 };
+          winsMap[wName].wins++;
+        });
+      });
+      const sorted = Object.values(winsMap).filter(x => x.wins > 0 || state.players.some(p => p.name === x.name && p.active !== false))
+        .sort((a, b) => b.wins - a.wins);
+
+      bar.className = 'bg-gradient-to-r from-amber-950/60 via-slate-900 to-amber-950/60 border border-amber-500/50 rounded-2xl p-3.5 space-y-2.5 shadow-lg mb-4';
+      bar.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🏆</span>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-black text-sm text-amber-300">${t.name}</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-950 border border-amber-500/30 text-slate-300 font-bold">
+                  ${(t.matches || []).length} potje${(t.matches || []).length === 1 ? '' : 's'} • ${t.countInGlobal ? '📊 Telt mee in totaal' : '🔒 Los toernooi'}
+                </span>
+              </div>
+            </div>
+          </div>
+          <button type="button" onclick="openEndTournamentModal()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow transition">
+            🏁 Einde Toernooi
+          </button>
+        </div>
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-0.5">
+          ${sorted.map((s, idx) => `
+            <div class="px-2.5 py-1 rounded-xl bg-slate-950/90 border ${idx === 0 && s.wins > 0 ? 'border-amber-400 text-amber-200' : 'border-slate-800 text-slate-300'} text-xs font-bold flex items-center gap-1.5 shrink-0">
+              ${renderMeepleSvg(s.color, 'w-4 h-4')}
+              <span>${s.name}: <b>${s.wins}</b></span>
+            </div>
+          `).join('')}
+        </div>
+      `;
     }
+
 
     // =========================================================================
     // 8. GAME PICKER & FAVORITES
