@@ -54,7 +54,7 @@
   <!-- Toast Melding -->
   <div id="toastBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-indigo-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-2xl border border-indigo-400/40"></div>
 
-      <!-- Top Header -->
+  <!-- Top Header -->
   <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3">
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-center justify-between">
@@ -65,13 +65,13 @@
           </div>
         </div>
         
-        <!-- Mobiele knoppen rechtsboven -->
-        <div class="flex sm:hidden items-center gap-1.5">
+        <!-- Mobiele knoppen rechtsboven (onder elkaar) -->
+        <div class="flex sm:hidden flex-col gap-1.5 items-end">
           <button type="button" onclick="openStartPlayerModal()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">
             🎲 Wie begint?
           </button>
           <button type="button" onclick="openStartTournamentModal()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-extrabold">
-            🏆 Toernooi
+            🏆 Start Toernooi
           </button>
         </div>
       </div>
@@ -265,7 +265,7 @@
 
   </main>
 
-  <!-- MODAL 1: WIE START ER VANDAAG? (LOTING + UITDAGINGEN GENERATOR) -->
+  <!-- MODAL 1: WIE START ER VANDAAG? -->
   <div id="startPlayerModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 text-center space-y-4 shadow-2xl">
       <div class="text-3xl">🎲</div>
@@ -345,7 +345,7 @@
     </div>
   </div>
 
-  <!-- MODAL 3: SNEL WINNAAR KIEZEN (ZONDER SCORES) -->
+  <!-- MODAL 3: SNEL WINNAAR KIEZEN -->
   <div id="quickWinModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between">
@@ -355,7 +355,7 @@
         </h3>
         <button type="button" onclick="closeQuickWinModal()" class="text-slate-400 hover:text-white text-xs font-bold">✕</button>
       </div>
-      <p class="text-xs text-slate-400">Registreer direct een gespeeld potje voor de statistieken (en eventueel je actieve toernooi) zonder scores in te vullen.</p>
+      <p class="text-xs text-slate-400">Registreer direct een gespeeld potje voor de statistieken zonder scores in te vullen.</p>
 
       <div class="space-y-3 text-xs">
         <div>
@@ -386,7 +386,7 @@
     </div>
   </div>
 
-  <!-- MODAL 4: PODIUM, CONFETTI & POTJES-NOTITIE BIJ OPSLAAN -->
+  <!-- MODAL 4: PODIUM, CONFETTI & NOTITIE BIJ OPSLAAN -->
   <div id="podiumModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl text-center">
       <div class="text-3xl">🎉</div>
@@ -396,7 +396,6 @@
       </div>
 
       <div id="podiumRecordBanner" class="hidden bg-amber-500/20 border border-amber-400 text-amber-200 rounded-xl px-3 py-2 text-xs font-extrabold"></div>
-
       <div id="podiumStandingsList" class="space-y-2 text-left"></div>
 
       <div class="text-left space-y-1 pt-1">
@@ -585,8 +584,8 @@
       { id: 'paard', name: '🐎 Paard', val: 1000 }
     ];
 
-        // =========================================================================
-    // 2. VOLLEDIGE SPELLEN CATALOGUS (TOP 20 BORD + TOP 20 KAART/DOBBEL + SPECIALS)
+    // =========================================================================
+    // 2. VOLLEDIGE SPELLEN CATALOGUS
     // =========================================================================
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + vloerlijn óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
@@ -758,7 +757,7 @@
         qwixx: { red: 0, yellow: 0, green: 0, blue: 0, fails: 0 },
         clever: { yellow: 0, blue: 0, greenCount: 0, orange: 0, purple: 0, foxes: 0 },
         cascadia: { bear: 0, elk: 0, salmon: 0, hawk: 0, fox: 0, hab_mountain: 0, hab_forest: 0, hab_prairie: 0, hab_wetland: 0, hab_river: 0, cones: 0 },
-        regenwormen: { tiles: {}, hasRaven: false, bonus: 0 },
+        regenwormen: { tiles: {}, bonus: 0 },
         categories: {},
         wonders: { military: 0, coins: 0, wonder: 0, civil: 0, trade: 0, guild: 0, sci_a: 0, sci_b: 0, sci_c: 0 },
         ttr: { routes: 0, destPlus: 0, destMinus: 0, stations: 0, longest: false, warehouse: 0 },
@@ -945,7 +944,7 @@
     // =========================================================================
     // 6. SCORE CALCULATIONS PER GAME
     // =========================================================================
-      function calculatePlayerTotal(gameId, playerId) {
+    function calculatePlayerTotal(gameId, playerId) {
       const def = getGameDef(gameId);
       const gs = ensureGameState(gameId);
       const pd = gs.playerData[playerId];
@@ -1109,58 +1108,27 @@
         btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center';
       });
 
-          function renderTournamentTopBar() {
-      const bar = document.getElementById('tournamentTopBar');
-      if (!bar) return; // Als de balk er op dit scherm niet is, stopt hij direct en zie je geen leeg balkje meer!
-      
-      const t = state.tournament || { active: false };
-
-      if (!t.active) {
-        bar.style.display = 'none';
-        return;
+      if (view === 'picker') {
+        document.getElementById('viewPicker').classList.remove('hidden');
+        document.getElementById('navBtnPicker').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
+        document.getElementById('headerSubtitle').textContent = 'Kies een spel of beheer je favorieten';
+        renderGamePicker();
+      } else if (view === 'scoreboard') {
+        document.getElementById('viewScoreboard').classList.remove('hidden');
+        requestAppWakeLock();
+        renderScoreboard();
+      } else if (view === 'players') {
+        document.getElementById('viewPlayers').classList.remove('hidden');
+        document.getElementById('navBtnPlayers').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
+        document.getElementById('headerSubtitle').textContent = 'Beheer spelers & volgorde';
+        renderPlayersManager();
+      } else if (view === 'history') {
+        document.getElementById('viewHistory').classList.remove('hidden');
+        document.getElementById('navBtnHistory').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
+        document.getElementById('headerSubtitle').textContent = 'Statistieken & Hall of Fame';
+        renderHistoryView();
       }
-
-      bar.style.display = 'flex';
-      const winsMap = {};
-      state.players.forEach(p => { winsMap[p.name] = { name: p.name, color: p.color, wins: 0 }; });
-      (t.matches || []).forEach(m => {
-        (m.winners || []).forEach(wName => {
-          if (!winsMap[wName]) winsMap[wName] = { name: wName, color: '#6366f1', wins: 0 };
-          winsMap[wName].wins++;
-        });
-      });
-      const sorted = Object.values(winsMap).filter(x => x.wins > 0 || state.players.some(p => p.name === x.name && p.active !== false))
-        .sort((a, b) => b.wins - a.wins);
-
-      bar.className = 'bg-gradient-to-r from-amber-950/60 via-slate-900 to-amber-950/60 border border-amber-500/50 rounded-2xl p-3.5 space-y-2.5 shadow-lg mb-4';
-      bar.innerHTML = `
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🏆</span>
-            <div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-black text-sm text-amber-300">${t.name}</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-950 border border-amber-500/30 text-slate-300 font-bold">
-                  ${(t.matches || []).length} potje${(t.matches || []).length === 1 ? '' : 's'} • ${t.countInGlobal ? '📊 Telt mee in totaal' : '🔒 Los toernooi'}
-                </span>
-              </div>
-            </div>
-          </div>
-          <button type="button" onclick="openEndTournamentModal()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow transition">
-            🏁 Einde Toernooi
-          </button>
-        </div>
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-0.5">
-          ${sorted.map((s, idx) => `
-            <div class="px-2.5 py-1 rounded-xl bg-slate-950/90 border ${idx === 0 && s.wins > 0 ? 'border-amber-400 text-amber-200' : 'border-slate-800 text-slate-300'} text-xs font-bold flex items-center gap-1.5 shrink-0">
-              ${renderMeepleSvg(s.color, 'w-4 h-4')}
-              <span>${s.name}: <b>${s.wins}</b></span>
-            </div>
-          `).join('')}
-        </div>
-      `;
     }
-
 
     // =========================================================================
     // 8. GAME PICKER & FAVORITES
@@ -1296,7 +1264,7 @@
         const catBadge = g.category === 'board'
           ? '<span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 text-[10px] font-bold">Bordspel</span>'
           : '<span class="px-2 py-0.5 rounded-md bg-sky-500/15 text-sky-300 text-[10px] font-bold">Kaart & Dobbel</span>';
-       const pBadge = `<span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-semibold">${g.minP || 1}-${g.maxP || 8}p</span>`;
+        const pBadge = `<span class="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 text-[10px] font-semibold">${g.minP || 1}-${g.maxP || 8}p</span>`;
 
         const orderBtns = isFavTab ? `
           <div class="flex flex-col gap-1 mr-1">
@@ -1344,12 +1312,12 @@
       pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       gs.activeExpansions[expName] = !gs.activeExpansions[expName];
-      if (state.activeGameId === 'regenwormen' && !gs.activeExpansions[expName]) {
+      if (state.activeGameId === 'regenwormen' && !isRegenwormenExpActive(gs)) {
         state.players.forEach(p => {
           const rw = gs.playerData[p.id]?.regenwormen;
           if (rw) {
             if (rw.tiles) { delete rw.tiles[11]; delete rw.tiles[13]; }
-            rw.hasRaven = false;
+            rw.bonus = 0;
           }
         });
       }
@@ -1469,7 +1437,6 @@
     function renderScoreboard() {
       const def = getGameDef();
       const gs = ensureGameState(def.id);
-      document.getElementById('headerSubtitle').textContent = `Actief spel: ${def.name}`;
       document.getElementById('activeGameIcon').innerHTML = SVG_ICONS[def.icon] || SVG_ICONS.free;
       document.getElementById('activeGameTitle').textContent = def.name;
       updateActiveFavStar();
@@ -1477,7 +1444,8 @@
 
       const lowWins = isLowestWins();
       let ruleTxt = lowWins ? '👑 Laagste score wint' : '👑 Hoogste score wint';
-      if (def.limit) ruleTxt += ` • Doel/Limiet: ${def.limit} pnt`; if (def.tieBreakerDesc) ruleTxt += ` • ⚖️ Gelijkspel: ${def.tieBreakerDesc}`;
+      if (def.limit) ruleTxt += ` • Doel/Limiet: ${def.limit} pnt`;
+      if (def.tieBreakerDesc) ruleTxt += ` • ⚖️ Gelijkspel: ${def.tieBreakerDesc}`;
       document.getElementById('activeGameRuleInfo').textContent = ruleTxt;
 
       renderEndgameAlertBanner(def, gs);
@@ -1575,7 +1543,8 @@
               </span>
               <span>${isLeader ? '👑' : ''}</span>
             </div>
-            <div class="score-number text-2xl font-black mt-1 ${isLeader ? 'text-indigo-300' : 'text-white'}">${pScore}</div>${isLeader && hasTieBreakAtTop ? `<div class="text-[10px] text-emerald-300 font-bold">⚖️ Wint tie-breaker (${pTie})</div>` : ''}
+            <div class="score-number text-2xl font-black mt-1 ${isLeader ? 'text-indigo-300' : 'text-white'}">${pScore}</div>
+            ${isLeader && hasTieBreakAtTop ? `<div class="text-[10px] text-emerald-300 font-bold">⚖️ Wint tie-breaker (${pTie})</div>` : ''}
             ${p.handicap ? `<div class="text-[10px] text-slate-400">incl. start-handicap (${p.handicap > 0 ? '+' : ''}${p.handicap})</div>` : ''}
             ${reachedLimit ? `<div class="text-[10px] text-amber-300 font-bold mt-0.5">⚠️ Limiet (${activeLimit}) bereikt!</div>` : ''}
           </div>`;
@@ -1643,7 +1612,8 @@
                       <p class="text-[11px] text-slate-400">Rondescore: <b>${az.baseScore}</b> • Eindbonus: <b>+${bon.total}</b></p>
                     </div>
                     <div class="text-right">
-                      <span class="text-xl font-black text-sky-400">${total} pnt</span>${(prev.gained > 0 || az.floor > 0) ? `<div class="text-[11px] font-bold ${prev.delta >= 0 ? 'text-emerald-400' : 'text-rose-400'}">Deze ronde: ${prev.delta >= 0 ? '+' : ''}${prev.delta}</div>` : ''}
+                      <span class="text-xl font-black text-sky-400">${total} pnt</span>
+                      ${(prev.gained > 0 || az.floor > 0) ? `<div class="text-[11px] font-bold ${prev.delta >= 0 ? 'text-emerald-400' : 'text-rose-400'}">Deze ronde: ${prev.delta >= 0 ? '+' : ''}${prev.delta}</div>` : ''}
                     </div>
                   </div>
 
@@ -1934,7 +1904,7 @@
       renderScoreboard();
     }
 
-     // =========================================================================
+    // =========================================================================
     // 10D. QWIXX, CLEVER & CASCADIA
     // =========================================================================
     function renderQwixxSheet(container) {
@@ -2080,7 +2050,7 @@
       renderScoreboard();
     }
 
-      // =========================================================================
+    // =========================================================================
     // 10E. REGENWORMEN (INCL. DEEL 2: STENEN 11 & 13 + MAX 7 WORMFICHES)
     // =========================================================================
     function isRegenwormenExpActive(gs) {
@@ -2623,7 +2593,7 @@
                 <input type="number" value="${valOrEmpty(an.appeal)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setArkNovaVal('${p.id}','appeal',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center">
-                <label class="text-[11px] font-bold text-emerald-400 block">🛡️ Behoud (×2)</label>
+                <label class="text-[11px] font-bold text-emerald-400 block">🛡️ Behoud (×2/×3)</label>
                 <input type="number" value="${valOrEmpty(an.conservation)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setArkNovaVal('${p.id}','conservation',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-sm font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center">
@@ -2898,7 +2868,7 @@
     }
 
     // =========================================================================
-    // 11. SPELERSBEHEER, 16 KLEUREN & SPELERSGROEPEN (PRESETS)
+    // 11. SPELERSBEHEER, KLEUREN & PRESETS
     // =========================================================================
     const PLAYER_PALETTE = [
       '#6366f1', '#4f46e5', '#3b82f6', '#06b6d4',
@@ -2970,7 +2940,7 @@
     function saveCurrentGroupPreset() {
       const activeNames = getActivePlayers().map(p => p.name);
       if (activeNames.length === 0) return showToast('⚠️ Geen actieve spelers geselecteerd.');
-      const groupName = prompt('Geef een naam voor deze spelersgroep (bijv. "Spelletjesavond", "Gezin"):', 'Groep ' + (state.playerPresets.length + 1));
+      const groupName = prompt('Geef een naam voor deze spelersgroep:', 'Groep ' + (state.playerPresets.length + 1));
       if (!groupName || !groupName.trim()) return;
 
       if (!state.playerPresets) state.playerPresets = [];
@@ -3096,7 +3066,9 @@
       renderPlayersManager();
     }
 
-    // "WIE START ER VANDAAG?" LOTING + UITDAGINGEN GENERATOR
+    // =========================================================================
+    // WIE START ER VANDAAG?
+    // =========================================================================
     let lastPickedStarterId = null;
     let startPlayerMode = 'random';
 
@@ -3184,68 +3156,9 @@
       showToast('👑 Startspeler ingesteld op #1!');
     }
 
-        // =========================================================================
-    // 11B. TOERNOOI-MODUS ("DE RUMMIKUB CUP" MET SCHAKELAAR & CEREMONIE)
     // =========================================================================
-    function renderTournamentTopBar() {
-      const bar = document.getElementById('tournamentTopBar');
-      if (!bar) return;
-      const t = state.tournament || { active: false };
-
-      if (!t.active) {
-        bar.className = 'bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2';
-        bar.innerHTML = `
-          <div class="flex items-center gap-2 text-xs text-slate-300">
-            <span class="text-base">🏆</span>
-            <span>Gamenight? Start een toernooi!</span>
-          </div>
-          <button type="button" onclick="openStartTournamentModal()" class="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-extrabold transition">
-            🏆 Start Toernooi
-          </button>
-        `;
-        return;
-      }
-
-      const winsMap = {};
-      state.players.forEach(p => { winsMap[p.name] = { name: p.name, color: p.color, wins: 0 }; });
-      (t.matches || []).forEach(m => {
-        (m.winners || []).forEach(wName => {
-          if (!winsMap[wName]) winsMap[wName] = { name: wName, color: '#6366f1', wins: 0 };
-          winsMap[wName].wins++;
-        });
-      });
-      const sorted = Object.values(winsMap).filter(x => x.wins > 0 || state.players.some(p => p.name === x.name && p.active !== false))
-        .sort((a, b) => b.wins - a.wins);
-
-      bar.className = 'bg-gradient-to-r from-amber-950/60 via-slate-900 to-amber-950/60 border border-amber-500/50 rounded-2xl p-3.5 space-y-2.5 shadow-lg';
-      bar.innerHTML = `
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🏆</span>
-            <div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="font-black text-sm text-amber-300">${t.name}</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-950 border border-amber-500/30 text-slate-300 font-bold">
-                  ${(t.matches || []).length} potje${(t.matches || []).length === 1 ? '' : 's'} • ${t.countInGlobal ? '📊 Telt mee in totaal' : '🔒 Los toernooi'}
-                </span>
-              </div>
-            </div>
-          </div>
-          <button type="button" onclick="openEndTournamentModal()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow transition">
-            🏁 Einde Toernooi
-          </button>
-        </div>
-        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-0.5">
-          ${sorted.map((s, idx) => `
-            <div class="px-2.5 py-1 rounded-xl bg-slate-950/90 border ${idx === 0 && s.wins > 0 ? 'border-amber-400 text-amber-200' : 'border-slate-800 text-slate-300'} text-xs font-bold flex items-center gap-1.5 shrink-0">
-              ${renderMeepleSvg(s.color, 'w-4 h-4')}
-              <span>${s.name}: <b>${s.wins}</b></span>
-            </div>
-          `).join('')}
-        </div>
-      `;
-    }
-
+    // 11B. TOERNOOI-MODUS
+    // =========================================================================
     function openStartTournamentModal() {
       const modal = document.getElementById('tournamentModal');
       const box = document.getElementById('tournamentModalContent');
@@ -3259,44 +3172,13 @@
         <div class="space-y-3 text-xs">
           <div>
             <label class="block text-slate-300 font-bold mb-1">Toernooinaam:</label>
-            <input type="text" id="tournNameInput" placeholder="Bijv. De Rummikub Cup" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white font-bold focus:outline-none focus:border-amber-500 placeholder:text-slate-600" />
-          </div>
-          <label class="flex items-start gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-3 cursor-pointer">
-            <input type="checkbox" id="tournCountGlobalCheck" checked class="mt-0.5" />
-            <div>
-              <div class="font-bold text-slate-200">📊 Tellen de wins mee voor de algemene statistieken?</div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Vink aan om de potjes óók mee te tellen in de Hall of Fame & Wisselbeker. Vink uit voor een volledig losstaand toernooi.</div>
-            </div>
-          </label>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Annuleer</button>
-          <button type="button" onclick="confirmStartTournament()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold">🚀 Start Toernooi</button>
-        </div>
-      `;
-      modal.classList.remove('hidden');
-    }
-
-    function openStartTournamentModal() {
-      const modal = document.getElementById('tournamentModal');
-      const box = document.getElementById('tournamentModalContent');
-      if (!modal || !box) return;
-
-      box.innerHTML = `
-        <div class="flex items-center justify-between">
-          <h3 class="font-black text-base text-white flex items-center gap-2">🏆 Nieuw Toernooi Starten</h3>
-          <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white text-xs font-bold">✕</button>
-        </div>
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="block text-slate-300 font-bold mb-1">Naam van het toernooi:</label>
             <input type="text" id="tournNameInput" value="De Rummikub Cup" placeholder="Bijv. De Rummikub Cup" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white font-bold focus:outline-none focus:border-amber-500" />
           </div>
           <label class="flex items-start gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-3 cursor-pointer">
             <input type="checkbox" id="tournCountGlobalCheck" checked class="mt-0.5" />
             <div>
               <div class="font-bold text-slate-200">📊 Tellen de wins mee voor de algemene statistieken?</div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Vink aan om de potjes óók mee te tellen in de Hall of Fame & Wisselbeker. Vink uit voor een volledig losstaand toernooi.</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Vink aan om de potjes óók mee te tellen in de Hall of Fame & Wisselbeker.</div>
             </div>
           </label>
         </div>
@@ -3319,7 +3201,6 @@
       };
       saveState();
       closeTournamentModal();
-      renderTournamentTopBar();
       showToast(`🏆 "${name}" is gestart!`);
     }
 
@@ -3349,7 +3230,7 @@
           <div class="text-4xl">🏆✨</div>
           <div class="bg-slate-950 border border-amber-500/50 rounded-2xl p-4 space-y-2 shadow-inner">
             <p class="text-xs text-slate-300 leading-relaxed">
-              "En de winnaar van het pretentieuze toernooi <b class="text-amber-300">${t.name}</b> is gewonnen door..."
+              "En de winnaar van <b class="text-amber-300">${t.name}</b> is..."
             </p>
             <div class="flex items-center justify-center gap-2 pt-1">
               ${renderMeepleSvg(winnerColor, 'w-8 h-8')}
@@ -3358,7 +3239,7 @@
           </div>
 
           <div class="space-y-1.5 text-left">
-            <div class="text-[11px] font-bold text-slate-400 uppercase">Eindstand ${t.name}:</div>
+            <div class="text-[11px] font-bold text-slate-400 uppercase">Eindstand:</div>
             ${standings.filter(s => s.wins > 0 || state.players.some(p => p.name === s.name && p.active !== false)).map((s, idx) => `
               <div class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between text-xs">
                 <div class="flex items-center gap-2">
@@ -3386,7 +3267,6 @@
       state.tournament.matches = [];
       saveState();
       closeTournamentModal();
-      renderTournamentTopBar();
       showToast('🏆 Toernooi feestelijk afgesloten!');
     }
 
@@ -3395,7 +3275,7 @@
     }
 
     // =========================================================================
-    // 12. STATISTIEKEN, WISSELBEKER SPELLENKAMPIOEN, RIVALS & PODIUM
+    // 12. STATISTIEKEN, WISSELBEKER, RIVALS & PODIUM
     // =========================================================================
     function updateChampionCupState() {
       const winsMap = {};
@@ -3432,7 +3312,6 @@
         state.history.unshift(matchRecord);
         updateChampionCupState();
       }
-      renderTournamentTopBar();
     }
 
     function resetCurrentGameConfirm() {
@@ -3729,7 +3608,7 @@
                   <span class="font-bold text-sm text-white truncate group-hover:text-indigo-300 transition">${s.name}</span>
                   ${s.currentStreak >= 2 ? `<span class="px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/40 text-orange-300 text-[10px] font-extrabold">🔥 ${s.currentStreak} op rij!</span>` : ''}
                 </div>
-                <div class="text-[11px] text-slate-400">${s.played} potje${s.played === 1 ? '' : 's'} • Beste reeks: <b class="text-slate-300">${s.bestStreak}</b> (Tik voor profiel ➔)</div>
+                <div class="text-[11px] text-slate-400">${s.played} potje${s.played === 1 ? '' : 's'} • Beste reeks: <b class="text-slate-300">${s.bestStreak}</b></div>
               </div>
             </div>
             <div class="flex items-center gap-4 text-right shrink-0">
@@ -3782,7 +3661,7 @@
 
         const recList = Object.values(recordsByGame);
         if (recList.length === 0) {
-          recGrid.innerHTML = `<div class="col-span-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center text-xs text-slate-400">Speel en bewaar een potje met scores om jullie All-Time Spelrecords te zien!</div>`;
+          recGrid.innerHTML = `<div class="col-span-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center text-xs text-slate-400">Speel een potje met scores om jullie All-Time Spelrecords te zien!</div>`;
         } else {
           recGrid.innerHTML = recList.map(rec => {
             const gDef = getGameDef(rec.gameId);
@@ -3941,7 +3820,7 @@
     }
 
     // =========================================================================
-    // 13. EIGEN SPEL, BACK-UP, OEPS-KNOP (UNDO), SNEL WINNAAR & SCHERM AAN-HOUDER
+    // 13. EIGEN SPEL, BACK-UP, UNDO & SCHERMVERGRENDELING
     // =========================================================================
     let undoStack = [];
     let isRestoringUndo = false;
@@ -3989,7 +3868,6 @@
       }
     }, true);
 
-    // SCHERM AAN-HOUDER (WAKE LOCK API)
     let wakeLockSentinel = null;
     let wakeLockWanted = true;
 
@@ -4045,7 +3923,6 @@
       }
     });
 
-    // SNEL WINNAAR FUNCTIES
     let qwSelectedWinners = [];
 
     function openQuickWinModal(preselectGameId = null) {
@@ -4202,7 +4079,6 @@
           if (imported && Array.isArray(imported.players)) {
             state = { ...state, ...imported };
             saveState();
-            renderTournamentTopBar();
             renderPlayersManager();
             renderGamePicker();
             showToast('✅ Back-up ingeladen!');
@@ -4226,7 +4102,6 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadState();
       ensureGameState(state.activeGameId);
-      renderTournamentTopBar();
       renderGamePicker();
     });
   </script>
