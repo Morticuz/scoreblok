@@ -1095,37 +1095,38 @@
       return list;
     }
 
-    // =========================================================================
+        // =========================================================================
     // 7. VIEWS & NAVIGATION
     // =========================================================================
     function switchMainView(view) {
       releaseAppWakeLock();
       ['viewPicker', 'viewScoreboard', 'viewPlayers', 'viewHistory'].forEach(id => {
-        document.getElementById(id).classList.add('hidden');
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
       });
       ['navBtnPicker', 'navBtnPlayers', 'navBtnHistory'].forEach(id => {
         const btn = document.getElementById(id);
-        btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center';
+        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center';
       });
 
       if (view === 'picker') {
-        document.getElementById('viewPicker').classList.remove('hidden');
-        document.getElementById('navBtnPicker').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
-        document.getElementById('headerSubtitle').textContent = 'Kies een spel of beheer je favorieten';
+        document.getElementById('viewPicker')?.classList.remove('hidden');
+        const btn = document.getElementById('navBtnPicker');
+        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
         renderGamePicker();
       } else if (view === 'scoreboard') {
-        document.getElementById('viewScoreboard').classList.remove('hidden');
+        document.getElementById('viewScoreboard')?.classList.remove('hidden');
         requestAppWakeLock();
         renderScoreboard();
       } else if (view === 'players') {
-        document.getElementById('viewPlayers').classList.remove('hidden');
-        document.getElementById('navBtnPlayers').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
-        document.getElementById('headerSubtitle').textContent = 'Beheer spelers & volgorde';
+        document.getElementById('viewPlayers')?.classList.remove('hidden');
+        const btn = document.getElementById('navBtnPlayers');
+        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
         renderPlayersManager();
       } else if (view === 'history') {
-        document.getElementById('viewHistory').classList.remove('hidden');
-        document.getElementById('navBtnHistory').className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
-        document.getElementById('headerSubtitle').textContent = 'Statistieken & Hall of Fame';
+        document.getElementById('viewHistory')?.classList.remove('hidden');
+        const btn = document.getElementById('navBtnHistory');
+        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
         renderHistoryView();
       }
     }
@@ -2867,14 +2868,14 @@
       renderScoreboard();
     }
 
-    // =========================================================================
-    // 11. SPELERSBEHEER, KLEUREN & PRESETS
+        // =========================================================================
+    // 11. SPELERSBEHEER, 16 KLEUREN & SPELERSGROEPEN (PRESETS)
     // =========================================================================
     const PLAYER_PALETTE = [
       '#6366f1', '#4f46e5', '#3b82f6', '#06b6d4',
       '#10b981', '#84cc16', '#eab308', '#f97316',
       '#ef4444', '#991b1b', '#ec4899', '#a855f7',
-      '#d946ef', '#78716c', '#0f172a', '#f8fafc'
+      '#d946ef', '#78716c', '#475569', '#f8fafc'
     ];
 
     function renderPlayersManager() {
@@ -2884,8 +2885,13 @@
       listEl.innerHTML = state.players.map((p, idx) => {
         const isActive = p.active !== false;
         const curColor = p.color || '#6366f1';
+        const isDark = curColor === '#0f172a' || curColor === '#000000' || curColor === '#475569';
+        const borderStyle = isDark 
+          ? `border-left: 5px solid ${curColor}; box-shadow: -3px 0 8px rgba(255,255,255,0.25);` 
+          : `border-left: 5px solid ${curColor};`;
+
         return `
-          <div class="bg-slate-950 border ${isActive ? 'border-slate-800' : 'border-slate-900 opacity-55'} rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2" style="border-left: 5px solid ${curColor}">
+          <div class="bg-slate-950 border ${isActive ? 'border-slate-800' : 'border-slate-900 opacity-55'} rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2" style="${borderStyle}">
             <div class="flex items-center gap-2.5 min-w-0">
               <button type="button" onclick="togglePlayerActive('${p.id}')" title="Speelt mee aan/uit" class="w-6 h-6 rounded-lg border flex items-center justify-center text-xs font-bold ${isActive ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-500'}">
                 ${isActive ? '✓' : ''}
