@@ -3349,7 +3349,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       }
     }
 
-    // =========================================================================
+        // =========================================================================
     // 12. STATISTIEKEN, WISSELBEKER, PECH- EN PLAAGTROFEEËN & RIVALS
     // =========================================================================
     function setStatsSortMode(mode) {
@@ -3443,29 +3443,77 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         ? 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition'
         : 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition';
 
-      // 1. WISSELBEKER
+      // Spelersstatistieken berekenen
+      const playerStats = state.players.map(p => {
+        let played = 0, won = 0;
+        filteredMatches.forEach(m => {
+          if ((m.players || []).includes(p.id)) {
+            played++;
+            if ((m.winners || []).includes(p.id)) won++;
+          }
+        });
+        const pct = played > 0 ? Math.round((won / played) * 100) : 0;
+        return { ...p, played, won, pct };
+      });
+
+      playerStats.sort((a, b) => {
+        if (state.statsSortMode === 'pct') {
+          return b.pct !== a.pct ? b.pct - a.pct : b.won - a.won;
+        }
+        return b.won !== a.won ? b.won - a.won : b.pct - a.pct;
+      });
+
+      // 1. BEKERS: WISSELBEKER (MEESTE WINS) & REGEREND KAMPIOEN (LAATSTE WINNAAR)
       const cupWidget = document.getElementById('championCupWidget');
+      
+      const allTimeWins = {};
+      state.players.forEach(p => allTimeWins[p.id] = 0);
+      state.history.forEach(m => {
+        (m.winners || []).forEach(wId => {
+          if (allTimeWins[wId] !== undefined) allTimeWins[wId]++;
+        });
+      });
+
+      let topWins = 0;
+      Object.values(allTimeWins).forEach(w => { if (w > topWins) topWins = w; });
+      const cupHolders = state.players.filter(p => allTimeWins[p.id] === topWins && topWins > 0);
+
       if (state.history.length === 0) {
         cupWidget.classList.add('hidden');
       } else {
         cupWidget.classList.remove('hidden');
+        const holdersNames = cupHolders.length > 0 ? cupHolders.map(p => p.name).join(' & ') : 'Nog niemand';
+        
+        // Laatste winnaar gegevens
         const lastMatch = state.history[0];
-        const lastWinners = (lastMatch.winners || []).map(id => state.players.find(p => p.id === id)?.name || 'Onbekend').join(' & ');
+        const lastWinnersNames = (lastMatch.winners || []).map(id => state.players.find(p => p.id === id)?.name || 'Onbekend').join(' & ');
         const lastGame = allCatalog.find(g => g.id === lastMatch.gameId)?.name || 'Bordspel';
 
         cupWidget.innerHTML = `
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl shrink-0">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- All-Time Wisselbeker -->
+            <div class="bg-slate-900/90 border border-amber-500/40 rounded-2xl p-3.5 flex items-center gap-3 shadow-lg">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-600 to-amber-300 border-2 border-amber-200/60 shadow-md shadow-amber-500/20 flex items-center justify-center text-2xl shrink-0">
                 🏆
               </div>
-              <div>
-                <div class="text-[10px] font-black uppercase tracking-wider text-amber-400">Actuele Wisselbekerhouder</div>
-                <div class="text-base font-black text-white">${lastWinners}</div>
-                <div class="text-xs text-slate-400">Veroverd bij <b>${lastGame}</b></div>
+              <div class="min-w-0">
+                <div class="text-[10px] font-black uppercase tracking-wider text-amber-400">All-Time Wisselbeker</div>
+                <div class="text-sm font-black text-white truncate">${holdersNames}</div>
+                <div class="text-[11px] text-slate-400 font-semibold">${topWins} overwinningen in totaal</div>
               </div>
             </div>
-            <span class="text-3xl">👑</span>
+
+            <!-- Regerend Kampioen (Laatste Winnaar) -->
+            <div class="bg-slate-900/90 border border-indigo-500/40 rounded-2xl p-3.5 flex items-center gap-3 shadow-lg">
+              <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-400 border-2 border-indigo-200/60 shadow-md shadow-indigo-500/20 flex items-center justify-center text-2xl shrink-0">
+                👑
+              </div>
+              <div class="min-w-0">
+                <div class="text-[10px] font-black uppercase tracking-wider text-indigo-300">Regerend Kampioen</div>
+                <div class="text-sm font-black text-white truncate">${lastWinnersNames}</div>
+                <div class="text-[11px] text-slate-400 font-semibold">Won laatst bij <b>${lastGame}</b></div>
+              </div>
+            </div>
           </div>
         `;
       }
@@ -3516,25 +3564,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       }
 
       // 3. HALL OF FAME
-      const playerStats = state.players.map(p => {
-        let played = 0, won = 0;
-        filteredMatches.forEach(m => {
-          if ((m.players || []).includes(p.id)) {
-            played++;
-            if ((m.winners || []).includes(p.id)) won++;
-          }
-        });
-        const pct = played > 0 ? Math.round((won / played) * 100) : 0;
-        return { ...p, played, won, pct };
-      });
-
-      playerStats.sort((a, b) => {
-        if (state.statsSortMode === 'pct') {
-          return b.pct !== a.pct ? b.pct - a.pct : b.won - a.won;
-        }
-        return b.won !== a.won ? b.won - a.won : b.pct - a.pct;
-      });
-
       document.getElementById('hallOfFameList').innerHTML = playerStats.map((p, idx) => `
         <div onclick="openPlayerProfileModal('${p.id}')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-3 flex items-center justify-between cursor-pointer transition">
           <div class="flex items-center gap-2.5">
