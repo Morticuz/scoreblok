@@ -4042,10 +4042,10 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       }
     }
 
-        // =========================================================================
+    // =========================================================================
     // 17. TOERNOOI ENGINE & MODAL
     // =========================================================================
-    let selectedTournamentGameId = null;
+    let selectedTournamentGameId = 'multi';
 
     function openStartTournamentModal() {
       const act = getActivePlayers();
@@ -4053,8 +4053,8 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         showToast('⚠️ Minstens 2 actieve spelers nodig.');
         return;
       }
-      const defaultGame = getGameDef();
-      selectedTournamentGameId = defaultGame.id;
+      const curGame = getGameDef();
+      selectedTournamentGameId = 'multi';
 
       document.getElementById('tournamentModalContent').innerHTML = `
         <div class="flex items-center justify-between border-b border-slate-800 pb-3">
@@ -4063,15 +4063,15 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         </div>
         <div class="space-y-3 text-xs">
           <div>
-            <label class="block text-slate-400 mb-1 font-semibold">1. Kies het spel (zoek op naam)</label>
+            <label class="block text-slate-400 mb-1 font-semibold">1. Type toernooi of spelkeuze</label>
             <div class="relative">
-              <input type="text" id="tGameSearchInput" oninput="filterTournamentGameList()" placeholder="Typ om spel te zoeken..." value="${defaultGame.name}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-indigo-500" />
+              <input type="text" id="tGameSearchInput" oninput="filterTournamentGameList()" placeholder="Typ om specifiek spel te zoeken..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-indigo-500" />
             </div>
-            <div id="tGameResultsList" class="mt-1.5 max-h-36 overflow-y-auto space-y-1 bg-slate-950 border border-slate-800 rounded-xl p-1.5 no-scrollbar"></div>
+            <div id="tGameResultsList" class="mt-1.5 max-h-40 overflow-y-auto space-y-1 bg-slate-950 border border-slate-800 rounded-xl p-1.5 no-scrollbar"></div>
           </div>
           <div>
             <label class="block text-slate-400 mb-1 font-semibold">2. Toernooinaam</label>
-            <input type="text" id="tNameInput" value="${defaultGame.name} Toernooi" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-indigo-500" />
+            <input type="text" id="tNameInput" value="Spellen Meerkamp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-indigo-500" />
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-2">
@@ -4089,13 +4089,28 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       const listEl = document.getElementById('tGameResultsList');
       if (!listEl) return;
 
-      const games = getAllGames().filter(g => g.name.toLowerCase().includes(q));
-      if (games.length === 0) {
-        listEl.innerHTML = '<div class="text-[11px] text-slate-500 p-2 text-center">Geen spel gevonden.</div>';
-        return;
+      const allGames = getAllGames().filter(g => g.name.toLowerCase().includes(q));
+      
+      const showMultiOption = 'meerkamp allround verschillende spellen'.includes(q) || q === '';
+      const isMultiSelected = selectedTournamentGameId === 'multi';
+
+      let html = '';
+      if (showMultiOption) {
+        html += `
+          <div onclick="selectTournamentGame('multi')" class="flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${isMultiSelected ? 'bg-amber-500/25 border border-amber-400 text-amber-200 font-black' : 'bg-slate-900/60 hover:bg-slate-800 border border-transparent text-slate-300 font-bold'}">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-5 h-5 flex items-center justify-center shrink-0">🎲</span>
+              <div class="truncate">
+                <span class="text-xs">Meerkamp (Verschillende spellen)</span>
+                <span class="text-[10px] text-slate-400 block font-normal">Kies per duel welk spel gespeeld wordt</span>
+              </div>
+            </div>
+            ${isMultiSelected ? '<span class="text-xs text-amber-400">✓</span>' : ''}
+          </div>
+        `;
       }
 
-      listEl.innerHTML = games.map(g => {
+      html += allGames.map(g => {
         const isSelected = g.id === selectedTournamentGameId;
         return `
           <div onclick="selectTournamentGame('${g.id}')" class="flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${isSelected ? 'bg-indigo-600/30 border border-indigo-500 text-white font-black' : 'bg-slate-900/60 hover:bg-slate-800 border border-transparent text-slate-300 font-bold'}">
@@ -4107,18 +4122,25 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
           </div>
         `;
       }).join('');
+
+      listEl.innerHTML = html || '<div class="text-[11px] text-slate-500 p-2 text-center">Geen spel gevonden.</div>';
     }
 
     function selectTournamentGame(gameId) {
-      const game = getAllGames().find(g => g.id === gameId);
-      if (!game) return;
-      selectedTournamentGameId = game.id;
-
+      selectedTournamentGameId = gameId;
       const searchInp = document.getElementById('tGameSearchInput');
       const nameInp = document.getElementById('tNameInput');
 
-      if (searchInp) searchInp.value = game.name;
-      if (nameInp) nameInp.value = `${game.name} Toernooi`;
+      if (gameId === 'multi') {
+        if (searchInp) searchInp.value = '';
+        if (nameInp) nameInp.value = 'Spellen Meerkamp';
+      } else {
+        const game = getAllGames().find(g => g.id === gameId);
+        if (game) {
+          if (searchInp) searchInp.value = game.name;
+          if (nameInp) nameInp.value = `${game.name} Toernooi`;
+        }
+      }
 
       filterTournamentGameList();
     }
@@ -4128,15 +4150,17 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
     }
 
     function launchNewTournament() {
-      const game = getAllGames().find(g => g.id === selectedTournamentGameId) || getGameDef();
-      const defaultTitle = `${game.name} Toernooi`;
+      const isMulti = selectedTournamentGameId === 'multi';
+      const game = !isMulti ? getAllGames().find(g => g.id === selectedTournamentGameId) : null;
+      const defaultTitle = isMulti ? 'Spellen Meerkamp' : `${game.name} Toernooi`;
       const name = document.getElementById('tNameInput')?.value.trim() || defaultTitle;
       const act = getActivePlayers();
 
       state.tournament = {
         active: true,
         name,
-        gameId: game.id,
+        gameId: isMulti ? 'multi' : game.id,
+        isMultiGame: isMulti,
         participants: act.map(p => p.id),
         matches: []
       };
@@ -4146,6 +4170,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
           state.tournament.matches.push({
             p1: act[i].id,
             p2: act[j].id,
+            matchGameId: isMulti ? null : game.id,
             winnerId: null,
             done: false
           });
@@ -4154,9 +4179,16 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
 
       saveState();
       closeTournamentModal();
-      openGame(game.id);
+      
+      if (!isMulti && game) {
+        openGame(game.id);
+      } else {
+        switchMainView('picker');
+      }
+
       showToast(`🏆 Toernooi "${name}" gestart!`);
     }
+
 
     // =========================================================================
     // 18. CONFETTI, TOAST, WAKELOCK, UNDO ENGINE & BACKUP
