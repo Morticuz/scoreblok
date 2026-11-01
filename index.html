@@ -3349,7 +3349,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       }
     }
 
-        // =========================================================================
+    // =========================================================================
     // 12. STATISTIEKEN, WISSELBEKER, PECH- EN PLAAGTROFEEËN & RIVALS
     // =========================================================================
     function setStatsSortMode(mode) {
@@ -3435,7 +3435,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         ? state.history
         : state.history.filter(m => m.gameId === selectedFilter);
 
-      // Sortering knoppen
       document.getElementById('sortBtnWins').className = state.statsSortMode === 'wins'
         ? 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition'
         : 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition';
@@ -3443,7 +3442,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         ? 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition'
         : 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition';
 
-      // Spelersstatistieken berekenen
       const playerStats = state.players.map(p => {
         let played = 0, won = 0;
         filteredMatches.forEach(m => {
@@ -3463,7 +3461,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         return b.won !== a.won ? b.won - a.won : b.pct - a.pct;
       });
 
-      // 1. BEKERS: WISSELBEKER (MEESTE WINS) & REGEREND KAMPIOEN (LAATSTE WINNAAR)
       const cupWidget = document.getElementById('championCupWidget');
       
       const allTimeWins = {};
@@ -3484,14 +3481,12 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         cupWidget.classList.remove('hidden');
         const holdersNames = cupHolders.length > 0 ? cupHolders.map(p => p.name).join(' & ') : 'Nog niemand';
         
-        // Laatste winnaar gegevens
         const lastMatch = state.history[0];
         const lastWinnersNames = (lastMatch.winners || []).map(id => state.players.find(p => p.id === id)?.name || 'Onbekend').join(' & ');
         const lastGame = allCatalog.find(g => g.id === lastMatch.gameId)?.name || 'Bordspel';
 
         cupWidget.innerHTML = `
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <!-- All-Time Wisselbeker -->
             <div class="bg-slate-900/90 border border-amber-500/40 rounded-2xl p-3.5 flex items-center gap-3 shadow-lg">
               <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-600 to-amber-300 border-2 border-amber-200/60 shadow-md shadow-amber-500/20 flex items-center justify-center text-2xl shrink-0">
                 🏆
@@ -3503,7 +3498,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
               </div>
             </div>
 
-            <!-- Regerend Kampioen (Laatste Winnaar) -->
             <div class="bg-slate-900/90 border border-indigo-500/40 rounded-2xl p-3.5 flex items-center gap-3 shadow-lg">
               <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-400 border-2 border-indigo-200/60 shadow-md shadow-indigo-500/20 flex items-center justify-center text-2xl shrink-0">
                 👑
@@ -3518,7 +3512,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         `;
       }
 
-      // 2. PECH- EN PLAAGTROFEEËN
       const banterWidget = document.getElementById('banterStatsWidget');
       const banter = calculateBanterStats();
       if (banter && (banter.mostLosses || banter.longestLossStreak || banter.mostSecondPlaces)) {
@@ -3563,7 +3556,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         banterWidget.innerHTML = '';
       }
 
-      // 3. HALL OF FAME
       document.getElementById('hallOfFameList').innerHTML = playerStats.map((p, idx) => `
         <div onclick="openPlayerProfileModal('${p.id}')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-3 flex items-center justify-between cursor-pointer transition">
           <div class="flex items-center gap-2.5">
@@ -3581,7 +3573,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         </div>
       `).join('');
 
-      // 4. ALL-TIME SPELRECORDS
       const recGrid = document.getElementById('gameRecordsGrid');
       const recordsByGame = {};
       state.history.forEach(m => {
@@ -3624,7 +3615,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         `).join('');
       }
 
-      // 5. GESPEELDE POTJES
       const mList = document.getElementById('historyMatchesList');
       if (filteredMatches.length === 0) {
         mList.innerHTML = '<div class="text-xs text-slate-500 py-3 text-center">Geen potjes gevonden voor dit filter.</div>';
@@ -3753,6 +3743,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
     function closePlayerProfileModal() {
       document.getElementById('playerProfileModal').classList.add('hidden');
     }
+
 
     // =========================================================================
     // 13. WIE START ER VANDAAG? (LOTING & UITDAGINGEN)
