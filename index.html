@@ -4042,7 +4042,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       }
     }
 
-    // =========================================================================
+        // =========================================================================
     // 17. TOERNOOI ENGINE & MODAL
     // =========================================================================
     let selectedTournamentGameId = 'multi';
@@ -4053,7 +4053,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         showToast('⚠️ Minstens 2 actieve spelers nodig.');
         return;
       }
-      const curGame = getGameDef();
       selectedTournamentGameId = 'multi';
 
       document.getElementById('tournamentModalContent').innerHTML = `
@@ -4070,8 +4069,8 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
             <div id="tGameResultsList" class="mt-1.5 max-h-40 overflow-y-auto space-y-1 bg-slate-950 border border-slate-800 rounded-xl p-1.5 no-scrollbar"></div>
           </div>
           <div>
-            <label class="block text-slate-400 mb-1 font-semibold">2. Toernooinaam</label>
-            <input type="text" id="tNameInput" value="Spellen Meerkamp" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold focus:outline-none focus:border-indigo-500" />
+            <label class="block text-slate-400 mb-1 font-semibold">2. Toernooinaam (optioneel)</label>
+            <input type="text" id="tNameInput" placeholder="bijv. Spellen Meerkamp Cup" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold placeholder:text-slate-500 placeholder:font-normal focus:outline-none focus:border-indigo-500" />
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-2">
@@ -4090,8 +4089,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       if (!listEl) return;
 
       const allGames = getAllGames().filter(g => g.name.toLowerCase().includes(q));
-      
-      const showMultiOption = 'meerkamp allround verschillende spellen'.includes(q) || q === '';
+      const showMultiOption = 'meerkamp allround verschillende spellen cup'.includes(q) || q === '';
       const isMultiSelected = selectedTournamentGameId === 'multi';
 
       let html = '';
@@ -4133,12 +4131,18 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
 
       if (gameId === 'multi') {
         if (searchInp) searchInp.value = '';
-        if (nameInp) nameInp.value = 'Spellen Meerkamp';
+        if (nameInp) {
+          nameInp.value = '';
+          nameInp.placeholder = 'bijv. Spellen Meerkamp Cup';
+        }
       } else {
         const game = getAllGames().find(g => g.id === gameId);
         if (game) {
           if (searchInp) searchInp.value = game.name;
-          if (nameInp) nameInp.value = `${game.name} Toernooi`;
+          if (nameInp) {
+            nameInp.value = '';
+            nameInp.placeholder = `bijv. ${game.name} Cup`;
+          }
         }
       }
 
@@ -4152,8 +4156,10 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
     function launchNewTournament() {
       const isMulti = selectedTournamentGameId === 'multi';
       const game = !isMulti ? getAllGames().find(g => g.id === selectedTournamentGameId) : null;
-      const defaultTitle = isMulti ? 'Spellen Meerkamp' : `${game.name} Toernooi`;
-      const name = document.getElementById('tNameInput')?.value.trim() || defaultTitle;
+      
+      const defaultTitle = isMulti ? 'Spellen Meerkamp Cup' : `${game ? game.name : 'Bordspel'} Cup`;
+      const inputVal = document.getElementById('tNameInput')?.value.trim();
+      const name = inputVal || defaultTitle;
       const act = getActivePlayers();
 
       state.tournament = {
@@ -4188,7 +4194,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
 
       showToast(`🏆 Toernooi "${name}" gestart!`);
     }
-
 
     // =========================================================================
     // 18. CONFETTI, TOAST, WAKELOCK, UNDO ENGINE & BACKUP
