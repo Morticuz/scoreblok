@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Scoreblok</title>
   <meta name="theme-color" content="#020617" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Scoreblok" />
 
-  <link rel="icon" type="image/png" href="./icon.png?v=3" />
-  <link rel="apple-touch-icon" href="./icon.png?v=3" />
-  <link rel="manifest" href="./manifest.json?v=3" />
+  <link rel="icon" type="image/png" href="./icon.png" />
+  <link rel="apple-touch-icon" href="./icon.png" />
+  <link rel="manifest" href="./manifest.json" />
 
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -65,7 +66,7 @@
           </div>
         </div>
         
-        <!-- Mobiele knoppen rechtsboven (onder elkaar) -->
+        <!-- Mobiele knoppen rechtsboven -->
         <div class="flex sm:hidden flex-col gap-1.5 items-end">
           <button type="button" onclick="openStartPlayerModal()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">
             🎲 Wie begint?
@@ -104,7 +105,7 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
         <div class="flex flex-col gap-2">
           <div class="relative w-full">
-            <input type="text" id="gameSearchInput" oninput="renderGamePicker()" placeholder="Zoek op spelnaam (bijv. Azul, Parijs, Beverclan, Take 5)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3.5 pr-9 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 box-border" />
+            <input type="text" id="gameSearchInput" oninput="renderGamePicker()" placeholder="Zoek op spelnaam (bijv. Azul, Parijs, Catan, Moddervarkens)..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3.5 pr-9 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500 box-border" />
             <button type="button" id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs font-bold">✕</button>
           </div>
           <div class="grid grid-cols-2 sm:flex gap-2">
@@ -161,6 +162,7 @@
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-1.5 ml-auto">
+          <button type="button" id="roundGraphBtn" onclick="showRoundGraph()" class="hidden px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition">📈 Verloop</button>
           <button type="button" id="undoActionBtn" onclick="undoLastScoreAction()" disabled class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-35 text-amber-300 text-xs font-extrabold transition" title="Maak laatste actie ongedaan">↩️ Oeps</button>
           <button type="button" onclick="switchMainView('players')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold" title="Wijzig tafelvolgorde">🪑 Tafel</button>
           <button type="button" onclick="resetCurrentGameConfirm()" class="px-3 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold">🧹 Reset</button>
@@ -224,9 +226,10 @@
       </div>
     </section>
 
-    <!-- VIEW 4: STATISTIEKEN, WISSELBEKER, WIN-STREAKS, RIVALS & RECORDS -->
+    <!-- VIEW 4: STATISTIEKEN, WISSELBEKER, PECH- EN PLAAGTROFEEËN & RECORDS -->
     <section id="viewHistory" class="hidden space-y-4">
       <div id="championCupWidget" class="bg-gradient-to-r from-amber-950/60 via-slate-900 to-amber-950/60 border border-amber-500/50 rounded-2xl p-4 shadow-xl"></div>
+      <div id="banterStatsWidget" class="space-y-3"></div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -264,6 +267,32 @@
     </section>
 
   </main>
+
+  <!-- MODAL: SNEL KLEUR KIEZEN VOOR EEN SPELER -->
+  <div id="quickColorModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xs w-full p-4 space-y-3 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <span id="quickColorModalTitle" class="text-xs font-bold text-white">Kleur kiezen</span>
+        <button type="button" onclick="closeQuickColorModal()" class="text-slate-400 hover:text-white text-xs font-bold">✕</button>
+      </div>
+      <div id="quickColorGrid" class="grid grid-cols-4 gap-2.5 py-1"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: SCOREVERLOOP GRAFIEK (SVG) -->
+  <div id="roundGraphModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-lg p-5 shadow-2xl relative space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📈</span>
+          <h3 class="text-sm font-black text-white">Scoreverloop per ronde</h3>
+        </div>
+        <button type="button" onclick="closeRoundGraph()" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+      </div>
+      <div id="roundGraphContainer" class="w-full h-56 flex items-center justify-center"></div>
+      <div id="roundGraphLegend" class="flex flex-wrap items-center justify-center gap-3 pt-2 border-t border-slate-800/80"></div>
+    </div>
+  </div>
 
   <!-- MODAL 1: WIE START ER VANDAAG? -->
   <div id="startPlayerModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
@@ -494,6 +523,10 @@
       patchwork: '<span class="text-xl">🧵</span>',
       kwakzalvers: '<span class="text-xl">🧪</span>',
       dixit: '<span class="text-xl">🎨</span>',
+      arschmellows: '<span class="text-xl">🍢</span>',
+      gameoftrains: '<span class="text-xl">🚂</span>',
+      snackmatch: '<span class="text-xl">🍟</span>',
+      moddervarkens: '<span class="text-xl">🐷</span>',
       free: '<span class="text-xl">✨</span>'
     };
 
@@ -585,7 +618,7 @@
     ];
 
     // =========================================================================
-    // 2. VOLLEDIGE SPELLEN CATALOGUS
+    // 2. VOLLEDIGE SPELLEN CATALOGUS (INCL. 4 NIEUWE KAARTSPELLEN)
     // =========================================================================
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + vloerlijn óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
@@ -631,7 +664,7 @@
       { id: 'decrew', name: 'De Crew', subtitle: 'Coöperatief missielogboek & aantal pogingen', category: 'card', type: 'coop', icon: 'decrew', minP: 2, maxP: 5, dur: 'short' },
       { id: 'codenames', name: 'Codenames', subtitle: 'Team Rood vs Team Blauw scorebord', category: 'card', type: 'codenames', icon: 'codenames', minP: 4, maxP: 8, dur: 'short' },
       { id: 'flip7', name: 'Flip 7', subtitle: 'Rondeteller tot 200p met +15 Flip 7 bonusknop', category: 'card', type: 'flip7', icon: 'flip7', limit: 200, minP: 3, maxP: 8, dur: 'short' },
-      { id: 'catan', name: 'Catan', subtitle: 'Dorpen, steden, handelsroute & riddermacht', category: 'board', type: 'catan', icon: 'catan', limit: 10, minP: 3, maxP: 6, dur: 'medium', expansions: ['⛵ Zeevaarders (12p)', '⚔️ Steden & Ridders (13p)'] },
+      { id: 'catan', name: 'Catan', subtitle: 'Dorpen, steden, handelsroute & riddermacht met automatische upgrade', category: 'board', type: 'catan', icon: 'catan', limit: 10, minP: 3, maxP: 6, dur: 'medium', expansions: ['⛵ Zeevaarders (12p)', '⚔️ Steden & Ridders (13p)'] },
       { id: 'qwixx', name: 'Qwixx', subtitle: 'Automatische kruisjestabel & mislukte worpen (-5)', category: 'card', type: 'qwixx', icon: 'qwixx', minP: 2, maxP: 5, dur: 'short' },
       { id: 'clever', name: 'Clever', subtitle: 'Kleuren + automatische vossen-vermenigvuldiger', category: 'card', type: 'clever', icon: 'clever', minP: 1, maxP: 4, dur: 'medium' },
       { id: 'ttr', name: 'Ticket to Ride', subtitle: 'Routes, bestemmingskaarten, stations & langste route', category: 'board', type: 'ttr', icon: 'ttr', minP: 2, maxP: 5, dur: 'medium', tieBreakerDesc: 'Langste route bonus' },
@@ -644,6 +677,11 @@
       { id: 'machiavelli', name: 'Machiavelli', subtitle: 'Gebouwen, 5-kleurenbonus (+3) & eerste met 8 gebouwen (+4)', category: 'card', type: 'machiavelli', icon: 'machiavelli', minP: 2, maxP: 7, dur: 'medium' },
       { id: 'themind', name: 'The Mind', subtitle: 'Coöperatieve level-, levens- en shuriken-tracker', category: 'card', type: 'themind', icon: 'themind', minP: 2, maxP: 4, dur: 'short' },
       { id: 'qwirkle', name: 'Qwirkle', subtitle: 'Live teller met Qwirkle (+12) snelknop', category: 'board', type: 'carcassonne', icon: 'free', minP: 2, maxP: 4, dur: 'medium' },
+      // 4 Nieuwe Spellen
+      { id: 'arschmellows', name: 'Arschmellows', subtitle: 'Snel registreren wie het potje heeft gewonnen', category: 'card', type: 'carcassonne', icon: 'arschmellows', limit: 1, minP: 2, maxP: 5, dur: 'short' },
+      { id: 'gameoftrains', name: 'Game of Trains', subtitle: 'Eerste speler met trein in oplopende volgorde', category: 'card', type: 'carcassonne', icon: 'gameoftrains', limit: 1, minP: 2, maxP: 4, dur: 'short' },
+      { id: 'snackmatch', name: 'Snackmatch', subtitle: 'Snel registreren wie de snacks compleet heeft', category: 'card', type: 'carcassonne', icon: 'snackmatch', limit: 1, minP: 2, maxP: 6, dur: 'short' },
+      { id: 'moddervarkens', name: 'Moddervarkens', subtitle: 'Eerste speler met alle varkens in de modder', category: 'card', type: 'carcassonne', icon: 'moddervarkens', limit: 1, minP: 2, maxP: 4, dur: 'short' },
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
 
@@ -660,7 +698,7 @@
       playerPresets: [
         { id: 'pres_duo', name: '👥 Duo (2p)', names: ['Speler 1', 'Speler 2'] }
       ],
-      favorites: ['azul', 'parijs', 'keeropkeer2', 'regenwormen', 'carcassonne', 'cascadia', 'beverbende', 'beverclan', 'rummikub', 'eldorado'],
+      favorites: ['azul', 'parijs', 'keeropkeer2', 'regenwormen', 'carcassonne', 'cascadia', 'beverbende', 'beverclan', 'rummikub', 'eldorado', 'catan'],
       customGames: [],
       activeGameId: 'azul',
       lastPlayedGameId: 'azul',
@@ -1095,7 +1133,7 @@
       return list;
     }
 
-        // =========================================================================
+    // =========================================================================
     // 7. VIEWS & NAVIGATION
     // =========================================================================
     function switchMainView(view) {
@@ -1443,6 +1481,16 @@
       updateActiveFavStar();
       updateUndoButtonUI();
 
+      // Toon/verberg grafiek knop bij rondespellen
+      const graphBtn = document.getElementById('roundGraphBtn');
+      if (graphBtn) {
+        if (def.type === 'rounds' || def.type === 'flip7') {
+          graphBtn.classList.remove('hidden');
+        } else {
+          graphBtn.classList.add('hidden');
+        }
+      }
+
       const lowWins = isLowestWins();
       let ruleTxt = lowWins ? '👑 Laagste score wint' : '👑 Hoogste score wint';
       if (def.limit) ruleTxt += ` • Doel/Limiet: ${def.limit} pnt`;
@@ -1540,7 +1588,10 @@
             <div class="flex items-center justify-between text-xs text-slate-400">
               <span class="player-title font-bold truncate flex items-center gap-1.5 text-slate-100">
                 <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">#${idx + 1}</span>
-                ${renderMeepleSvg(p.color, 'w-4 h-4')} <span>${p.name}</span>
+                <button type="button" onclick="openQuickColorModal('${p.id}')" title="Kleur snel wisselen" class="hover:scale-110 transition">
+                  ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                </button>
+                <span>${p.name}</span>
               </span>
               <span>${isLeader ? '👑' : ''}</span>
             </div>
@@ -1584,7 +1635,10 @@
               return `
                 <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-sm text-white">${p.name}</span>
+                    <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                      ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                      <span class="font-bold text-sm text-white">${p.name}</span>
+                    </button>
                     <span class="text-xl font-black text-indigo-400">${pd.liveScore || 0} pnt</span>
                   </div>
                   <div class="grid grid-cols-5 gap-1.5">
@@ -1607,7 +1661,9 @@
                   <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                     <div>
                       <h3 class="font-bold text-sm text-white flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full inline-block" style="background:${p.color}"></span>
+                        <button type="button" onclick="openQuickColorModal('${p.id}')" class="hover:scale-110 transition">
+                          ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                        </button>
                         <span>${p.name}</span>
                       </h3>
                       <p class="text-[11px] text-slate-400">Rondescore: <b>${az.baseScore}</b> • Eindbonus: <b>+${bon.total}</b></p>
@@ -1719,10 +1775,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-              <h3 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full inline-block" style="background:${p.color}"></span>
-                <span>${p.name}</span>
-              </h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-2 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm sm:text-base text-white">${p.name}</span>
+              </button>
               <span id="kokPlayerTotal_${p.id}" class="text-sm font-extrabold text-indigo-400">Totaal: ${calculatePlayerTotal(def.id, p.id)} pnt</span>
             </div>
 
@@ -1832,13 +1888,20 @@
     }
 
     // =========================================================================
-    // 10C. ROUNDS & FLIP 7
+    // 10C. ROUNDS & FLIP 7 (MET LIVE SVG SCORE-GRAFIEK)
     // =========================================================================
     function renderRoundsSheet(container, def) {
       const gs = ensureGameState(def.id);
       const activePlayers = getActivePlayers();
 
-      const headerCols = activePlayers.map(p => `<th class="px-2 py-2 text-right text-xs font-bold text-slate-300">${p.name}</th>`).join('');
+      const headerCols = activePlayers.map(p => `
+        <th class="px-2 py-2 text-right text-xs font-bold text-slate-300">
+          <button type="button" onclick="openQuickColorModal('${p.id}')" class="inline-flex items-center gap-1 hover:opacity-80">
+            ${renderMeepleSvg(p.color, 'w-3 h-3')}
+            <span>${p.name}</span>
+          </button>
+        </th>
+      `).join('');
       const rowsHtml = (gs.rounds || []).map((r, idx) => `
         <tr class="border-t border-slate-800/80">
           <td class="px-2 py-2 text-xs text-slate-400 font-semibold">R${idx + 1}</td>
@@ -1905,6 +1968,90 @@
       renderScoreboard();
     }
 
+    function showRoundGraph() {
+      const gs = ensureGameState(state.activeGameId);
+      if (!gs.rounds || gs.rounds.length < 2) {
+        showToast('ℹ️ Speel minstens 2 rondes om een verloopgrafiek te zien.');
+        return;
+      }
+      const actPlayers = getActivePlayers();
+      const numRounds = gs.rounds.length;
+
+      const playerSeries = actPlayers.map(p => {
+        let cum = Number(p.handicap || 0);
+        const points = [cum];
+        for (let r = 0; r < numRounds; r++) {
+          cum += Number(gs.rounds[r][p.id] || 0);
+          points.push(cum);
+        }
+        return { player: p, points };
+      });
+
+      let allVals = [];
+      playerSeries.forEach(s => allVals.push(...s.points));
+      let minVal = Math.min(...allVals);
+      let maxVal = Math.max(...allVals);
+      if (minVal === maxVal) { maxVal += 10; minVal -= 10; }
+
+      const width = 360;
+      const height = 180;
+      const padX = 35;
+      const padY = 20;
+
+      const scaleX = (idx) => padX + (idx / numRounds) * (width - 2 * padX);
+      const scaleY = (val) => height - padY - ((val - minVal) / (maxVal - minVal)) * (height - 2 * padY);
+
+      let svgLines = `
+        <line x1="${padX}" y1="${padY}" x2="${padX}" y2="${height - padY}" stroke="#334155" stroke-width="1" />
+        <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="#334155" stroke-width="1" />
+      `;
+
+      for (let r = 0; r <= numRounds; r++) {
+        const x = scaleX(r);
+        svgLines += `
+          <text x="${x}" y="${height - 5}" font-size="9" fill="#64748b" text-anchor="middle" font-weight="bold">${r === 0 ? 'Start' : 'R' + r}</text>
+          <line x1="${x}" y1="${padY}" x2="${x}" y2="${height - padY}" stroke="#1e293b" stroke-dasharray="2,2" stroke-width="1" />
+        `;
+      }
+
+      let linesMarkup = '';
+      playerSeries.forEach(s => {
+        const col = s.player.color || '#6366f1';
+        let pathD = '';
+        let circles = '';
+
+        s.points.forEach((pt, idx) => {
+          const cx = scaleX(idx);
+          const cy = scaleY(pt);
+          pathD += (idx === 0 ? `M ${cx} ${cy}` : ` L ${cx} ${cy}`);
+          circles += `<circle cx="${cx}" cy="${cy}" r="3.5" fill="${col}" stroke="#0f172a" stroke-width="1.5" />`;
+        });
+
+        linesMarkup += `<path d="${pathD}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />`;
+        linesMarkup += circles;
+      });
+
+      document.getElementById('roundGraphContainer').innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" class="w-full h-full">
+          ${svgLines}
+          ${linesMarkup}
+        </svg>
+      `;
+
+      document.getElementById('roundGraphLegend').innerHTML = playerSeries.map(s => `
+        <div class="flex items-center gap-1.5 text-xs text-slate-300 font-semibold">
+          <span class="w-3 h-3 rounded-full border border-slate-700" style="background-color: ${s.player.color || '#6366f1'}"></span>
+          <span>${s.player.name} (${s.points[s.points.length - 1]})</span>
+        </div>
+      `).join('');
+
+      document.getElementById('roundGraphModal')?.classList.remove('hidden');
+    }
+
+    function closeRoundGraph() {
+      document.getElementById('roundGraphModal')?.classList.add('hidden');
+    }
+
     // =========================================================================
     // 10D. QWIXX, CLEVER & CASCADIA
     // =========================================================================
@@ -1921,7 +2068,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-bold text-indigo-400">${calculatePlayerTotal('qwixx', p.id)} pnt</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -1959,7 +2109,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('clever', p.id)} pnt</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-6 gap-2">
@@ -2017,7 +2170,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-extrabold text-emerald-400">Gebiedsbonus: +${habBonuses[p.id] || 0} • Totaal: ${calculatePlayerTotal('cascadia', p.id)}</span>
             </div>
             <div class="text-xs font-semibold text-slate-400">Dierenkaarten</div>
@@ -2052,7 +2208,7 @@
     }
 
     // =========================================================================
-    // 10E. REGENWORMEN (INCL. DEEL 2: STENEN 11 & 13 + MAX 7 WORMFICHES)
+    // 10E. REGENWORMEN
     // =========================================================================
     function isRegenwormenExpActive(gs) {
       if (!gs || !gs.activeExpansions) return false;
@@ -2092,10 +2248,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2">
-              <h3 class="font-bold text-sm text-white flex items-center gap-2">
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-2 hover:opacity-80">
                 ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                <span>${p.name}</span>
-              </h3>
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-sm font-extrabold text-amber-300">Wormen: ${calculatePlayerTotal('regenwormen', p.id)} 🐛</span>
             </div>
 
@@ -2177,7 +2333,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal(def.id, p.id)} pnt</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -2210,7 +2369,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('wonders7', p.id)} pnt</span>
             </div>
             <div class="grid grid-cols-3 gap-2">
@@ -2242,7 +2404,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('ttr', p.id)} pnt</span>
             </div>
             <div class="flex flex-wrap gap-1.5">
@@ -2318,7 +2483,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-bold text-amber-300">Boven: ${upperSum}/63 (${upperSum >= 63 ? '+35 Bonus!' : 'nog ' + (63 - upperSum)})</span>
             </div>
             <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -2361,41 +2529,110 @@
       renderScoreboard();
     }
 
+    // --- CATAN MET INTERACTIEVE AUTOMATISCHE STADSUPGRADE ---
     function renderCatanSheet(container) {
       const gs = ensureGameState('catan');
-      container.innerHTML = getActivePlayers().map(p => {
+      container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">` + getActivePlayers().map(p => {
         const ct = gs.playerData[p.id].catan;
+        const totalPts = calculatePlayerTotal('catan', p.id);
+        const isWinner = totalPts >= 10;
         return `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-            <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
-              <span class="text-xs font-bold text-amber-300">Overwinningspunten: ${calculatePlayerTotal('catan', p.id)}</span>
-            </div>
-            <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
-                <label class="text-[11px] font-bold text-slate-300">🏠 Dorpen (1p)</label>
-                <input type="number" value="${valOrEmpty(ct.villages)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCatanVal('${p.id}','villages',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
+          <div class="bg-slate-900 border ${isWinner ? 'border-amber-400 ring-2 ring-amber-400/30' : 'border-slate-800'} rounded-2xl p-4 flex flex-col justify-between" style="border-top: 5px solid ${p.color || '#6366f1'};">
+            <div>
+              <div class="flex items-center justify-between pb-2 border-b border-slate-800 mb-3">
+                <button type="button" onclick="openQuickColorModal('${p.id}')" title="Kleur snel wisselen" class="flex items-center gap-1.5 hover:opacity-80 transition">
+                  ${renderMeepleSvg(p.color, 'w-5 h-5')}
+                  <span class="font-extrabold text-sm text-white">${p.name}</span>
+                  <span class="text-[10px] text-slate-500">🎨</span>
+                </button>
+                <div class="text-xl font-black ${isWinner ? 'text-amber-300 animate-pulse' : 'text-indigo-400'}">
+                  ${totalPts} <span class="text-xs font-normal text-slate-400">/ 10</span>
+                </div>
               </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
-                <label class="text-[11px] font-bold text-slate-300">🏛️ Steden (2p)</label>
-                <input type="number" value="${valOrEmpty(ct.cities)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCatanVal('${p.id}','cities',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
+
+              <div class="space-y-2 text-xs">
+                <!-- Dorpen -->
+                <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
+                  <span class="text-slate-300 font-bold flex items-center gap-1">🏠 Dorpen (1p)</span>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="updateCatanDelta('${p.id}', 'villages', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm">-</button>
+                    <span class="font-black text-sm w-4 text-center text-white">${ct.villages || 0}</span>
+                    <button type="button" onclick="updateCatanDelta('${p.id}', 'villages', 1)" class="w-7 h-7 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm">+</button>
+                  </div>
+                </div>
+
+                <!-- Steden (automatische upgrade van dorp) -->
+                <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
+                  <span class="text-slate-300 font-bold flex items-center gap-1">🏰 Steden (2p)</span>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="updateCatanDelta('${p.id}', 'cities', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm">-</button>
+                    <span class="font-black text-sm w-4 text-center text-white">${ct.cities || 0}</span>
+                    <button type="button" onclick="updateCatanDelta('${p.id}', 'cities', 1)" class="w-7 h-7 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm">+</button>
+                  </div>
+                </div>
+
+                <!-- Overwinningspunt-kaarten -->
+                <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
+                  <span class="text-slate-300 font-bold flex items-center gap-1">📜 OP-Kaarten (1p)</span>
+                  <div class="flex items-center gap-2">
+                    <button type="button" onclick="updateCatanDelta('${p.id}', 'dev', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm">-</button>
+                    <span class="font-black text-sm w-4 text-center text-white">${ct.dev || 0}</span>
+                    <button type="button" onclick="updateCatanDelta('${p.id}', 'dev', 1)" class="w-7 h-7 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm">+</button>
+                  </div>
+                </div>
+
+                <!-- Bonussen -->
+                <div class="grid grid-cols-2 gap-1.5 pt-1">
+                  <button type="button" onclick="toggleCatanAward('${p.id}', 'longestRoad')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition ${ct.longestRoad ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
+                    🛣️ Route (+2)
+                  </button>
+                  <button type="button" onclick="toggleCatanAward('${p.id}', 'largestArmy')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition ${ct.largestArmy ? 'bg-rose-500/20 border-rose-400 text-rose-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
+                    ⚔️ Ridder (+2)
+                  </button>
+                </div>
               </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 text-center">
-                <label class="text-[11px] font-bold text-slate-300">📜 Kaarten (1p)</label>
-                <input type="number" value="${valOrEmpty(ct.dev)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setCatanVal('${p.id}','dev',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
-              </div>
-              <button type="button" onclick="toggleCatanAward('${p.id}','longestRoad')" class="rounded-xl border p-2 text-xs font-bold ${ct.longestRoad ? 'bg-amber-500 text-slate-950 border-amber-300' : 'bg-slate-950 border-slate-800 text-slate-400'}">🛣️ Handelsroute (+2)</button>
-              <button type="button" onclick="toggleCatanAward('${p.id}','largestArmy')" class="rounded-xl border p-2 text-xs font-bold ${ct.largestArmy ? 'bg-rose-600 text-white border-rose-400' : 'bg-slate-950 border-slate-800 text-slate-400'}">⚔️ Riddermacht (+2)</button>
             </div>
           </div>`;
-      }).join('');
+      }).join('') + `</div>`;
     }
 
-    function setCatanVal(playerId, key, val) {
+    function updateCatanDelta(playerId, field, delta) {
+      pushUndoSnapshot();
       const gs = ensureGameState('catan');
-      gs.playerData[playerId].catan[key] = Number(val || 0);
+      const ct = gs.playerData[playerId].catan;
+      if (!ct) return;
+
+      if (field === 'cities') {
+        if (delta > 0) {
+          if ((ct.cities || 0) >= 4) {
+            showToast('⚠️ Maximaal 4 steden.');
+            return;
+          }
+          if ((ct.villages || 0) <= 0) {
+            showToast('⚠️ Je hebt eerst een dorp nodig om te upgraden naar een stad.');
+            return;
+          }
+          ct.cities = (ct.cities || 0) + 1;
+          ct.villages = Math.max(0, (ct.villages || 0) - 1);
+        } else if (delta < 0) {
+          if ((ct.cities || 0) > 0) {
+            ct.cities -= 1;
+            ct.villages = Math.min(5, (ct.villages || 0) + 1);
+          }
+        }
+      } else if (field === 'villages') {
+        const nextVal = (ct.villages || 0) + delta;
+        if (nextVal > 5) {
+          showToast('⚠️ Maximaal 5 dorpen op het bord.');
+          return;
+        }
+        ct.villages = Math.max(0, nextVal);
+      } else {
+        ct[field] = Math.max(0, (ct[field] || 0) + delta);
+      }
+
       saveState();
-      renderLiveLeaderboard();
+      renderScoreboard();
     }
 
     function toggleCatanAward(playerId, awardKey) {
@@ -2417,7 +2654,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('sushigo', p.id)} pnt</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -2462,7 +2702,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('lostcities', p.id)} pnt</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-5 gap-2">
@@ -2514,7 +2757,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-extrabold text-emerald-400">${setsCnt} kwartet(ten) • Totaal: ${calculatePlayerTotal('koehandel', p.id)}</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
@@ -2550,7 +2796,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('machiavelli', p.id)} pnt</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -2585,7 +2834,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex justify-between items-center">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-xs font-extrabold text-orange-400">Eindscore: ${calculatePlayerTotal('arknova', p.id)} pnt</span>
             </div>
             <div class="grid grid-cols-3 gap-2">
@@ -2621,7 +2873,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <p class="text-[11px] text-slate-400">Finishpositie of kampioenschapspunten</p>
             </div>
             <div class="flex items-center gap-2">
@@ -2812,7 +3067,10 @@
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="font-bold text-sm text-white">${p.name}</h3>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
               <span class="text-lg font-black text-indigo-400">${pd.liveScore || 0} pnt</span>
             </div>
             <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
@@ -2868,7 +3126,7 @@
       renderScoreboard();
     }
 
-        // =========================================================================
+    // =========================================================================
     // 11. SPELERSBEHEER, 16 KLEUREN & SPELERSGROEPEN (PRESETS)
     // =========================================================================
     const PLAYER_PALETTE = [
@@ -2904,21 +3162,21 @@
 
             <div class="flex items-center gap-2 ml-auto flex-wrap">
               <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl px-2 py-1" title="Handicap">
-                <span class="text-[10px] text-slate-400">Hcp:</span>
-                <input type="number" value="${p.handicap || 0}" onchange="setPlayerHandicap('${p.id}', this.value)" class="w-8 bg-transparent text-center text-xs font-bold text-amber-300 outline-none" />
+                <span class="
+text-[10px] font-bold text-slate-400">Handicap:</span>
+                <input type="number" value="${valOrEmpty(p.handicap)}" placeholder="0" onchange="setPlayerHandicap('${p.id}', this.value)" class="w-10 bg-slate-950 border border-slate-800 rounded-lg text-center text-xs font-bold text-indigo-400 outline-none py-0.5" />
               </div>
 
-              <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl px-2 py-1.5 max-w-[215px] overflow-x-auto no-scrollbar">
-                ${PLAYER_PALETTE.map(hex => `
-                  <button type="button" onclick="setPlayerColor('${p.id}', '${hex}')" 
-                    class="w-4 h-4 rounded-full border shrink-0 transition ${curColor === hex ? 'scale-125 border-white ring-2 ring-indigo-500' : 'border-slate-700 hover:scale-110'}" 
-                    style="background-color: ${hex};" title="Kies kleur"></button>
-                `).join('')}
-              </div>
+              <button type="button" onclick="openQuickColorModal('${p.id}')" title="Kleur kiezen" class="px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-full border border-slate-700" style="background-color: ${curColor};"></span>
+                <span>Kleur</span>
+              </button>
 
-              <button type="button" onclick="movePlayerOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 text-xs font-bold text-slate-200">▲</button>
-              <button type="button" onclick="movePlayerOrder(${idx}, 1)" ${idx === state.players.length - 1 ? 'disabled' : ''} class="px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 text-xs font-bold text-slate-200">▼</button>
-              <button type="button" onclick="removePlayer('${p.id}')" class="px-2 py-1.5 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 text-xs font-bold">🗑️</button>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="movePlayerOrder('${p.id}', -1)" ${idx === 0 ? 'disabled' : ''} class="w-7 h-7 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 border border-slate-800 text-xs font-bold text-slate-300">▲</button>
+                <button type="button" onclick="movePlayerOrder('${p.id}', 1)" ${idx === state.players.length - 1 ? 'disabled' : ''} class="w-7 h-7 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 border border-slate-800 text-xs font-bold text-slate-300">▼</button>
+                <button type="button" onclick="deletePlayerConfirm('${p.id}')" class="w-7 h-7 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-bold ml-1">🗑️</button>
+              </div>
             </div>
           </div>`;
       }).join('');
@@ -2929,39 +3187,117 @@
     function renderPlayerPresetsBar() {
       const bar = document.getElementById('playerPresetsBar');
       if (!bar) return;
-      const presets = state.playerPresets || [];
-      if (presets.length === 0) {
-        bar.innerHTML = `<span class="text-xs text-slate-500">Geen opgeslagen groepen.</span>`;
+
+      if (!state.playerPresets || state.playerPresets.length === 0) {
+        bar.innerHTML = '<span class="text-xs text-slate-500">Nog geen presets opgeslagen.</span>';
         return;
       }
 
-      bar.innerHTML = presets.map(pr => `
-        <div class="flex items-center bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 gap-2">
-          <button type="button" onclick="applyGroupPreset('${pr.id}')" class="text-xs font-extrabold text-indigo-300 hover:text-white transition">${pr.name}</button>
-          <button type="button" onclick="deleteGroupPreset('${pr.id}')" class="text-slate-500 hover:text-rose-400 text-xs font-bold" title="Groep verwijderen">✕</button>
+      bar.innerHTML = state.playerPresets.map((pr, idx) => `
+        <div class="inline-flex items-center gap-1 bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1">
+          <button type="button" onclick="applyPlayerPreset('${pr.id}')" class="text-xs font-bold text-indigo-300 hover:text-white transition">
+            ${pr.name}
+          </button>
+          <button type="button" onclick="deletePlayerPreset(${idx})" class="text-slate-500 hover:text-rose-400 text-xs ml-1 font-bold">✕</button>
         </div>
       `).join('');
     }
 
-    function saveCurrentGroupPreset() {
-      const activeNames = getActivePlayers().map(p => p.name);
-      if (activeNames.length === 0) return showToast('⚠️ Geen actieve spelers geselecteerd.');
-      const groupName = prompt('Geef een naam voor deze spelersgroep:', 'Groep ' + (state.playerPresets.length + 1));
-      if (!groupName || !groupName.trim()) return;
+    function togglePlayerActive(id) {
+      const p = state.players.find(x => x.id === id);
+      if (!p) return;
+      p.active = p.active === false ? true : false;
+      saveState();
+      renderPlayersManager();
+    }
 
-      if (!state.playerPresets) state.playerPresets = [];
+    function renamePlayer(id, name) {
+      const p = state.players.find(x => x.id === id);
+      if (p && name.trim()) {
+        p.name = name.trim();
+        saveState();
+        renderPlayersManager();
+      }
+    }
+
+    function setPlayerHandicap(id, val) {
+      const p = state.players.find(x => x.id === id);
+      if (p) {
+        p.handicap = Number(val || 0);
+        saveState();
+      }
+    }
+
+    function movePlayerOrder(id, dir) {
+      const idx = state.players.findIndex(x => x.id === id);
+      if (idx === -1) return;
+      const target = idx + dir;
+      if (target < 0 || target >= state.players.length) return;
+      const tmp = state.players[idx];
+      state.players[idx] = state.players[target];
+      state.players[target] = tmp;
+      saveState();
+      renderPlayersManager();
+    }
+
+    function rotatePlayersClockwise() {
+      if (state.players.length < 2) return;
+      const first = state.players.shift();
+      state.players.push(first);
+      saveState();
+      renderPlayersManager();
+      showToast('🔄 Tafelvolgorde doorgeschoven!');
+    }
+
+    function addNewPlayer() {
+      const input = document.getElementById('newPlayerNameInput');
+      const name = input?.value.trim();
+      if (!name) return;
+      const nextColor = PLAYER_PALETTE[state.players.length % PLAYER_PALETTE.length];
+      state.players.push({
+        id: 'p_' + Date.now(),
+        name,
+        color: nextColor,
+        active: true,
+        handicap: 0
+      });
+      input.value = '';
+      saveState();
+      renderPlayersManager();
+    }
+
+    function deletePlayerConfirm(id) {
+      if (state.players.length <= 1) {
+        showToast('⚠️ Er moet minimaal 1 speler blijven.');
+        return;
+      }
+      if (confirm('Wil je deze speler verwijderen?')) {
+        state.players = state.players.filter(x => x.id !== id);
+        saveState();
+        renderPlayersManager();
+      }
+    }
+
+    function saveCurrentGroupPreset() {
+      const act = getActivePlayers();
+      if (act.length === 0) {
+        showToast('⚠️ Geen actieve spelers geselecteerd.');
+        return;
+      }
+      const name = prompt('Geef een naam voor deze groep (bijv. "Gezin 4p" of "Vriendenavond"):', `Groep (${act.length}p)`);
+      if (!name) return;
       state.playerPresets.push({
         id: 'pres_' + Date.now(),
-        name: groupName.trim(),
-        names: activeNames
+        name: name.trim(),
+        names: act.map(p => p.name)
       });
       saveState();
       renderPlayerPresetsBar();
-      showToast(`💾 Groep "${groupName.trim()}" opgeslagen!`);
+      showToast('✅ Groep opgeslagen!');
     }
 
-    function applyGroupPreset(presetId) {
-      const pr = (state.playerPresets || []).find(x => x.id === presetId);
+    function applyPlayerPreset(presetId) {
+      const pr = state.playerPresets.find(x => x.id === presetId);
       if (!pr) return;
       state.players.forEach(p => {
         p.active = pr.names.includes(p.name);
@@ -2971,1145 +3307,907 @@
       showToast(`✅ Groep "${pr.name}" geactiveerd!`);
     }
 
-    function deleteGroupPreset(presetId) {
-      state.playerPresets = (state.playerPresets || []).filter(x => x.id !== presetId);
+    function deletePlayerPreset(idx) {
+      state.playerPresets.splice(idx, 1);
       saveState();
       renderPlayerPresetsBar();
-      showToast('🗑️ Groep verwijderd.');
     }
 
-    function addNewPlayer() {
-      const inp = document.getElementById('newPlayerNameInput');
-      const name = (inp?.value || '').trim();
-      if (!name) return;
-      state.players.push({
-        id: 'p_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-        name,
-        color: PLAYER_PALETTE[state.players.length % PLAYER_PALETTE.length],
-        active: true,
-        handicap: 0
-      });
-      inp.value = '';
-      ensureGameState(state.activeGameId);
-      saveState();
-      renderPlayersManager();
-      showToast(`👤 ${name} toegevoegd!`);
-    }
+    // --- QUICK COLOR PICKER MODAL ---
+    let quickColorTargetPlayerId = null;
 
-    function togglePlayerActive(playerId) {
-      const activeCnt = getActivePlayers().length;
+    function openQuickColorModal(playerId) {
+      quickColorTargetPlayerId = playerId;
       const p = state.players.find(x => x.id === playerId);
       if (!p) return;
-      if (p.active !== false && activeCnt <= 1) {
-        showToast('⚠️ Minimaal 1 actieve speler verplicht.');
-        return;
-      }
-      p.active = p.active === false ? true : false;
-      saveState();
-      renderPlayersManager();
-    }
-
-    function renamePlayer(playerId, newName) {
-      const p = state.players.find(x => x.id === playerId);
-      if (p && newName.trim()) {
-        p.name = newName.trim();
-        saveState();
-        renderPlayersManager();
-      }
-    }
-
-    function setPlayerHandicap(playerId, val) {
-      const p = state.players.find(x => x.id === playerId);
-      if (p) {
-        p.handicap = Number(val || 0);
-        saveState();
-      }
-    }
-
-    function setPlayerColor(playerId, color) {
-      const p = state.players.find(x => x.id === playerId);
-      if (p) {
-        p.color = color;
-        saveState();
-        renderPlayersManager();
-        renderHistoryView();
-      }
-    }
-
-    function movePlayerOrder(idx, dir) {
-      const target = idx + dir;
-      if (target < 0 || target >= state.players.length) return;
-      const tmp = state.players[idx];
-      state.players[idx] = state.players[target];
-      state.players[target] = tmp;
-      saveState();
-      renderPlayersManager();
-      if (!document.getElementById('viewScoreboard').classList.contains('hidden')) {
-        renderScoreboard();
-      }
-    }
-
-    function rotatePlayersClockwise() {
-      if (state.players.length < 2) return;
-      const first = state.players.shift();
-      state.players.push(first);
-      saveState();
-      renderPlayersManager();
-      if (!document.getElementById('viewScoreboard').classList.contains('hidden')) {
-        renderScoreboard();
-      }
-      showToast('🔄 Tafelvolgorde doorgeschoven!');
-    }
-
-    function removePlayer(playerId) {
-      if (state.players.length <= 1) {
-        showToast('⚠️ Minimaal 1 speler vereist.');
-        return;
-      }
-      if (!confirm('Weet je zeker dat je deze speler wilt verwijderen?')) return;
-      state.players = state.players.filter(x => x.id !== playerId);
-      saveState();
-      renderPlayersManager();
-    }
-
-    // =========================================================================
-    // WIE START ER VANDAAG?
-    // =========================================================================
-    let lastPickedStarterId = null;
-    let startPlayerMode = 'random';
-
-    function openStartPlayerModal() {
-      const modal = document.getElementById('startPlayerModal');
-      if (!modal) return;
-      modal.classList.remove('hidden');
-      setStartPlayerMode(startPlayerMode);
-    }
-
-    function closeStartPlayerModal() {
-      document.getElementById('startPlayerModal')?.classList.add('hidden');
-    }
-
-    function setStartPlayerMode(mode) {
-      startPlayerMode = mode;
-      const tabR = document.getElementById('spTabRandom');
-      const tabC = document.getElementById('spTabChallenge');
-      const boxR = document.getElementById('spRandomBox');
-      const boxC = document.getElementById('spChallengeBox');
-
-      if (mode === 'random') {
-        if (tabR) tabR.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-600 text-white transition';
-        if (tabC) tabC.className = 'flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
-        boxR?.classList.remove('hidden');
-        boxC?.classList.add('hidden');
-        rollStartPlayer();
-      } else {
-        if (tabC) tabC.className = 'flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-amber-500 text-slate-950 transition';
-        if (tabR) tabR.className = 'flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition';
-        boxC?.classList.remove('hidden');
-        boxR?.classList.add('hidden');
-        rollStartChallenge();
-      }
-    }
-
-    function rollStartPlayer() {
-      const active = getActivePlayers();
-      if (!active.length) return;
-      const winner = active[Math.floor(Math.random() * active.length)];
-      lastPickedStarterId = winner.id;
-      const nameEl = document.getElementById('startPlayerWinnerName');
-      if (nameEl) {
-        nameEl.innerHTML = `${renderMeepleSvg(winner.color, 'w-6 h-6')} <span>${winner.name} mag beginnen!</span>`;
-        nameEl.style.color = winner.color || '#818cf8';
-      }
-    }
-
-    function rollStartChallenge() {
-      const txtEl = document.getElementById('startChallengeText');
-      const listEl = document.getElementById('spChallengePlayers');
-      if (txtEl) {
-        const ch = START_CHALLENGES[Math.floor(Math.random() * START_CHALLENGES.length)];
-        txtEl.textContent = ch;
-      }
-      if (listEl) {
-        listEl.innerHTML = getActivePlayers().map(p => `
-          <button type="button" onclick="pickChallengeStarter('${p.id}')" class="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 flex items-center gap-2 text-xs font-bold text-white transition">
-            ${renderMeepleSvg(p.color, 'w-4 h-4')}
-            <span class="truncate">${p.name}</span>
-          </button>
-        `).join('');
-      }
-    }
-
-    function pickChallengeStarter(playerId) {
-      lastPickedStarterId = playerId;
-      makePickedStarterFirstAtTable();
-    }
-
-    function makePickedStarterFirstAtTable() {
-      if (!lastPickedStarterId) return;
-      const idx = state.players.findIndex(p => p.id === lastPickedStarterId);
-      if (idx > 0) {
-        const before = state.players.slice(0, idx);
-        const fromIdx = state.players.slice(idx);
-        state.players = [...fromIdx, ...before];
-      }
-      const gs = ensureGameState(state.activeGameId);
-      gs.manualStarterIdx = 0;
-      saveState();
-      closeStartPlayerModal();
-      if (!document.getElementById('viewPlayers').classList.contains('hidden')) renderPlayersManager();
-      if (!document.getElementById('viewScoreboard').classList.contains('hidden')) renderScoreboard();
-      showToast('👑 Startspeler ingesteld op #1!');
-    }
-
-    // =========================================================================
-    // 11B. TOERNOOI-MODUS
-    // =========================================================================
-    function openStartTournamentModal() {
-      const modal = document.getElementById('tournamentModal');
-      const box = document.getElementById('tournamentModalContent');
-      if (!modal || !box) return;
-
-      box.innerHTML = `
-        <div class="flex items-center justify-between">
-          <h3 class="font-black text-base text-white flex items-center gap-2">🏆 Nieuw Toernooi Starten</h3>
-          <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white text-xs font-bold">✕</button>
-        </div>
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="block text-slate-300 font-bold mb-1">Toernooinaam:</label>
-            <input type="text" id="tournNameInput" value="De Rummikub Cup" placeholder="Bijv. De Rummikub Cup" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-white font-bold focus:outline-none focus:border-amber-500" />
-          </div>
-          <label class="flex items-start gap-2.5 bg-slate-950 border border-slate-800 rounded-xl p-3 cursor-pointer">
-            <input type="checkbox" id="tournCountGlobalCheck" checked class="mt-0.5" />
-            <div>
-              <div class="font-bold text-slate-200">📊 Tellen de wins mee voor de algemene statistieken?</div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Vink aan om de potjes óók mee te tellen in de Hall of Fame & Wisselbeker.</div>
-            </div>
-          </label>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Annuleer</button>
-          <button type="button" onclick="confirmStartTournament()" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold">🚀 Start Toernooi</button>
-        </div>
-      `;
-      modal.classList.remove('hidden');
-    }
-
-    function confirmStartTournament() {
-      const name = (document.getElementById('tournNameInput')?.value || '').trim() || 'De Rummikub Cup';
-      const countInGlobal = !!document.getElementById('tournCountGlobalCheck')?.checked;
-      state.tournament = {
-        active: true,
-        name,
-        countInGlobal,
-        matches: []
-      };
-      saveState();
-      closeTournamentModal();
-      showToast(`🏆 "${name}" is gestart!`);
-    }
-
-    function openEndTournamentModal() {
-      const t = state.tournament;
-      if (!t || !t.active) return;
-
-      const winsMap = {};
-      state.players.forEach(p => { winsMap[p.name] = { name: p.name, color: p.color, wins: 0 }; });
-      (t.matches || []).forEach(m => {
-        (m.winners || []).forEach(wName => {
-          if (!winsMap[wName]) winsMap[wName] = { name: wName, color: '#6366f1', wins: 0 };
-          winsMap[wName].wins++;
-        });
-      });
-
-      const standings = Object.values(winsMap).sort((a, b) => b.wins - a.wins);
-      const topWins = standings.length ? standings[0].wins : 0;
-      const winners = standings.filter(s => s.wins === topWins && topWins > 0);
-      const winnerNames = winners.length ? winners.map(w => w.name).join(' & ') : (standings[0]?.name || 'Niemand');
-      const winnerColor = winners[0]?.color || '#eab308';
-
-      const modal = document.getElementById('tournamentModal');
-      const box = document.getElementById('tournamentModalContent');
-      box.innerHTML = `
-        <div class="text-center space-y-4 py-2">
-          <div class="text-4xl">🏆✨</div>
-          <div class="bg-slate-950 border border-amber-500/50 rounded-2xl p-4 space-y-2 shadow-inner">
-            <p class="text-xs text-slate-300 leading-relaxed">
-              "En de winnaar van <b class="text-amber-300">${t.name}</b> is..."
-            </p>
-            <div class="flex items-center justify-center gap-2 pt-1">
-              ${renderMeepleSvg(winnerColor, 'w-8 h-8')}
-              <span class="text-2xl font-black text-white">${winnerNames}!</span>
-            </div>
-          </div>
-
-          <div class="space-y-1.5 text-left">
-            <div class="text-[11px] font-bold text-slate-400 uppercase">Eindstand:</div>
-            ${standings.filter(s => s.wins > 0 || state.players.some(p => p.name === s.name && p.active !== false)).map((s, idx) => `
-              <div class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-slate-400">#${idx + 1}</span>
-                  ${renderMeepleSvg(s.color, 'w-4 h-4')}
-                  <span class="font-bold text-white">${s.name}</span>
-                </div>
-                <span class="font-extrabold text-amber-300">${s.wins} win${s.wins === 1 ? '' : 's'}</span>
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="flex gap-2 pt-2">
-            <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Nog niet stoppen</button>
-            <button type="button" onclick="finishAndCloseTournament()" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold">🏁 Sluit Toernooi Af</button>
-          </div>
-        </div>
-      `;
-      modal.classList.remove('hidden');
-      launchConfetti();
-    }
-
-    function finishAndCloseTournament() {
-      state.tournament.active = false;
-      state.tournament.matches = [];
-      saveState();
-      closeTournamentModal();
-      showToast('🏆 Toernooi feestelijk afgesloten!');
-    }
-
-    function closeTournamentModal() {
-      document.getElementById('tournamentModal')?.classList.add('hidden');
-    }
-
-    // =========================================================================
-    // 12. STATISTIEKEN, WISSELBEKER, RIVALS & PODIUM
-    // =========================================================================
-    function updateChampionCupState() {
-      const winsMap = {};
-      state.players.forEach(p => { winsMap[p.name] = { name: p.name, color: p.color, wins: 0 }; });
-      state.history.forEach(h => {
-        (h.winners || []).forEach(wName => {
-          if (!winsMap[wName]) winsMap[wName] = { name: wName, color: '#6366f1', wins: 0 };
-          winsMap[wName].wins++;
-        });
-      });
-      const sorted = Object.values(winsMap).sort((a, b) => b.wins - a.wins);
-      if (!sorted.length || sorted[0].wins === 0) return;
-
-      const topLeader = sorted[0].name;
-      if (!state.championCup) state.championCup = { currentHolder: null, previousHolder: null };
-
-      if (state.championCup.currentHolder && state.championCup.currentHolder !== topLeader) {
-        state.championCup.previousHolder = state.championCup.currentHolder;
-        state.championCup.currentHolder = topLeader;
-      } else if (!state.championCup.currentHolder) {
-        state.championCup.currentHolder = topLeader;
-      }
-    }
-
-    function recordMatchInApp(matchRecord) {
-      state.lastPlayedGameId = matchRecord.gameId;
-      if (state.tournament && state.tournament.active) {
-        state.tournament.matches.push(matchRecord);
-        if (state.tournament.countInGlobal) {
-          state.history.unshift(matchRecord);
-          updateChampionCupState();
-        }
-      } else {
-        state.history.unshift(matchRecord);
-        updateChampionCupState();
-      }
-    }
-
-    function resetCurrentGameConfirm() {
-      const def = getGameDef();
-      if (!confirm(`Weet je zeker dat je alle scores van ${def.name} wilt resetten?`)) return;
-      pushUndoSnapshot();
-      delete state.gamesState[def.id];
-      ensureGameState(def.id);
-      saveState();
-      renderScoreboard();
-      showToast('🧹 Scoreblad gereset!');
-    }
-
-    let pendingMatchRecord = null;
-
-    function openPodiumModal() {
-      const def = getGameDef();
-      const gs = ensureGameState(def.id);
-      const activePlayers = getActivePlayers();
-      if (!activePlayers.length) return;
-
-      if (def.type === 'azul' && gs.azulMode !== 'manual') {
-        const hasPending = activePlayers.some(p => gs.playerData[p.id]?.azul?.pending?.some(r => r.some(Boolean)));
-        if (hasPending) commitAzulRound();
-      }
-
-      const standings = getStandings(def.id);
-      let winners = [];
-
-      if (def.type === 'dorfromantik' || def.type === 'themind') {
-        winners = activePlayers.map(p => p.name);
-      } else if (def.type === 'coop') {
-        winners = gs.coop?.won ? activePlayers.map(p => p.name) : [];
-      } else {
-        const bestScore = standings[0].score;
-        winners = standings.filter(s => s.score === bestScore).map(s => s.name);
-      }
-
-      let bestRoundInfo = null;
-      if ((def.type === 'rounds' || def.type === 'flip7') && Array.isArray(gs.rounds) && gs.rounds.length > 0) {
-        const lowWins = isLowestWins(def.id);
-        gs.rounds.forEach((rObj, rIdx) => {
-          activePlayers.forEach(p => {
-            const val = Number(rObj[p.id]);
-            if (!isNaN(val)) {
-              if (!bestRoundInfo || (!lowWins && val > bestRoundInfo.score) || (lowWins && val < bestRoundInfo.score)) {
-                bestRoundInfo = { player: p.name, score: val, round: rIdx + 1 };
-              }
-            }
-          });
-        });
-      }
-
-      pendingMatchRecord = {
-        id: 'm_' + Date.now(),
-        gameId: def.id,
-        gameName: def.name,
-        date: new Date().toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        results: standings.map(s => ({ playerId: s.id, name: s.name, score: s.score, color: s.color })),
-        winners,
-        bestRoundInfo,
-        note: ''
-      };
-
-      const lowWins = isLowestWins(def.id);
-      let existingBest = null;
-      state.history.forEach(h => {
-        if (h.gameId === def.id && !h.noScores) {
-          (h.results || []).forEach(r => {
-            const sc = Number(r.score);
-            if (!isNaN(sc)) {
-              if (existingBest === null || (!lowWins && sc > existingBest) || (lowWins && sc < existingBest)) {
-                existingBest = sc;
-              }
-            }
-          });
-        }
-      });
-
-      const topScore = standings[0].score;
-      const isNewRecord = existingBest === null || (!lowWins && topScore > existingBest) || (lowWins && topScore < existingBest);
-      const hasTieBreakAtTop = standings.length > 1 && standings[0].score === standings[1].score && standings[0].tieVal !== standings[1].tieVal;
-
-      const modal = document.getElementById('podiumModal');
-      const titleEl = document.getElementById('podiumModalTitle');
-      const tieNotice = document.getElementById('podiumTieBreakNotice');
-      const recBanner = document.getElementById('podiumRecordBanner');
-      const listEl = document.getElementById('podiumStandingsList');
-      const noteInput = document.getElementById('matchNoteInput');
-
-      if (titleEl) titleEl.textContent = `🎉 Eindstand ${def.name}`;
-      if (noteInput) noteInput.value = '';
-
-      if (hasTieBreakAtTop) {
-        tieNotice.classList.remove('hidden');
-        tieNotice.textContent = `⚖️ Beslist via tie-breaker (${def.tieBreakerDesc || 'secundaire waarde'})!`;
-      } else {
-        tieNotice.classList.add('hidden');
-      }
-
-      if (isNewRecord && topScore !== 0) {
-        recBanner.classList.remove('hidden');
-        recBanner.textContent = `🏅 NIEUW ALL-TIME SPELLENRECORD! (${topScore} pnt)`;
-      } else {
-        recBanner.classList.add('hidden');
-      }
-
-      const medals = ['🥇', '🥈', '🥉'];
-      listEl.innerHTML = standings.map((s, idx) => `
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 flex items-center justify-between" style="border-left: 4px solid ${s.color || '#6366f1'}">
-          <div class="flex items-center gap-2.5">
-            <span class="text-base">${medals[idx] || '#' + (idx + 1)}</span>
-            ${renderMeepleSvg(s.color, 'w-5 h-5')}
-            <span class="font-bold text-sm text-white">${s.name}</span>
-          </div>
-          <div class="font-black text-base text-indigo-300">${s.score} <span class="text-xs font-normal text-slate-400">pnt</span></div>
-        </div>
+      document.getElementById('quickColorModalTitle').textContent = `Kleur kiezen voor ${p.name}`;
+      document.getElementById('quickColorGrid').innerHTML = PLAYER_PALETTE.map(hex => `
+        <button type="button" onclick="selectQuickColor('${hex}')" class="w-10 h-10 rounded-xl border border-slate-700 hover:scale-110 transition flex items-center justify-center font-bold text-xs shadow" style="background-color: ${hex}; color: ${hex === '#f8fafc' ? '#020617' : '#ffffff'};">
+          ${p.color === hex ? '✓' : ''}
+        </button>
       `).join('');
-
-      modal.classList.remove('hidden');
-      launchConfetti();
+      document.getElementById('quickColorModal').classList.remove('hidden');
     }
 
-    function closePodiumModal() {
-      document.getElementById('podiumModal')?.classList.add('hidden');
+    function closeQuickColorModal() {
+      document.getElementById('quickColorModal').classList.add('hidden');
+      quickColorTargetPlayerId = null;
     }
 
-    function confirmSaveFinishedMatch() {
-      if (!pendingMatchRecord) return;
-      const noteVal = (document.getElementById('matchNoteInput')?.value || '').trim();
-      pendingMatchRecord.note = noteVal;
-
-      recordMatchInApp(pendingMatchRecord);
-      delete state.gamesState[state.activeGameId];
-      ensureGameState(state.activeGameId);
-      undoStack = [];
-      updateUndoButtonUI();
-      saveState();
-      closePodiumModal();
-      switchMainView('history');
-      showToast(`🏆 Potje opgeslagen!`);
-    }
-
-    function launchConfetti() {
-      const container = document.getElementById('confettiContainer');
-      if (!container) return;
-      container.innerHTML = '';
-      const colors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#38bdf8', '#eab308'];
-      for (let i = 0; i < 45; i++) {
-        const piece = document.createElement('div');
-        piece.className = 'confetti-piece';
-        piece.style.left = Math.random() * 100 + 'vw';
-        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        piece.style.width = (Math.random() * 8 + 6) + 'px';
-        piece.style.height = (Math.random() * 12 + 8) + 'px';
-        piece.style.borderRadius = Math.random() > 0.5 ? '50% 50%' : '2px';
-        piece.style.animationDelay = (Math.random() * 0.8) + 's';
-        piece.style.animationDuration = (Math.random() * 1.5 + 2) + 's';
-        container.appendChild(piece);
+    function selectQuickColor(hex) {
+      if (!quickColorTargetPlayerId) return;
+      const p = state.players.find(x => x.id === quickColorTargetPlayerId);
+      if (p) {
+        p.color = hex;
+        saveState();
+        closeQuickColorModal();
+        if (!document.getElementById('viewPlayers').classList.contains('hidden')) {
+          renderPlayersManager();
+        } else {
+          renderScoreboard();
+        }
       }
-      setTimeout(() => { container.innerHTML = ''; }, 3500);
     }
 
+    // =========================================================================
+    // 12. STATISTIEKEN, WISSELBEKER, PECH- EN PLAAGTROFEEËN & RIVALS
+    // =========================================================================
     function setStatsSortMode(mode) {
       state.statsSortMode = mode;
       saveState();
       renderHistoryView();
     }
 
-    function renderHistoryView() {
-      updateChampionCupState();
-      const sortMode = state.statsSortMode || 'wins';
-      const gameFilterEl = document.getElementById('historyGameFilter');
-      const selectedGame = gameFilterEl ? gameFilterEl.value : 'all';
+    function calculateBanterStats() {
+      if (!state.history || state.history.length === 0) return null;
 
-      const btnWins = document.getElementById('sortBtnWins');
-      const btnPct = document.getElementById('sortBtnPct');
-      if (btnWins && btnPct) {
-        btnWins.className = sortMode === 'wins'
-          ? 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition'
-          : 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition';
-        btnPct.className = sortMode === 'pct'
-          ? 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition'
-          : 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition';
-      }
+      const lossCount = {};
+      const secondPlaceCount = {};
+      const currentLossStreak = {};
+      const maxLossStreak = {};
 
-      if (gameFilterEl) {
-        const playedGamesMap = {};
-        state.history.forEach(h => { playedGamesMap[h.gameId] = h.gameName; });
-        const opts = `<option value="all">Alle gespeelde spellen (${state.history.length})</option>` +
-          Object.entries(playedGamesMap).map(([gid, gname]) => `<option value="${gid}" ${selectedGame === gid ? 'selected' : ''}>${gname}</option>`).join('');
-        gameFilterEl.innerHTML = opts;
-      }
-
-      const filteredHistory = selectedGame === 'all'
-        ? state.history
-        : state.history.filter(h => h.gameId === selectedGame);
-
-      const statsMap = {};
       state.players.forEach(p => {
-        statsMap[p.name] = { name: p.name, color: p.color, played: 0, wins: 0, pct: 0, currentStreak: 0, bestStreak: 0 };
+        lossCount[p.id] = 0;
+        secondPlaceCount[p.id] = 0;
+        currentLossStreak[p.id] = 0;
+        maxLossStreak[p.id] = 0;
       });
 
-      const chronological = [...filteredHistory].reverse();
-      chronological.forEach(h => {
-        (h.results || []).forEach(r => {
-          if (!statsMap[r.name]) {
-            statsMap[r.name] = { name: r.name, color: r.color || '#6366f1', played: 0, wins: 0, pct: 0, currentStreak: 0, bestStreak: 0 };
-          }
-          const st = statsMap[r.name];
-          st.played++;
-          if ((h.winners || []).includes(r.name)) {
-            st.wins++;
-            st.currentStreak++;
-            if (st.currentStreak > st.bestStreak) st.bestStreak = st.currentStreak;
+      const sortedHistory = [...state.history].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      sortedHistory.forEach(match => {
+        const participants = match.players || [];
+        const winners = match.winners || [];
+        const results = match.results || [];
+
+        participants.forEach(pId => {
+          if (lossCount[pId] === undefined) lossCount[pId] = 0;
+          if (secondPlaceCount[pId] === undefined) secondPlaceCount[pId] = 0;
+          if (currentLossStreak[pId] === undefined) currentLossStreak[pId] = 0;
+          if (maxLossStreak[pId] === undefined) maxLossStreak[pId] = 0;
+
+          const won = winners.includes(pId);
+          if (won) {
+            currentLossStreak[pId] = 0;
           } else {
-            st.currentStreak = 0;
+            lossCount[pId] += 1;
+            currentLossStreak[pId] += 1;
+            if (currentLossStreak[pId] > maxLossStreak[pId]) {
+              maxLossStreak[pId] = currentLossStreak[pId];
+            }
           }
         });
-      });
 
-      const leaderboard = Object.values(statsMap).map(item => {
-        item.pct = item.played > 0 ? Math.round((item.wins / item.played) * 100) : 0;
-        return item;
-      });
-
-      leaderboard.sort((a, b) => {
-        if (sortMode === 'pct') {
-          return (b.pct - a.pct) || (b.wins - a.wins) || (b.played - a.played);
+        if (results.length >= 3 && results[1] && results[1].playerId) {
+          const secondId = results[1].playerId;
+          secondPlaceCount[secondId] = (secondPlaceCount[secondId] || 0) + 1;
         }
-        return (b.wins - a.wins) || (b.pct - a.pct) || (b.played - a.played);
       });
 
-      const cupEl = document.getElementById('championCupWidget');
-      if (cupEl) {
-        const curName = state.championCup?.currentHolder;
-        const prevName = state.championCup?.previousHolder;
-        const curPlayer = state.players.find(p => p.name === curName) || leaderboard[0];
-
-        if (!curPlayer || curPlayer.wins === 0) {
-          cupEl.innerHTML = `
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3">
-                <div class="text-3xl">🏆</div>
-                <div>
-                  <div class="text-[11px] uppercase tracking-wider font-extrabold text-amber-400">Wisselbeker Spellenkampioen</div>
-                  <div class="text-xs text-slate-300">Speel jullie eerste potje om de Wisselbeker uit te reiken!</div>
-                </div>
-              </div>
-            </div>`;
-        } else {
-          const prevPlayer = prevName ? (state.players.find(p => p.name === prevName) || { name: prevName, color: '#64748b' }) : null;
-          cupEl.innerHTML = `
-            <div class="flex flex-wrap items-center justify-between gap-4">
-              <div class="flex items-center gap-3.5">
-                <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400 flex items-center justify-center text-2xl shadow-lg">🏆</div>
-                <div>
-                  <div class="text-[10px] uppercase tracking-wider font-extrabold text-amber-400">Wisselbeker Spellenkampioen</div>
-                  <div class="flex items-center gap-2 mt-0.5">
-                    ${renderMeepleSvg(curPlayer.color, 'w-6 h-6')}
-                    <span class="font-black text-base text-white">${curPlayer.name}</span>
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 font-extrabold">Titelhouder</span>
-                  </div>
-                </div>
-              </div>
-
-              ${prevPlayer && prevPlayer.name !== curPlayer.name ? `
-                <div class="bg-slate-950/90 border border-amber-500/30 rounded-xl px-3 py-2 flex items-center gap-2 text-xs">
-                  <span class="text-[11px] text-slate-400">Overgenomen van:</span>
-                  <div class="flex items-center gap-1.5 font-bold text-slate-300">
-                    ${renderMeepleSvg(prevPlayer.color, 'w-5 h-5')}
-                    <span>${prevPlayer.name}</span>
-                  </div>
-                  <span class="text-amber-400 font-black">➔ 🏆 ➔</span>
-                  <div class="flex items-center gap-1.5 font-extrabold text-amber-300">
-                    ${renderMeepleSvg(curPlayer.color, 'w-5 h-5')}
-                    <span>${curPlayer.name}</span>
-                  </div>
-                </div>
-              ` : ''}
-            </div>`;
-        }
-      }
-
-      const hallEl = document.getElementById('hallOfFameList');
-      if (hallEl) {
-        hallEl.innerHTML = leaderboard.map((s, idx) => `
-          <div onclick="openPlayerProfile('${s.name.replace(/'/g, "\\'")}')" class="group cursor-pointer bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-3.5 flex items-center justify-between gap-3 transition shadow-md" style="border-left: 5px solid ${s.color || '#6366f1'}">
-            <div class="flex items-center gap-3 min-w-0">
-              <span class="w-7 h-7 rounded-xl font-black text-xs flex items-center justify-center shrink-0 ${idx === 0 && (s.wins > 0 || s.pct > 0) ? 'bg-amber-500 text-slate-950 shadow' : 'bg-slate-900 text-slate-400'}">#${idx + 1}</span>
-              ${renderMeepleSvg(s.color, 'w-6 h-6 shrink-0')}
-              <div class="min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-bold text-sm text-white truncate group-hover:text-indigo-300 transition">${s.name}</span>
-                  ${s.currentStreak >= 2 ? `<span class="px-2 py-0.5 rounded-full bg-orange-500/20 border border-orange-500/40 text-orange-300 text-[10px] font-extrabold">🔥 ${s.currentStreak} op rij!</span>` : ''}
-                </div>
-                <div class="text-[11px] text-slate-400">${s.played} potje${s.played === 1 ? '' : 's'} • Beste reeks: <b class="text-slate-300">${s.bestStreak}</b></div>
-              </div>
-            </div>
-            <div class="flex items-center gap-4 text-right shrink-0">
-              <div>
-                <div class="text-[10px] uppercase tracking-wider text-slate-400">Wins</div>
-                <div class="font-black text-sm ${sortMode === 'wins' ? 'text-amber-300 text-base' : 'text-slate-200'}">🏆 ${s.wins}</div>
-              </div>
-              <div class="min-w-[54px]">
-                <div class="text-[10px] uppercase tracking-wider text-slate-400">Win %</div>
-                <div class="font-black text-sm ${sortMode === 'pct' ? 'text-emerald-400 text-base' : 'text-slate-200'}">${s.pct}%</div>
-              </div>
-            </div>
-          </div>`).join('');
-      }
-
-      const recGrid = document.getElementById('gameRecordsGrid');
-      if (recGrid) {
-        const recordsByGame = {};
-        filteredHistory.forEach(h => {
-          if (h.noScores) return;
-          const lowWins = isLowestWins(h.gameId);
-          (h.results || []).forEach(r => {
-            const numScore = Number(r.score);
-            if (isNaN(numScore)) return;
-            if (!recordsByGame[h.gameId]) {
-              recordsByGame[h.gameId] = {
-                gameId: h.gameId,
-                gameName: h.gameName,
-                lowWins,
-                bestScore: numScore,
-                holder: r.name,
-                date: h.date,
-                bestRound: h.bestRoundInfo || null
-              };
-            } else {
-              const rec = recordsByGame[h.gameId];
-              if ((!lowWins && numScore > rec.bestScore) || (lowWins && numScore < rec.bestScore)) {
-                rec.bestScore = numScore;
-                rec.holder = r.name;
-                rec.date = h.date;
-              }
-              if (h.bestRoundInfo) {
-                if (!rec.bestRound || (!lowWins && h.bestRoundInfo.score > rec.bestRound.score) || (lowWins && h.bestRoundInfo.score < rec.bestRound.score)) {
-                  rec.bestRound = h.bestRoundInfo;
-                }
-              }
-            }
-          });
+      const getTop = (obj) => {
+        let bestId = null;
+        let maxVal = 0;
+        Object.entries(obj).forEach(([id, val]) => {
+          if (val > maxVal) { maxVal = val; bestId = id; }
         });
+        return bestId && maxVal > 0 ? { player: state.players.find(p => p.id === bestId), value: maxVal } : null;
+      };
 
-        const recList = Object.values(recordsByGame);
-        if (recList.length === 0) {
-          recGrid.innerHTML = `<div class="col-span-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center text-xs text-slate-400">Speel een potje met scores om jullie All-Time Spelrecords te zien!</div>`;
-        } else {
-          recGrid.innerHTML = recList.map(rec => {
-            const gDef = getGameDef(rec.gameId);
-            return `
-              <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <div class="w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
-                    ${SVG_ICONS[gDef?.icon] || SVG_ICONS.free}
-                  </div>
-                  <div class="min-w-0">
-                    <div class="font-bold text-xs text-white truncate">${rec.gameName}</div>
-                    <div class="text-[11px] text-amber-300 font-bold truncate">👑 ${rec.holder}</div>
-                    ${rec.bestRound ? `<div class="text-[10px] text-slate-400 truncate">⚡ Beste ronde: <b>${rec.bestRound.score}p</b> (${rec.bestRound.player})</div>` : ''}
-                  </div>
-                </div>
-                <div class="text-right shrink-0">
-                  <div class="text-[10px] text-slate-400 uppercase">${rec.lowWins ? 'Beste (Laag)' : 'Record'}</div>
-                  <div class="text-lg font-black text-indigo-400">${rec.bestScore} <span class="text-[10px] font-normal">pnt</span></div>
-                </div>
-              </div>`;
-          }).join('');
-        }
-      }
-
-      const histListEl = document.getElementById('historyMatchesList');
-      if (histListEl) {
-        if (filteredHistory.length === 0) {
-          histListEl.innerHTML = `<div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-center text-xs text-slate-400">Nog geen potjes opgeslagen.</div>`;
-        } else {
-          histListEl.innerHTML = filteredHistory.map(h => `
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2">
-              <div class="flex flex-wrap items-center justify-between gap-2">
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-sm text-indigo-300">${h.gameName}</span>
-                  <span class="text-[11px] text-slate-500">${h.date}</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  ${(h.winners && h.winners.length) ? `<span class="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">👑 ${h.winners.join(', ')}</span>` : ''}
-                  <button type="button" onclick="deleteHistoryItem('${h.id}')" class="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 text-xs" title="Verwijder">🗑️</button>
-                </div>
-              </div>
-              <div class="text-xs text-slate-300">
-                ${h.noScores ? `<span class="text-slate-400 italic">Alleen winnaar geregistreerd (${(h.results || []).map(r => r.name).join(', ')})</span>` : (h.results || []).map(r => `${r.name}: <b>${r.score}</b>`).join(' • ')}
-              </div>
-              ${h.note ? `<div class="text-[11px] text-indigo-200/90 bg-slate-900 border border-slate-800 rounded-lg px-2.5 py-1 italic">💬 "${h.note}"</div>` : ''}
-            </div>`).join('');
-        }
-      }
+      return {
+        mostLosses: getTop(lossCount),
+        longestLossStreak: getTop(maxLossStreak),
+        mostSecondPlaces: getTop(secondPlaceCount)
+      };
     }
 
-    function openPlayerProfile(playerName) {
-      const modal = document.getElementById('playerProfileModal');
-      if (!modal) return;
-      const pObj = state.players.find(x => x.name === playerName) || { name: playerName, color: '#6366f1' };
+    function renderHistoryView() {
+      const gFilter = document.getElementById('historyGameFilter');
+      const allCatalog = getAllGames();
 
-      document.getElementById('profPlayerName').textContent = pObj.name;
-      document.getElementById('profColorDot').style.backgroundColor = pObj.color || '#6366f1';
+      if (gFilter) {
+        const curVal = gFilter.value || 'all';
+        gFilter.innerHTML = `<option value="all">📚 Alle gespeelde spellen</option>` +
+          allCatalog.map(g => `<option value="${g.id}" ${curVal === g.id ? 'selected' : ''}>${g.name}</option>`).join('');
+      }
 
-      let totalPlayed = 0;
-      let totalWins = 0;
-      const gameWinCounts = {};
+      const selectedFilter = gFilter ? gFilter.value : 'all';
+      const filteredMatches = selectedFilter === 'all'
+        ? state.history
+        : state.history.filter(m => m.gameId === selectedFilter);
 
-      state.history.forEach(h => {
-        const inMatch = (h.results || []).some(r => r.name === pObj.name);
-        if (inMatch) {
-          totalPlayed++;
-          if ((h.winners || []).includes(pObj.name)) {
-            totalWins++;
-            gameWinCounts[h.gameName] = (gameWinCounts[h.gameName] || 0) + 1;
-          }
-        }
-      });
+      // Sortering knoppen
+      document.getElementById('sortBtnWins').className = state.statsSortMode === 'wins'
+        ? 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition'
+        : 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition';
+      document.getElementById('sortBtnPct').className = state.statsSortMode === 'pct'
+        ? 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition'
+        : 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition';
 
-      const winPct = totalPlayed > 0 ? Math.round((totalWins / totalPlayed) * 100) : 0;
-      document.getElementById('profSummaryGrid').innerHTML = `
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
-          <div class="text-[10px] uppercase text-slate-400">Potjes</div>
-          <div class="text-lg font-black text-white">${totalPlayed}</div>
-        </div>
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
-          <div class="text-[10px] uppercase text-slate-400">Wins</div>
-          <div class="text-lg font-black text-amber-300">🏆 ${totalWins}</div>
-        </div>
-        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
-          <div class="text-[10px] uppercase text-slate-400">Win %</div>
-          <div class="text-lg font-black text-emerald-400">${winPct}%</div>
-        </div>
-      `;
-
-      let favGame = '-';
-      let maxW = -1;
-      Object.entries(gameWinCounts).forEach(([gName, wCnt]) => {
-        if (wCnt > maxW) {
-          maxW = wCnt;
-          favGame = `${gName} (${wCnt}x win)`;
-        }
-      });
-      document.getElementById('profFavGame').textContent = favGame;
-
-      const rivalsMap = {};
-      state.history.forEach(h => {
-        const namesInMatch = (h.results || []).map(r => r.name);
-        if (namesInMatch.includes(pObj.name)) {
-          namesInMatch.forEach(otherName => {
-            if (otherName !== pObj.name) {
-              if (!rivalsMap[otherName]) rivalsMap[otherName] = { played: 0, wins: 0, losses: 0 };
-              rivalsMap[otherName].played++;
-              const pWon = (h.winners || []).includes(pObj.name);
-              const otherWon = (h.winners || []).includes(otherName);
-              if (pWon && !otherWon) rivalsMap[otherName].wins++;
-              else if (!pWon && otherWon) rivalsMap[otherName].losses++;
-            }
-          });
-        }
-      });
-
-      const rivalListEl = document.getElementById('profRivalsList');
-      const rivalEntries = Object.entries(rivalsMap);
-      if (rivalEntries.length === 0) {
-        rivalListEl.innerHTML = `<div class="text-xs text-slate-500 text-center py-2">Nog geen onderlinge duels geregistreerd.</div>`;
+      // 1. WISSELBEKER
+      const cupWidget = document.getElementById('championCupWidget');
+      if (state.history.length === 0) {
+        cupWidget.classList.add('hidden');
       } else {
-        rivalEntries.sort((a, b) => b[1].played - a[1].played);
-        rivalListEl.innerHTML = rivalEntries.map(([rName, dat]) => `
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs">
-            <span class="font-bold text-white">${rName}</span>
+        cupWidget.classList.remove('hidden');
+        const lastMatch = state.history[0];
+        const lastWinners = (lastMatch.winners || []).map(id => state.players.find(p => p.id === id)?.name || 'Onbekend').join(' & ');
+        const lastGame = allCatalog.find(g => g.id === lastMatch.gameId)?.name || 'Bordspel';
+
+        cupWidget.innerHTML = `
+          <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-              <span class="text-slate-400">${dat.played} duel${dat.played === 1 ? '' : 's'}</span>
-              <span class="font-extrabold text-emerald-400">${dat.wins}W</span>
-              <span class="font-extrabold text-rose-400">${dat.losses}V</span>
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-2xl shrink-0">
+                🏆
+              </div>
+              <div>
+                <div class="text-[10px] font-black uppercase tracking-wider text-amber-400">Actuele Wisselbekerhouder</div>
+                <div class="text-base font-black text-white">${lastWinners}</div>
+                <div class="text-xs text-slate-400">Veroverd bij <b>${lastGame}</b></div>
+              </div>
+            </div>
+            <span class="text-3xl">👑</span>
+          </div>
+        `;
+      }
+
+      // 2. PECH- EN PLAAGTROFEEËN
+      const banterWidget = document.getElementById('banterStatsWidget');
+      const banter = calculateBanterStats();
+      if (banter && (banter.mostLosses || banter.longestLossStreak || banter.mostSecondPlaces)) {
+        banterWidget.innerHTML = `
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-base">🎭</span>
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-400">Pech- & Plaagtrofeeën</h3>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            ${banter.mostLosses ? `
+              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-xl shrink-0">🏮</div>
+                <div class="min-w-0">
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-rose-400">De Rode Lantaarn</div>
+                  <div class="text-sm font-extrabold text-white truncate">${banter.mostLosses.player?.name || 'Onbekend'}</div>
+                  <div class="text-xs text-slate-400 font-semibold">${banter.mostLosses.value} potjes verloren</div>
+                </div>
+              </div>` : ''}
+
+            ${banter.longestLossStreak ? `
+              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-xl shrink-0">🌧️</div>
+                <div class="min-w-0">
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-amber-400">Pechvogel Record</div>
+                  <div class="text-sm font-extrabold text-white truncate">${banter.longestLossStreak.player?.name || 'Onbekend'}</div>
+                  <div class="text-xs text-slate-400 font-semibold">${banter.longestLossStreak.value} op een rij zonder winst</div>
+                </div>
+              </div>` : ''}
+
+            ${banter.mostSecondPlaces ? `
+              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-500/10 border border-slate-500/20 flex items-center justify-center text-xl shrink-0">🥈</div>
+                <div class="min-w-0">
+                  <div class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Eeuwige Tweede</div>
+                  <div class="text-sm font-extrabold text-white truncate">${banter.mostSecondPlaces.player?.name || 'Onbekend'}</div>
+                  <div class="text-xs text-slate-400 font-semibold">${banter.mostSecondPlaces.value}x net naast goud gegrepen</div>
+                </div>
+              </div>` : ''}
+          </div>
+        `;
+      } else {
+        banterWidget.innerHTML = '';
+      }
+
+      // 3. HALL OF FAME
+      const playerStats = state.players.map(p => {
+        let played = 0, won = 0;
+        filteredMatches.forEach(m => {
+          if ((m.players || []).includes(p.id)) {
+            played++;
+            if ((m.winners || []).includes(p.id)) won++;
+          }
+        });
+        const pct = played > 0 ? Math.round((won / played) * 100) : 0;
+        return { ...p, played, won, pct };
+      });
+
+      playerStats.sort((a, b) => {
+        if (state.statsSortMode === 'pct') {
+          return b.pct !== a.pct ? b.pct - a.pct : b.won - a.won;
+        }
+        return b.won !== a.won ? b.won - a.won : b.pct - a.pct;
+      });
+
+      document.getElementById('hallOfFameList').innerHTML = playerStats.map((p, idx) => `
+        <div onclick="openPlayerProfileModal('${p.id}')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-3 flex items-center justify-between cursor-pointer transition">
+          <div class="flex items-center gap-2.5">
+            <span class="w-6 text-center font-black text-xs ${idx === 0 ? 'text-amber-400' : 'text-slate-500'}">#${idx + 1}</span>
+            ${renderMeepleSvg(p.color, 'w-5 h-5')}
+            <div>
+              <div class="font-extrabold text-sm text-white">${p.name}</div>
+              <div class="text-[11px] text-slate-400">${p.played} potjes gespeeld</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="font-black text-sm text-indigo-400">${p.won} wins</div>
+            <div class="text-[11px] font-bold text-slate-400">${p.pct}% winstpercentage</div>
+          </div>
+        </div>
+      `).join('');
+
+      // 4. ALL-TIME SPELRECORDS
+      const recGrid = document.getElementById('gameRecordsGrid');
+      const recordsByGame = {};
+      state.history.forEach(m => {
+        const def = allCatalog.find(g => g.id === m.gameId);
+        if (!def || !m.results || m.results.length === 0) return;
+        const low = isLowestWins(m.gameId);
+        m.results.forEach(res => {
+          const sc = Number(res.score);
+          if (isNaN(sc)) return;
+          if (!recordsByGame[m.gameId]) {
+            recordsByGame[m.gameId] = { game: def, score: sc, playerNames: [state.players.find(p => p.id === res.playerId)?.name || 'Onbekend'] };
+          } else {
+            const cur = recordsByGame[m.gameId].score;
+            if ((low && sc < cur) || (!low && sc > cur)) {
+              recordsByGame[m.gameId] = { game: def, score: sc, playerNames: [state.players.find(p => p.id === res.playerId)?.name || 'Onbekend'] };
+            } else if (sc === cur) {
+              const pName = state.players.find(p => p.id === res.playerId)?.name || 'Onbekend';
+              if (!recordsByGame[m.gameId].playerNames.includes(pName)) {
+                recordsByGame[m.gameId].playerNames.push(pName);
+              }
+            }
+          }
+        });
+      });
+
+      const recEntries = Object.values(recordsByGame);
+      if (recEntries.length === 0) {
+        recGrid.innerHTML = '<div class="col-span-full text-xs text-slate-500 py-2">Nog geen records gevestigd.</div>';
+      } else {
+        recGrid.innerHTML = recEntries.map(rec => `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
+            <div>
+              <div class="font-extrabold text-xs text-white">${rec.game.name}</div>
+              <div class="text-[11px] text-slate-400">${rec.playerNames.join(', ')}</div>
+            </div>
+            <div class="text-right">
+              <span class="text-base font-black text-amber-300">${rec.score} pnt</span>
             </div>
           </div>
         `).join('');
       }
 
-      modal.classList.remove('hidden');
+      // 5. GESPEELDE POTJES
+      const mList = document.getElementById('historyMatchesList');
+      if (filteredMatches.length === 0) {
+        mList.innerHTML = '<div class="text-xs text-slate-500 py-3 text-center">Geen potjes gevonden voor dit filter.</div>';
+        return;
+      }
+
+      mList.innerHTML = filteredMatches.map((m, mIdx) => {
+        const game = allCatalog.find(g => g.id === m.gameId) || { name: 'Bordspel', icon: 'free' };
+        const winnerNames = (m.winners || []).map(id => state.players.find(p => p.id === id)?.name || 'Onbekend').join(', ');
+        const dateStr = new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+
+        return `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center shrink-0">
+                ${SVG_ICONS[game.icon] || SVG_ICONS.free}
+              </div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                  <h4 class="font-black text-xs text-white truncate">${game.name}</h4>
+                  <span class="text-[10px] text-slate-500 font-bold">${dateStr}</span>
+                </div>
+                <div class="text-xs text-indigo-400 font-semibold truncate">🏆 ${winnerNames}</div>
+                ${m.note ? `<div class="text-[11px] text-slate-400 italic mt-0.5 truncate">"${m.note}"</div>` : ''}
+              </div>
+            </div>
+            <button type="button" onclick="deleteHistoryMatch(${mIdx})" class="text-slate-600 hover:text-rose-400 text-xs font-bold p-1">✕</button>
+          </div>
+        `;
+      }).join('');
     }
 
-    function closePlayerProfileModal() {
-      document.getElementById('playerProfileModal')?.classList.add('hidden');
-    }
-
-    function deleteHistoryItem(matchId) {
-      if (!confirm('Dit opgeslagen potje verwijderen?')) return;
-      state.history = state.history.filter(h => h.id !== matchId);
-      saveState();
-      renderHistoryView();
+    function deleteHistoryMatch(idx) {
+      if (confirm('Wil je dit potje verwijderen uit de geschiedenis?')) {
+        state.history.splice(idx, 1);
+        saveState();
+        renderHistoryView();
+      }
     }
 
     function clearAllHistoryConfirm() {
-      if (!confirm('Weet je zeker dat je alle geschiedenis wilt wissen?')) return;
-      state.history = [];
-      state.championCup = { currentHolder: null, previousHolder: null };
-      saveState();
-      renderHistoryView();
-      showToast('🗑️ Geschiedenis gewist.');
+      if (confirm('Weet je zeker dat je ALLE gespeelde potjes en records wilt wissen?')) {
+        state.history = [];
+        saveState();
+        renderHistoryView();
+      }
+    }
+
+    // --- SPELER PROFIEL & RIVALS MODAL ---
+    function openPlayerProfileModal(playerId) {
+      const p = state.players.find(x => x.id === playerId);
+      if (!p) return;
+
+      document.getElementById('profColorDot').style.backgroundColor = p.color || '#6366f1';
+      document.getElementById('profPlayerName').textContent = p.name;
+
+      let played = 0, won = 0;
+      const gameCounts = {};
+      const rivals = {};
+
+      state.history.forEach(m => {
+        if ((m.players || []).includes(p.id)) {
+          played++;
+          const didWin = (m.winners || []).includes(p.id);
+          if (didWin) {
+            won++;
+            gameCounts[m.gameId] = (gameCounts[m.gameId] || 0) + 1;
+          }
+
+          (m.players || []).forEach(otherId => {
+            if (otherId === p.id) return;
+            if (!rivals[otherId]) rivals[otherId] = { pWins: 0, oWins: 0 };
+            if (didWin) rivals[otherId].pWins++;
+            else if ((m.winners || []).includes(otherId)) rivals[otherId].oWins++;
+          });
+        }
+      });
+
+      const pct = played > 0 ? Math.round((won / played) * 100) : 0;
+      document.getElementById('profSummaryGrid').innerHTML = `
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+          <div class="text-[10px] text-slate-400">Gespeeld</div>
+          <div class="text-base font-black text-white">${played}</div>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+          <div class="text-[10px] text-slate-400">Overwinningen</div>
+          <div class="text-base font-black text-emerald-400">${won}</div>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5">
+          <div class="text-[10px] text-slate-400">Winpercentage</div>
+          <div class="text-base font-black text-indigo-400">${pct}%</div>
+        </div>
+      `;
+
+      let bestGameId = null, bestCount = 0;
+      Object.entries(gameCounts).forEach(([gId, cnt]) => {
+        if (cnt > bestCount) { bestCount = cnt; bestGameId = gId; }
+      });
+      const bestGameObj = getAllGames().find(g => g.id === bestGameId);
+      document.getElementById('profFavGame').textContent = bestGameObj ? `${bestGameObj.name} (${bestCount} overwinningen)` : 'Nog geen favoriet';
+
+      const rList = document.getElementById('profRivalsList');
+      const rEntries = Object.entries(rivals);
+      if (rEntries.length === 0) {
+        rList.innerHTML = '<div class="text-xs text-slate-500 py-2">Nog geen onderlinge duels gespeeld.</div>';
+      } else {
+        rList.innerHTML = rEntries.map(([oId, data]) => {
+          const other = state.players.find(x => x.id === oId) || { name: 'Onbekend', color: '#6366f1' };
+          return `
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between text-xs">
+              <span class="font-bold text-white flex items-center gap-1.5">
+                ${renderMeepleSvg(other.color, 'w-3 h-3')}
+                <span>vs. ${other.name}</span>
+              </span>
+              <span class="font-black ${data.pWins >= data.oWins ? 'text-emerald-400' : 'text-rose-400'}">
+                ${data.pWins} - ${data.oWins}
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('playerProfileModal').classList.remove('hidden');
+    }
+
+    function closePlayerProfileModal() {
+      document.getElementById('playerProfileModal').classList.add('hidden');
     }
 
     // =========================================================================
-    // 13. EIGEN SPEL, BACK-UP, UNDO & SCHERMVERGRENDELING
+    // 13. WIE START ER VANDAAG? (LOTING & UITDAGINGEN)
     // =========================================================================
-    let undoStack = [];
-    let isRestoringUndo = false;
+    function openStartPlayerModal() {
+      rollStartPlayer();
+      rollStartChallenge();
+      setStartPlayerMode('random');
+      document.getElementById('startPlayerModal').classList.remove('hidden');
+    }
+
+    function closeStartPlayerModal() {
+      document.getElementById('startPlayerModal').classList.add('hidden');
+    }
+
+    function setStartPlayerMode(mode) {
+      const bRand = document.getElementById('spTabRandom');
+      const bChal = document.getElementById('spTabChallenge');
+      const boxRand = document.getElementById('spRandomBox');
+      const boxChal = document.getElementById('spChallengeBox');
+
+      if (mode === 'random') {
+        bRand.className = "flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-600 text-white transition";
+        bChal.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+        boxRand.classList.remove('hidden');
+        boxChal.classList.add('hidden');
+      } else {
+        bChal.className = "flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-600 text-white transition";
+        bRand.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+        boxChal.classList.remove('hidden');
+        boxRand.classList.add('hidden');
+      }
+    }
+
+    let lastPickedStarterId = null;
+
+    function rollStartPlayer() {
+      const act = getActivePlayers();
+      if (act.length === 0) return;
+      const pick = act[Math.floor(Math.random() * act.length)];
+      lastPickedStarterId = pick.id;
+      const nameEl = document.getElementById('startPlayerWinnerName');
+      nameEl.textContent = pick.name;
+      nameEl.style.color = pick.color || '#818cf8';
+    }
+
+    function makePickedStarterFirstAtTable() {
+      if (!lastPickedStarterId) return;
+      setPlayerFirstAtTable(lastPickedStarterId);
+      closeStartPlayerModal();
+    }
+
+    function setPlayerFirstAtTable(playerId) {
+      const idx = state.players.findIndex(x => x.id === playerId);
+      if (idx <= 0) return;
+      const part1 = state.players.slice(idx);
+      const part2 = state.players.slice(0, idx);
+      state.players = [...part1, ...part2];
+      saveState();
+      renderPlayersManager();
+      if (!document.getElementById('viewScoreboard').classList.contains('hidden')) {
+        renderScoreboard();
+      }
+      showToast('🪑 Tafelvolgorde aangepast!');
+    }
+
+    function rollStartChallenge() {
+      const c = START_CHALLENGES[Math.floor(Math.random() * START_CHALLENGES.length)];
+      document.getElementById('startChallengeText').textContent = c;
+      const pGrid = document.getElementById('spChallengePlayers');
+      pGrid.innerHTML = getActivePlayers().map(p => `
+        <button type="button" onclick="setPlayerFirstAtTable('${p.id}'); closeStartPlayerModal();" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-400 text-xs font-bold text-white flex items-center justify-center gap-1.5 transition">
+          ${renderMeepleSvg(p.color, 'w-3 h-3')}
+          <span>${p.name}</span>
+        </button>
+      `).join('');
+    }
+
+    // =========================================================================
+    // 14. EIGEN SPEL TOEVOEGEN & BEHEREN
+    // =========================================================================
+    function openCustomGameModal() {
+      document.getElementById('cgNameInput').value = '';
+      document.getElementById('cgCategoriesInput').value = '';
+      document.getElementById('cgLowestWinsCheck').checked = false;
+      document.getElementById('customGameModal').classList.remove('hidden');
+    }
+
+    function closeCustomGameModal() {
+      document.getElementById('customGameModal').classList.add('hidden');
+    }
+
+    function createCustomGame() {
+      const name = document.getElementById('cgNameInput').value.trim();
+      if (!name) {
+        showToast('⚠️ Vul een spelnaam in.');
+        return;
+      }
+      const category = document.getElementById('cgCategorySelect').value;
+      const type = document.getElementById('cgTypeSelect').value;
+      const lowestWins = document.getElementById('cgLowestWinsCheck').checked;
+      const rawCats = document.getElementById('cgCategoriesInput').value.trim();
+      const categories = rawCats ? rawCats.split(',').map(s => s.trim()).filter(Boolean) : ['Punten'];
+
+      const newG = {
+        id: 'cg_' + Date.now(),
+        name,
+        subtitle: 'Zelf toegevoegd spel',
+        category,
+        type,
+        icon: 'free',
+        lowestWins,
+        categories: type === 'categories' ? categories : undefined,
+        isCustom: true
+      };
+
+      if (!state.customGames) state.customGames = [];
+      state.customGames.push(newG);
+      state.favorites.push(newG.id);
+      saveState();
+      closeCustomGameModal();
+      renderGamePicker();
+      showToast('✅ Eigen spel toegevoegd!');
+    }
+
+    function deleteCustomGame(id, ev) {
+      if (ev) ev.stopPropagation();
+      if (confirm('Wil je dit eigen spel definitief verwijderen?')) {
+        state.customGames = (state.customGames || []).filter(g => g.id !== id);
+        state.favorites = state.favorites.filter(fId => fId !== id);
+        saveState();
+        renderGamePicker();
+      }
+    }
+
+    // =========================================================================
+    // 15. SNEL WINNAAR MODAL
+    // =========================================================================
+    function openQuickWinModal(preselectedGameId = null) {
+      const allCatalog = getAllGames();
+      const select = document.getElementById('qwGameSelect');
+      select.innerHTML = allCatalog.map(g => `
+        <option value="${g.id}" ${preselectedGameId === g.id ? 'selected' : ''}>${g.name}</option>
+      `).join('') + `<option value="custom_input">➕ Ander spel intypen...</option>`;
+
+      toggleQwCustomNameInput();
+
+      const winnersList = document.getElementById('qwWinnersList');
+      winnersList.innerHTML = getActivePlayers().map(p => `
+        <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500 cursor-pointer transition">
+          <input type="checkbox" value="${p.id}" class="qw-winner-chk rounded border-slate-700 text-indigo-600 focus:ring-0" />
+          ${renderMeepleSvg(p.color, 'w-4 h-4')}
+          <span class="text-xs font-bold text-white truncate">${p.name}</span>
+        </label>
+      `).join('');
+
+      document.getElementById('qwNoteInput').value = '';
+      document.getElementById('quickWinModal').classList.remove('hidden');
+    }
+
+    function closeQuickWinModal() {
+      document.getElementById('quickWinModal').classList.add('hidden');
+    }
+
+    function toggleQwCustomNameInput() {
+      const selVal = document.getElementById('qwGameSelect').value;
+      document.getElementById('qwCustomNameWrap').classList.toggle('hidden', selVal !== 'custom_input');
+    }
+
+    function saveQuickWinMatch() {
+      const selVal = document.getElementById('qwGameSelect').value;
+      let gameId = selVal;
+      let customName = null;
+
+      if (selVal === 'custom_input') {
+        const inp = document.getElementById('qwCustomGameInput').value.trim();
+        if (!inp) {
+          showToast('⚠️ Typ eerst de naam van het spel in.');
+          return;
+        }
+        customName = inp;
+        gameId = 'free';
+      }
+
+      const checked = Array.from(document.querySelectorAll('.qw-winner-chk:checked')).map(cb => cb.value);
+      if (checked.length === 0) {
+        showToast('⚠️ Selecteer minstens 1 winnaar.');
+        return;
+      }
+
+      const note = document.getElementById('qwNoteInput').value.trim();
+      const active = getActivePlayers();
+
+      const match = {
+        id: 'm_' + Date.now(),
+        gameId,
+        customGameName: customName,
+        date: new Date().toISOString(),
+        players: active.map(p => p.id),
+        winners: checked,
+        note: note || undefined,
+        results: active.map(p => ({
+          playerId: p.id,
+          score: checked.includes(p.id) ? 1 : 0
+        }))
+      };
+
+      state.history.unshift(match);
+      saveState();
+      closeQuickWinModal();
+      triggerConfetti();
+      showToast('🏆 Snel winnaar opgeslagen!');
+      switchMainView('history');
+    }
+
+    // =========================================================================
+    // 16. PODIUM MODAL & CONFETTI OPSLAG
+    // =========================================================================
+    function openPodiumModal() {
+      const def = getGameDef();
+      const standings = getStandings();
+      if (standings.length === 0) return;
+
+      const top = standings[0];
+      const winners = standings.filter(p => p.score === top.score && p.tieVal === top.tieVal);
+      const isTieBreakApplied = standings.length > 1 && standings[0].score === standings[1].score && standings[0].tieVal !== standings[1].tieVal;
+
+      document.getElementById('podiumModalTitle').textContent = `Eindstand: ${def.name}`;
+      const tbNotice = document.getElementById('podiumTieBreakNotice');
+      if (isTieBreakApplied) {
+        tbNotice.classList.remove('hidden');
+        tbNotice.textContent = `⚖️ Gelijkspel verbroken via officiële tie-breaker!`;
+      } else {
+        tbNotice.classList.add('hidden');
+      }
+
+      document.getElementById('podiumStandingsList').innerHTML = standings.map((p, idx) => {
+        const isWin = winners.some(w => w.id === p.id);
+        return `
+          <div class="flex items-center justify-between p-3 rounded-2xl ${isWin ? 'bg-indigo-950/70 border border-indigo-500/50 shadow' : 'bg-slate-950 border border-slate-800'}">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 text-center font-black text-sm ${idx === 0 ? 'text-amber-400' : 'text-slate-500'}">#${idx + 1}</span>
+              ${renderMeepleSvg(p.color, 'w-5 h-5')}
+              <span class="font-extrabold text-xs text-white">${p.name}</span>
+            </div>
+            <div class="text-right">
+              <span class="font-black text-sm ${isWin ? 'text-indigo-300' : 'text-slate-200'}">${p.score} pnt</span>
+              ${isTieBreakApplied && isWin ? `<div class="text-[10px] text-emerald-400 font-bold">Tie-val: ${p.tieVal}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('matchNoteInput').value = '';
+      document.getElementById('podiumModal').classList.remove('hidden');
+      triggerConfetti();
+    }
+
+    function closePodiumModal() {
+      document.getElementById('podiumModal').classList.add('hidden');
+    }
+
+    function confirmSaveFinishedMatch() {
+      const def = getGameDef();
+      const standings = getStandings();
+      const top = standings[0];
+      const winners = standings.filter(p => p.score === top.score && p.tieVal === top.tieVal).map(p => p.id);
+      const note = document.getElementById('matchNoteInput').value.trim();
+
+      const match = {
+        id: 'm_' + Date.now(),
+        gameId: def.id,
+        date: new Date().toISOString(),
+        players: getActivePlayers().map(p => p.id),
+        winners,
+        note: note || undefined,
+        results: standings.map(p => ({ playerId: p.id, score: p.score, tieVal: p.tieVal }))
+      };
+
+      state.history.unshift(match);
+      state.gamesState[def.id] = null; // Bord leegmaken na opslaan
+      saveState();
+
+      closePodiumModal();
+      showToast('🏆 Match opgeslagen!');
+      switchMainView('history');
+    }
+
+    function resetCurrentGameConfirm() {
+      if (confirm('Wil je alle scores van dit actieve bord wissen?')) {
+        pushUndoSnapshot();
+        state.gamesState[state.activeGameId] = null;
+        saveState();
+        renderScoreboard();
+        showToast('🧹 Scorebord gereset.');
+      }
+    }
+
+    // =========================================================================
+    // 17. TOERNOOI ENGINE & MODAL
+    // =========================================================================
+    function openStartTournamentModal() {
+      const act = getActivePlayers();
+      if (act.length < 2) {
+        showToast('⚠️ Minstens 2 actieve spelers nodig.');
+        return;
+      }
+      const allCatalog = getAllGames();
+      document.getElementById('tournamentModalContent').innerHTML = `
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+          <h3 class="font-black text-base text-white">🏆 Nieuw Toernooi Starten</h3>
+          <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block text-slate-400 mb-1">Toernooinaam</label>
+            <input type="text" id="tNameInput" value="Scoreblok Beker" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Kies het spel</label>
+            <select id="tGameSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold">
+              ${allCatalog.map(g => `<option value="${g.id}">${g.name}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeTournamentModal()" class="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">Annuleer</button>
+          <button type="button" onclick="launchNewTournament()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs">Toernooi Starten 🚀</button>
+        </div>
+      `;
+      document.getElementById('tournamentModal').classList.remove('hidden');
+    }
+
+    function closeTournamentModal() {
+      document.getElementById('tournamentModal').classList.add('hidden');
+    }
+
+    function launchNewTournament() {
+      const name = document.getElementById('tNameInput').value.trim() || 'Beker';
+      const gameId = document.getElementById('tGameSelect').value;
+      const act = getActivePlayers();
+
+      state.tournament = {
+        active: true,
+        name,
+        gameId,
+        participants: act.map(p => p.id),
+        matches: []
+      };
+
+      for (let i = 0; i < act.length; i++) {
+        for (let j = i + 1; j < act.length; j++) {
+          state.tournament.matches.push({
+            p1: act[i].id,
+            p2: act[j].id,
+            winnerId: null,
+            done: false
+          });
+        }
+      }
+
+      saveState();
+      closeTournamentModal();
+      openGame(gameId);
+      showToast(`🏆 Toernooi "${name}" gestart!`);
+    }
+
+    // =========================================================================
+    // 18. CONFETTI, TOAST, WAKELOCK, UNDO ENGINE & BACKUP
+    // =========================================================================
+    function triggerConfetti() {
+      const container = document.getElementById('confettiContainer');
+      container.innerHTML = '';
+      const colors = ['#6366f1', '#ec4899', '#eab308', '#10b981', '#38bdf8', '#f97316'];
+      for (let i = 0; i < 40; i++) {
+        const piece = document.createElement('div');
+        piece.className = 'confetti-piece';
+        piece.style.left = Math.random() * 100 + 'vw';
+        piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.width = (Math.random() * 8 + 6) + 'px';
+        piece.style.height = (Math.random() * 12 + 8) + 'px';
+        piece.style.animationDelay = (Math.random() * 0.4) + 's';
+        container.appendChild(piece);
+      }
+      setTimeout(() => { container.innerHTML = ''; }, 3200);
+    }
+
+    function showToast(msg) {
+      const b = document.getElementById('toastBanner');
+      b.textContent = msg;
+      b.classList.remove('hidden');
+      setTimeout(() => { b.classList.add('hidden'); }, 2500);
+    }
+
+    let wakeLockObj = null;
+
+    async function requestAppWakeLock() {
+      if ('wakeLock' in navigator) {
+        try {
+          wakeLockObj = await navigator.wakeLock.request('screen');
+        } catch (e) {}
+      }
+    }
+
+    function releaseAppWakeLock() {
+      if (wakeLockObj) {
+        wakeLockObj.release().catch(() => {});
+        wakeLockObj = null;
+      }
+    }
+
+    function toggleWakeLockManual() {
+      if (wakeLockObj) {
+        releaseAppWakeLock();
+        document.getElementById('wakeLockBadge').className = "cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 font-bold";
+        document.getElementById('wakeLockBadge').textContent = "Scherm slaapstand aan";
+      } else {
+        requestAppWakeLock();
+        document.getElementById('wakeLockBadge').className = "cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold";
+        document.getElementById('wakeLockBadge').textContent = "📱 Scherm blijft aan";
+      }
+    }
+
+    // --- UNDO ENGINE ---
+    const undoStack = [];
 
     function pushUndoSnapshot() {
-      if (isRestoringUndo) return;
-      const gs = state.gamesState[state.activeGameId];
-      if (!gs) return;
-      const snap = JSON.stringify(gs);
-      if (undoStack.length > 0 && undoStack[undoStack.length - 1].snap === snap) return;
-      undoStack.push({ gameId: state.activeGameId, snap });
+      undoStack.push(JSON.stringify(state.gamesState));
       if (undoStack.length > 25) undoStack.shift();
       updateUndoButtonUI();
     }
 
     function undoLastScoreAction() {
-      for (let i = undoStack.length - 1; i >= 0; i--) {
-        if (undoStack[i].gameId === state.activeGameId) {
-          const item = undoStack.splice(i, 1)[0];
-          isRestoringUndo = true;
-          state.gamesState[state.activeGameId] = JSON.parse(item.snap);
-          saveState();
-          renderScoreboard();
-          isRestoringUndo = false;
-          updateUndoButtonUI();
-          showToast('↩️ Laatste actie ongedaan gemaakt!');
-          return;
-        }
-      }
-      showToast('⚠️ Geen eerdere stap om terug te draaien.');
+      if (undoStack.length === 0) return;
+      const prev = undoStack.pop();
+      state.gamesState = JSON.parse(prev);
+      saveState();
+      renderScoreboard();
+      updateUndoButtonUI();
+      showToast('↩️ Actie hersteld.');
     }
 
     function updateUndoButtonUI() {
       const btn = document.getElementById('undoActionBtn');
-      if (!btn) return;
-      const hasSteps = undoStack.some(x => x.gameId === state.activeGameId);
-      btn.disabled = !hasSteps;
+      if (btn) btn.disabled = (undoStack.length === 0);
     }
 
-    document.addEventListener('pointerdown', (e) => {
-      const sb = document.getElementById('gameSheetContainer');
-      if (sb && sb.contains(e.target)) {
-        const btn = e.target.closest('button');
-        if (btn) pushUndoSnapshot();
-      }
-    }, true);
-
-    let wakeLockSentinel = null;
-    let wakeLockWanted = true;
-
-    async function requestAppWakeLock() {
-      if (!('wakeLock' in navigator) || !wakeLockWanted) {
-        updateWakeLockBadge(false);
-        return;
-      }
-      try {
-        wakeLockSentinel = await navigator.wakeLock.request('screen');
-        updateWakeLockBadge(true);
-        wakeLockSentinel.addEventListener('release', () => updateWakeLockBadge(false));
-      } catch (err) {
-        updateWakeLockBadge(false);
-      }
-    }
-
-    async function releaseAppWakeLock() {
-      if (wakeLockSentinel) {
-        try { await wakeLockSentinel.release(); } catch (e) {}
-        wakeLockSentinel = null;
-      }
-      updateWakeLockBadge(false);
-    }
-
-    function toggleWakeLockManual() {
-      wakeLockWanted = !wakeLockWanted;
-      if (wakeLockWanted) {
-        requestAppWakeLock();
-        showToast('📱 Scherm blijft nu aan tijdens het spelen!');
-      } else {
-        releaseAppWakeLock();
-        showToast('🌙 Scherm aan-houder uitgeschakeld.');
-      }
-    }
-
-    function updateWakeLockBadge(active) {
-      const badge = document.getElementById('wakeLockBadge');
-      if (!badge) return;
-      if (active) {
-        badge.textContent = '📱 Scherm blijft aan';
-        badge.className = 'cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold';
-      } else {
-        badge.textContent = '🌙 Scherm-lock uit (tik)';
-        badge.className = 'cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 font-semibold';
-      }
-    }
-
-    document.addEventListener('visibilitychange', () => {
-      const sbVisible = !document.getElementById('viewScoreboard')?.classList.contains('hidden');
-      if (document.visibilityState === 'visible' && sbVisible && wakeLockWanted) {
-        requestAppWakeLock();
-      }
-    });
-
-    let qwSelectedWinners = [];
-
-    function openQuickWinModal(preselectGameId = null) {
-      const modal = document.getElementById('quickWinModal');
-      if (!modal) return;
-      const selectEl = document.getElementById('qwGameSelect');
-      const allGames = [...getAllGames()].sort((a, b) => a.name.localeCompare(b.name, 'nl'));
-      const recentFromHistory = state.history.length > 0 ? state.history[0].gameId : null;
-      const defaultGameId = preselectGameId || recentFromHistory || state.lastPlayedGameId || state.activeGameId || 'azul';
-
-      selectEl.innerHTML = `<option value="__custom__">✍️ Ander spel (zelf naam intypen)...</option>` +
-        allGames.map(g => `<option value="${g.id}" ${g.id === defaultGameId ? 'selected' : ''}>${g.name}</option>`).join('');
-
-      document.getElementById('qwCustomGameInput').value = '';
-      document.getElementById('qwNoteInput').value = '';
-      toggleQwCustomNameInput();
-      qwSelectedWinners = [];
-      renderQwWinnersList();
-      modal.classList.remove('hidden');
-    }
-
-    function closeQuickWinModal() {
-      document.getElementById('quickWinModal')?.classList.add('hidden');
-    }
-
-    function toggleQwCustomNameInput() {
-      const val = document.getElementById('qwGameSelect')?.value;
-      const wrap = document.getElementById('qwCustomNameWrap');
-      if (wrap) wrap.classList.toggle('hidden', val !== '__custom__');
-    }
-
-    function toggleQwWinner(playerName) {
-      const idx = qwSelectedWinners.indexOf(playerName);
-      if (idx === -1) qwSelectedWinners.push(playerName);
-      else qwSelectedWinners.splice(idx, 1);
-      renderQwWinnersList();
-    }
-
-    function renderQwWinnersList() {
-      const listEl = document.getElementById('qwWinnersList');
-      if (!listEl) return;
-      listEl.innerHTML = getActivePlayers().map(p => {
-        const isPicked = qwSelectedWinners.includes(p.name);
-        return `
-          <button type="button" onclick="toggleQwWinner('${p.name.replace(/'/g, "\\'")}')"
-            class="p-2.5 rounded-xl border text-left flex items-center justify-between transition ${isPicked ? 'bg-amber-500/20 border-amber-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}"
-            style="border-left: 4px solid ${p.color || '#6366f1'}">
-            <span class="font-bold truncate flex items-center gap-1.5">${renderMeepleSvg(p.color, 'w-4 h-4')} ${p.name}</span>
-            <span class="text-sm">${isPicked ? '👑' : '○'}</span>
-          </button>`;
-      }).join('');
-    }
-
-    function saveQuickWinMatch() {
-      const activePlayers = getActivePlayers();
-      if (!activePlayers.length) return;
-      if (qwSelectedWinners.length === 0) return showToast('⚠️ Kies minimaal 1 winnaar!');
-
-      const selVal = document.getElementById('qwGameSelect')?.value;
-      let gameId = selVal;
-      let gameName = '';
-
-      if (selVal === '__custom__') {
-        const customName = (document.getElementById('qwCustomGameInput')?.value || '').trim();
-        if (!customName) return showToast('⚠️ Typ eerst een spelnaam in!');
-        gameName = customName;
-        gameId = 'quick_' + customName.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-      } else {
-        gameName = getGameDef(selVal).name;
-      }
-
-      const noteVal = (document.getElementById('qwNoteInput')?.value || '').trim();
-
-      recordMatchInApp({
-        id: 'm_' + Date.now(),
-        gameId,
-        gameName,
-        noScores: true,
-        date: new Date().toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        results: activePlayers.map(p => ({ playerId: p.id, name: p.name, score: qwSelectedWinners.includes(p.name) ? '👑' : '-', color: p.color })),
-        winners: [...qwSelectedWinners],
-        note: noteVal
-      });
-
-      saveState();
-      closeQuickWinModal();
-      switchMainView('history');
-      showToast(`🏆 Winst voor ${qwSelectedWinners.join(', ')} opgeslagen!`);
-    }
-
-    function openCustomGameModal() {
-      document.getElementById('customGameModal')?.classList.remove('hidden');
-    }
-
-    function closeCustomGameModal() {
-      document.getElementById('customGameModal')?.classList.add('hidden');
-    }
-
-    function createCustomGame() {
-      const name = (document.getElementById('cgNameInput')?.value || '').trim();
-      if (!name) return showToast('⚠️ Vul een spelnaam in.');
-      const category = document.getElementById('cgCategorySelect')?.value || 'board';
-      const type = document.getElementById('cgTypeSelect')?.value || 'carcassonne';
-      const lowestWins = document.getElementById('cgLowestWinsCheck')?.checked || false;
-      const catsRaw = (document.getElementById('cgCategoriesInput')?.value || '').trim();
-      const categories = catsRaw ? catsRaw.split(',').map(s => s.trim()).filter(Boolean) : ['Punten'];
-
-      state.customGames.push({
-        id: 'custom_' + Date.now(),
-        name,
-        subtitle: 'Eigen toegevoegd spel',
-        category,
-        type,
-        icon: 'free',
-        lowestWins,
-        minP: 1,
-        maxP: 10,
-        dur: 'medium',
-        categories,
-        isCustom: true
-      });
-      saveState();
-      closeCustomGameModal();
-      renderGamePicker();
-      showToast(`🎲 ${name} toegevoegd!`);
-    }
-
-    function deleteCustomGame(gameId, ev) {
-      if (ev) ev.stopPropagation();
-      if (!confirm('Wil je dit eigen spel verwijderen?')) return;
-      state.customGames = state.customGames.filter(g => g.id !== gameId);
-      state.favorites = state.favorites.filter(id => id !== gameId);
-      saveState();
-      renderGamePicker();
-    }
-
+    // --- JSON BACK-UP & RESTORE ---
     function exportBackupJson() {
-      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
       const dl = document.createElement('a');
-      dl.setAttribute('href', dataStr);
-      dl.setAttribute('download', `scoreblok-backup-${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(dl);
+      dl.setAttribute("href", dataStr);
+      dl.setAttribute("download", `scoreblok_backup_${new Date().toISOString().slice(0, 10)}.json`);
       dl.click();
-      dl.remove();
+      showToast('📥 Back-up gedownload!');
     }
 
     function importBackupJson(event) {
-      const file = event.target.files?.[0];
+      const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = e => {
+      reader.onload = function(e) {
         try {
-          const imported = JSON.parse(e.target.result);
-          if (imported && Array.isArray(imported.players)) {
-            state = { ...state, ...imported };
+          const parsed = JSON.parse(e.target.result);
+          if (parsed.players && parsed.history) {
+            state = parsed;
             saveState();
-            renderPlayersManager();
-            renderGamePicker();
-            showToast('✅ Back-up ingeladen!');
+            showToast('✅ Back-up succesvol hersteld!');
+            switchMainView('history');
+          } else {
+            showToast('⚠️ Ongeldig bestandformaat.');
           }
         } catch (err) {
-          alert('Ongeldig back-up bestand.');
+          showToast('⚠️ Fout bij inladen.');
         }
       };
       reader.readAsText(file);
     }
 
-    function showToast(msg) {
-      const t = document.getElementById('toastBanner');
-      if (!t) return;
-      t.textContent = msg;
-      t.classList.remove('hidden');
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => t.classList.add('hidden'), 2800);
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      loadState();
-      ensureGameState(state.activeGameId);
-      renderGamePicker();
-    });
+    // =========================================================================
+    // 19. OPSTARTEN EN INITIALISATIE
+    // =========================================================================
+    loadState();
+    switchMainView('picker');
   </script>
 </body>
 </html>
