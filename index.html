@@ -535,6 +535,24 @@
       snackmatch: '<span class="text-xl">🍟</span>',
       moddervarkens: '<span class="text-xl">🐷</span>',
       doolhof: '<span class="text-xl">🌀</span>',
+      // Nieuwe iconen voor de klassiekers:
+      monopoly: '<span class="text-xl">🎩</span>',
+      risk: '<span class="text-xl">⚔️</span>',
+      cluedo: '<span class="text-xl">🔍</span>',
+      stratego: '<span class="text-xl">🚩</span>',
+      levensweg: '<span class="text-xl">🚗</span>',
+      ganzenbord: '<span class="text-xl">🪿</span>',
+      mensergerjeniet: '<span class="text-xl">🔴</span>',
+      zeeslag: '<span class="text-xl">🚢</span>',
+      trivial: '<span class="text-xl">🥧</span>',
+      scrabble: '<span class="text-xl">🔤</span>',
+      boggle: '<span class="text-xl">⏳</span>',
+      thirtysec: '<span class="text-xl">⏱️</span>',
+      pictionary: '<span class="text-xl">✏️</span>',
+      pesten: '<span class="text-xl">🃏</span>',
+      klaverjas: '<span class="text-xl">♣️</span>',
+      hartenjagen: '<span class="text-xl">💔</span>',
+      kingen: '<span class="text-xl">🤴</span>',
       free: '<span class="text-xl">✨</span>'
     };
 
@@ -626,7 +644,7 @@
     ];
 
         // =========================================================================
-    // 2. VOLLEDIGE SPELLEN CATALOGUS
+    // 2. VOLLEDIGE SPELLEN CATALOGUS (INCLUSIEF ALLE KLASSIEKERS)
     // =========================================================================
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + vloerlijn óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
@@ -685,11 +703,31 @@
       { id: 'machiavelli', name: 'Machiavelli', subtitle: 'Gebouwen, 5-kleurenbonus (+3) & eerste met 8 gebouwen (+4)', category: 'card', type: 'machiavelli', icon: 'machiavelli', minP: 2, maxP: 7, dur: 'medium' },
       { id: 'themind', name: 'The Mind', subtitle: 'Coöperatieve level-, levens- en shuriken-tracker', category: 'card', type: 'themind', icon: 'themind', minP: 2, maxP: 4, dur: 'short' },
       { id: 'qwirkle', name: 'Qwirkle', subtitle: 'Live teller met Qwirkle (+12) snelknop', category: 'board', type: 'carcassonne', icon: 'free', minP: 2, maxP: 4, dur: 'medium' },
-      { id: 'doolhof', name: 'Doolhof', subtitle: 'Eerste speler die alle geheime schatkaarten behaalt en terugkeert naar start', category: 'board', type: 'carcassonne', icon: 'doolhof', limit: 1, minP: 2, maxP: 4, dur: 'short' },
+      { id: 'doolhof', name: 'Doolhof', subtitle: 'Eerste speler die alle schatten verzamelt en terugkeert naar start', category: 'board', type: 'carcassonne', icon: 'doolhof', limit: 1, minP: 2, maxP: 4, dur: 'short' },
       { id: 'arschmellows', name: 'Arschmellows', subtitle: 'Snel registreren wie het potje heeft gewonnen', category: 'card', type: 'carcassonne', icon: 'arschmellows', limit: 1, minP: 2, maxP: 5, dur: 'short' },
       { id: 'gameoftrains', name: 'Game of Trains', subtitle: 'Eerste speler met trein in oplopende volgorde', category: 'card', type: 'carcassonne', icon: 'gameoftrains', limit: 1, minP: 2, maxP: 4, dur: 'short' },
       { id: 'snackmatch', name: 'Snackmatch', subtitle: 'Snel registreren wie de snacks compleet heeft', category: 'card', type: 'carcassonne', icon: 'snackmatch', limit: 1, minP: 2, maxP: 6, dur: 'short' },
       { id: 'moddervarkens', name: 'Moddervarkens', subtitle: 'Eerste speler met alle varkens in de modder', category: 'card', type: 'carcassonne', icon: 'moddervarkens', limit: 1, minP: 2, maxP: 4, dur: 'short' },
+      
+      // --- TOEGEVOEGDE KLASSIEKERS ---
+      { id: 'monopoly', name: 'Monopoly', subtitle: 'Eindsaldo in contanten + waarde van straten en huizen (of 1 overlever)', category: 'board', type: 'categories', icon: 'monopoly', minP: 2, maxP: 8, dur: 'long', categories: ['💵 Contant geld', '🏠 Waarde van straten, huizen & hotels', '🚂 Stations & Nutsbedrijven'] },
+      { id: 'risk', name: 'Risk', subtitle: 'Veroverde continenten of geheime missie voltooid', category: 'board', type: 'carcassonne', icon: 'risk', limit: 1, minP: 2, maxP: 6, dur: 'long' },
+      { id: 'cluedo', name: 'Cluedo', subtitle: 'Eerste die verdachte, wapen en kamer correct ontrafelt', category: 'board', type: 'carcassonne', icon: 'cluedo', limit: 1, minP: 2, maxP: 6, dur: 'medium' },
+      { id: 'stratego', name: 'Stratego', subtitle: 'Eerste die de vijandelijke vlag verovert', category: 'board', type: 'carcassonne', icon: 'stratego', limit: 1, minP: 2, maxP: 2, dur: 'medium' },
+      { id: 'levensweg', name: 'Levensweg', subtitle: 'Totaal vermogen bij pensioen (contanten, levensloop-certificaten & pensioenbonus)', category: 'board', type: 'categories', icon: 'levensweg', minP: 2, maxP: 6, dur: 'medium', categories: ['💵 Eindbedrag pensioen', '📜 Waarde Levensloopkaarten', '🏡 Waarde Woning'] },
+      { id: 'ganzenbord', name: 'Ganzenbord', subtitle: 'Eerste speler die precies op vakje 63 eindigt', category: 'board', type: 'carcassonne', icon: 'ganzenbord', limit: 1, minP: 2, maxP: 6, dur: 'short' },
+      { id: 'mensergerjeniet', name: 'Mens Erger Je Niet!', subtitle: 'Eerste die al zijn pionnen veilig in de thuisbasis heeft', category: 'board', type: 'carcassonne', icon: 'mensergerjeniet', limit: 1, minP: 2, maxP: 6, dur: 'short' },
+      { id: 'zeeslag', name: 'Zeeslag', subtitle: 'Eerste die de complete vloot van de tegenstander laat zinken', category: 'board', type: 'carcassonne', icon: 'zeeslag', limit: 1, minP: 2, maxP: 2, dur: 'short' },
+      { id: 'trivial', name: 'Trivial Pursuit', subtitle: 'Eerste met alle 6 partjes en de winnende centrumvraag', category: 'board', type: 'carcassonne', icon: 'trivial', limit: 1, minP: 2, maxP: 6, dur: 'medium' },
+      { id: 'scrabble', name: 'Scrabble', subtitle: 'Rondeteller voor woordwaardes, dubbele/driedubbele letters en bonussen', category: 'board', type: 'rounds', icon: 'scrabble', minP: 2, maxP: 4, dur: 'medium' },
+      { id: 'boggle', name: 'Boggle', subtitle: 'Rondeteller voor gevonden unieke woorden binnen 3 minuten', category: 'board', type: 'rounds', icon: 'boggle', minP: 2, maxP: 8, dur: 'short' },
+      { id: 'thirtysec', name: '30 Seconds', subtitle: 'Live rondeteller voor geraden begrippen tot het finishvakje', category: 'board', type: 'rounds', icon: 'thirtysec', limit: 30, minP: 4, maxP: 12, dur: 'short' },
+      { id: 'pictionary', name: 'Pictionary', subtitle: 'Rondeteller voor getekende en geraden opdrachten per beurt', category: 'board', type: 'rounds', icon: 'pictionary', minP: 4, maxP: 12, dur: 'short' },
+      { id: 'pesten', name: 'Pesten / Duizenden', subtitle: 'Rondeteller voor strafpunten van kaarten in hand (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'pesten', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short' },
+      { id: 'klaverjas', name: 'Klaverjassen', subtitle: 'Rondeteller voor slagenpunten en behaalde roem per spel tot 1500', category: 'card', type: 'rounds', icon: 'klaverjas', limit: 1500, minP: 4, maxP: 4, dur: 'medium' },
+      { id: 'hartenjagen', name: 'Hartenjagen', subtitle: 'Harten (+1) en Schoppenvrouw (+13) tot 100 punten (Laagste wint!)', category: 'card', type: 'rounds', icon: 'hartenjagen', lowestWins: true, limit: 100, minP: 4, maxP: 4, dur: 'medium' },
+      { id: 'kingen', name: 'Kingen / Brikken', subtitle: 'Rondeteller voor min-contracten en plus-contracten per beurt', category: 'card', type: 'rounds', icon: 'kingen', lowestWins: false, minP: 4, maxP: 4, dur: 'medium' },
+
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
 
