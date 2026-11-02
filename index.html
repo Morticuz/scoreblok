@@ -478,7 +478,8 @@
   </div>
 
   <script>
-    // =========================================================================
+    
+        // =========================================================================
     // 1. SVG ICONS, MEEPLE GENERATOR & CONSTANTS
     // =========================================================================
     const SVG_ICONS = {
@@ -533,6 +534,7 @@
       gameoftrains: '<span class="text-xl">🚂</span>',
       snackmatch: '<span class="text-xl">🍟</span>',
       moddervarkens: '<span class="text-xl">🐷</span>',
+      doolhof: '<span class="text-xl">🌀</span>',
       free: '<span class="text-xl">✨</span>'
     };
 
@@ -623,8 +625,8 @@
       { id: 'paard', name: '🐎 Paard', val: 1000 }
     ];
 
-    // =========================================================================
-    // 2. VOLLEDIGE SPELLEN CATALOGUS (INCL. 4 NIEUWE KAARTSPELLEN)
+        // =========================================================================
+    // 2. VOLLEDIGE SPELLEN CATALOGUS
     // =========================================================================
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + vloerlijn óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
@@ -683,7 +685,7 @@
       { id: 'machiavelli', name: 'Machiavelli', subtitle: 'Gebouwen, 5-kleurenbonus (+3) & eerste met 8 gebouwen (+4)', category: 'card', type: 'machiavelli', icon: 'machiavelli', minP: 2, maxP: 7, dur: 'medium' },
       { id: 'themind', name: 'The Mind', subtitle: 'Coöperatieve level-, levens- en shuriken-tracker', category: 'card', type: 'themind', icon: 'themind', minP: 2, maxP: 4, dur: 'short' },
       { id: 'qwirkle', name: 'Qwirkle', subtitle: 'Live teller met Qwirkle (+12) snelknop', category: 'board', type: 'carcassonne', icon: 'free', minP: 2, maxP: 4, dur: 'medium' },
-      // 4 Nieuwe Spellen
+      { id: 'doolhof', name: 'Doolhof', subtitle: 'Eerste speler die alle geheime schatkaarten behaalt en terugkeert naar start', category: 'board', type: 'carcassonne', icon: 'doolhof', limit: 1, minP: 2, maxP: 4, dur: 'short' },
       { id: 'arschmellows', name: 'Arschmellows', subtitle: 'Snel registreren wie het potje heeft gewonnen', category: 'card', type: 'carcassonne', icon: 'arschmellows', limit: 1, minP: 2, maxP: 5, dur: 'short' },
       { id: 'gameoftrains', name: 'Game of Trains', subtitle: 'Eerste speler met trein in oplopende volgorde', category: 'card', type: 'carcassonne', icon: 'gameoftrains', limit: 1, minP: 2, maxP: 4, dur: 'short' },
       { id: 'snackmatch', name: 'Snackmatch', subtitle: 'Snel registreren wie de snacks compleet heeft', category: 'card', type: 'carcassonne', icon: 'snackmatch', limit: 1, minP: 2, maxP: 6, dur: 'short' },
