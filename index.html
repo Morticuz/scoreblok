@@ -4195,11 +4195,12 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       showToast(`🏆 Toernooi "${name}" gestart!`);
     }
 
-    // =========================================================================
-    // 18. CONFETTI, TOAST, WAKELOCK, UNDO ENGINE & BACKUP
+        // =========================================================================
+    // 18. CONFETTI, TOAST, WAKELOCK, UNDO, BACKUP & LAAG 2: QR & LINK SYNC
     // =========================================================================
     function triggerConfetti() {
       const container = document.getElementById('confettiContainer');
+      if (!container) return;
       container.innerHTML = '';
       const colors = ['#6366f1', '#ec4899', '#eab308', '#10b981', '#38bdf8', '#f97316'];
       for (let i = 0; i < 40; i++) {
@@ -4217,6 +4218,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
 
     function showToast(msg) {
       const b = document.getElementById('toastBanner');
+      if (!b) return;
       b.textContent = msg;
       b.classList.remove('hidden');
       setTimeout(() => { b.classList.add('hidden'); }, 2500);
@@ -4242,12 +4244,18 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
     function toggleWakeLockManual() {
       if (wakeLockObj) {
         releaseAppWakeLock();
-        document.getElementById('wakeLockBadge').className = "cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 font-bold";
-        document.getElementById('wakeLockBadge').textContent = "Scherm slaapstand aan";
+        const badge = document.getElementById('wakeLockBadge');
+        if (badge) {
+          badge.className = "cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 font-bold";
+          badge.textContent = "Scherm slaapstand aan";
+        }
       } else {
         requestAppWakeLock();
-        document.getElementById('wakeLockBadge').className = "cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold";
-        document.getElementById('wakeLockBadge').textContent = "📱 Scherm blijft aan";
+        const badge = document.getElementById('wakeLockBadge');
+        if (badge) {
+          badge.className = "cursor-pointer text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold";
+          badge.textContent = "📱 Scherm blijft aan";
+        }
       }
     }
 
@@ -4275,7 +4283,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       if (btn) btn.disabled = (undoStack.length === 0);
     }
 
-    // --- JSON BACK-UP & RESTORE ---
+    // --- JSON BESTAND BACK-UP & RESTORE ---
     function exportBackupJson() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
       const dl = document.createElement('a');
@@ -4308,10 +4316,262 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
     }
 
     // =========================================================================
+    // LAAG 2: DYNAMISCHE QR-CODE & LINK SYNCHRONISATIE ENGINE
+    // =========================================================================
+    function loadExternalSyncScripts(callback) {
+      let lzReady = !!window.LZString;
+      let qrReady = !!window.QRCode;
+
+      if (lzReady && qrReady) {
+        callback();
+        return;
+      }
+
+      let loadedCount = 0;
+      const checkDone = () => {
+        loadedCount++;
+        if (loadedCount >= 2) callback();
+      };
+
+      if (!lzReady) {
+        const s1 = document.createElement('script');
+        s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js';
+        s1.onload = checkDone;
+        s1.onerror = checkDone;
+        document.head.appendChild(s1);
+      } else {
+        loadedCount++;
+      }
+
+      if (!qrReady) {
+        const s2 = document.createElement('script');
+        s2.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+        s2.onload = checkDone;
+        s2.onerror = checkDone;
+        document.head.appendChild(s2);
+      } else {
+        loadedCount++;
+      }
+    }
+
+    function openShareQrModal(defaultScope = 'table') {
+      loadExternalSyncScripts(() => {
+        let modal = document.getElementById('shareQrModal');
+        if (!modal) {
+          const modalHtml = `
+            <div id="shareQrModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xl">📱</span>
+                    <h3 class="font-extrabold text-sm text-white">Deel met ander apparaat</h3>
+                  </div>
+                  <button type="button" onclick="closeShareQrModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+                </div>
+
+                <div class="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800 w-full">
+                  <button type="button" id="qrScopeTableBtn" onclick="renderQrPayload('table')" class="flex-1 py-1.5 rounded-lg text-xs font-bold transition">🎯 Actieve Tafel</button>
+                  <button type="button" id="qrScopeAllBtn" onclick="renderQrPayload('all')" class="flex-1 py-1.5 rounded-lg text-xs font-bold transition">📦 Alles (Backup)</button>
+                </div>
+
+                <div id="qrCodeTargetBox" class="bg-white p-3 rounded-2xl mx-auto w-fit min-h-[220px] min-w-[220px] flex items-center justify-center shadow-inner">
+                  <div class="text-xs text-slate-500 font-bold">QR-code laden...</div>
+                </div>
+
+                <div id="qrOverflowWarning" class="hidden text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl p-2 font-semibold text-left">
+                  ⚠️ Je geschiedenis is te groot voor een leesbare QR-code. Gebruik de knop "Kopieer Deellink" hieronder om via WhatsApp of AirDrop te sturen!
+                </div>
+
+                <p id="qrHelpSubtitle" class="text-[11px] text-slate-400">
+                  Scan met de normale camera van de andere telefoon om de stand direct in te laden.
+                </p>
+
+                <div class="space-y-2 pt-1">
+                  <button type="button" onclick="copyCurrentShareLink()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-1.5">
+                    <span>📋</span> Kopieer Deellink
+                  </button>
+                  <button type="button" onclick="openManualImportPrompt()" class="w-full py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold text-xs transition">
+                    📥 Handmatig code / link importeren
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+          document.body.insertAdjacentHTML('beforeend', modalHtml);
+          modal = document.getElementById('shareQrModal');
+        }
+
+        modal.classList.remove('hidden');
+        renderQrPayload(defaultScope);
+      });
+    }
+
+    function closeShareQrModal() {
+      const modal = document.getElementById('shareQrModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    let activeShareUrl = '';
+
+    function renderQrPayload(scope) {
+      const bTable = document.getElementById('qrScopeTableBtn');
+      const bAll = document.getElementById('qrScopeAllBtn');
+      const box = document.getElementById('qrCodeTargetBox');
+      const warn = document.getElementById('qrOverflowWarning');
+      const sub = document.getElementById('qrHelpSubtitle');
+
+      if (scope === 'table') {
+        bTable.className = "flex-1 py-1.5 rounded-lg text-xs font-black bg-indigo-600 text-white shadow";
+        bAll.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white";
+        sub.textContent = "Scan met de camera om het actieve spel en de tussenstand over te nemen op een ander toestel.";
+      } else {
+        bAll.className = "flex-1 py-1.5 rounded-lg text-xs font-black bg-indigo-600 text-white shadow";
+        bTable.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white";
+        sub.textContent = "Deelt al je spelers, favorieten, records en gespeelde potjes.";
+      }
+
+      let payload = {};
+      if (scope === 'table') {
+        const curGame = state.activeGameId;
+        payload = {
+          type: 'scoreblok_share_table',
+          activeGameId: curGame,
+          players: state.players,
+          gameState: state.gamesState[curGame] || {}
+        };
+      } else {
+        payload = {
+          type: 'scoreblok_share_full',
+          state: state
+        };
+      }
+
+      const jsonStr = JSON.stringify(payload);
+      const compressed = window.LZString ? LZString.compressToEncodedURIComponent(jsonStr) : encodeURIComponent(jsonStr);
+      
+      const baseUrl = window.location.origin + window.location.pathname;
+      activeShareUrl = `${baseUrl}#share=${compressed}`;
+
+      box.innerHTML = '';
+
+      if (activeShareUrl.length > 2300) {
+        box.classList.add('hidden');
+        warn.classList.remove('hidden');
+      } else {
+        box.classList.remove('hidden');
+        warn.classList.add('hidden');
+        if (window.QRCode) {
+          new QRCode(box, {
+            text: activeShareUrl,
+            width: 200,
+            height: 200,
+            colorDark: '#020617',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        }
+      }
+    }
+
+    function copyCurrentShareLink() {
+      if (!activeShareUrl) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(activeShareUrl).then(() => {
+          showToast('📋 Deellink gekopieerd naar klembord!');
+        }).catch(() => fallbackCopyPrompt(activeShareUrl));
+      } else {
+        fallbackCopyPrompt(activeShareUrl);
+      }
+    }
+
+    function fallbackCopyPrompt(txt) {
+      prompt('Kopieer deze link om te delen:', txt);
+    }
+
+    function openManualImportPrompt() {
+      const pasted = prompt('Plak hier de ontvangen deellink of code:');
+      if (!pasted) return;
+      processIncomingSharedString(pasted);
+    }
+
+    function processIncomingSharedString(rawInput) {
+      loadExternalSyncScripts(() => {
+        let code = rawInput.trim();
+        if (code.includes('#share=')) {
+          code = code.split('#share=')[1];
+        }
+
+        let decompressed = '';
+        try {
+          decompressed = window.LZString ? LZString.decompressFromEncodedURIComponent(code) : decodeURIComponent(code);
+        } catch (e) {
+          try { decompressed = decodeURIComponent(code); } catch (err) {}
+        }
+
+        if (!decompressed) {
+          showToast('⚠️ Kon de gedeelde gegevens niet lezen.');
+          return;
+        }
+
+        try {
+          const data = JSON.parse(decompressed);
+          applyReceivedShareData(data);
+        } catch (e) {
+          showToast('⚠️ Fout bij uitpakken van gegevens.');
+        }
+      });
+    }
+
+    function applyReceivedShareData(data) {
+      if (data.type === 'scoreblok_share_table') {
+        if (confirm(`Tafel ontvangen voor "${data.activeGameId}"! Wil je deze actieve stand overnemen?`)) {
+          state.activeGameId = data.activeGameId;
+          state.players = data.players || state.players;
+          if (!state.gamesState) state.gamesState = {};
+          state.gamesState[data.activeGameId] = data.gameState || {};
+          saveState();
+          closeShareQrModal();
+          showToast('✅ Actieve tafel succesvol gesynchroniseerd!');
+          switchMainView('scoreboard');
+        }
+      } else if (data.type === 'scoreblok_share_full' && data.state) {
+        const choice = confirm('Volledige back-up ontvangen! Klik OK om je huidige data te vervangen door de ontvangen stand.');
+        if (choice) {
+          state = data.state;
+          saveState();
+          closeShareQrModal();
+          showToast('✅ Alle gegevens hersteld!');
+          switchMainView('history');
+        }
+      } else if (data.players && data.history) {
+        if (confirm('Scoreblok gegevens ontvangen! Wil je deze importeren?')) {
+          state = data;
+          saveState();
+          closeShareQrModal();
+          showToast('✅ Gegevens geïmporteerd!');
+          switchMainView('picker');
+        }
+      } else {
+        showToast('⚠️ Onbekend dataformaat.');
+      }
+    }
+
+    function checkUrlForIncomingShare() {
+      if (window.location.hash && window.location.hash.startsWith('#share=')) {
+        const hashPayload = window.location.hash.substring(7);
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+        setTimeout(() => {
+          processIncomingSharedString(hashPayload);
+        }, 500);
+      }
+    }
+
+    // =========================================================================
     // 19. OPSTARTEN EN INITIALISATIE
     // =========================================================================
     loadState();
     switchMainView('picker');
+    checkUrlForIncomingShare();
   </script>
 </body>
 </html>
