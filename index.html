@@ -179,7 +179,7 @@
       <div id="gameSheetContainer" class="space-y-4"></div>
     </section>
 
-        <!-- VIEW 3: SPELERS, GROEPEN & TAFELVOLGORDE -->
+            <!-- VIEW 3: SPELERS, GROEPEN & TAFELVOLGORDE -->
     <section id="viewPlayers" class="hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -215,11 +215,11 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 class="font-bold text-sm text-white">💾 Back-up & Gegevensoverdracht</h3>
-          <p class="text-xs text-slate-400">Deel via QR met een andere telefoon of download een back-up bestand.</p>
+          <p class="text-xs text-slate-400">Zet gegevens over naar een ander toestel of download een bestand.</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <button type="button" onclick="openShareQrModal('all')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-extrabold text-white shadow-lg shadow-indigo-600/30 transition flex items-center gap-1.5">
-            <span>📱</span> Deel via QR
+            <span>📲</span> Deel naar ander apparaat
           </button>
           <button type="button" onclick="exportBackupJson()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition">
             ⬇️ Exporteer Back-up
@@ -4201,8 +4201,8 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       showToast(`🏆 Toernooi "${name}" gestart!`);
     }
 
-    // =========================================================================
-    // 18. CONFETTI, TOAST, WAKELOCK, UNDO, BACKUP & LAAG 2: QR & LINK SYNC
+        // =========================================================================
+    // 18. CONFETTI, TOAST, WAKELOCK, UNDO, BACKUP & LAAG 2: SYNC NAAR APPARAAT
     // =========================================================================
     function triggerConfetti() {
       const container = document.getElementById('confettiContainer');
@@ -4322,7 +4322,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
     }
 
     // =========================================================================
-    // LAAG 2: DYNAMISCHE QR-CODE & LINK SYNCHRONISATIE ENGINE
+    // DYNAMISCHE OVERDRACHT ENGINE (QR & LINK)
     // =========================================================================
     function loadExternalSyncScripts(callback) {
       let lzReady = !!window.LZString;
@@ -4369,8 +4369,8 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
               <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center">
                 <div class="flex items-center justify-between border-b border-slate-800 pb-2">
                   <div class="flex items-center gap-2">
-                    <span class="text-xl">📱</span>
-                    <h3 class="font-extrabold text-sm text-white">Deel met ander apparaat</h3>
+                    <span class="text-xl">📲</span>
+                    <h3 class="font-extrabold text-sm text-white">Deel naar ander apparaat</h3>
                   </div>
                   <button type="button" onclick="closeShareQrModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
                 </div>
@@ -4384,20 +4384,18 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
                   <div class="text-xs text-slate-500 font-bold">QR-code laden...</div>
                 </div>
 
-                <div id="qrOverflowWarning" class="hidden text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl p-2 font-semibold text-left">
-                  ⚠️ Je geschiedenis is te groot voor een leesbare QR-code. Gebruik de knop "Kopieer Deellink" hieronder om via WhatsApp of AirDrop te sturen!
+                <div id="qrOverflowWarning" class="hidden text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 font-semibold text-left">
+                  ℹ️ Je geschiedenis bevat te veel gegevens voor een QR-code. Gebruik de knop "Kopieer Deellink" hieronder om het direct via WhatsApp, chat of AirDrop te sturen!
                 </div>
 
-                <p id="qrHelpSubtitle" class="text-[11px] text-slate-400">
-                  Scan met de normale camera van de andere telefoon om de stand direct in te laden.
-                </p>
+                <p id="qrHelpSubtitle" class="text-[11px] text-slate-400"></p>
 
                 <div class="space-y-2 pt-1">
                   <button type="button" onclick="copyCurrentShareLink()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition flex items-center justify-center gap-1.5">
                     <span>📋</span> Kopieer Deellink
                   </button>
                   <button type="button" onclick="openManualImportPrompt()" class="w-full py-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold text-xs transition">
-                    📥 Handmatig code / link importeren
+                    📥 Handmatig link of code invoeren
                   </button>
                 </div>
               </div>
@@ -4429,11 +4427,9 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       if (scope === 'table') {
         bTable.className = "flex-1 py-1.5 rounded-lg text-xs font-black bg-indigo-600 text-white shadow";
         bAll.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white";
-        sub.textContent = "Scan met de camera om het actieve spel en de tussenstand over te nemen op een ander toestel.";
       } else {
         bAll.className = "flex-1 py-1.5 rounded-lg text-xs font-black bg-indigo-600 text-white shadow";
         bTable.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white";
-        sub.textContent = "Deelt al je spelers, favorieten, records en gespeelde potjes.";
       }
 
       let payload = {};
@@ -4463,9 +4459,11 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       if (activeShareUrl.length > 2300) {
         box.classList.add('hidden');
         warn.classList.remove('hidden');
+        sub.textContent = "Stuur de deellink naar het andere toestel om de gegevens in één klik over te nemen.";
       } else {
         box.classList.remove('hidden');
         warn.classList.add('hidden');
+        sub.textContent = "Scan de QR-code met de camera van de andere telefoon, of kopieer de deellink.";
         if (window.QRCode) {
           new QRCode(box, {
             text: activeShareUrl,
