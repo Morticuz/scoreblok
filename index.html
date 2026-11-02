@@ -146,7 +146,7 @@
       <div id="gamesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-    <!-- VIEW 2: ACTIVE SCOREBOARD -->
+        <!-- VIEW 2: ACTIVE SCOREBOARD -->
     <section id="viewScoreboard" class="hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
@@ -162,6 +162,7 @@
           </div>
         </div>
         <div class="flex flex-wrap items-center gap-1.5 ml-auto">
+          <button type="button" onclick="openShareQrModal('table')" class="px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition flex items-center gap-1" title="Deel huidige tussenstand via QR">📱 Deel</button>
           <button type="button" id="roundGraphBtn" onclick="showRoundGraph()" class="hidden px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition">📈 Verloop</button>
           <button type="button" id="undoActionBtn" onclick="undoLastScoreAction()" disabled class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-35 text-amber-300 text-xs font-extrabold transition" title="Maak laatste actie ongedaan">↩️ Oeps</button>
           <button type="button" onclick="switchMainView('players')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold" title="Wijzig tafelvolgorde">🪑 Tafel</button>
@@ -178,7 +179,7 @@
       <div id="gameSheetContainer" class="space-y-4"></div>
     </section>
 
-    <!-- VIEW 3: SPELERS, GROEPEN & TAFELVOLGORDE -->
+        <!-- VIEW 3: SPELERS, GROEPEN & TAFELVOLGORDE -->
     <section id="viewPlayers" class="hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -214,11 +215,16 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 class="font-bold text-sm text-white">💾 Back-up & Gegevensoverdracht</h3>
-          <p class="text-xs text-slate-400">Download je spelers en statistieken of laad een eerder back-up bestand in.</p>
+          <p class="text-xs text-slate-400">Deel via QR met een andere telefoon of download een back-up bestand.</p>
         </div>
-        <div class="flex gap-2">
-          <button type="button" onclick="exportBackupJson()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200">⬇️ Exporteer Back-up</button>
-          <label class="px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-xs font-bold text-indigo-300 cursor-pointer">
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="openShareQrModal('all')" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-extrabold text-white shadow-lg shadow-indigo-600/30 transition flex items-center gap-1.5">
+            <span>📱</span> Deel via QR
+          </button>
+          <button type="button" onclick="exportBackupJson()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 transition">
+            ⬇️ Exporteer Back-up
+          </button>
+          <label class="px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-xs font-bold text-indigo-300 cursor-pointer transition">
             ⬆️ Importeer Back-up
             <input type="file" accept=".json" onchange="importBackupJson(event)" class="hidden" />
           </label>
