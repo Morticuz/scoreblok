@@ -4048,7 +4048,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       }
     }
 
-        // =========================================================================
+    // =========================================================================
     // 17. TOERNOOI ENGINE & MODAL
     // =========================================================================
     let selectedTournamentGameId = 'multi';
@@ -4076,7 +4076,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
           </div>
           <div>
             <label class="block text-slate-400 mb-1 font-semibold">2. Toernooinaam (optioneel)</label>
-            <input type="text" id="tNameInput" placeholder="bijv. Spellen Meerkamp Cup" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold placeholder:text-slate-500 placeholder:font-normal focus:outline-none focus:border-indigo-500" />
+            <input type="text" id="tNameInput" placeholder="bijv. Rummikub Cup" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold placeholder:text-slate-500 placeholder:font-normal focus:outline-none focus:border-indigo-500" />
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-2">
@@ -4139,7 +4139,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         if (searchInp) searchInp.value = '';
         if (nameInp) {
           nameInp.value = '';
-          nameInp.placeholder = 'bijv. Spellen Meerkamp Cup';
+          nameInp.placeholder = 'bijv. Rummikub Cup';
         }
       } else {
         const game = getAllGames().find(g => g.id === gameId);
@@ -4163,7 +4163,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       const isMulti = selectedTournamentGameId === 'multi';
       const game = !isMulti ? getAllGames().find(g => g.id === selectedTournamentGameId) : null;
       
-      const defaultTitle = isMulti ? 'Spellen Meerkamp Cup' : `${game ? game.name : 'Bordspel'} Cup`;
+      const defaultTitle = isMulti ? 'Spellen Meerkamp' : `${game ? game.name : 'Bordspel'} Toernooi`;
       const inputVal = document.getElementById('tNameInput')?.value.trim();
       const name = inputVal || defaultTitle;
       const act = getActivePlayers();
@@ -4201,7 +4201,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       showToast(`🏆 Toernooi "${name}" gestart!`);
     }
 
-        // =========================================================================
+    // =========================================================================
     // 18. CONFETTI, TOAST, WAKELOCK, UNDO, BACKUP & LAAG 2: QR & LINK SYNC
     // =========================================================================
     function triggerConfetti() {
