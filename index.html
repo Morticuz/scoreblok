@@ -146,7 +146,7 @@
       <div id="gamesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </section>
 
-        <!-- VIEW 2: ACTIVE SCOREBOARD -->
+    <!-- VIEW 2: ACTIVE SCOREBOARD -->
     <section id="viewScoreboard" class="hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
@@ -179,7 +179,7 @@
       <div id="gameSheetContainer" class="space-y-4"></div>
     </section>
 
-            <!-- VIEW 3: SPELERS, GROEPEN & TAFELVOLGORDE -->
+    <!-- VIEW 3: SPELERS, GROEPEN & TAFELVOLGORDE -->
     <section id="viewPlayers" class="hidden space-y-4">
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -232,7 +232,7 @@
       </div>
     </section>
 
-    <!-- VIEW 4: STATISTIEKEN, WISSELBEKER, PECH- EN PLAAGTROFEEËN & RECORDS -->
+    <!-- VIEW 4: STATISTIEKEN, WISSELBEKER & RECORDS -->
     <section id="viewHistory" class="hidden space-y-4">
       <div id="championCupWidget" class="bg-gradient-to-r from-amber-950/60 via-slate-900 to-amber-950/60 border border-amber-500/50 rounded-2xl p-4 shadow-xl"></div>
       <div id="banterStatsWidget" class="space-y-3"></div>
@@ -472,13 +472,12 @@
     </div>
   </div>
 
-  <!-- MODAL 6: TOERNOOI STARTEN & EINDE TOERNOOI CEREMONIE -->
+  <!-- MODAL 6: TOERNOOI STARTEN -->
   <div id="tournamentModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div id="tournamentModalContent" class="bg-slate-900 border border-amber-500/40 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl"></div>
   </div>
 
   <script>
-    
     // =========================================================================
     // 1. SVG ICONS, MEEPLE GENERATOR & CONSTANTS
     // =========================================================================
@@ -535,7 +534,6 @@
       snackmatch: '<span class="text-xl">🍟</span>',
       moddervarkens: '<span class="text-xl">🐷</span>',
       doolhof: '<span class="text-xl">🌀</span>',
-      // Nieuwe iconen voor de klassiekers:
       monopoly: '<span class="text-xl">🎩</span>',
       risk: '<span class="text-xl">⚔️</span>',
       cluedo: '<span class="text-xl">🔍</span>',
@@ -562,7 +560,7 @@
       </svg>`;
     }
 
-        const START_CHALLENGES = [
+    const START_CHALLENGES = [
       "Degene die als laatste een kroket of frikandel heeft gegeten!",
       "Degene die op dit moment de felste kleur sokken aan heeft!",
       "Degene die het laatst in het buitenland is geweest!",
@@ -638,7 +636,6 @@
       "Degene die als eerste een geel voorwerp aanwijst (geen spelmateriaal van dit spel)!"
     ];
 
-
     const AZUL_WALL_PATTERN = [
       ['blue', 'yellow', 'red', 'black', 'teal'],
       ['teal', 'blue', 'yellow', 'red', 'black'],
@@ -699,8 +696,8 @@
       { id: 'paard', name: '🐎 Paard', val: 1000 }
     ];
 
-        // =========================================================================
-    // 2. VOLLEDIGE SPELLEN CATALOGUS (INCLUSIEF ALLE KLASSIEKERS)
+    // =========================================================================
+    // 2. VOLLEDIGE SPELLEN CATALOGUS
     // =========================================================================
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + vloerlijn óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
@@ -708,7 +705,7 @@
       { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, jokers & sterren', category: 'card', type: 'kok1', icon: 'kok', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'keeropkeer2', name: 'Keer op Keer 2', subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O', category: 'card', type: 'kok2', icon: 'kok2', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Stenen 11 & 13 + 7 Wormfiches)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Stenen 11 & 13 + 7 Wormfiches)'], tieBreakerDesc: 'Hoogste tegelnummer in bezit' },
-      { id: 'carcassonne', name: 'Carcassonne', subtitle: 'Live teller met uitbreidings-snelknoppen', category: 'board', type: 'carcassonne', icon: 'carcassonne', minP: 2, maxP: 6, dur: 'medium', expansions: ['⛪ Kathedralen & Herbergen', '🍷 Kooplieden & Bouwmeesters'] },
+      { id: 'carcassonne', name: 'Carcassonne', subtitle: 'Live teller met uitbreidings-snelknoppen & calculator', category: 'board', type: 'carcassonne', icon: 'carcassonne', minP: 2, maxP: 6, dur: 'medium', expansions: ['⛪ Kathedralen & Herbergen', '🍷 Kooplieden & Bouwmeesters'] },
       { id: 'cascadia', name: 'Cascadia', subtitle: 'Dieren, leefgebieden (+ automatische meerderheid) & appels', category: 'board', type: 'cascadia', icon: 'cascadia', minP: 1, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste dennenappels (natuurfiches)' },
       { id: 'beverbende', name: 'Beverbende', subtitle: 'Rondeteller (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'beverbende', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
       { id: 'beverclan', name: 'Beverclan', subtitle: 'Rondeteller met burchtkaarten & bonuspunten (Hoogste wint!)', category: 'card', type: 'rounds', icon: 'beverbende', lowestWins: false, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
@@ -759,13 +756,11 @@
       { id: 'machiavelli', name: 'Machiavelli', subtitle: 'Gebouwen, 5-kleurenbonus (+3) & eerste met 8 gebouwen (+4)', category: 'card', type: 'machiavelli', icon: 'machiavelli', minP: 2, maxP: 7, dur: 'medium' },
       { id: 'themind', name: 'The Mind', subtitle: 'Coöperatieve level-, levens- en shuriken-tracker', category: 'card', type: 'themind', icon: 'themind', minP: 2, maxP: 4, dur: 'short' },
       { id: 'qwirkle', name: 'Qwirkle', subtitle: 'Live teller met Qwirkle (+12) snelknop', category: 'board', type: 'carcassonne', icon: 'free', minP: 2, maxP: 4, dur: 'medium' },
-      { id: 'doolhof', name: 'Doolhof', subtitle: 'Eerste speler die alle schatten verzamelt en terugkeert naar start', category: 'board', type: 'carcassonne', icon: 'doolhof', limit: 1, minP: 2, maxP: 4, dur: 'short' },
+      { id: 'doolhof', name: 'Doolhof', subtitle: 'Eerste speler die alle schatten verzamelt en terugkeert naar start', category: 'board', type: 'doolhof', icon: 'doolhof', limit: 1, minP: 2, maxP: 4, dur: 'short' },
       { id: 'arschmellows', name: 'Arschmellows', subtitle: 'Snel registreren wie het potje heeft gewonnen', category: 'card', type: 'carcassonne', icon: 'arschmellows', limit: 1, minP: 2, maxP: 5, dur: 'short' },
       { id: 'gameoftrains', name: 'Game of Trains', subtitle: 'Eerste speler met trein in oplopende volgorde', category: 'card', type: 'carcassonne', icon: 'gameoftrains', limit: 1, minP: 2, maxP: 4, dur: 'short' },
       { id: 'snackmatch', name: 'Snackmatch', subtitle: 'Snel registreren wie de snacks compleet heeft', category: 'card', type: 'carcassonne', icon: 'snackmatch', limit: 1, minP: 2, maxP: 6, dur: 'short' },
       { id: 'moddervarkens', name: 'Moddervarkens', subtitle: 'Eerste speler met alle varkens in de modder', category: 'card', type: 'carcassonne', icon: 'moddervarkens', limit: 1, minP: 2, maxP: 4, dur: 'short' },
-      
-      // --- TOEGEVOEGDE KLASSIEKERS ---
       { id: 'monopoly', name: 'Monopoly', subtitle: 'Eindsaldo in contanten + waarde van straten en huizen (of 1 overlever)', category: 'board', type: 'categories', icon: 'monopoly', minP: 2, maxP: 8, dur: 'long', categories: ['💵 Contant geld', '🏠 Waarde van straten, huizen & hotels', '🚂 Stations & Nutsbedrijven'] },
       { id: 'risk', name: 'Risk', subtitle: 'Veroverde continenten of geheime missie voltooid', category: 'board', type: 'carcassonne', icon: 'risk', limit: 1, minP: 2, maxP: 6, dur: 'long' },
       { id: 'cluedo', name: 'Cluedo', subtitle: 'Eerste die verdachte, wapen en kamer correct ontrafelt', category: 'board', type: 'carcassonne', icon: 'cluedo', limit: 1, minP: 2, maxP: 6, dur: 'medium' },
@@ -783,7 +778,6 @@
       { id: 'klaverjas', name: 'Klaverjassen', subtitle: 'Rondeteller voor slagenpunten en behaalde roem per spel tot 1500', category: 'card', type: 'rounds', icon: 'klaverjas', limit: 1500, minP: 4, maxP: 4, dur: 'medium' },
       { id: 'hartenjagen', name: 'Hartenjagen', subtitle: 'Harten (+1) en Schoppenvrouw (+13) tot 100 punten (Laagste wint!)', category: 'card', type: 'rounds', icon: 'hartenjagen', lowestWins: true, limit: 100, minP: 4, maxP: 4, dur: 'medium' },
       { id: 'kingen', name: 'Kingen / Brikken', subtitle: 'Rondeteller voor min-contracten en plus-contracten per beurt', category: 'card', type: 'rounds', icon: 'kingen', lowestWins: false, minP: 4, maxP: 4, dur: 'medium' },
-
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
 
@@ -867,7 +861,7 @@
 
     function isLowestWins(gameId = state.activeGameId) {
       const def = getGameDef(gameId);
-      const gs = state.gamesState[gameId];
+      const gs = state.gamesState?.[gameId];
       if (gs && typeof gs.lowestWinsOverride === 'boolean') return gs.lowestWinsOverride;
       return !!def.lowestWins;
     }
@@ -876,7 +870,7 @@
       return (v !== undefined && v !== null && Number(v) !== 0) ? v : '';
     }
 
-        // =========================================================================
+    // =========================================================================
     // 4. GAME STATE INITIALIZATION
     // =========================================================================
     function createEmptyPlayerData() {
@@ -950,7 +944,7 @@
     }
 
     // =========================================================================
-    // 5. HELPER CALCULATIONS (AZUL, CASCADIA, LOST CITIES, TIE-BREAKERS)
+    // 5. HELPER CALCULATIONS
     // =========================================================================
     function scoreSingleAzulPlacement(wall, r, c) {
       let horiz = 1;
@@ -985,18 +979,19 @@
     }
 
     function computeAzulEndBonuses(wall) {
+      if (!wall || !wall.length) return { rows: 0, cols: 0, colors: 0, total: 0 };
       let rows = 0, cols = 0, colors = 0;
       for (let r = 0; r < 5; r++) {
-        if (wall[r].every(Boolean)) rows++;
+        if (wall[r] && wall[r].every(Boolean)) rows++;
       }
       for (let c = 0; c < 5; c++) {
-        if ([0, 1, 2, 3, 4].every(r => wall[r][c])) cols++;
+        if ([0, 1, 2, 3, 4].every(r => wall[r] && wall[r][c])) cols++;
       }
       ['blue', 'yellow', 'red', 'black', 'teal'].forEach(clr => {
         let cnt = 0;
         for (let r = 0; r < 5; r++) {
           for (let c = 0; c < 5; c++) {
-            if (AZUL_WALL_PATTERN[r][c] === clr && wall[r][c]) cnt++;
+            if (AZUL_WALL_PATTERN[r][c] === clr && wall[r] && wall[r][c]) cnt++;
           }
         }
         if (cnt === 5) colors++;
@@ -1054,40 +1049,42 @@
     }
 
     function getTieBreakerValue(gameId, playerId) {
-      const gs = ensureGameState(gameId);
-      const pd = gs.playerData[playerId];
-      if (!pd) return 0;
+      try {
+        const gs = ensureGameState(gameId);
+        const pd = gs.playerData[playerId];
+        if (!pd) return 0;
 
-      if (gameId === 'azul' && gs.azulMode !== 'manual') {
-        return computeAzulEndBonuses(pd.azul.wall).rows;
-      }
-      if (gameId === 'cascadia') {
-        return Number(pd.cascadia?.cones || 0);
-      }
-      if (gameId === 'eldorado') {
-        return Number(pd.categories?.['🚧 Barrières (aantal)'] || 0);
-      }
-      if (gameId === 'keeropkeer' || gameId === 'keeropkeer2') {
-        return Number(pd.exclamations || 0);
-      }
-      if (gameId === 'wonders7') {
-        return Number(pd.wonders?.coins || 0);
-      }
-      if (gameId === 'sushigo') {
-        return Number(pd.sushigo?.pudding || 0);
-      }
-      if (gameId === 'ttr') {
-        return pd.ttr?.longest ? 1 : 0;
-      }
-      if (gameId === 'regenwormen') {
-        const tMap = pd.regenwormen?.tiles || {};
-        const owned = Object.keys(tMap).filter(k => tMap[k]).map(Number);
-        return owned.length ? Math.max(...owned) : 0;
-      }
+        if (gameId === 'azul' && gs.azulMode !== 'manual') {
+          return computeAzulEndBonuses(pd.azul?.wall || []).rows || 0;
+        }
+        if (gameId === 'cascadia') {
+          return Number(pd.cascadia?.cones || 0);
+        }
+        if (gameId === 'eldorado') {
+          return Number(pd.categories?.['🚧 Barrières (aantal)'] || 0);
+        }
+        if (gameId === 'keeropkeer' || gameId === 'keeropkeer2') {
+          return Number(pd.exclamations || 0);
+        }
+        if (gameId === 'wonders7') {
+          return Number(pd.wonders?.coins || 0);
+        }
+        if (gameId === 'sushigo') {
+          return Number(pd.sushigo?.pudding || 0);
+        }
+        if (gameId === 'ttr') {
+          return pd.ttr?.longest ? 1 : 0;
+        }
+        if (gameId === 'regenwormen') {
+          const tMap = pd.regenwormen?.tiles || {};
+          const owned = Object.keys(tMap).filter(k => tMap[k]).map(Number);
+          return owned.length ? Math.max(...owned) : 0;
+        }
+      } catch (e) {}
       return 0;
     }
 
-        // =========================================================================
+    // =========================================================================
     // 6. SCORE CALCULATIONS PER GAME
     // =========================================================================
     function calculatePlayerTotal(gameId, playerId) {
@@ -1200,6 +1197,8 @@
         rawScore = Number(m.buildings || 0) + (m.allColors ? 3 : 0) + Number(m.first8 || 0) + Number(m.extra || 0);
       } else if (def.type === 'carcassonne') {
         rawScore = Number(pd.liveScore || 0);
+      } else if (def.type === 'doolhof') {
+        rawScore = Number(pd.liveScore || 0);
       } else if (def.type === 'arknova') {
         const an = pd.arknova || {};
         const cons = Number(an.conservation || 0);
@@ -1218,42 +1217,6 @@
       }
 
       return rawScore + handicap;
-    }
-
-    function getTieBreakerValue(gameId, playerId) {
-      try {
-        const gs = ensureGameState(gameId);
-        const pd = gs.playerData[playerId];
-        if (!pd) return 0;
-
-        if (gameId === 'azul' && gs.azulMode !== 'manual') {
-          return computeAzulEndBonuses(pd.azul?.wall || []).rows || 0;
-        }
-        if (gameId === 'cascadia') {
-          return Number(pd.cascadia?.cones || 0);
-        }
-        if (gameId === 'eldorado') {
-          return Number(pd.categories?.['🚧 Barrières (aantal)'] || 0);
-        }
-        if (gameId === 'keeropkeer' || gameId === 'keeropkeer2') {
-          return Number(pd.exclamations || 0);
-        }
-        if (gameId === 'wonders7') {
-          return Number(pd.wonders?.coins || 0);
-        }
-        if (gameId === 'sushigo') {
-          return Number(pd.sushigo?.pudding || 0);
-        }
-        if (gameId === 'ttr') {
-          return pd.ttr?.longest ? 1 : 0;
-        }
-        if (gameId === 'regenwormen') {
-          const tMap = pd.regenwormen?.tiles || {};
-          const owned = Object.keys(tMap).filter(k => tMap[k]).map(Number);
-          return owned.length ? Math.max(...owned) : 0;
-        }
-      } catch (e) {}
-      return 0;
     }
 
     function getStandings(gameId = state.activeGameId) {
@@ -1353,6 +1316,7 @@
     }
 
     function openGame(gameId) {
+      state.activeGameStartTime = Date.now();
       state.activeGameId = gameId;
       state.lastPlayedGameId = gameId;
       ensureGameState(gameId);
@@ -1478,7 +1442,7 @@
       }).join('');
     }
 
-        // =========================================================================
+    // =========================================================================
     // 9. SCOREBOARD RENDERING & DEALER / STARTER / ENDGAME ALERTS
     // =========================================================================
     function updateActiveFavStar() {
@@ -1677,7 +1641,7 @@
       renderLiveLeaderboard();
 
       const container = document.getElementById('gameSheetContainer');
-      if (def.id === 'doolhof') renderDoolhofSheet(container);
+      if (def.id === 'doolhof' || def.type === 'doolhof') renderDoolhofSheet(container);
       else if (def.type === 'kok1' || def.type === 'kok2') renderKokSheet(container, def);
       else if (def.type === 'azul') renderAzulSheet(container, def);
       else if (def.type === 'rounds') renderRoundsSheet(container, def);
@@ -1702,6 +1666,45 @@
       else if (def.type === 'codenames') renderCodenamesSheet(container);
       else if (def.type === 'themind') renderTheMindSheet(container);
       else if (def.type === 'carcassonne') renderCarcassonneSheet(container, def);
+    }
+
+    function renderLiveLeaderboard() {
+      const def = getGameDef();
+      const standings = getStandings();
+      const topPlayer = standings[0];
+      const hasTieBreakAtTop = standings.length > 1 && standings[0].score === standings[1].score && standings[0].tieVal !== standings[1].tieVal && standings[0].score !== 0;
+      const activePlayers = getActivePlayers();
+
+      const gs = ensureGameState(def.id);
+      let activeLimit = def.limit;
+      if (def.id === 'catan') {
+        if (gs.activeExpansions['⚔️ Steden & Ridders (13p)']) activeLimit = 13;
+        else if (gs.activeExpansions['⛵ Zeevaarders (12p)']) activeLimit = 12;
+      }
+
+      document.getElementById('liveLeaderboard').innerHTML = activePlayers.map((p, idx) => {
+        const pScore = calculatePlayerTotal(def.id, p.id);
+        const pTie = getTieBreakerValue(def.id, p.id);
+        const isLeader = standings.some(x => x.score !== 0) && pScore === topPlayer?.score && pTie === topPlayer?.tieVal;
+        const reachedLimit = activeLimit && pScore >= activeLimit;
+        return `
+          <div class="rounded-2xl p-3 border transition ${isLeader ? 'bg-indigo-950/60 border-indigo-500/60 shadow-lg' : 'bg-slate-900 border-slate-800'}" style="border-left: 5px solid ${p.color || '#6366f1'}">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+              <span class="player-title font-bold truncate flex items-center gap-1.5 text-slate-100">
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">#${idx + 1}</span>
+                <button type="button" onclick="openQuickColorModal('${p.id}')" title="Kleur snel wisselen" class="hover:scale-110 transition">
+                  ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                </button>
+                <span>${p.name}</span>
+              </span>
+              <span>${isLeader ? '👑' : ''}</span>
+            </div>
+            <div class="score-number text-2xl font-black mt-1 ${isLeader ? 'text-indigo-300' : 'text-white'}">${pScore}</div>
+            ${isLeader && hasTieBreakAtTop ? `<div class="text-[10px] text-emerald-300 font-bold">⚖️ Wint tie-breaker (${pTie})</div>` : ''}
+            ${p.handicap ? `<div class="text-[10px] text-slate-400">incl. start-handicap (${p.handicap > 0 ? '+' : ''}${p.handicap})</div>` : ''}
+            ${reachedLimit ? `<div class="text-[10px] text-amber-300 font-bold mt-0.5">⚠️ Limiet (${activeLimit}) bereikt!</div>` : ''}
+          </div>`;
+      }).join('');
     }
 
     // =========================================================================
@@ -1989,7 +1992,7 @@
     }
 
     // =========================================================================
-    // 10C. ROUNDS & FLIP 7 (MET LIVE SVG SCORE-GRAFIEK)
+    // 10C. ROUNDS & FLIP 7
     // =========================================================================
     function renderRoundsSheet(container, def) {
       const gs = ensureGameState(def.id);
@@ -2336,7 +2339,7 @@
 
       const potBanner = expOn ? `
         <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between text-xs">
-          <span class="text-slate-300 font-bold">🪙 Wormfiches in de pot (via Raaf / Dubbel):</span>
+          <span class="text-slate-300 font-bold">🪙 Wormfiches in de pot:</span>
           <span class="px-2.5 py-1 rounded-xl ${tokensLeft === 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'} font-extrabold">
             Nog ${tokensLeft} van 7 over
           </span>
@@ -2420,7 +2423,7 @@
     }
 
     // =========================================================================
-    // 10F. CATEGORIES, WONDERS, TTR, YAHTZEE, CATAN, SUSHI GO, LOST CITIES, ETC.
+    // 10F. CATEGORIES, WONDERS, TTR, YAHTZEE, CATAN, ETC.
     // =========================================================================
     function renderCategoriesSheet(container, def) {
       const gs = ensureGameState(def.id);
@@ -2528,7 +2531,7 @@
                 <input type="number" value="${valOrEmpty(t.destMinus)}" placeholder="0" onfocus="pushUndoSnapshot()" oninput="setTtrVal('${p.id}','destMinus',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white placeholder-slate-600" />
               </div>
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
-                <label class="text-[11px] font-bold text-amber-300" title="Elk ongebruikt station is +4 punten waard">Stations over (×4)</label>
+                <label class="text-[11px] font-bold text-amber-300">Stations over (×4)</label>
                 <select onchange="setTtrVal('${p.id}','stations',this.value); renderScoreboard();" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white">
                   ${[0, 1, 2, 3].map(cnt => `<option value="${cnt}" ${Number(t.stations || 0) === cnt ? 'selected' : ''}>${cnt} over (+${cnt * 4}p)</option>`).join('')}
                 </select>
@@ -2630,7 +2633,6 @@
       renderScoreboard();
     }
 
-    // --- CATAN MET INTERACTIEVE AUTOMATISCHE STADSUPGRADE ---
     function renderCatanSheet(container) {
       const gs = ensureGameState('catan');
       container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">` + getActivePlayers().map(p => {
@@ -2652,7 +2654,6 @@
               </div>
 
               <div class="space-y-2 text-xs">
-                <!-- Dorpen -->
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
                   <span class="text-slate-300 font-bold flex items-center gap-1">🏠 Dorpen (1p)</span>
                   <div class="flex items-center gap-2">
@@ -2662,7 +2663,6 @@
                   </div>
                 </div>
 
-                <!-- Steden (automatische upgrade van dorp) -->
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
                   <span class="text-slate-300 font-bold flex items-center gap-1">🏰 Steden (2p)</span>
                   <div class="flex items-center gap-2">
@@ -2672,7 +2672,6 @@
                   </div>
                 </div>
 
-                <!-- Overwinningspunt-kaarten -->
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
                   <span class="text-slate-300 font-bold flex items-center gap-1">📜 OP-Kaarten (1p)</span>
                   <div class="flex items-center gap-2">
@@ -2682,7 +2681,6 @@
                   </div>
                 </div>
 
-                <!-- Bonussen -->
                 <div class="grid grid-cols-2 gap-1.5 pt-1">
                   <button type="button" onclick="toggleCatanAward('${p.id}', 'longestRoad')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition ${ct.longestRoad ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
                     🛣️ Route (+2)
@@ -2925,7 +2923,7 @@
       else renderLiveLeaderboard();
     }
 
-         // =========================================================================
+    // =========================================================================
     // 10G. ARK NOVA, HEAT, DORFROMANTIK, COOP, CODENAMES, THE MIND, CARCASSONNE & DOOLHOF
     // =========================================================================
     function renderArkNovaSheet(container) {
@@ -3113,6 +3111,7 @@
           <h3 class="font-extrabold text-base text-white">🧠 The Mind</h3>
           <div class="grid grid-cols-3 gap-3 max-w-md mx-auto">
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-2">
+              <div
               <div class="text-xs font-bold text-indigo-300">Level</div>
               <div class="text-3xl font-black text-white">${tm.level}</div>
               <div class="flex justify-center gap-1.5">
@@ -3357,128 +3356,6 @@
     }
 
     // =========================================================================
-    // SPELSPECIFIEK: DOOLHOF & CARCASSONNE REKENHULP
-    // =========================================================================
-    function renderDoolhofSheet(container) {
-      const act = getActivePlayers();
-      const gs = ensureGameState('doolhof');
-
-      let html = `
-        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div>
-              <h3 class="font-black text-sm text-white flex items-center gap-2">🌀 Doolhof Schattenjacht</h3>
-              <p class="text-[11px] text-slate-400">Verzamel al je schatten en keer als eerste terug naar je eigen beginveld!</p>
-            </div>
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-      `;
-
-      act.forEach(p => {
-        const pd = gs.playerData[p.id];
-        const treasures = Number(pd.liveScore || 0);
-        const backAtStart = !!(pd.categories && pd.categories['backAtStart']);
-
-        html += `
-          <div class="bg-slate-950 border border-slate-800/80 rounded-2xl p-3.5 space-y-3">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                <span class="font-extrabold text-xs text-white">${p.name}</span>
-              </div>
-              <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 hover:border-slate-700">
-                <input type="checkbox" onchange="toggleDoolhofStart('${p.id}', this.checked)" ${backAtStart ? 'checked' : ''} class="rounded bg-slate-950 border-slate-700 text-indigo-500 focus:ring-0 w-3.5 h-3.5" />
-                <span class="text-[10px] text-slate-300 font-bold">🏠 Terug op start</span>
-              </label>
-            </div>
-            <div class="flex items-center justify-between bg-slate-900/60 rounded-xl p-2 border border-slate-800/50">
-              <span class="text-[11px] font-bold text-slate-400">Schatten gevonden:</span>
-              <div class="flex items-center gap-2">
-                <button type="button" onclick="adjustDoolhofTreasure('${p.id}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-sm flex items-center justify-center">-</button>
-                <span class="font-black text-base text-teal-300 w-8 text-center font-mono">${treasures}</span>
-                <button type="button" onclick="adjustDoolhofTreasure('${p.id}', 1)" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm flex items-center justify-center">+</button>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-
-      html += `</div></div>`;
-      container.innerHTML = html;
-    }
-
-    function adjustDoolhofTreasure(playerId, delta) {
-      pushUndoSnapshot();
-      const gs = ensureGameState('doolhof');
-      const pd = gs.playerData[playerId];
-      const cur = Number(pd.liveScore || 0);
-      pd.liveScore = Math.max(0, cur + delta);
-      saveState();
-      renderScoreboard();
-    }
-
-    function toggleDoolhofStart(playerId, checked) {
-      pushUndoSnapshot();
-      const gs = ensureGameState('doolhof');
-      const pd = gs.playerData[playerId];
-      if (!pd.categories) pd.categories = {};
-      pd.categories['backAtStart'] = checked ? 1 : 0;
-      saveState();
-      renderScoreboard();
-    }
-
-    function openCarcassonneCalcModal(playerId) {
-      const player = state.players.find(p => p.id === playerId);
-      if (!player) return;
-
-      const modalHtml = `
-        <div id="carcaModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-              <div class="flex items-center gap-2">
-                ${renderMeepleSvg(player.color, 'w-4 h-4')}
-                <h3 class="font-black text-sm text-white">Carcassonne Eindtelling - ${player.name}</h3>
-              </div>
-              <button type="button" onclick="document.getElementById('carcaModal').remove()" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            <div class="space-y-3 text-xs">
-              <div>
-                <label class="block text-slate-400 font-semibold mb-1">Afgebouwde stadstegels (× 2 pt):</label>
-                <input type="number" id="cCityTiles" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono font-bold" />
-              </div>
-              <div>
-                <label class="block text-slate-400 font-semibold mb-1">Schilden in afgebouwde steden (× 2 pt):</label>
-                <input type="number" id="cShields" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono font-bold" />
-              </div>
-              <div>
-                <label class="block text-slate-400 font-semibold mb-1">Afgebouwde steden aan weides (Boeren × 3 pt):</label>
-                <input type="number" id="cFarmland" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono font-bold" />
-              </div>
-            </div>
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-              <button type="button" onclick="document.getElementById('carcaModal').remove()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">Annuleren</button>
-              <button type="button" onclick="applyCarcaCalculation('${playerId}')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30">+ Punten Toevoegen</button>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-
-    function applyCarcaCalculation(playerId) {
-      const city = Number(document.getElementById('cCityTiles')?.value || 0);
-      const shields = Number(document.getElementById('cShields')?.value || 0);
-      const farms = Number(document.getElementById('cFarmland')?.value || 0);
-
-      const totalBonus = (city * 2) + (shields * 2) + (farms * 3);
-      if (totalBonus > 0) {
-        addLivePoints(playerId, totalBonus);
-        showToast(`🏰 +${totalBonus} punten berekend!`);
-      }
-      document.getElementById('carcaModal')?.remove();
-    }
-
-    // =========================================================================
     // 11. SPELERSBEHEER, 16 KLEUREN & SPELERSGROEPEN (PRESETS)
     // =========================================================================
     const PLAYER_PALETTE = [
@@ -3514,8 +3391,7 @@
 
             <div class="flex items-center gap-2 ml-auto flex-wrap">
               <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 rounded-xl px-2 py-1" title="Handicap">
-                <span class="
-text-[10px] font-bold text-slate-400">Handicap:</span>
+                <span class="text-[10px] font-bold text-slate-400">Handicap:</span>
                 <input type="number" value="${valOrEmpty(p.handicap)}" placeholder="0" onchange="setPlayerHandicap('${p.id}', this.value)" class="w-10 bg-slate-950 border border-slate-800 rounded-lg text-center text-xs font-bold text-indigo-400 outline-none py-0.5" />
               </div>
 
@@ -4096,7 +3972,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       document.getElementById('playerProfileModal').classList.add('hidden');
     }
 
-
     // =========================================================================
     // 13. WIE START ER VANDAAG? (LOTING & UITDAGINGEN)
     // =========================================================================
@@ -4231,7 +4106,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       }
     }
 
-        // =========================================================================
+    // =========================================================================
     // 15. SNEL WINNAAR MODAL
     // =========================================================================
     function openQuickWinModal(preselectedGameId = null) {
@@ -4366,7 +4241,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       const winners = standings.filter(p => p.score === top.score && p.tieVal === top.tieVal).map(p => p.id);
       const note = document.getElementById('matchNoteInput').value.trim();
 
-      // Bereken verstreken speelduur in minuten
       const durationMinutes = state.activeGameStartTime 
         ? Math.max(1, Math.round((Date.now() - state.activeGameStartTime) / 60000))
         : null;
@@ -4384,8 +4258,8 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       };
 
       state.history.unshift(match);
-      state.gamesState[def.id] = null; // Bord leegmaken na opslaan
-      state.activeGameStartTime = null; // Timer resetten na afronding
+      state.gamesState[def.id] = null;
+      state.activeGameStartTime = null;
       saveState();
 
       closePodiumModal();
@@ -4397,14 +4271,14 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       if (confirm('Wil je alle scores van dit actieve bord wissen?')) {
         pushUndoSnapshot();
         state.gamesState[state.activeGameId] = null;
-        state.activeGameStartTime = Date.now(); // Start timer opnieuw na reset
+        state.activeGameStartTime = Date.now();
         saveState();
         renderScoreboard();
         showToast('🧹 Scorebord gereset.');
       }
     }
 
-        // =========================================================================
+    // =========================================================================
     // 17. STATISTIEKEN, GESCHIEDENIS & HEAD-TO-HEAD
     // =========================================================================
     function renderHistoryView() {
@@ -4427,12 +4301,10 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         const iconHtml = SVG_ICONS[game.icon] || SVG_ICONS.free;
         const dateStr = m.date ? new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
         
-        // Speelduur weergave (indien beschikbaar)
         const durationHtml = m.duration 
           ? `<span class="text-[10px] bg-slate-800 text-amber-300 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">⏱️ ${m.duration} min</span>` 
           : '';
 
-        // Spelers en winnaars overzicht
         const winners = m.winners || (m.winnerId ? [m.winnerId] : []);
         const resultsList = m.results || (m.scores ? Object.entries(m.scores).map(([pId, score]) => ({ playerId: pId, score })) : []);
 
@@ -4602,7 +4474,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       return { aWins, bWins, total };
     }
 
-        // =========================================================================
+    // =========================================================================
     // 18. CONFETTI, TOAST, WAKELOCK, UNDO, BACKUP & LAAG 2: SYNC NAAR APPARAAT
     // =========================================================================
     function triggerConfetti() {
@@ -4899,7 +4771,7 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       processIncomingSharedString(pasted);
     }
 
-        function processIncomingSharedString(rawInput) {
+    function processIncomingSharedString(rawInput) {
       loadExternalSyncScripts(() => {
         let code = rawInput.trim();
         if (code.includes('#share=')) {
@@ -4936,12 +4808,10 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
     }
 
     function applyReceivedShareData(data) {
-      // 1. Actieve tafel synchronisatie
       if (data.type === 'scoreblok_share_table') {
         if (confirm(`Tafel ontvangen voor "${data.activeGameId}"! Wil je deze actieve stand overnemen?`)) {
           state.activeGameId = data.activeGameId;
           
-          // Voeg eventueel ontbrekende spelers toe zonder bestaande te wissen
           if (Array.isArray(data.players)) {
             data.players.forEach(p => {
               if (!state.players.some(existing => existing.id === p.id)) {
@@ -4959,7 +4829,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
         return;
       }
 
-      // 2. Volledige export / backup
       const incomingState = data.state || (data.history ? data : null);
       if (incomingState && Array.isArray(incomingState.history)) {
         const modalHtml = `
@@ -4999,7 +4868,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       if (overwriteAll) {
         state = incoming;
       } else {
-        // Slim samenvoegen: Spelers
         if (Array.isArray(incoming.players)) {
           incoming.players.forEach(p => {
             const found = state.players.find(x => x.name.toLowerCase() === p.name.toLowerCase());
@@ -5008,7 +4876,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
             }
           });
         }
-        // Slim samenvoegen: Geschiedenis (op basis van unieke timestamp/id)
         if (Array.isArray(incoming.history)) {
           let addedCount = 0;
           incoming.history.forEach(h => {
@@ -5020,7 +4887,6 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
           });
           showToast(`✅ Samengevoegd: ${addedCount} nieuwe potjes toegevoegd!`);
         }
-        // Favorieten & groepen behouden of aanvullen
         if (Array.isArray(incoming.playerGroups)) {
           if (!state.playerGroups) state.playerGroups = [];
           incoming.playerGroups.forEach(g => {
@@ -5064,7 +4930,8 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
       timerSecondsLeft = seconds;
       isTimerPaused = false;
       updateTimerDisplay();
-      document.getElementById('timerPauseBtn').textContent = '⏸';
+      const pauseBtn = document.getElementById('timerPauseBtn');
+      if (pauseBtn) pauseBtn.textContent = '⏸';
       
       timerInterval = setInterval(() => {
         if (!isTimerPaused) {
@@ -5094,33 +4961,35 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
 
     function togglePauseTimer() {
       isTimerPaused = !isTimerPaused;
-      document.getElementById('timerPauseBtn').textContent = isTimerPaused ? '▶️' : '⏸';
+      const pauseBtn = document.getElementById('timerPauseBtn');
+      if (pauseBtn) pauseBtn.textContent = isTimerPaused ? '▶️' : '⏸';
     }
 
     function stopTableTimer() {
       clearInterval(timerInterval);
       timerInterval = null;
-      document.getElementById('timerCard').classList.add('hidden');
+      const card = document.getElementById('timerCard');
+      if (card) card.classList.add('hidden');
     }
 
     function playTimerAlert() {
-      if ('vibrate' in navigator) navigator.vibrate([200, 100, 200, 100, 400]);
+      if ('vibrate' in navigator) {
+        try { navigator.vibrate([200, 100, 200, 100, 400]); } catch (e) {}
+      }
       showToast('⏰ TIJD IS OM!');
-      // Audio beep via Web Audio API (werkt overal offline)
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.frequency.value = 587.33; // D5
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
         osc.start();
-        osc.stop(ctx.currentTime + 0.4);
+        osc.stop(ctx.currentTime + 0.45);
       } catch (e) {}
     }
 
-    // --- BEURT EN KLOP-BANNER HELPER ---
     function setGameKnockAlert(playerName) {
       const banner = document.getElementById('endgameAlertBanner');
       if (!banner) return;
@@ -5142,7 +5011,8 @@ text-[10px] font-bold text-slate-400">Handicap:</span>
     switchMainView('picker');
     checkUrlForIncomingShare();
   </script>
-    <!-- ZWEVENDE TIMER / ZANDLOPER -->
+
+  <!-- ZWEVENDE TIMER / ZANDLOPER WIDGET -->
   <div id="floatingTimerWidget" class="fixed bottom-20 right-4 z-40 flex flex-col items-end gap-2 pointer-events-none">
     <div id="timerCard" class="hidden pointer-events-auto bg-slate-900/95 border border-slate-700 backdrop-blur rounded-2xl p-3 shadow-2xl flex items-center gap-3 transition">
       <span id="timerDisplay" class="font-black text-lg text-amber-400 font-mono">00:30</span>
