@@ -479,7 +479,7 @@
 
   <script>
     
-        // =========================================================================
+    // =========================================================================
     // 1. SVG ICONS, MEEPLE GENERATOR & CONSTANTS
     // =========================================================================
     const SVG_ICONS = {
@@ -787,7 +787,7 @@
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
 
-        // =========================================================================
+    // =========================================================================
     // 3. STATE MANAGEMENT & LOCAL STORAGE
     // =========================================================================
     const STORAGE_KEY = 'scoreblok_pro_v4';
@@ -876,7 +876,7 @@
       return (v !== undefined && v !== null && Number(v) !== 0) ? v : '';
     }
 
-    // =========================================================================
+        // =========================================================================
     // 4. GAME STATE INITIALIZATION
     // =========================================================================
     function createEmptyPlayerData() {
@@ -917,7 +917,8 @@
     }
 
     function ensureGameState(gameId = state.activeGameId) {
-      if (!state.gamesState[gameId]) {
+      if (!state.gamesState) state.gamesState = {};
+      if (!state.gamesState[gameId] || typeof state.gamesState[gameId] !== 'object') {
         state.gamesState[gameId] = {
           rounds: [],
           dealerRule: 'clockwise',
@@ -940,8 +941,9 @@
       state.players.forEach(p => {
         if (!gs.playerData[p.id]) {
           gs.playerData[p.id] = createEmptyPlayerData();
-        } else if (!gs.playerData[p.id].azul) {
-          gs.playerData[p.id] = { ...createEmptyPlayerData(), ...gs.playerData[p.id] };
+        } else {
+          if (gs.playerData[p.id].liveScore === undefined) gs.playerData[p.id].liveScore = 0;
+          if (!gs.playerData[p.id].categories) gs.playerData[p.id].categories = {};
         }
       });
       return gs;
@@ -1085,16 +1087,15 @@
       return 0;
     }
 
-    // =========================================================================
+        // =========================================================================
     // 6. SCORE CALCULATIONS PER GAME
     // =========================================================================
     function calculatePlayerTotal(gameId, playerId) {
       const def = getGameDef(gameId);
       const gs = ensureGameState(gameId);
-      const pd = gs.playerData[playerId];
+      const pd = gs.playerData[playerId] || createEmptyPlayerData();
       const pObj = state.players.find(p => p.id === playerId);
       const handicap = Number(pObj?.handicap || 0);
-      if (!pd) return handicap;
 
       let rawScore = 0;
 
@@ -1102,20 +1103,20 @@
         if (gs.azulMode === 'manual') {
           rawScore = Number(pd.liveScore || 0);
         } else {
-          const bon = computeAzulEndBonuses(pd.azul.wall);
-          rawScore = Number(pd.azul.baseScore || 0) + bon.total;
+          const bon = computeAzulEndBonuses(pd.azul?.wall || []);
+          rawScore = Number(pd.azul?.baseScore || 0) + bon.total;
         }
       } else if (def.type === 'kok1' || def.type === 'kok2') {
         let colSum = 0;
         KOK_COLS.forEach(c => {
-          const st = pd.kokCols[c.id];
+          const st = pd.kokCols?.[c.id];
           const p1 = (def.type === 'kok1' && c.id === 'H') ? 1 : c.pts1;
           const p2 = (def.type === 'kok1' && c.id === 'H') ? 0 : c.pts2;
           if (st === 1 || st === true) colSum += p1;
           else if (st === 2) colSum += p2;
         });
         let colorSum = 0;
-        KOK_COLORS.forEach(c => { colorSum += Number(pd.kokColors[c.id] || 0); });
+        KOK_COLORS.forEach(c => { colorSum += Number(pd.kokColors?.[c.id] || 0); });
         const jokers = Number(pd.exclamations || 0) * 1;
         if (def.type === 'kok1') {
           const starPenalty = Number(pd.stars || 0) * 2;
@@ -1126,23 +1127,23 @@
       } else if (def.type === 'rounds' || def.type === 'flip7') {
         (gs.rounds || []).forEach(r => { rawScore += Number(r[playerId] || 0); });
       } else if (def.type === 'qwixx') {
-        const q = pd.qwixx;
+        const q = pd.qwixx || {};
         rawScore = (QWIXX_TABLE[q.red] || 0) + (QWIXX_TABLE[q.yellow] || 0) + (QWIXX_TABLE[q.green] || 0) + (QWIXX_TABLE[q.blue] || 0) - (Number(q.fails || 0) * 5);
       } else if (def.type === 'clever') {
-        const c = pd.clever;
+        const c = pd.clever || {};
         const greenScore = CLEVER_GREEN_TABLE[Math.min(11, Math.max(0, Number(c.greenCount || 0)))] || 0;
         const arr = [Number(c.yellow || 0), Number(c.blue || 0), greenScore, Number(c.orange || 0), Number(c.purple || 0)];
         const minColor = Math.min(...arr);
         rawScore = arr.reduce((a, b) => a + b, 0) + (Number(c.foxes || 0) * minColor);
       } else if (def.type === 'cascadia') {
-        const c = pd.cascadia;
+        const c = pd.cascadia || {};
         const habBonuses = computeCascadiaHabitatBonuses(gameId);
         rawScore = Number(c.bear || 0) + Number(c.elk || 0) + Number(c.salmon || 0) + Number(c.hawk || 0) + Number(c.fox || 0) +
                Number(c.hab_mountain || 0) + Number(c.hab_forest || 0) + Number(c.hab_prairie || 0) + Number(c.hab_wetland || 0) + Number(c.hab_river || 0) +
                Number(habBonuses[playerId] || 0) + Number(c.cones || 0);
       } else if (def.type === 'regenwormen') {
-        const r = pd.regenwormen;
-        const expOn = typeof isRegenwormenExpActive === 'function' ? isRegenwormenExpActive(gs) : !!gs.activeExpansions?.['🐦‍⬛ Deel 2: Uitbreiding (Raaf + Stenen 11 & 13)'];
+        const r = pd.regenwormen || {};
+        const expOn = typeof isRegenwormenExpActive === 'function' ? isRegenwormenExpActive(gs) : false;
         const tileList = expOn ? [...REGENWORMEN_EXP_TILES, ...REGENWORMEN_TILES] : REGENWORMEN_TILES;
         let worms = 0;
         tileList.forEach(item => {
@@ -1153,41 +1154,38 @@
         Object.entries(pd.categories || {}).forEach(([catName, v]) => {
           const num = Number(v || 0);
           const isPenaltyField = catName.includes('(-') || catName.includes('× -') || catName.toLowerCase().includes('strafpunten');
-          if (isPenaltyField) {
-            rawScore -= Math.abs(num);
-          } else {
-            rawScore += num;
-          }
+          if (isPenaltyField) rawScore -= Math.abs(num);
+          else rawScore += num;
         });
       } else if (def.type === 'wonders7') {
-        const w = pd.wonders;
+        const w = pd.wonders || {};
         const a = Number(w.sci_a || 0), b = Number(w.sci_b || 0), c = Number(w.sci_c || 0);
         const sets = Math.min(a, b, c);
         const sciScore = (a * a) + (b * b) + (c * c) + (sets * 7);
         rawScore = Number(w.military || 0) + Number(w.coins || 0) + Number(w.wonder || 0) + Number(w.civil || 0) + Number(w.trade || 0) + Number(w.guild || 0) + sciScore;
       } else if (def.type === 'ttr') {
-        const t = pd.ttr;
+        const t = pd.ttr || {};
         const unusedStations = t.stations !== undefined && t.stations !== '' ? Number(t.stations) : 0;
         rawScore = Number(t.routes || 0) + Number(t.destPlus || 0) - Math.abs(Number(t.destMinus || 0)) + (unusedStations * 4) + (t.longest ? 10 : 0) + Number(t.warehouse || 0);
       } else if (def.type === 'yahtzee') {
-        const y = pd.yahtzee;
+        const y = pd.yahtzee || {};
         const upper = Number(y.ones || 0) + Number(y.twos || 0) + Number(y.threes || 0) + Number(y.fours || 0) + Number(y.fives || 0) + Number(y.sixes || 0);
         const bonus = upper >= 63 ? 35 : 0;
         const lower = Number(y.toak || 0) + Number(y.foak || 0) + Number(y.fh || 0) + Number(y.smStr || 0) + Number(y.lgStr || 0) + Number(y.yahtzee || 0) + Number(y.chance || 0) + (Number(y.extraY || 0) * 100);
         rawScore = upper + bonus + lower;
       } else if (def.type === 'catan') {
-        const ct = pd.catan;
+        const ct = pd.catan || {};
         rawScore = (Number(ct.villages || 0) * 1) + (Number(ct.cities || 0) * 2) + Number(ct.dev || 0) + (ct.longestRoad ? 2 : 0) + (ct.largestArmy ? 2 : 0) + Number(ct.extra || 0);
       } else if (def.type === 'sushigo') {
-        const s = pd.sushigo;
+        const s = pd.sushigo || {};
         rawScore = Number(s.r1 || 0) + Number(s.r2 || 0) + Number(s.r3 || 0) + Number(s.pudding || 0);
       } else if (def.type === 'lostcities') {
-        const lc = pd.lostcities;
+        const lc = pd.lostcities || {};
         LOST_CITIES_COLORS.forEach(col => {
           rawScore += calculateLostCitiesExpScore(lc[col.id]);
         });
       } else if (def.type === 'koehandel') {
-        const kh = pd.koehandel;
+        const kh = pd.koehandel || {};
         let setsCount = 0;
         let baseSum = 0;
         KOEHANDEL_ANIMALS.forEach(an => {
@@ -1198,12 +1196,12 @@
         });
         rawScore = baseSum * Math.max(1, setsCount);
       } else if (def.type === 'machiavelli') {
-        const m = pd.machiavelli;
+        const m = pd.machiavelli || {};
         rawScore = Number(m.buildings || 0) + (m.allColors ? 3 : 0) + Number(m.first8 || 0) + Number(m.extra || 0);
       } else if (def.type === 'carcassonne') {
         rawScore = Number(pd.liveScore || 0);
       } else if (def.type === 'arknova') {
-        const an = pd.arknova;
+        const an = pd.arknova || {};
         const cons = Number(an.conservation || 0);
         const consPts = cons <= 10 ? (cons * 2) : (20 + (cons - 10) * 3);
         rawScore = Number(an.appeal || 0) + consPts + Number(an.endgame || 0);
@@ -1220,6 +1218,42 @@
       }
 
       return rawScore + handicap;
+    }
+
+    function getTieBreakerValue(gameId, playerId) {
+      try {
+        const gs = ensureGameState(gameId);
+        const pd = gs.playerData[playerId];
+        if (!pd) return 0;
+
+        if (gameId === 'azul' && gs.azulMode !== 'manual') {
+          return computeAzulEndBonuses(pd.azul?.wall || []).rows || 0;
+        }
+        if (gameId === 'cascadia') {
+          return Number(pd.cascadia?.cones || 0);
+        }
+        if (gameId === 'eldorado') {
+          return Number(pd.categories?.['🚧 Barrières (aantal)'] || 0);
+        }
+        if (gameId === 'keeropkeer' || gameId === 'keeropkeer2') {
+          return Number(pd.exclamations || 0);
+        }
+        if (gameId === 'wonders7') {
+          return Number(pd.wonders?.coins || 0);
+        }
+        if (gameId === 'sushigo') {
+          return Number(pd.sushigo?.pudding || 0);
+        }
+        if (gameId === 'ttr') {
+          return pd.ttr?.longest ? 1 : 0;
+        }
+        if (gameId === 'regenwormen') {
+          const tMap = pd.regenwormen?.tiles || {};
+          const owned = Object.keys(tMap).filter(k => tMap[k]).map(Number);
+          return owned.length ? Math.max(...owned) : 0;
+        }
+      } catch (e) {}
+      return 0;
     }
 
     function getStandings(gameId = state.activeGameId) {
