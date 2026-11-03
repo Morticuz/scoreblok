@@ -1444,7 +1444,7 @@
       }).join('');
     }
 
-       // =========================================================================
+        // =========================================================================
     // 9. SCOREBOARD RENDERING & DEALER / STARTER / ENDGAME ALERTS
     // =========================================================================
     function updateActiveFavStar() {
@@ -1669,7 +1669,6 @@
       else if (def.type === 'themind') renderTheMindSheet(container);
       else if (def.type === 'carcassonne') renderCarcassonneSheet(container, def);
     }
-
 
     // =========================================================================
     // 10A. AZUL
@@ -2892,7 +2891,7 @@
       else renderLiveLeaderboard();
     }
 
-        // =========================================================================
+         // =========================================================================
     // 10G. ARK NOVA, HEAT, DORFROMANTIK, COOP, CODENAMES, THE MIND, CARCASSONNE & DOOLHOF
     // =========================================================================
     function renderArkNovaSheet(container) {
@@ -3199,6 +3198,128 @@
       gs.lowestWinsOverride = !isLowestWins('free');
       saveState();
       renderScoreboard();
+    }
+
+    // =========================================================================
+    // SPELSPECIFIEK: DOOLHOF & CARCASSONNE REKENHULP
+    // =========================================================================
+    function renderDoolhofSheet(container) {
+      const act = getActivePlayers();
+      const gs = ensureGameState('doolhof');
+
+      let html = `
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <h3 class="font-black text-sm text-white flex items-center gap-2">🌀 Doolhof Schattenjacht</h3>
+              <p class="text-[11px] text-slate-400">Verzamel al je schatten en keer als eerste terug naar je eigen beginveld!</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      `;
+
+      act.forEach(p => {
+        const pd = gs.playerData[p.id];
+        const treasures = Number(pd.liveScore || 0);
+        const backAtStart = !!(pd.categories && pd.categories['backAtStart']);
+
+        html += `
+          <div class="bg-slate-950 border border-slate-800/80 rounded-2xl p-3.5 space-y-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-extrabold text-xs text-white">${p.name}</span>
+              </div>
+              <label class="flex items-center gap-1.5 cursor-pointer bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 hover:border-slate-700">
+                <input type="checkbox" onchange="toggleDoolhofStart('${p.id}', this.checked)" ${backAtStart ? 'checked' : ''} class="rounded bg-slate-950 border-slate-700 text-indigo-500 focus:ring-0 w-3.5 h-3.5" />
+                <span class="text-[10px] text-slate-300 font-bold">🏠 Terug op start</span>
+              </label>
+            </div>
+            <div class="flex items-center justify-between bg-slate-900/60 rounded-xl p-2 border border-slate-800/50">
+              <span class="text-[11px] font-bold text-slate-400">Schatten gevonden:</span>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="adjustDoolhofTreasure('${p.id}', -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-sm flex items-center justify-center">-</button>
+                <span class="font-black text-base text-teal-300 w-8 text-center font-mono">${treasures}</span>
+                <button type="button" onclick="adjustDoolhofTreasure('${p.id}', 1)" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm flex items-center justify-center">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      html += `</div></div>`;
+      container.innerHTML = html;
+    }
+
+    function adjustDoolhofTreasure(playerId, delta) {
+      pushUndoSnapshot();
+      const gs = ensureGameState('doolhof');
+      const pd = gs.playerData[playerId];
+      const cur = Number(pd.liveScore || 0);
+      pd.liveScore = Math.max(0, cur + delta);
+      saveState();
+      renderScoreboard();
+    }
+
+    function toggleDoolhofStart(playerId, checked) {
+      pushUndoSnapshot();
+      const gs = ensureGameState('doolhof');
+      const pd = gs.playerData[playerId];
+      if (!pd.categories) pd.categories = {};
+      pd.categories['backAtStart'] = checked ? 1 : 0;
+      saveState();
+      renderScoreboard();
+    }
+
+    function openCarcassonneCalcModal(playerId) {
+      const player = state.players.find(p => p.id === playerId);
+      if (!player) return;
+
+      const modalHtml = `
+        <div id="carcaModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <div class="flex items-center gap-2">
+                ${renderMeepleSvg(player.color, 'w-4 h-4')}
+                <h3 class="font-black text-sm text-white">Carcassonne Eindtelling - ${player.name}</h3>
+              </div>
+              <button type="button" onclick="document.getElementById('carcaModal').remove()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <div class="space-y-3 text-xs">
+              <div>
+                <label class="block text-slate-400 font-semibold mb-1">Afgebouwde stadstegels (× 2 pt):</label>
+                <input type="number" id="cCityTiles" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono font-bold" />
+              </div>
+              <div>
+                <label class="block text-slate-400 font-semibold mb-1">Schilden in afgebouwde steden (× 2 pt):</label>
+                <input type="number" id="cShields" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono font-bold" />
+              </div>
+              <div>
+                <label class="block text-slate-400 font-semibold mb-1">Afgebouwde steden aan weides (Boeren × 3 pt):</label>
+                <input type="number" id="cFarmland" value="0" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white font-mono font-bold" />
+              </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+              <button type="button" onclick="document.getElementById('carcaModal').remove()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">Annuleren</button>
+              <button type="button" onclick="applyCarcaCalculation('${playerId}')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30">+ Punten Toevoegen</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function applyCarcaCalculation(playerId) {
+      const city = Number(document.getElementById('cCityTiles')?.value || 0);
+      const shields = Number(document.getElementById('cShields')?.value || 0);
+      const farms = Number(document.getElementById('cFarmland')?.value || 0);
+
+      const totalBonus = (city * 2) + (shields * 2) + (farms * 3);
+      if (totalBonus > 0) {
+        addLivePoints(playerId, totalBonus);
+        showToast(`🏰 +${totalBonus} punten berekend!`);
+      }
+      document.getElementById('carcaModal')?.remove();
     }
 
     // =========================================================================
