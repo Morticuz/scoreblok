@@ -61,7 +61,7 @@
   <!-- Toast Melding -->
   <div id="toastBanner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-indigo-600 text-white px-4 py-2.5 rounded-2xl text-xs font-extrabold shadow-2xl border border-indigo-400/40"></div>
 
-    <!-- Top Header -->
+      <!-- Top Header -->
   <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3">
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-center justify-between">
@@ -72,17 +72,15 @@
           </div>
         </div>
         
-        <!-- Mobiele knoppen rechtsboven -->
+        <!-- Mobiele knoppen rechtsboven (alle drie exact even breed) -->
         <div class="flex sm:hidden flex-col gap-1.5 items-end">
-          <div class="flex items-center gap-1.5">
-            <button type="button" onclick="openStartTournamentModal()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-extrabold">
-              🏆 Toernooi
-            </button>
-            <button type="button" onclick="openStartPlayerModal()" class="px-2.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold">
-              🎲 Wie begint?
-            </button>
-          </div>
-          <button type="button" onclick="openLiveRoomModal()" class="px-2.5 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold">
+          <button type="button" onclick="openStartTournamentModal()" class="w-32 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-extrabold text-center transition">
+            🏆 Toernooi
+          </button>
+          <button type="button" onclick="openStartPlayerModal()" class="w-32 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold text-center transition">
+            🎲 Wie begint?
+          </button>
+          <button type="button" onclick="openLiveRoomModal()" class="w-32 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold text-center transition">
             📡 Live Tafel
           </button>
         </div>
@@ -285,56 +283,49 @@
   </main>
 
   <script>
-        // =========================================================================
-    // 1. GAME ARTWORK, HIGH-RES VECTOR BADGES & GELUIDEN
+    
+    // =========================================================================
+    // 1. GAME ARTWORK, SCHONE VECTOR BADGES & GELUIDEN
     // =========================================================================
     const GAME_BADGES = {
-      azul: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-950 flex flex-col items-center justify-center border border-sky-300/40 shadow-lg p-1">
-        <div class="grid grid-cols-2 gap-0.5 w-6 h-6 mb-0.5">
+      // Top Bordspellen & Favorieten
+      azul: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-950 flex flex-col items-center justify-center border border-sky-300/40 shadow-lg p-1.5">
+        <div class="grid grid-cols-2 gap-1 w-6 h-6">
           <div class="bg-amber-400 rounded-sm"></div><div class="bg-sky-200 rounded-sm"></div>
           <div class="bg-rose-500 rounded-sm"></div><div class="bg-slate-900 rounded-sm"></div>
         </div>
-        <span class="text-[9px] font-black text-white tracking-widest leading-none">AZUL</span>
       </div>`,
 
-      parijs: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-blue-950 to-slate-950 flex flex-col items-center justify-center border border-amber-300/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🗼</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Parijs</span>
+      parijs: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-blue-950 to-slate-950 flex items-center justify-center border border-amber-300/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🗼</span>
       </div>`,
 
-      carcassonne: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-yellow-700 to-stone-900 flex flex-col items-center justify-center border border-amber-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🏰</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Carcassonne</span>
+      carcassonne: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-yellow-700 to-stone-900 flex items-center justify-center border border-amber-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🏰</span>
       </div>`,
 
-      catan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-amber-600 to-yellow-600 flex flex-col items-center justify-center border border-amber-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🌾</span>
-        <span class="text-[9px] font-black uppercase tracking-widest text-amber-100 mt-0.5">Catan</span>
+      catan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-amber-600 to-yellow-600 flex items-center justify-center border border-amber-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🌾</span>
       </div>`,
 
-      doolhof: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-teal-700 to-slate-950 flex flex-col items-center justify-center border border-cyan-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🌀</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-cyan-200 mt-0.5">Doolhof</span>
+      doolhof: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-teal-700 to-slate-950 flex items-center justify-center border border-cyan-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🌀</span>
       </div>`,
 
-      cascadia: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-800 to-stone-950 flex flex-col items-center justify-center border border-emerald-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🌲</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 mt-0.5">Cascadia</span>
+      cascadia: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-800 to-stone-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🌲</span>
       </div>`,
 
-      wingspan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-400 via-teal-600 to-slate-900 flex flex-col items-center justify-center border border-sky-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🐦</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-sky-100 mt-0.5">Wingspan</span>
+      wingspan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-400 via-teal-600 to-slate-900 flex items-center justify-center border border-sky-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🐦</span>
       </div>`,
 
-      wyrmspan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-900 to-slate-950 flex flex-col items-center justify-center border border-purple-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🐉</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-purple-200 mt-0.5">Wyrmspan</span>
+      wyrmspan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-900 to-slate-950 flex items-center justify-center border border-purple-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🐉</span>
       </div>`,
 
-      regenwormen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-stone-900 flex flex-col items-center justify-center border border-amber-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🐛</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-100 mt-0.5">Wormen</span>
+      regenwormen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-stone-900 flex items-center justify-center border border-amber-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🐛</span>
       </div>`,
 
       beverbende: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-800 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-600/50 shadow-lg text-white">
@@ -345,342 +336,275 @@
         <span class="text-3xl drop-shadow">🦫</span>
       </div>`,
 
-      eldorado: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-yellow-500 via-amber-600 to-stone-950 flex flex-col items-center justify-center border border-yellow-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🧭</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-yellow-100 mt-0.5">El Dorado</span>
+      eldorado: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-yellow-500 via-amber-600 to-stone-950 flex items-center justify-center border border-yellow-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🧭</span>
       </div>`,
 
-      mars: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-700 to-stone-950 flex flex-col items-center justify-center border border-rose-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🪐</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-rose-200 mt-0.5">Mars</span>
+      mars: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-700 to-stone-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🪐</span>
       </div>`,
 
-      dune: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-orange-900 to-slate-950 flex flex-col items-center justify-center border border-amber-500/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🏜️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Dune</span>
+      dune: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-orange-900 to-slate-950 flex items-center justify-center border border-amber-500/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🏜️</span>
       </div>`,
 
-      everdell: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-amber-800 to-stone-950 flex flex-col items-center justify-center border border-emerald-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🐿️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 mt-0.5">Everdell</span>
+      everdell: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-amber-800 to-stone-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🐿️</span>
       </div>`,
 
-      wonders7: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-amber-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🏛️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">7 Wonders</span>
+      wonders7: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🏛️</span>
       </div>`,
 
-      wondersduel: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-700 via-purple-900 to-slate-950 flex flex-col items-center justify-center border border-indigo-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">⚔️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-indigo-200 mt-0.5">7W Duel</span>
+      wondersduel: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-700 via-purple-900 to-slate-950 flex items-center justify-center border border-indigo-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">⚔️</span>
       </div>`,
 
-      splendor: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-blue-800 to-slate-950 flex flex-col items-center justify-center border border-cyan-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">💎</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-cyan-100 mt-0.5">Splendor</span>
+      splendor: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-blue-800 to-slate-950 flex items-center justify-center border border-cyan-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">💎</span>
       </div>`,
 
-      patchwork: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-teal-600 via-amber-700 to-slate-950 flex flex-col items-center justify-center border border-teal-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🧵</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-teal-100 mt-0.5">Patchwork</span>
+      patchwork: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-teal-600 via-amber-700 to-slate-950 flex items-center justify-center border border-teal-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🧵</span>
       </div>`,
 
-      kwakzalvers: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-800 to-slate-950 flex flex-col items-center justify-center border border-purple-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🧪</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-purple-200 mt-0.5">Kwakzalvers</span>
+      kwakzalvers: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-800 to-slate-950 flex items-center justify-center border border-purple-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🧪</span>
       </div>`,
 
-      elgrande: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-red-900 to-slate-950 flex flex-col items-center justify-center border border-amber-500/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🏰</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">El Grande</span>
+      elgrande: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-red-900 to-slate-950 flex items-center justify-center border border-amber-500/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🏰</span>
       </div>`,
 
-      dixit: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-pink-600 via-purple-700 to-indigo-950 flex flex-col items-center justify-center border border-pink-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🎨</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-pink-200 mt-0.5">Dixit</span>
+      dixit: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-pink-600 via-purple-700 to-indigo-950 flex items-center justify-center border border-pink-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🎨</span>
       </div>`,
 
-      rozenkoning: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-red-900 to-stone-950 flex flex-col items-center justify-center border border-rose-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🌹</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-rose-200 mt-0.5">Rozenkoning</span>
+      rozenkoning: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-red-900 to-stone-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🌹</span>
       </div>`,
 
-      burgundy: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-emerald-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">⚜️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 mt-0.5">Burgundy</span>
+      burgundy: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-stone-800 to-slate-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">⚜️</span>
       </div>`,
 
-      agricola: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-yellow-800 to-stone-950 flex flex-col items-center justify-center border border-amber-500/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🚜</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Agricola</span>
+      agricola: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-yellow-800 to-stone-950 flex items-center justify-center border border-amber-500/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🚜</span>
       </div>`,
 
-      arknova: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-700 to-slate-950 flex flex-col items-center justify-center border border-amber-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🦏</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Ark Nova</span>
+      arknova: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-700 to-slate-950 flex items-center justify-center border border-amber-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🦏</span>
       </div>`,
 
-      brass: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-700 via-slate-800 to-slate-950 flex flex-col items-center justify-center border border-stone-500/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🏭</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-stone-300 mt-0.5">Brass</span>
+      brass: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-700 via-slate-800 to-slate-950 flex items-center justify-center border border-stone-500/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🏭</span>
       </div>`,
 
-      heat: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-600 to-stone-950 flex flex-col items-center justify-center border border-red-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🏎️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-red-200 mt-0.5">HEAT</span>
+      heat: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-600 to-stone-950 flex items-center justify-center border border-red-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🏎️</span>
       </div>`,
 
-      dorfromantik: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-950 flex flex-col items-center justify-center border border-emerald-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🌲</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 mt-0.5">Dorf</span>
+      dorfromantik: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🌲</span>
       </div>`,
 
-      skyteam: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-600 via-blue-800 to-slate-950 flex flex-col items-center justify-center border border-sky-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">✈️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-sky-200 mt-0.5">Sky Team</span>
+      skyteam: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-600 via-blue-800 to-slate-950 flex items-center justify-center border border-sky-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">✈️</span>
       </div>`,
 
-      decrew: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-black flex flex-col items-center justify-center border border-indigo-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🚀</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-indigo-300 mt-0.5">De Crew</span>
+      decrew: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-black flex items-center justify-center border border-indigo-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🚀</span>
       </div>`,
 
-      codenames: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-700 via-slate-900 to-blue-800 flex flex-col items-center justify-center border border-slate-600/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🕵️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-slate-200 mt-0.5">Codenames</span>
+      codenames: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-700 via-slate-900 to-blue-800 flex items-center justify-center border border-slate-600/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🕵️</span>
       </div>`,
 
-      flip7: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-slate-950 flex flex-col items-center justify-center border border-amber-300/50 shadow-lg text-white">
-        <span class="text-2xl font-black drop-shadow">7️⃣</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Flip 7</span>
+      flip7: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-slate-950 flex items-center justify-center border border-amber-300/50 shadow-lg text-white">
+        <span class="text-3xl font-black drop-shadow">7️⃣</span>
       </div>`,
 
-      qwixx: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-amber-500 to-blue-600 flex flex-col items-center justify-center border border-white/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🖍️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-white mt-0.5">Qwixx</span>
+      qwixx: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-amber-500 to-blue-600 flex items-center justify-center border border-white/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🖍️</span>
       </div>`,
 
-      clever: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 flex flex-col items-center justify-center border border-indigo-500/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🦊</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-indigo-300 mt-0.5">Clever</span>
+      clever: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 flex items-center justify-center border border-indigo-500/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🦊</span>
       </div>`,
 
-      ttr: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-indigo-900 to-slate-950 flex flex-col items-center justify-center border border-rose-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🚂</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-rose-200 mt-0.5">TTR</span>
+      ttr: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-indigo-900 to-slate-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🚂</span>
       </div>`,
 
-      yahtzee: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-slate-800 to-slate-950 flex flex-col items-center justify-center border border-red-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">⚄</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-red-200 mt-0.5">Yahtzee</span>
+      yahtzee: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-slate-800 to-slate-950 flex items-center justify-center border border-red-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">⚄</span>
       </div>`,
 
-      skyjo: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-slate-900 flex flex-col items-center justify-center border border-emerald-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🌈</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-100 mt-0.5">Skyjo</span>
+      skyjo: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-slate-900 flex items-center justify-center border border-emerald-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🌈</span>
       </div>`,
 
-      uno: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-yellow-500 to-blue-600 flex flex-col items-center justify-center border border-white/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🃏</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-white mt-0.5">UNO</span>
+      uno: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-yellow-500 to-blue-600 flex items-center justify-center border border-white/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🃏</span>
       </div>`,
 
-      sushigo: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-500 via-pink-600 to-stone-900 flex flex-col items-center justify-center border border-pink-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🍣</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-pink-100 mt-0.5">Sushi Go</span>
+      sushigo: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-500 via-pink-600 to-stone-900 flex items-center justify-center border border-pink-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🍣</span>
       </div>`,
 
-      lostcities: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-amber-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🏺</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Lost Cities</span>
+      lostcities: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🏺</span>
       </div>`,
 
-      koehandel: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-amber-700 to-stone-900 flex flex-col items-center justify-center border border-emerald-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🐄</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-100 mt-0.5">Koehandel</span>
+      koehandel: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-amber-700 to-stone-900 flex items-center justify-center border border-emerald-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🐄</span>
       </div>`,
 
-      machiavelli: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-purple-900 to-slate-950 flex flex-col items-center justify-center border border-amber-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">👑</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-100 mt-0.5">Machiavelli</span>
+      machiavelli: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-purple-900 to-slate-950 flex items-center justify-center border border-amber-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">👑</span>
       </div>`,
 
-      themind: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 flex flex-col items-center justify-center border border-cyan-400/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🧠</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-cyan-200 mt-0.5">The Mind</span>
+      themind: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 flex items-center justify-center border border-cyan-400/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🧠</span>
       </div>`,
 
-      qwirkle: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-stone-900 to-black flex flex-col items-center justify-center border border-amber-400/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🔷</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Qwirkle</span>
+      qwirkle: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-stone-900 to-black flex items-center justify-center border border-amber-400/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🔷</span>
       </div>`,
 
-      arschmellows: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-orange-700 to-stone-900 flex flex-col items-center justify-center border border-amber-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🍢</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-100 mt-0.5">Mellows</span>
+      arschmellows: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-orange-700 to-stone-900 flex items-center justify-center border border-amber-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🍢</span>
       </div>`,
 
-      gameoftrains: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-700 via-slate-800 to-slate-950 flex flex-col items-center justify-center border border-sky-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🚂</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-sky-200 mt-0.5">Trains</span>
+      gameoftrains: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-700 via-slate-800 to-slate-950 flex items-center justify-center border border-sky-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🚂</span>
       </div>`,
 
-      snackmatch: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-yellow-600 to-stone-900 flex flex-col items-center justify-center border border-yellow-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🍟</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-yellow-100 mt-0.5">Snacks</span>
+      snackmatch: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-yellow-600 to-stone-900 flex items-center justify-center border border-yellow-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🍟</span>
       </div>`,
 
-      moddervarkens: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-pink-600 via-amber-800 to-stone-950 flex flex-col items-center justify-center border border-pink-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🐷</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-pink-200 mt-0.5">Varkens</span>
+      moddervarkens: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-pink-600 via-amber-800 to-stone-950 flex items-center justify-center border border-pink-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🐷</span>
       </div>`,
 
-      keeropkeer: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-sky-600 to-indigo-900 flex flex-col items-center justify-center border border-emerald-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🎲</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 mt-0.5">Keer op Keer</span>
+      keeropkeer: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-sky-600 to-indigo-900 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🎲</span>
       </div>`,
 
-      keeropkeer2: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-pink-700 to-indigo-950 flex flex-col items-center justify-center border border-rose-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">❤️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-pink-200 mt-0.5">Keer 2</span>
+      keeropkeer2: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-pink-700 to-indigo-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">❤️</span>
       </div>`,
 
-      rummikub: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-600 via-sky-700 to-slate-950 flex flex-col items-center justify-center border border-sky-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🔢</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-sky-200 mt-0.5">Rummikub</span>
+      rummikub: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-600 via-sky-700 to-slate-950 flex items-center justify-center border border-sky-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🔢</span>
       </div>`,
 
-      take5: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-amber-500/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🐮</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Take 5</span>
+      take5: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-500/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🐮</span>
       </div>`,
 
-      boonanza: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-emerald-800 to-stone-900 flex flex-col items-center justify-center border border-amber-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🫘</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Boonanza</span>
+      boonanza: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-emerald-800 to-stone-900 flex items-center justify-center border border-amber-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🫘</span>
       </div>`,
 
-      pointsalad: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-lime-600 to-stone-900 flex flex-col items-center justify-center border border-lime-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🥗</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-lime-200 mt-0.5">Salad</span>
+      pointsalad: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-lime-600 to-stone-900 flex items-center justify-center border border-lime-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🥗</span>
       </div>`,
 
-      saboteur: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-700 via-slate-800 to-black flex flex-col items-center justify-center border border-amber-400/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">⛏️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Saboteur</span>
+      saboteur: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-700 via-slate-800 to-black flex items-center justify-center border border-amber-400/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">⛏️</span>
       </div>`,
 
-      qwinto: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-orange-500 via-purple-600 to-slate-950 flex flex-col items-center justify-center border border-orange-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">⬠</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-orange-100 mt-0.5">Qwinto</span>
+      qwinto: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-orange-500 via-purple-600 to-slate-950 flex items-center justify-center border border-orange-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">⬠</span>
       </div>`,
 
-      hitster: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-fuchsia-600 via-purple-700 to-slate-950 flex flex-col items-center justify-center border border-fuchsia-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🎵</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-fuchsia-200 mt-0.5">Hitster</span>
+      hitster: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-fuchsia-600 via-purple-700 to-slate-950 flex items-center justify-center border border-fuchsia-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🎵</span>
       </div>`,
 
-      schottentotten: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-teal-700 via-slate-800 to-slate-950 flex flex-col items-center justify-center border border-teal-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🪨</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-teal-200 mt-0.5">Schotten</span>
+      schottentotten: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-teal-700 via-slate-800 to-slate-950 flex items-center justify-center border border-teal-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🪨</span>
       </div>`,
 
-      loveletter: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-pink-700 to-stone-900 flex flex-col items-center justify-center border border-rose-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">💌</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-rose-200 mt-0.5">Love Letter</span>
+      loveletter: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-pink-700 to-stone-900 flex items-center justify-center border border-rose-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">💌</span>
       </div>`,
 
-      explodingkittens: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-600 to-stone-900 flex flex-col items-center justify-center border border-orange-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">💣</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-orange-200 mt-0.5">Kittens</span>
+      explodingkittens: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-600 to-stone-900 flex items-center justify-center border border-orange-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">💣</span>
       </div>`,
 
-      monopoly: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-red-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🎩</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-red-200 mt-0.5">Monopoly</span>
+      monopoly: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-stone-800 to-slate-950 flex items-center justify-center border border-red-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🎩</span>
       </div>`,
 
-      risk: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-800 via-red-900 to-black flex flex-col items-center justify-center border border-red-500/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">⚔️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-red-200 mt-0.5">Risk</span>
+      risk: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-800 via-red-900 to-black flex items-center justify-center border border-red-500/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">⚔️</span>
       </div>`,
 
-      cluedo: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-black flex flex-col items-center justify-center border border-amber-400/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🔍</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Cluedo</span>
+      cluedo: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-black flex items-center justify-center border border-amber-400/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🔍</span>
       </div>`,
 
-      stratego: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-700 via-red-700 to-slate-950 flex flex-col items-center justify-center border border-white/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🚩</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-white mt-0.5">Stratego</span>
+      stratego: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-700 via-red-700 to-slate-950 flex items-center justify-center border border-white/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🚩</span>
       </div>`,
 
-      levensweg: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-pink-600 via-blue-600 to-slate-950 flex flex-col items-center justify-center border border-white/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🚗</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-white mt-0.5">Levensweg</span>
+      levensweg: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-pink-600 via-blue-600 to-slate-950 flex items-center justify-center border border-white/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🚗</span>
       </div>`,
 
-      ganzenbord: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-600 via-teal-700 to-slate-950 flex flex-col items-center justify-center border border-sky-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🪿</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-sky-200 mt-0.5">Ganzenbord</span>
+      ganzenbord: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-600 via-teal-700 to-slate-950 flex items-center justify-center border border-sky-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🪿</span>
       </div>`,
 
-      mensergerjeniet: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-amber-500 to-blue-600 flex flex-col items-center justify-center border border-white/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🔴</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-white mt-0.5">Mens Erger</span>
+      mensergerjeniet: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-amber-500 to-blue-600 flex items-center justify-center border border-white/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🔴</span>
       </div>`,
 
-      zeeslag: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-700 via-slate-800 to-slate-950 flex flex-col items-center justify-center border border-blue-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🚢</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-blue-200 mt-0.5">Zeeslag</span>
+      zeeslag: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-700 via-slate-800 to-slate-950 flex items-center justify-center border border-blue-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🚢</span>
       </div>`,
 
-      trivial: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-600 via-amber-600 to-purple-700 flex flex-col items-center justify-center border border-white/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🥧</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-white mt-0.5">Trivial</span>
+      trivial: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-600 via-amber-600 to-purple-700 flex items-center justify-center border border-white/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🥧</span>
       </div>`,
 
-      scrabble: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-amber-300/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🔤</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Scrabble</span>
+      scrabble: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-300/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🔤</span>
       </div>`,
 
-      boggle: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-800 to-slate-950 flex flex-col items-center justify-center border border-indigo-400/40 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">⏳</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-indigo-200 mt-0.5">Boggle</span>
+      boggle: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-800 to-slate-950 flex items-center justify-center border border-indigo-400/40 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">⏳</span>
       </div>`,
 
-      thirtysec: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-900 flex flex-col items-center justify-center border border-amber-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">⏱️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">30 Sec</span>
+      thirtysec: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-900 flex items-center justify-center border border-amber-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">⏱️</span>
       </div>`,
 
-      pictionary: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-700 to-slate-950 flex flex-col items-center justify-center border border-purple-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">✏️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-purple-200 mt-0.5">Pictionary</span>
+      pictionary: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-700 to-slate-950 flex items-center justify-center border border-purple-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">✏️</span>
       </div>`,
 
-      pesten: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-slate-800 to-slate-950 flex flex-col items-center justify-center border border-rose-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🃏</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-rose-200 mt-0.5">Pesten</span>
+      pesten: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-slate-800 to-slate-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🃏</span>
       </div>`,
 
-      klaverjas: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-emerald-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">♣️</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 mt-0.5">Klaverjas</span>
+      klaverjas: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-stone-800 to-slate-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">♣️</span>
       </div>`,
 
-      hartenjagen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-red-400/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">💔</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-red-200 mt-0.5">Harten</span>
+      hartenjagen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-stone-800 to-slate-950 flex items-center justify-center border border-red-400/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">💔</span>
       </div>`,
 
-      kingen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-amber-300/50 shadow-lg text-white">
-        <span class="text-2xl drop-shadow">🤴</span>
-        <span class="text-[8px] font-black uppercase tracking-wider text-amber-100 mt-0.5">Kingen</span>
+      kingen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-300/50 shadow-lg text-white">
+        <span class="text-3xl drop-shadow">🤴</span>
       </div>`,
 
-      free: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center border border-indigo-400/40 shadow-md text-white"><span class="text-2xl">✨</span></div>`
+      free: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center border border-indigo-400/40 shadow-md text-white"><span class="text-3xl">✨</span></div>`
     };
 
     function renderGameArtwork(gameId, sizeClass = "w-12 h-12") {
@@ -697,12 +621,6 @@
           ${initial}
         </div>
       `;
-    }
-
-    function renderMeepleSvg(color = '#6366f1', sizeClass = 'w-7 h-7') {
-      return `<svg viewBox="0 0 24 24" class="${sizeClass} inline-block drop-shadow" fill="${color}" stroke="#f8fafc" stroke-width="1.5" stroke-linejoin="round">
-        <path d="M12 2.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM6.5 9.5C4.5 9.5 3 11 3 12.5c0 1.2.9 2 2 2h2l-1.5 6c-.2.8.4 1.5 1.2 1.5h3.3L12 17l2 5h3.3c.8 0 1.4-.7 1.2-1.5L17 14.5h2c1.1 0 2-.8 2-2 0-1.5-1.5-3-3.5-3h-11z"/>
-      </svg>`;
     }
 
     const SoundFX = {
