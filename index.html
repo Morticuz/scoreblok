@@ -285,119 +285,90 @@
   </main>
 
   <script>
-         // =========================================================================
-    // 1. GAME ARTWORK, HIGH-RES COVERS & WATERDICHTE FALLBACK
+        // =========================================================================
+    // 1. GAME ARTWORK, CACHED COVERS & WATERDICHTE FALLBACK
     // =========================================================================
+    // We leiden BGG-afbeeldingen om via images.weserv.nl zodat mobiele browsers niet worden geblokkeerd (anti-hotlink bypass)
+    const bggImg = (url) => `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=120&h=120&fit=cover&output=webp`;
+
     const GAME_COVERS = {
-      azul: 'https://cf.geekdo-images.com/tz19PfALHs-jtWin8CP4nA__itemrep/img/yXqQeL8394-X8U7T1E7Vd_Bqf8c=/fit-in/246x300/filters:strip_icc()/pic3718275.jpg',
-      parijs: 'https://cf.geekdo-images.com/6U8p4w3g3wE93-Xh1E_qWA__itemrep/img/x6w7Nn3b3F1vQ6c5w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic5109312.jpg',
-      carcassonne: 'https://cf.geekdo-images.com/Z3tczAUsK7rewY0assnjpQ__itemrep/img/rX7-qj2XF2Vb5L608pM1m5j7q8o=/fit-in/246x300/filters:strip_icc()/pic6544250.png',
-      cascadia: 'https://cf.geekdo-images.com/M5gg6ioIos_Itemrep/pic5100691.jpg',
-      catan: 'https://cf.geekdo-images.com/W3Bsga_log ору_img/pic2419375.jpg',
-      eldorado: 'https://cf.geekdo-images.com/g3PqG2w7q6Q4r1X8v4w4wA__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3490053.jpg',
-      wingspan: 'https://cf.geekdo-images.com/yLZJ0aJRzbX_wingspan/pic4458123.jpg',
-      wyrmspan: 'https://cf.geekdo-images.com/a4gW2v4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic7932685.jpg',
-      everdell: 'https://cf.geekdo-images.com/fjE2w4w4w4w4w4w4w4w4wA__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3918905.jpg',
-      mars: 'https://cf.geekdo-images.com/wgusSc2fUMYrImnDuFFYwg__itemrep/img/8FnG7tZ3L3lXmZq0A5w4w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3536616.jpg',
-      dune: 'https://cf.geekdo-images.com/PhjygpSS5ECE2w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic5666597.jpg',
-      brass: 'https://cf.geekdo-images.com/x3zxjr-Vw53w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3490053.jpg',
-      arknova: 'https://cf.geekdo-images.com/So3L3w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6293412.jpg',
-      burgundy: 'https://cf.geekdo-images.com/5w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1176369.jpg',
-      agricola: 'https://cf.geekdo-images.com/dQ_2w4w4w4w4w4w4w4w4wA__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic86174.jpg',
-      heat: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6666888.jpg',
-      dorfromantik: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6952408.jpg',
-      skyteam: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic7439773.jpg',
-      ttr: 'https://cf.geekdo-images.com/ZWJg0dC36ZfhSL5w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic38668.jpg',
-      wonders7: 'https://cf.geekdo-images.com/356w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic860217.jpg',
-      wondersduel: 'https://cf.geekdo-images.com/WssL3w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic2576399.jpg',
-      splendor: 'https://cf.geekdo-images.com/rwOMRM9w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1904079.jpg',
-      patchwork: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic2270442.jpg',
-      kwakzalvers: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4055945.jpg',
-      dixit: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3483909.jpg',
-      elgrande: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic7854619.jpg',
-      rozenkoning: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic38221.jpg',
-      qwirkle: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1026524.jpg',
-      doolhof: 'https://cf.geekdo-images.com/5Skg_doolhof/pic153487.jpg',
-      keeropkeer: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3014161.jpg',
-      keeropkeer2: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4776856.jpg',
-      regenwormen: 'https://cf.geekdo-images.com/regenwormen_pic/pic179342.jpg',
-      beverbende: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic282586.jpg',
-      beverclan: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4405391.jpg',
-      rummikub: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1581898.jpg',
-      take5: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic262497.jpg',
-      boonanza: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic443180.jpg',
-      pointsalad: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4745347.jpg',
-      saboteur: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic128828.jpg',
-      qwinto: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic2736195.jpg',
-      hitster: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6831114.jpg',
-      uno: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3146440.jpg',
-      schottentotten: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic48842.jpg',
-      loveletter: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1401448.jpg',
-      explodingkittens: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic2691976.jpg',
-      codenames: 'https://cf.geekdo-images.com/F_KDEu0GjdClmlvYFahuqg__itemrep/img/A6XbK3s-H8F0_o9Lh_Q2w4w4w=/fit-in/246x300/filters:strip_icc()/pic2582929.jpg',
-      flip7: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic8276707.jpg',
-      decrew: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic5115160.jpg',
-      qwixx: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1394145.jpg',
-      clever: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4055943.jpg',
-      yahtzee: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic424683.jpg',
-      skyjo: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4076326.jpg',
-      sushigo: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1900075.jpg',
-      lostcities: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4248464.jpg',
-      koehandel: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic171960.jpg',
-      machiavelli: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3188265.jpg',
-      themind: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3979402.jpg',
-      arschmellows: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic7815212.jpg',
-      gameoftrains: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic2551460.jpg',
-      snackmatch: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic8250000.jpg',
-      moddervarkens: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1928093.jpg',
-      monopoly: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248888.jpg',
-      risk: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248889.jpg',
-      cluedo: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248890.jpg',
-      stratego: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248891.jpg',
-      levensweg: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248892.jpg',
-      ganzenbord: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248893.jpg',
-      mensergerjeniet: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248894.jpg',
-      zeeslag: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248895.jpg',
-      trivial: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248896.jpg',
-      scrabble: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248897.jpg',
-      boggle: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248898.jpg',
-      thirtysec: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248899.jpg',
-      pictionary: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248900.jpg',
-      pesten: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248901.jpg',
-      klaverjas: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248902.jpg',
-      hartenjagen: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248903.jpg',
-      kingen: 'https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic248904.jpg'
+      // Top Bordspellen & Favorieten
+      azul: bggImg('https://cf.geekdo-images.com/tz19PfALHs-jtWin8CP4nA__itemrep/img/yXqQeL8394-X8U7T1E7Vd_Bqf8c=/fit-in/246x300/filters:strip_icc()/pic3718275.jpg'),
+      parijs: bggImg('https://cf.geekdo-images.com/6U8p4w3g3wE93-Xh1E_qWA__itemrep/img/x6w7Nn3b3F1vQ6c5w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic5109312.jpg'),
+      carcassonne: bggImg('https://cf.geekdo-images.com/Z3tczAUsK7rewY0assnjpQ__itemrep/img/rX7-qj2XF2Vb5L608pM1m5j7q8o=/fit-in/246x300/filters:strip_icc()/pic6544250.png'),
+      cascadia: bggImg('https://cf.geekdo-images.com/M5gg6ioIos_Itemrep/pic5100691.jpg'),
+      catan: bggImg('https://cf.geekdo-images.com/W3Bsga_log ору_img/pic2419375.jpg'),
+      eldorado: bggImg('https://cf.geekdo-images.com/g3PqG2w7q6Q4r1X8v4w4wA__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3490053.jpg'),
+      wingspan: bggImg('https://cf.geekdo-images.com/yLZJ0aJRzbX_wingspan/pic4458123.jpg'),
+      everdell: bggImg('https://cf.geekdo-images.com/fjE2w4w4w4w4w4w4w4w4wA__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3918905.jpg'),
+      mars: bggImg('https://cf.geekdo-images.com/wgusSc2fUMYrImnDuFFYwg__itemrep/img/8FnG7tZ3L3lXmZq0A5w4w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3536616.jpg'),
+      dune: bggImg('https://cf.geekdo-images.com/PhjygpSS5ECE2w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic5666597.jpg'),
+      arknova: bggImg('https://cf.geekdo-images.com/So3L3w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6293412.jpg'),
+      heat: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6666888.jpg'),
+      dorfromantik: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6952408.jpg'),
+      ttr: bggImg('https://cf.geekdo-images.com/ZWJg0dC36ZfhSL5w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic38668.jpg'),
+      wonders7: bggImg('https://cf.geekdo-images.com/356w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic860217.jpg'),
+      splendor: bggImg('https://cf.geekdo-images.com/rwOMRM9w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1904079.jpg'),
+      kwakzalvers: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4055945.jpg'),
+      doolhof: bggImg('https://cf.geekdo-images.com/5Skg_doolhof/pic153487.jpg'),
+
+      // Kaart- & Dobbelspellen
+      keeropkeer: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3014161.jpg'),
+      keeropkeer2: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4776856.jpg'),
+      regenwormen: bggImg('https://cf.geekdo-images.com/regenwormen_pic/pic179342.jpg'),
+      beverbende: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic282586.jpg'),
+      beverclan: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4405391.jpg'),
+      rummikub: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1581898.jpg'),
+      take5: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic262497.jpg'),
+      boonanza: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic443180.jpg'),
+      pointsalad: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4745347.jpg'),
+      hitster: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6831114.jpg'),
+      uno: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3146440.jpg'),
+      codenames: bggImg('https://cf.geekdo-images.com/F_KDEu0GjdClmlvYFahuqg__itemrep/img/A6XbK3s-H8F0_o9Lh_Q2w4w4w=/fit-in/246x300/filters:strip_icc()/pic2582929.jpg'),
+      flip7: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic8276707.jpg'),
+      qwixx: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1394145.jpg'),
+      clever: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4055943.jpg'),
+      yahtzee: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic424683.jpg'),
+      skyjo: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4076326.jpg'),
+      sushigo: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1900075.jpg'),
+      lostcities: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4248464.jpg'),
+      themind: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3979402.jpg')
     };
 
+    // Stijlvolle, herkenbare vector gamebadges (in plaats van kale letters)
     const SVG_ICONS = {
-      azul: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-blue-600 via-sky-500 to-indigo-700 flex items-center justify-center shadow-inner border border-white/20"><span class="text-white font-black text-xs tracking-tighter">AZUL</span></div>`,
-      carcassonne: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-amber-600 via-amber-700 to-yellow-800 flex items-center justify-center shadow-inner border border-amber-400/30"><span class="text-lg">🏰</span></div>`,
-      doolhof: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-teal-500 via-cyan-600 to-slate-900 flex items-center justify-center shadow-inner border border-cyan-400/40"><span class="text-lg">🌀</span></div>`,
-      catan: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-red-600 via-amber-600 to-yellow-500 flex items-center justify-center shadow-inner border border-yellow-300/30"><span class="text-lg">🌾</span></div>`,
-      cascadia: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 flex items-center justify-center shadow-inner border border-emerald-400/30"><span class="text-lg">🌲</span></div>`,
-      regenwormen: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-inner border border-amber-300/30"><span class="text-lg">🐛</span></div>`,
-      wingspan: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 flex items-center justify-center shadow-inner border border-sky-300/30"><span class="text-lg">🐦</span></div>`,
-      beverbende: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-amber-700 to-amber-900 flex items-center justify-center shadow-inner border border-amber-500/30"><span class="text-lg">🦫</span></div>`,
-      eldorado: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-yellow-500 to-amber-700 flex items-center justify-center shadow-inner border border-yellow-300/30"><span class="text-lg">🧭</span></div>`,
-      free: `<div class="w-full h-full rounded-xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center shadow-inner border border-indigo-400/30"><span class="text-lg">✨</span></div>`
+      azul: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-600 via-sky-500 to-indigo-700 flex items-center justify-center border border-white/30 shadow-md"><span class="text-white font-black text-xs tracking-tighter">AZUL</span></div>`,
+      carcassonne: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-yellow-700 to-amber-900 flex items-center justify-center border border-amber-400/40 shadow-md"><span class="text-xl">🏰</span></div>`,
+      doolhof: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-teal-700 to-slate-900 flex items-center justify-center border border-cyan-400/40 shadow-md"><span class="text-xl">🌀</span></div>`,
+      catan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-amber-600 to-yellow-600 flex items-center justify-center border border-yellow-300/40 shadow-md"><span class="text-xl">🌾</span></div>`,
+      cascadia: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-900 flex items-center justify-center border border-emerald-400/40 shadow-md"><span class="text-xl">🌲</span></div>`,
+      regenwormen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center border border-amber-300/40 shadow-md"><span class="text-xl">🐛</span></div>`,
+      beverbende: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-800 to-stone-900 flex items-center justify-center border border-amber-600/40 shadow-md"><span class="text-xl">🦫</span></div>`,
+      beverclan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 to-stone-800 flex items-center justify-center border border-amber-500/40 shadow-md"><span class="text-xl">🦫</span></div>`,
+      boggle: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 to-slate-900 flex items-center justify-center border border-indigo-400/40 shadow-md"><span class="text-xl">🎲</span></div>`,
+      boonanza: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 to-emerald-800 flex items-center justify-center border border-amber-400/40 shadow-md"><span class="text-xl">🫘</span></div>`,
+      brass: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-700 to-slate-950 flex items-center justify-center border border-slate-600/40 shadow-md"><span class="text-xl">🏭</span></div>`,
+      thirtysec: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 to-rose-700 flex items-center justify-center border border-amber-400/40 shadow-md"><span class="text-xl">⏱️</span></div>`,
+      free: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center border border-indigo-400/40 shadow-md"><span class="text-xl">✨</span></div>`
     };
 
     function getFallbackBadgeHtml(gameName, category) {
-      const initial = (gameName || 'S').charAt(0).toUpperCase();
-      const bgGradient = category === 'board' 
-        ? 'from-indigo-600 via-indigo-700 to-slate-900 border-indigo-500/40 text-indigo-200' 
-        : 'from-amber-600 via-orange-700 to-slate-900 border-amber-500/40 text-amber-200';
-      return `<div class="w-full h-full rounded-xl bg-gradient-to-br ${bgGradient} border flex items-center justify-center shadow-inner font-black text-sm tracking-tight drop-shadow">${initial}</div>`;
+      const g = (gameName || 'S').trim();
+      const initial = g.length > 3 ? g.substring(0, 3).toUpperCase() : g.toUpperCase();
+      const bg = category === 'board' 
+        ? 'from-indigo-600 via-indigo-800 to-slate-950 border-indigo-500/40 text-indigo-200' 
+        : 'from-amber-600 via-orange-800 to-slate-950 border-amber-500/40 text-amber-200';
+      return `<div class="w-full h-full rounded-2xl bg-gradient-to-br ${bg} border flex items-center justify-center shadow-md font-black text-[11px] tracking-wider">${initial}</div>`;
     }
 
-    function renderGameArtwork(gameId, sizeClass = "w-11 h-11") {
+    function renderGameArtwork(gameId, sizeClass = "w-12 h-12") {
       const g = getGameDef(gameId) || { name: 'Spel', category: 'board', icon: 'free' };
       const coverUrl = GAME_COVERS[gameId];
 
       if (coverUrl) {
         return `
-          <div class="${sizeClass} rounded-xl overflow-hidden border border-slate-700/80 bg-slate-950 shrink-0 shadow-md flex items-center justify-center">
-            <img src="${coverUrl}" alt="${g.name}" loading="lazy" referrerpolicy="no-referrer" class="w-full h-full object-cover"
+          <div class="${sizeClass} rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950 shrink-0 shadow-lg flex items-center justify-center">
+            <img src="${coverUrl}" alt="${g.name}" loading="lazy" class="w-full h-full object-cover"
               onerror="this.onerror=null; const f = SVG_ICONS['${gameId}'] || SVG_ICONS['${g.icon}']; this.parentElement.innerHTML = f ? f : getFallbackBadgeHtml('${g.name.replace(/'/g, "\\'")}', '${g.category}');" />
           </div>
         `;
@@ -589,7 +560,6 @@
       { id: 'koe', name: '🐄 Koe', val: 800 },
       { id: 'paard', name: '🐎 Paard', val: 1000 }
     ];
-
 
     // =========================================================================
     // 2. VOLLEDIGE SPELLEN CATALOGUS
