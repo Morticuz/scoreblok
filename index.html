@@ -286,99 +286,142 @@
 
   <script>
         // =========================================================================
-    // 1. GAME ARTWORK, CACHED COVERS & WATERDICHTE FALLBACK
+    // 1. GAME ARTWORK, HIGH-RES VECTOR BADGES & GELUIDEN
     // =========================================================================
-    // We leiden BGG-afbeeldingen om via images.weserv.nl zodat mobiele browsers niet worden geblokkeerd (anti-hotlink bypass)
-    const bggImg = (url) => `https://images.weserv.nl/?url=${encodeURIComponent(url)}&w=120&h=120&fit=cover&output=webp`;
+    const GAME_BADGES = {
+      azul: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-950 flex flex-col items-center justify-center border border-sky-300/40 shadow-lg p-1">
+        <div class="grid grid-cols-2 gap-0.5 w-6 h-6 mb-0.5">
+          <div class="bg-amber-400 rounded-sm"></div><div class="bg-sky-200 rounded-sm"></div>
+          <div class="bg-rose-500 rounded-sm"></div><div class="bg-slate-900 rounded-sm"></div>
+        </div>
+        <span class="text-[9px] font-black text-white tracking-widest leading-none">AZUL</span>
+      </div>`,
 
-    const GAME_COVERS = {
-      // Top Bordspellen & Favorieten
-      azul: bggImg('https://cf.geekdo-images.com/tz19PfALHs-jtWin8CP4nA__itemrep/img/yXqQeL8394-X8U7T1E7Vd_Bqf8c=/fit-in/246x300/filters:strip_icc()/pic3718275.jpg'),
-      parijs: bggImg('https://cf.geekdo-images.com/6U8p4w3g3wE93-Xh1E_qWA__itemrep/img/x6w7Nn3b3F1vQ6c5w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic5109312.jpg'),
-      carcassonne: bggImg('https://cf.geekdo-images.com/Z3tczAUsK7rewY0assnjpQ__itemrep/img/rX7-qj2XF2Vb5L608pM1m5j7q8o=/fit-in/246x300/filters:strip_icc()/pic6544250.png'),
-      cascadia: bggImg('https://cf.geekdo-images.com/M5gg6ioIos_Itemrep/pic5100691.jpg'),
-      catan: bggImg('https://cf.geekdo-images.com/W3Bsga_log ору_img/pic2419375.jpg'),
-      eldorado: bggImg('https://cf.geekdo-images.com/g3PqG2w7q6Q4r1X8v4w4wA__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3490053.jpg'),
-      wingspan: bggImg('https://cf.geekdo-images.com/yLZJ0aJRzbX_wingspan/pic4458123.jpg'),
-      everdell: bggImg('https://cf.geekdo-images.com/fjE2w4w4w4w4w4w4w4w4wA__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3918905.jpg'),
-      mars: bggImg('https://cf.geekdo-images.com/wgusSc2fUMYrImnDuFFYwg__itemrep/img/8FnG7tZ3L3lXmZq0A5w4w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3536616.jpg'),
-      dune: bggImg('https://cf.geekdo-images.com/PhjygpSS5ECE2w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic5666597.jpg'),
-      arknova: bggImg('https://cf.geekdo-images.com/So3L3w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6293412.jpg'),
-      heat: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6666888.jpg'),
-      dorfromantik: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6952408.jpg'),
-      ttr: bggImg('https://cf.geekdo-images.com/ZWJg0dC36ZfhSL5w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic38668.jpg'),
-      wonders7: bggImg('https://cf.geekdo-images.com/356w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic860217.jpg'),
-      splendor: bggImg('https://cf.geekdo-images.com/rwOMRM9w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1904079.jpg'),
-      kwakzalvers: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4055945.jpg'),
-      doolhof: bggImg('https://cf.geekdo-images.com/5Skg_doolhof/pic153487.jpg'),
+      carcassonne: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-yellow-700 to-stone-900 flex flex-col items-center justify-center border border-amber-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🏰</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Carcassonne</span>
+      </div>`,
 
-      // Kaart- & Dobbelspellen
-      keeropkeer: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3014161.jpg'),
-      keeropkeer2: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4776856.jpg'),
-      regenwormen: bggImg('https://cf.geekdo-images.com/regenwormen_pic/pic179342.jpg'),
-      beverbende: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic282586.jpg'),
-      beverclan: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4405391.jpg'),
-      rummikub: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1581898.jpg'),
-      take5: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic262497.jpg'),
-      boonanza: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic443180.jpg'),
-      pointsalad: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4745347.jpg'),
-      hitster: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic6831114.jpg'),
-      uno: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3146440.jpg'),
-      codenames: bggImg('https://cf.geekdo-images.com/F_KDEu0GjdClmlvYFahuqg__itemrep/img/A6XbK3s-H8F0_o9Lh_Q2w4w4w=/fit-in/246x300/filters:strip_icc()/pic2582929.jpg'),
-      flip7: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic8276707.jpg'),
-      qwixx: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1394145.jpg'),
-      clever: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4055943.jpg'),
-      yahtzee: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic424683.jpg'),
-      skyjo: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4076326.jpg'),
-      sushigo: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic1900075.jpg'),
-      lostcities: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic4248464.jpg'),
-      themind: bggImg('https://cf.geekdo-images.com/2w4w4w4w4w4w4w4w4w4w4w__itemrep/img/w7w7w7w7w7w7w7w=/fit-in/246x300/filters:strip_icc()/pic3979402.jpg')
+      catan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-amber-600 to-yellow-600 flex flex-col items-center justify-center border border-amber-300/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🌾</span>
+        <span class="text-[9px] font-black uppercase tracking-widest text-amber-100 mt-0.5">Catan</span>
+      </div>`,
+
+      doolhof: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-teal-700 to-slate-950 flex flex-col items-center justify-center border border-cyan-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🌀</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-cyan-200 mt-0.5">Doolhof</span>
+      </div>`,
+
+      cascadia: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-800 to-stone-950 flex flex-col items-center justify-center border border-emerald-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🌲</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 mt-0.5">Cascadia</span>
+      </div>`,
+
+      wingspan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-400 via-teal-600 to-slate-900 flex flex-col items-center justify-center border border-sky-300/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🐦</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-sky-100 mt-0.5">Wingspan</span>
+      </div>`,
+
+      regenwormen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-stone-900 flex flex-col items-center justify-center border border-amber-300/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🐛</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-amber-100 mt-0.5">Wormen</span>
+      </div>`,
+
+      beverbende: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-800 via-stone-800 to-slate-950 flex flex-col items-center justify-center border border-amber-600/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🦫</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Bende</span>
+      </div>`,
+
+      beverclan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-orange-700 via-amber-800 to-stone-950 flex flex-col items-center justify-center border border-orange-500/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🦫</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-orange-200 mt-0.5">Clan</span>
+      </div>`,
+
+      eldorado: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-yellow-500 via-amber-600 to-stone-950 flex flex-col items-center justify-center border border-yellow-300/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🧭</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-yellow-100 mt-0.5">El Dorado</span>
+      </div>`,
+
+      mars: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-700 to-stone-950 flex flex-col items-center justify-center border border-rose-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🪐</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-rose-200 mt-0.5">Mars</span>
+      </div>`,
+
+      arknova: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-700 to-slate-950 flex flex-col items-center justify-center border border-amber-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🦏</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Ark Nova</span>
+      </div>`,
+
+      agricola: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-yellow-800 to-stone-950 flex flex-col items-center justify-center border border-amber-500/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🚜</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">Agricola</span>
+      </div>`,
+
+      everdell: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-amber-800 to-stone-950 flex flex-col items-center justify-center border border-emerald-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🐿️</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 mt-0.5">Everdell</span>
+      </div>`,
+
+      ttr: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-indigo-900 to-slate-950 flex flex-col items-center justify-center border border-rose-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🚂</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-rose-200 mt-0.5">TTR</span>
+      </div>`,
+
+      heat: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-600 to-stone-950 flex flex-col items-center justify-center border border-red-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🏎️</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-red-200 mt-0.5">HEAT</span>
+      </div>`,
+
+      rummikub: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-600 via-sky-700 to-slate-950 flex flex-col items-center justify-center border border-sky-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🔢</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-sky-200 mt-0.5">Rummikub</span>
+      </div>`,
+
+      clever: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 flex flex-col items-center justify-center border border-indigo-500/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🦊</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-indigo-300 mt-0.5">Clever</span>
+      </div>`,
+
+      qwixx: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-amber-500 to-blue-600 flex flex-col items-center justify-center border border-white/40 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🖍️</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-white mt-0.5">Qwixx</span>
+      </div>`,
+
+      keeropkeer: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-sky-600 to-indigo-900 flex flex-col items-center justify-center border border-emerald-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🎲</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-emerald-200 mt-0.5">Keer op Keer</span>
+      </div>`,
+
+      keeropkeer2: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-pink-700 to-indigo-950 flex flex-col items-center justify-center border border-rose-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">❤️</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-pink-200 mt-0.5">Keer 2</span>
+      </div>`,
+
+      thirtysec: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-900 flex flex-col items-center justify-center border border-amber-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">⏱️</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-amber-200 mt-0.5">30 Sec</span>
+      </div>`,
+
+      hitster: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-fuchsia-600 via-purple-700 to-slate-950 flex flex-col items-center justify-center border border-fuchsia-400/50 shadow-lg text-white">
+        <span class="text-2xl drop-shadow">🎵</span>
+        <span class="text-[8px] font-black uppercase tracking-wider text-fuchsia-200 mt-0.5">Hitster</span>
+      </div>`
     };
-
-    // Stijlvolle, herkenbare vector gamebadges (in plaats van kale letters)
-    const SVG_ICONS = {
-      azul: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-600 via-sky-500 to-indigo-700 flex items-center justify-center border border-white/30 shadow-md"><span class="text-white font-black text-xs tracking-tighter">AZUL</span></div>`,
-      carcassonne: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-yellow-700 to-amber-900 flex items-center justify-center border border-amber-400/40 shadow-md"><span class="text-xl">🏰</span></div>`,
-      doolhof: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-teal-700 to-slate-900 flex items-center justify-center border border-cyan-400/40 shadow-md"><span class="text-xl">🌀</span></div>`,
-      catan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-amber-600 to-yellow-600 flex items-center justify-center border border-yellow-300/40 shadow-md"><span class="text-xl">🌾</span></div>`,
-      cascadia: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-900 flex items-center justify-center border border-emerald-400/40 shadow-md"><span class="text-xl">🌲</span></div>`,
-      regenwormen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center border border-amber-300/40 shadow-md"><span class="text-xl">🐛</span></div>`,
-      beverbende: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-800 to-stone-900 flex items-center justify-center border border-amber-600/40 shadow-md"><span class="text-xl">🦫</span></div>`,
-      beverclan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 to-stone-800 flex items-center justify-center border border-amber-500/40 shadow-md"><span class="text-xl">🦫</span></div>`,
-      boggle: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 to-slate-900 flex items-center justify-center border border-indigo-400/40 shadow-md"><span class="text-xl">🎲</span></div>`,
-      boonanza: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 to-emerald-800 flex items-center justify-center border border-amber-400/40 shadow-md"><span class="text-xl">🫘</span></div>`,
-      brass: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-700 to-slate-950 flex items-center justify-center border border-slate-600/40 shadow-md"><span class="text-xl">🏭</span></div>`,
-      thirtysec: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 to-rose-700 flex items-center justify-center border border-amber-400/40 shadow-md"><span class="text-xl">⏱️</span></div>`,
-      free: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center border border-indigo-400/40 shadow-md"><span class="text-xl">✨</span></div>`
-    };
-
-    function getFallbackBadgeHtml(gameName, category) {
-      const g = (gameName || 'S').trim();
-      const initial = g.length > 3 ? g.substring(0, 3).toUpperCase() : g.toUpperCase();
-      const bg = category === 'board' 
-        ? 'from-indigo-600 via-indigo-800 to-slate-950 border-indigo-500/40 text-indigo-200' 
-        : 'from-amber-600 via-orange-800 to-slate-950 border-amber-500/40 text-amber-200';
-      return `<div class="w-full h-full rounded-2xl bg-gradient-to-br ${bg} border flex items-center justify-center shadow-md font-black text-[11px] tracking-wider">${initial}</div>`;
-    }
 
     function renderGameArtwork(gameId, sizeClass = "w-12 h-12") {
       const g = getGameDef(gameId) || { name: 'Spel', category: 'board', icon: 'free' };
-      const coverUrl = GAME_COVERS[gameId];
-
-      if (coverUrl) {
-        return `
-          <div class="${sizeClass} rounded-2xl overflow-hidden border border-slate-700/80 bg-slate-950 shrink-0 shadow-lg flex items-center justify-center">
-            <img src="${coverUrl}" alt="${g.name}" loading="lazy" class="w-full h-full object-cover"
-              onerror="this.onerror=null; const f = SVG_ICONS['${gameId}'] || SVG_ICONS['${g.icon}']; this.parentElement.innerHTML = f ? f : getFallbackBadgeHtml('${g.name.replace(/'/g, "\\'")}', '${g.category}');" />
-          </div>
-        `;
+      if (GAME_BADGES[gameId]) {
+        return `<div class="${sizeClass} shrink-0">${GAME_BADGES[gameId]}</div>`;
       }
-
-      if (SVG_ICONS[gameId] || SVG_ICONS[g.icon]) {
-        return `<div class="${sizeClass} shrink-0 flex items-center justify-center">${SVG_ICONS[gameId] || SVG_ICONS[g.icon]}</div>`;
-      }
-
-      return `<div class="${sizeClass} shrink-0 flex items-center justify-center">${getFallbackBadgeHtml(g.name, g.category)}</div>`;
+      const initial = (g.name || 'S').trim().substring(0, 3).toUpperCase();
+      const bg = g.category === 'board'
+        ? 'from-indigo-600 via-indigo-800 to-slate-950 border-indigo-500/40 text-indigo-200'
+        : 'from-amber-600 via-orange-800 to-slate-950 border-amber-500/40 text-amber-200';
+      return `
+        <div class="${sizeClass} shrink-0 rounded-2xl bg-gradient-to-br ${bg} border flex items-center justify-center shadow-md font-black text-xs tracking-wider">
+          ${initial}
+        </div>
+      `;
     }
 
     function renderMeepleSvg(color = '#6366f1', sizeClass = 'w-7 h-7') {
