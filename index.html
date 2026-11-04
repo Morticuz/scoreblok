@@ -1720,10 +1720,9 @@
       }).join('');
     }
 
-        // =========================================================================
+         // =========================================================================
     // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND
     // =========================================================================
-        
     function toggleLayoutOrientation() {
       // Horizontaal forceren uitgeschakeld om schermproblemen te voorkomen
       document.body.classList.remove('layout-landscape');
@@ -1738,26 +1737,7 @@
 
       const orientBtn = document.getElementById('layoutOrientBtn');
       if (orientBtn) {
-        orientBtn.style.display = 'none'; // Verbergt het knopje zodat niemand er per ongeluk op klikt
-      }
-
-      const tBtn = document.getElementById('teamModeToggleBtn');
-      if (tBtn) {
-        tBtn.className = `px-2.5 py-2 rounded-xl text-xs font-black border transition ${state.isTeamMode ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-800 text-slate-300'}`;
-        tBtn.textContent = state.isTeamMode ? '👥 Teams' : '👤 Solo';
-      }
-    }
-
-      // Forceer 'layout-landscape' UIT als we niet in het actieve spelbord zitten
-      const shouldApplyLandscape = isLandscape && isScoreboardOpen;
-      document.body.classList.toggle('layout-landscape', shouldApplyLandscape);
-
-      const orientBtn = document.getElementById('layoutOrientBtn');
-      if (orientBtn) {
-        orientBtn.textContent = isLandscape ? '📱 Verticaal' : '💻 Horizontaal';
-        orientBtn.className = isLandscape
-          ? 'px-2.5 py-2 rounded-xl bg-indigo-600 border border-indigo-400 text-white text-xs font-black transition'
-          : 'px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition';
+        orientBtn.style.display = 'none'; // Verbergt het knopje zodat de layout stabiel blijft
       }
 
       const tBtn = document.getElementById('teamModeToggleBtn');
@@ -2083,6 +2063,7 @@
           </div>`;
       }).join('');
     }
+
 
     // =========================================================================
     // 10. SPELBLADEN
