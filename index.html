@@ -325,9 +325,144 @@
 
   <script>
     
-    // =========================================================================
+        // =========================================================================
     // 1. GAME ARTWORK, SCHONE VECTOR BADGES, MEEPLE & GELUIDEN
     // =========================================================================
+    // Geluidseffecten en spraaksynthese
+    const SoundFX = {
+      ctx: null,
+      getCtx() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        return this.ctx;
+      },
+      beep(freq = 440, type = 'sine', duration = 0.08, vol = 0.1) {
+        if (state.audioMuted) return;
+        try {
+          const ctx = this.getCtx();
+          if (!ctx) return;
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, ctx.currentTime);
+          gain.gain.setValueAtTime(vol, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + duration);
+        } catch(e) {}
+      },
+      click() { this.beep(600, 'triangle', 0.04, 0.08); },
+      point() { this.beep(880, 'sine', 0.08, 0.12); },
+      plus() { this.beep(750, 'sine', 0.06, 0.1); },
+      minus() { this.beep(350, 'sine', 0.06, 0.1); },
+      fanfare() {
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          setTimeout(() => this.beep(freq, 'triangle', 0.15, 0.15), idx * 90);
+        });
+      },
+      alarm() {
+        [800, 600, 800, 600].forEach((freq, idx) => {
+          setTimeout(() => this.beep(freq, 'sawtooth', 0.12, 0.15), idx * 110);
+        });
+      },
+      record() { this.fanfare(); },
+      speak(text) {
+        if (state.audioMuted || !('speechSynthesis' in window)) return;
+        try {
+          window.speechSynthesis.cancel();
+          const ut = new SpeechSynthesisUtterance(text);
+          ut.lang = 'nl-NL';
+          window.speechSynthesis.speak(ut);
+        } catch(e) {}
+      }
+    };
+
+    function triggerHaptic(duration = 20) {
+      if (state.hapticFeedback && 'vibrate' in navigator) {
+        try { navigator.vibrate(duration); } catch(e) {}
+      }
+    }
+
+    const START_CHALLENGES = [
+      "Wie het laatst een bordspel gekocht heeft!",
+      "Wie het dichtst bij de koelkast zit!",
+      "Degene met de kleurrijkste sokken aan!",
+      "Wie vandaag het vroegst is opgestaan!",
+      "Degene die als laatste jarig is geweest!"
+    ];
+
+    const REGENWORMEN_TILES = [
+      { t: 21, w: 1 }, { t: 22, w: 1 }, { t: 23, w: 1 }, { t: 24, w: 1 },
+      { t: 25, w: 2 }, { t: 26, w: 2 }, { t: 27, w: 2 }, { t: 28, w: 2 },
+      { t: 29, w: 3 }, { t: 30, w: 3 }, { t: 31, w: 3 }, { t: 32, w: 3 },
+      { t: 33, w: 4 }, { t: 34, w: 4 }, { t: 35, w: 4 }, { t: 36, w: 4 }
+    ];
+    const REGENWORMEN_EXP_TILES = [
+      { t: 11, w: 1, special: true }, { t: 13, w: 2, special: true }
+    ];
+
+    const AZUL_WALL_PATTERN = [
+      ['blue', 'yellow', 'red', 'black', 'teal'],
+      ['teal', 'blue', 'yellow', 'red', 'black'],
+      ['black', 'teal', 'blue', 'yellow', 'red'],
+      ['red', 'black', 'teal', 'blue', 'yellow'],
+      ['yellow', 'red', 'black', 'teal', 'blue']
+    ];
+    const AZUL_FLOOR_PENALTIES = [0, -1, -2, -4, -7, -11, -16, -22];
+
+    const KOK_COLORS = [
+      { id: 'g', name: 'Groen', bg: 'bg-emerald-500' },
+      { id: 'y', name: 'Geel', bg: 'bg-amber-400' },
+      { id: 'b', name: 'Blauw', bg: 'bg-blue-500' },
+      { id: 'p', name: 'Roze', bg: 'bg-pink-500' },
+      { id: 'o', name: 'Oranje', bg: 'bg-orange-500' }
+    ];
+
+    const KOK_COLS = [
+      { id: 'A', pts1: 5, pts2: 3 }, { id: 'B', pts1: 3, pts2: 2 }, { id: 'C', pts1: 3, pts2: 2 },
+      { id: 'D', pts1: 3, pts2: 2 }, { id: 'E', pts1: 2, pts2: 1 }, { id: 'F', pts1: 2, pts2: 1 },
+      { id: 'G', pts1: 2, pts2: 1 }, { id: 'H', pts1: 1, pts2: 0 }, { id: 'I', pts1: 2, pts2: 1 },
+      { id: 'J', pts1: 2, pts2: 1 }, { id: 'K', pts1: 2, pts2: 1 }, { id: 'L', pts1: 3, pts2: 2 },
+      { id: 'M', pts1: 3, pts2: 2 }, { id: 'N', pts1: 3, pts2: 2 }, { id: 'O', pts1: 5, pts2: 3 }
+    ];
+
+    const QWIXX_TABLE = [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78];
+    const CLEVER_GREEN_TABLE = [0, 1, 3, 6, 10, 15, 21, 28, 36, 45, 56, 66];
+    const LOST_CITIES_COLORS = [
+      { id: 'y', name: 'Geel', bg: 'bg-amber-950/40 border-amber-500/40' },
+      { id: 'b', name: 'Blauw', bg: 'bg-blue-950/40 border-blue-500/40' },
+      { id: 'w', name: 'Wit', bg: 'bg-slate-800/40 border-slate-400/40' },
+      { id: 'g', name: 'Groen', bg: 'bg-emerald-950/40 border-emerald-500/40' },
+      { id: 'r', name: 'Rood', bg: 'bg-rose-950/40 border-rose-500/40' }
+    ];
+    const KOEHANDEL_ANIMALS = [
+      { id: 'haan', name: '🐓 Haan', val: 10 },
+      { id: 'gans', name: '🪿 Gans', val: 40 },
+      { id: 'kat', name: '🐈 Kat', val: 90 },
+      { id: 'hond', name: '🐕 Hond', val: 160 },
+      { id: 'schaap', name: '🐑 Schaap', val: 250 },
+      { id: 'geit', name: '🐐 Geit', val: 350 },
+      { id: 'ezel', name: '🫏 Ezel', val: 500 },
+      { id: 'varken', name: '🐖 Varken', val: 650 },
+      { id: 'koe', name: '🐄 Koe', val: 800 },
+      { id: 'paard', name: '🐎 Paard', val: 1000 }
+    ];
+
+    function renderMeepleSvg(color = '#6366f1', sizeClass = 'w-4 h-4') {
+      return `
+        <svg class="${sizeClass} inline-block shrink-0 drop-shadow" viewBox="0 0 100 100" fill="${color}">
+          <path d="M 50 5 C 41 5 34 12 34 21 C 34 27 37 32 42 35 C 33 39 24 48 16 58 C 13 62 16 68 21 68 C 25 68 28 65 31 61 C 34 57 37 54 40 52 C 40 59 39 72 37 84 C 36 91 42 95 48 95 C 49 95 50 90 50 83 C 50 90 51 95 52 95 C 58 95 64 91 63 84 C 61 72 60 59 60 52 C 63 54 66 57 69 61 C 72 65 75 68 79 68 C 84 68 87 62 84 58 C 76 48 67 39 58 35 C 63 32 66 27 66 21 C 66 12 59 5 50 5 Z"/>
+        </svg>
+      `;
+    }
+
     const GAME_BADGES = {
       azul: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-950 flex flex-col items-center justify-center border border-sky-300/40 shadow-lg p-1.5"><div class="grid grid-cols-2 gap-1 w-6 h-6"><div class="bg-amber-400 rounded-sm"></div><div class="bg-sky-200 rounded-sm"></div><div class="bg-rose-500 rounded-sm"></div><div class="bg-slate-900 rounded-sm"></div></div></div>`,
       parijs: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-blue-950 to-slate-950 flex items-center justify-center border border-amber-300/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🗼</span></div>`,
@@ -2663,7 +2798,7 @@
       showToast(`🌲 +${score} punten berekend!`);
     }
 
-    // --- 10F. REGENWORMEN ---
+        // --- 10F. REGENWORMEN ---
     function isRegenwormenExpActive(gs) {
       if (!gs || !gs.activeExpansions) return false;
       return Object.keys(gs.activeExpansions).some(k => gs.activeExpansions[k]);
@@ -2776,119 +2911,6 @@
       renderScoreboard();
     }
 
-
-    // --- 10F. REGENWORMEN ---
-    function isRegenwormenExpActive(gs) {
-      if (!gs || !gs.activeExpansions) return false;
-      return Object.keys(gs.activeExpansions).some(k => gs.activeExpansions[k]);
-    }
-
-    function renderRegenwormenSheet(container) {
-      const gs = ensureGameState('regenwormen');
-      const expOn = isRegenwormenExpActive(gs);
-      const tilesToRender = expOn ? [...REGENWORMEN_EXP_TILES, ...REGENWORMEN_TILES] : REGENWORMEN_TILES;
-      const activePlayers = getActivePlayers();
-
-      const owners = {};
-      let totalTokensTaken = 0;
-      activePlayers.forEach(p => {
-        const r = gs.playerData[p.id].regenwormen;
-        const tMap = r.tiles || {};
-        Object.keys(tMap).forEach(tKey => {
-          if (tMap[tKey]) owners[tKey] = p.name;
-        });
-        totalTokensTaken += Number(r.bonus || 0);
-      });
-      const tokensLeft = Math.max(0, 7 - totalTokensTaken);
-
-      const potBanner = expOn ? `
-        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between text-xs">
-          <span class="text-slate-300 font-bold">🪙 Wormfiches in de pot:</span>
-          <span class="px-2.5 py-1 rounded-xl ${tokensLeft === 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'} font-extrabold">
-            Nog ${tokensLeft} van 7 over
-          </span>
-        </div>
-      ` : '';
-
-      container.innerHTML = potBanner + activePlayers.map(p => {
-        const r = gs.playerData[p.id].regenwormen;
-        const myTokens = Number(r.bonus || 0);
-        return `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-2 hover:opacity-80">
-                ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                <span class="font-bold text-sm text-white">${p.name}</span>
-              </button>
-              <span class="text-sm font-extrabold text-amber-300">Wormen: ${calculatePlayerTotal('regenwormen', p.id)} 🐛</span>
-            </div>
-
-            <div class="grid grid-cols-6 sm:grid-cols-9 gap-1.5">
-              ${tilesToRender.map(item => {
-                const on = !!(r.tiles && r.tiles[item.t]);
-                const takenByOther = !on && owners[item.t];
-                return `
-                  <button type="button" onclick="toggleRegenwormenTile('${p.id}', ${item.t})"
-                    class="p-1.5 rounded-xl border text-center transition ${on ? 'bg-amber-500 text-slate-950 border-amber-300 font-extrabold shadow' : (takenByOther ? 'bg-slate-950/40 border-slate-900 text-slate-600 line-through' : (item.special ? 'bg-indigo-950/60 border-indigo-500/50 text-indigo-200' : 'bg-slate-950 border-slate-800 text-slate-300'))}">
-                    <div class="text-xs font-bold">${item.t}</div>
-                    <div class="text-[10px]">${'🐛'.repeat(item.w)}</div>
-                  </button>`;
-              }).join('')}
-            </div>
-
-            ${expOn ? `
-              <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
-                <div>
-                  <span class="text-slate-200 font-bold">🪙 Wormfiches (Raaf / Dubbel):</span>
-                  <span class="text-[11px] text-slate-400 block">Elk fiche telt als +1 🐛 (max. 7 totaal in het spel)</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', -1)" ${myTokens <= 0 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 border border-slate-700 text-white font-black text-sm">-</button>
-                  <span class="w-12 text-center font-black text-sm text-amber-300">${myTokens} 🐛</span>
-                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', 1)" ${totalTokensTaken >= 7 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-30 text-slate-950 font-black text-sm">+</button>
-                </div>
-              </div>` : ''}
-          </div>`;
-      }).join('');
-    }
-
-    function toggleRegenwormenTile(playerId, tileNum) {
-      pushUndoSnapshot();
-      triggerHaptic(15);
-      const gs = ensureGameState('regenwormen');
-      const cur = !!gs.playerData[playerId].regenwormen.tiles[tileNum];
-      state.players.forEach(p => {
-        if (gs.playerData[p.id]?.regenwormen?.tiles) {
-          gs.playerData[p.id].regenwormen.tiles[tileNum] = false;
-        }
-      });
-      gs.playerData[playerId].regenwormen.tiles[tileNum] = !cur;
-      SoundFX.click();
-      saveState();
-      renderScoreboard();
-    }
-
-    function adjRegenwormenTokens(playerId, delta) {
-      pushUndoSnapshot();
-      triggerHaptic(15);
-      const gs = ensureGameState('regenwormen');
-      const activePlayers = getActivePlayers();
-      let totalTaken = 0;
-      activePlayers.forEach(p => {
-        totalTaken += Number(gs.playerData[p.id]?.regenwormen?.bonus || 0);
-      });
-
-      const cur = Number(gs.playerData[playerId].regenwormen.bonus || 0);
-      if (delta > 0 && totalTaken >= 7) {
-        showToast('⚠️ Alle 7 wormfiches zijn al uit de pot!');
-        return;
-      }
-      const next = Math.max(0, Math.min(7, cur + delta));
-      gs.playerData[playerId].regenwormen.bonus = next;
-      SoundFX.click();
-      saveState();
-      renderScoreboard();
-    }
 
     // --- 10G. CATEGORIES, WONDERS, TTR, YAHTZEE, CATAN, ETC. ---
     function renderCategoriesSheet(container, def) {
