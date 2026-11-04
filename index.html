@@ -20,7 +20,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-  <style>
+    <style>
     html, body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: #020617 !important;
@@ -102,6 +102,15 @@
         flex-shrink: 0 !important;
       }
     }
+
+    /* Zorgt dat onzichtbare schermen/lagen het touchscreen niet blokkeren */
+    .hidden {
+      display: none !important;
+      pointer-events: none !important;
+    }
+    #confettiContainer {
+      pointer-events: none !important;
+    }
   </style>
 </head>
 
@@ -151,7 +160,7 @@
           <button type="button" id="navBtnHistory" onclick="switchMainView('history')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">🏆 Statistieken</button>
         </div>
 
-                <!-- Desktop actieknoppen rechts -->
+                        <!-- Desktop actieknoppen rechts -->
         <div class="hidden sm:flex items-center gap-1.5 shrink-0">
           <button type="button" onclick="openGamePickerWheelModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/40 border border-indigo-400 text-indigo-200 text-xs font-black transition text-center">🎲 Wat spelen we?</button>
           <button type="button" onclick="openStartTournamentModal()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-extrabold transition text-center">🏆 Toernooi</button>
