@@ -122,7 +122,7 @@
           </div>
         </div>
         
-        <!-- Mobiele actieknoppen rechtsboven -->
+                <!-- Mobiele actieknoppen rechtsboven -->
         <div class="flex sm:hidden flex-col gap-1.5 items-end">
           <button type="button" onclick="openGamePickerWheelModal()" class="w-36 py-1.5 rounded-xl bg-indigo-600/30 border border-indigo-400 text-indigo-200 text-xs font-black text-center transition">
             🎲 Wat spelen we?
@@ -132,6 +132,9 @@
           </button>
           <button type="button" onclick="openStartPlayerModal()" class="w-36 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-extrabold text-center transition">
             🎲 Wie begint?
+          </button>
+          <button type="button" onclick="openLiveRoomModal()" class="w-36 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold text-center transition">
+            📡 Live Tafel
           </button>
         </div>
       </div>
@@ -149,11 +152,8 @@
           <button type="button" onclick="openStartTournamentModal()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-extrabold transition text-center">🏆 Toernooi</button>
           <button type="button" onclick="openLiveRoomModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold transition text-center">📡 Live Tafel</button>
           <button type="button" onclick="openStartPlayerModal()" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-extrabold transition text-center">🎲 Wie begint?</button>
-          <button type="button" onclick="openSecretRolesModal()" class="px-3 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 text-xs font-extrabold transition text-center">🤫 Geheime Rollen</button>
         </div>
-      </div>
-    </div>
-  </header>
+
 
   <!-- Main Container -->
   <main class="max-w-5xl mx-auto p-4 space-y-5">
@@ -6433,21 +6433,7 @@
       ⏱️
     </button>
   </div>
-
-  <!-- MODAL: GEHEIME ROLLEN & DOELEN (HOLD-TO-PEEK #8) -->
-  <div id="secretRolesModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-purple-500/40 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">🤫</span>
-          <h3 class="font-black text-sm text-white">Geheime Rollen & Doelen</h3>
-        </div>
-        <button type="button" onclick="closeSecretRolesModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
-      </div>
-      <div id="secretRolesBody" class="space-y-3"></div>
-      <button type="button" onclick="closeSecretRolesModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">Sluiten</button>
-    </div>
-  </div>
+</div>
 
 </body>
 </html>
