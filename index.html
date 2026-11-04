@@ -522,7 +522,7 @@
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
 
-    // =========================================================================
+        // =========================================================================
     // 3. STATE MANAGEMENT, LOCAL STORAGE & INITIALISATIE
     // =========================================================================
     const STORAGE_KEY = 'scoreblok_pro_v5';
@@ -541,12 +541,12 @@
       playerPresets: [
         { id: 'pres_duo', name: '👥 Duo (2p)', names: ['Speler 1', 'Speler 2'] }
       ],
-      favorites: ['azul', 'parijs', 'keeropkeer2', 'regenwormen', 'carcassonne', 'cascadia', 'beverbende', 'beverclan', 'rummikub', 'eldorado', 'catan', 'seasalt', 'harmonies'],
+      favorites: ['azul', 'parijs', 'keeropkeer2', 'regenwormen', 'carcassonne', 'cascadia', 'beverbende', 'catan', 'seasalt', 'harmonies'],
       customGames: [],
       activeGameId: 'azul',
       lastPlayedGameId: 'azul',
       activeGameStartTime: null,
-      pickerTab: 'fav',
+      pickerTab: 'all',
       statsSortMode: 'wins',
       currentSeasonName: 'Huidig Seizoen',
       hapticFeedback: true,
@@ -558,14 +558,20 @@
       history: []
     };
 
-        function loadState() {
+    function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('scoreblok_pro_v4');
         if (raw) {
           const parsed = JSON.parse(raw);
           state = { ...state, ...parsed };
-          // Forceer altijd verticaal zodat het scherm nooit meer naar rechts schuift
           state.layoutOrientation = 'portrait';
+
+          if (!Array.isArray(state.favorites) || state.favorites.length === 0) {
+            state.favorites = ['azul', 'parijs', 'keeropkeer2', 'regenwormen', 'carcassonne', 'cascadia', 'beverbende', 'catan', 'seasalt', 'harmonies'];
+          }
+          if (state.pickerTab === 'fav' && (!state.favorites || state.favorites.length === 0)) {
+            state.pickerTab = 'all';
+          }
 
           if (!Array.isArray(state.teams)) {
             state.teams = [
@@ -584,7 +590,10 @@
             if (p.seasonCups === undefined) p.seasonCups = 0;
             if (p.tournamentCups === undefined) p.tournamentCups = 0;
           });
+        } else {
+          state.pickerTab = 'all';
         }
+
         const emergency = localStorage.getItem(SNAPSHOT_KEY);
         if (emergency && !raw) {
           state = JSON.parse(emergency);
@@ -595,7 +604,6 @@
         console.error('Kon state niet laden:', e);
       }
     }
-
 
     function saveState() {
       try {
@@ -680,6 +688,7 @@
       state.apTimerEnabled = val;
       saveState();
     }
+
 
     // =========================================================================
     // 4. GAME STATE INITIALIZATION
@@ -2557,110 +2566,7 @@
       document.getElementById('roundGraphModal')?.classList.add('hidden');
     }
 
-    // --- QWIXX, CLEVER & CASCADIA ---
-    function renderQwixxSheet(container) {
-      const gs = ensureGameState('qwixx');
-      const rows = [
-        { id: 'red', name: 'Rood', cls: 'text-rose-400' },
-        { id: 'yellow', name: 'Geel', cls: 'text-amber-300' },
-        { id: 'green', name: 'Groen', cls: 'text-emerald-400' },
-        { id: 'blue', name: 'Blauw', cls: 'text-sky-400' }
-      ];
-      container.innerHTML = getActivePlayers().map(p => {
-        const q = gs.playerData[p.id].qwixx;
-        return `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-            <div class="flex justify-between items-center">
-              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
-                ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                <span class="font-bold text-sm text-white">${p.name}</span>
-              </button>
-              <span class="text-xs font-bold text-indigo-400">${calculatePlayerTotal('qwixx', p.id)} pnt</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              ${rows.map(r => `
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center">
-                  <div class="text-xs font-bold ${r.cls}">${r.name}</div>
-                  <select onchange="setQwixxVal('${p.id}','${r.id}',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white">
-                    ${QWIXX_TABLE.map((pts, cnt) => `<option value="${cnt}" ${Number(q[r.id]) === cnt ? 'selected' : ''}>${cnt}x (${pts}p)</option>`).join('')}
-                  </select>
-                </div>`).join('')}
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-center">
-                <div class="text-xs font-bold text-slate-400">Mislukt (-5)</div>
-                <select onchange="setQwixxVal('${p.id}','fails',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-rose-400">
-                  ${[0, 1, 2, 3, 4].map(cnt => `<option value="${cnt}" ${Number(q.fails) === cnt ? 'selected' : ''}>${cnt}x (-${cnt * 5})</option>`).join('')}
-                </select>
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    function setQwixxVal(playerId, key, val) {
-      pushUndoSnapshot();
-      const gs = ensureGameState('qwixx');
-      gs.playerData[playerId].qwixx[key] = Number(val || 0);
-      triggerHaptic(15);
-      SoundFX.click();
-      saveState();
-      renderScoreboard();
-    }
-
-    function renderCleverSheet(container) {
-      const gs = ensureGameState('clever');
-      container.innerHTML = getActivePlayers().map(p => {
-        const c = gs.playerData[p.id].clever;
-        const greenPts = CLEVER_GREEN_TABLE[Math.min(11, Math.max(0, Number(c.greenCount || 0)))] || 0;
-        return `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-            <div class="flex justify-between items-center">
-              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
-                ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                <span class="font-bold text-sm text-white">${p.name}</span>
-              </button>
-              <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('clever', p.id)} pnt</span>
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-amber-300">🟨 Geel</span>
-                ${renderNumberStepper(`clever_${p.id}_y`, c.yellow, `val => setCleverVal('${p.id}','yellow', val)`)}
-              </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-sky-400">🟦 Blauw</span>
-                ${renderNumberStepper(`clever_${p.id}_b`, c.blue, `val => setCleverVal('${p.id}','blue', val)`)}
-              </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-orange-400">🟧 Oranje</span>
-                ${renderNumberStepper(`clever_${p.id}_o`, c.orange, `val => setCleverVal('${p.id}','orange', val)`)}
-              </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-purple-400">🟪 Paars</span>
-                ${renderNumberStepper(`clever_${p.id}_p`, c.purple, `val => setCleverVal('${p.id}','purple', val)`)}
-              </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
-                <span class="text-[11px] font-bold text-rose-400">🦊 Vossen</span>
-                ${renderNumberStepper(`clever_${p.id}_f`, c.foxes, `val => setCleverVal('${p.id}','foxes', val)`)}
-              </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2">
-                <label class="text-[11px] font-bold text-emerald-400 block truncate">🟩 Groen (${greenPts}p)</label>
-                <select onchange="setCleverVal('${p.id}','greenCount',this.value)" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white">
-                  ${CLEVER_GREEN_TABLE.map((pts, cnt) => `<option value="${cnt}" ${Number(c.greenCount) === cnt ? 'selected' : ''}>${cnt}x = ${pts}p</option>`).join('')}
-                </select>
-              </div>
-            </div>
-          </div>`;
-      }).join('');
-    }
-
-    function setCleverVal(playerId, key, val) {
-      triggerHaptic(15);
-      const gs = ensureGameState('clever');
-      gs.playerData[playerId].clever[key] = Number(val || 0);
-      saveState();
-      renderLiveLeaderboard();
-      if (key === 'greenCount') renderScoreboard();
-    }
-
+        // --- 10E. CASCADIA ---
     const CASCADIA_RULES = {
       salmon: { A: [0, 2, 5, 9, 14, 20, 27], B: [0, 2, 4, 9, 11, 17] },
       bear: { A: [0, 4, 11, 19, 27], B: [0, 10] }
@@ -2723,7 +2629,7 @@
     }
 
     function openCascadiaCardHelper(playerId, animalKey) {
-          const player = state.players.find(p => p.id === playerId);
+      const player = state.players.find(p => p.id === playerId);
       if (!player) return;
 
       const helperHtml = `
@@ -2756,6 +2662,120 @@
       SoundFX.point();
       showToast(`🌲 +${score} punten berekend!`);
     }
+
+    // --- 10F. REGENWORMEN ---
+    function isRegenwormenExpActive(gs) {
+      if (!gs || !gs.activeExpansions) return false;
+      return Object.keys(gs.activeExpansions).some(k => gs.activeExpansions[k]);
+    }
+
+    function renderRegenwormenSheet(container) {
+      const gs = ensureGameState('regenwormen');
+      const expOn = isRegenwormenExpActive(gs);
+      const tilesToRender = expOn ? [...REGENWORMEN_EXP_TILES, ...REGENWORMEN_TILES] : REGENWORMEN_TILES;
+      const activePlayers = getActivePlayers();
+
+      const owners = {};
+      let totalTokensTaken = 0;
+      activePlayers.forEach(p => {
+        const r = gs.playerData[p.id].regenwormen;
+        const tMap = r.tiles || {};
+        Object.keys(tMap).forEach(tKey => {
+          if (tMap[tKey]) owners[tKey] = p.name;
+        });
+        totalTokensTaken += Number(r.bonus || 0);
+      });
+      const tokensLeft = Math.max(0, 7 - totalTokensTaken);
+
+      const potBanner = expOn ? `
+        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between text-xs">
+          <span class="text-slate-300 font-bold">🪙 Wormfiches in de pot:</span>
+          <span class="px-2.5 py-1 rounded-xl ${tokensLeft === 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'} font-extrabold">
+            Nog ${tokensLeft} van 7 over
+          </span>
+        </div>
+      ` : '';
+
+      container.innerHTML = potBanner + activePlayers.map(p => {
+        const r = gs.playerData[p.id].regenwormen;
+        const myTokens = Number(r.bonus || 0);
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-2 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
+              <span class="text-sm font-extrabold text-amber-300">Wormen: ${calculatePlayerTotal('regenwormen', p.id)} 🐛</span>
+            </div>
+
+            <div class="grid grid-cols-6 sm:grid-cols-9 gap-1.5">
+              ${tilesToRender.map(item => {
+                const on = !!(r.tiles && r.tiles[item.t]);
+                const takenByOther = !on && owners[item.t];
+                return `
+                  <button type="button" onclick="toggleRegenwormenTile('${p.id}', ${item.t})"
+                    class="p-1.5 rounded-xl border text-center transition ${on ? 'bg-amber-500 text-slate-950 border-amber-300 font-extrabold shadow' : (takenByOther ? 'bg-slate-950/40 border-slate-900 text-slate-600 line-through' : (item.special ? 'bg-indigo-950/60 border-indigo-500/50 text-indigo-200' : 'bg-slate-950 border-slate-800 text-slate-300'))}">
+                    <div class="text-xs font-bold">${item.t}</div>
+                    <div class="text-[10px]">${'🐛'.repeat(item.w)}</div>
+                  </button>`;
+              }).join('')}
+            </div>
+
+            ${expOn ? `
+              <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs">
+                <div>
+                  <span class="text-slate-200 font-bold">🪙 Wormfiches (Raaf / Dubbel):</span>
+                  <span class="text-[11px] text-slate-400 block">Elk fiche telt als +1 🐛 (max. 7 totaal in het spel)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', -1)" ${myTokens <= 0 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 border border-slate-700 text-white font-black text-sm">-</button>
+                  <span class="w-12 text-center font-black text-sm text-amber-300">${myTokens} 🐛</span>
+                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', 1)" ${totalTokensTaken >= 7 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-30 text-slate-950 font-black text-sm">+</button>
+                </div>
+              </div>` : ''}
+          </div>`;
+      }).join('');
+    }
+
+    function toggleRegenwormenTile(playerId, tileNum) {
+      pushUndoSnapshot();
+      triggerHaptic(15);
+      const gs = ensureGameState('regenwormen');
+      const cur = !!gs.playerData[playerId].regenwormen.tiles[tileNum];
+      state.players.forEach(p => {
+        if (gs.playerData[p.id]?.regenwormen?.tiles) {
+          gs.playerData[p.id].regenwormen.tiles[tileNum] = false;
+        }
+      });
+      gs.playerData[playerId].regenwormen.tiles[tileNum] = !cur;
+      SoundFX.click();
+      saveState();
+      renderScoreboard();
+    }
+
+    function adjRegenwormenTokens(playerId, delta) {
+      pushUndoSnapshot();
+      triggerHaptic(15);
+      const gs = ensureGameState('regenwormen');
+      const activePlayers = getActivePlayers();
+      let totalTaken = 0;
+      activePlayers.forEach(p => {
+        totalTaken += Number(gs.playerData[p.id]?.regenwormen?.bonus || 0);
+      });
+
+      const cur = Number(gs.playerData[playerId].regenwormen.bonus || 0);
+      if (delta > 0 && totalTaken >= 7) {
+        showToast('⚠️ Alle 7 wormfiches zijn al uit de pot!');
+        return;
+      }
+      const next = Math.max(0, Math.min(7, cur + delta));
+      gs.playerData[playerId].regenwormen.bonus = next;
+      SoundFX.click();
+      saveState();
+      renderScoreboard();
+    }
+
 
     // --- 10F. REGENWORMEN ---
     function isRegenwormenExpActive(gs) {
