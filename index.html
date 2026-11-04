@@ -4523,7 +4523,7 @@
       switchMainView('history');
     }
 
-        // =========================================================================
+         // =========================================================================
     // 16. PODIUM MODAL, TIE-BREAKER OVERRULE & TOERNOOI ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
@@ -4706,7 +4706,7 @@
       };
 
       if (!state.tournament) {
-        state.tournament = { active: false, mode: 'bracket', name: 'Bordspel Beker', rounds: [], matches: [] };
+        state.tournament = { active: false, mode: 'bracket', name: 'Bordspel Beker', bracketRounds: [], matches: [] };
       }
       if (state.tournament.active) {
         if (!Array.isArray(state.tournament.matches)) state.tournament.matches = [];
@@ -4757,6 +4757,15 @@
       document.getElementById('tournamentModal')?.classList.add('hidden');
     }
 
+    function setTourNamePreset(presetName) {
+      const inp = document.getElementById('tourNameInput');
+      if (inp) {
+        inp.value = presetName;
+        inp.focus();
+        inp.select();
+      }
+    }
+
     function renderTournamentModalContent() {
       const content = document.getElementById('tournamentModalContent');
       if (!content) return;
@@ -4768,6 +4777,8 @@
 
       if (!tour.active) {
         const act = getActivePlayers();
+        const activeGameName = getGameDef(state.activeGameId)?.name || 'Rummikub';
+
         content.innerHTML = `
           <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
             <div class="flex items-center gap-2">
@@ -4780,7 +4791,14 @@
           <div class="space-y-3.5 text-xs">
             <div>
               <label class="block text-slate-400 font-semibold mb-1">Toernooinaam:</label>
-              <input type="text" id="tourNameInput" value="Tafelkampioenschap ${new Date().getFullYear()}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
+              <input type="text" id="tourNameInput" value="" placeholder="bijv. ${activeGameName} Cup" onfocus="this.select()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold placeholder-slate-500 focus:outline-none focus:border-amber-400" />
+              
+              <div class="flex flex-wrap items-center gap-1.5 pt-1.5">
+                <span class="text-[10px] text-slate-500 font-bold">Snelkeuze:</span>
+                <button type="button" onclick="setTourNamePreset('${activeGameName} Cup')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold">🏆 ${activeGameName} Cup</button>
+                <button type="button" onclick="setTourNamePreset('Spelavond Beker')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold">🎲 Spelavond Beker</button>
+                <button type="button" onclick="setTourNamePreset('Kampioenschap')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold">👑 Kampioenschap</button>
+              </div>
             </div>
 
             <div>
@@ -4790,7 +4808,7 @@
                   <input type="radio" name="tourModeRadio" value="bracket" checked class="text-amber-500 focus:ring-0" />
                   <div>
                     <div class="font-extrabold text-white">🥊 Knock-out (Brackets)</div>
-                    <div class="text-[10px] text-slate-400">Directe duels tot in de finale</div>
+                    <div class="text-[10px] text-slate-400">Directe duels tot de finale</div>
                   </div>
                 </label>
                 <label class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer">
@@ -4936,7 +4954,9 @@
     }
 
     function startTournamentAction() {
-      const name = document.getElementById('tourNameInput')?.value.trim() || 'Bordspel Beker';
+      const activeGameName = getGameDef(state.activeGameId)?.name || 'Rummikub';
+      const rawName = document.getElementById('tourNameInput')?.value.trim();
+      const name = rawName || `${activeGameName} Cup`;
       const mode = document.querySelector('input[name="tourModeRadio"]:checked')?.value || 'bracket';
       const act = getActivePlayers();
 
