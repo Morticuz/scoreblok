@@ -1500,20 +1500,20 @@
           </div>`;
       }).join('');
     }
-        // =========================================================================
-    // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND
+         // =========================================================================
+    // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND (GEFIXT)
     // =========================================================================
     function toggleLayoutOrientation() {
       state.layoutOrientation = (state.layoutOrientation === 'landscape') ? 'portrait' : 'landscape';
-      triggerHaptic(25);
+      if (typeof triggerHaptic === 'function') triggerHaptic(25);
       saveState();
       renderScoreboard();
     }
 
     function toggleTeamMode() {
       state.isTeamMode = !state.isTeamMode;
-      triggerHaptic(30);
-      SoundFX.click();
+      if (typeof triggerHaptic === 'function') triggerHaptic(30);
+      if (typeof SoundFX !== 'undefined' && SoundFX.click) SoundFX.click();
       saveState();
       renderScoreboard();
       showToast(state.isTeamMode ? '👥 Team-modus Actief!' : '👤 Individuele Modus Actief!');
@@ -1526,11 +1526,10 @@
       
       const curIdx = gs.activeTurnPlayerIdx || 0;
       gs.activeTurnPlayerIdx = (curIdx + delta + active.length) % active.length;
-      triggerHaptic(20);
-      SoundFX.click();
+      if (typeof triggerHaptic === 'function') triggerHaptic(20);
+      if (typeof SoundFX !== 'undefined' && SoundFX.click) SoundFX.click();
 
-      // Reset de bedenktijd-klok indien ingeschakeld in instellingen
-      if (state.apTimerEnabled) {
+      if (state.apTimerEnabled && typeof startTableTimer === 'function') {
         startTableTimer(45);
       }
 
@@ -1548,7 +1547,7 @@
     }
 
     function toggleExpansion(expName) {
-      pushUndoSnapshot();
+      if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       gs.activeExpansions[expName] = !gs.activeExpansions[expName];
       if (state.activeGameId === 'regenwormen' && !isRegenwormenExpActive(gs)) {
@@ -1565,15 +1564,15 @@
     }
 
     function setLastRoundKnocker(playerId) {
-      pushUndoSnapshot();
+      if (typeof pushUndoSnapshot === 'function') pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       gs.knockerPlayerId = gs.knockerPlayerId === playerId ? null : playerId;
       saveState();
       renderScoreboard();
       const p = state.players.find(x => x.id === playerId);
-      if (p && gs.knockerPlayerId === playerId) {
-        SoundFX.alarm();
-        SoundFX.speak(`${p.name} heeft afgeklopt! Laatste ronde voor iedereen.`);
+      if (p && gs.knockerPlayerId === playerId && typeof SoundFX !== 'undefined') {
+        if (SoundFX.alarm) SoundFX.alarm();
+        if (SoundFX.speak) SoundFX.speak(`${p.name} heeft afgeklopt! Laatste ronde voor iedereen.`);
       }
     }
 
@@ -1594,7 +1593,7 @@
         });
         if (completedBy.length > 0) {
           banner.classList.remove('hidden');
-          banner.innerHTML = `<span>🏁 <b>Einde spel bereikt!</b> ${completedBy.map(p => p.name).join(', ')} heeft een horizontale rij van 5 tegels compleet. Dit is de laatste ronde!</span>`;
+          banner.innerHTML = `<span>🏁 <b>Einde spel bereikt!</b> ${completedBy.map(p => p.name).join(', ')} heeft een horizontale rij compleet! Dit is de laatste ronde.</span>`;
           return;
         }
       }
@@ -1690,7 +1689,7 @@
       if (titleEl) titleEl.textContent = def.name;
       
       updateActiveFavStar();
-      updateUndoButtonUI();
+      if (typeof updateUndoButtonUI === 'function') updateUndoButtonUI();
 
       const graphBtn = document.getElementById('roundGraphBtn');
       if (graphBtn) {
@@ -1758,71 +1757,42 @@
         }
       }
 
-      const isLandscape = (state.layoutOrientation === 'landscape');
-      let splitWrap = document.getElementById('splitViewWrapper');
-      if (isLandscape && !splitWrap) {
-        const lb = document.getElementById('liveLeaderboard');
-        const sc = document.getElementById('gameSheetContainer');
-        if (lb && sc) {
-          const parent = lb.parentNode;
-          const wrap = document.createElement('div');
-          wrap.id = 'splitViewWrapper';
-          wrap.className = 'grid grid-cols-1 md:grid-cols-12 gap-4 items-start';
-          parent.insertBefore(wrap, lb);
-
-          const leftCol = document.createElement('div');
-          leftCol.id = 'splitLeftCol';
-          leftCol.className = 'md:col-span-4 sticky top-20 space-y-3';
-          leftCol.appendChild(lb);
-
-          const rightCol = document.createElement('div');
-          rightCol.id = 'splitRightCol';
-          rightCol.className = 'md:col-span-8 space-y-4';
-          rightCol.appendChild(sc);
-
-          wrap.appendChild(leftCol);
-          wrap.appendChild(rightCol);
-        }
-      } else if (!isLandscape && splitWrap) {
-        const lb = document.getElementById('liveLeaderboard');
-        const sc = document.getElementById('gameSheetContainer');
-        const parent = splitWrap.parentNode;
-        parent.insertBefore(lb, splitWrap);
-        parent.insertBefore(sc, splitWrap);
-        splitWrap.remove();
-      }
-
       renderLiveLeaderboard();
 
       const container = document.getElementById('gameSheetContainer');
       if (!container) return;
 
-      if (def.id === 'doolhof' || def.type === 'doolhof') renderDoolhofSheet(container);
-      else if (def.id === 'wingspan') renderWingspanDashboard(container);
-      else if (def.type === 'kok1' || def.type === 'kok2') renderKokSheet(container, def);
-      else if (def.type === 'azul') renderAzulSheet(container, def);
-      else if (def.type === 'rounds') renderRoundsSheet(container, def);
-      else if (def.type === 'flip7') renderFlip7Sheet(container, def);
-      else if (def.type === 'qwixx') renderQwixxSheet(container);
-      else if (def.type === 'clever') renderCleverSheet(container);
-      else if (def.type === 'cascadia') renderCascadiaSheet(container);
-      else if (def.type === 'regenwormen') renderRegenwormenSheet(container);
-      else if (def.type === 'categories') renderCategoriesSheet(container, def);
-      else if (def.type === 'wonders7') renderWonders7Sheet(container);
-      else if (def.type === 'ttr') renderTtrSheet(container);
-      else if (def.type === 'yahtzee') renderYahtzeeSheet(container);
-      else if (def.type === 'catan') renderCatanSheet(container);
-      else if (def.type === 'sushigo') renderSushiGoSheet(container);
-      else if (def.type === 'lostcities') renderLostCitiesSheet(container);
-      else if (def.type === 'koehandel') renderKoehandelSheet(container);
-      else if (def.type === 'machiavelli') renderMachiavelliSheet(container);
-      else if (def.type === 'arknova') renderArkNovaSheet(container);
-      else if (def.type === 'heat') renderHeatSheet(container);
-      else if (def.type === 'dorfromantik') renderDorfromantikSheet(container);
-      else if (def.type === 'coop') renderCoopSheet(container, def);
-      else if (def.type === 'codenames') renderCodenamesSheet(container);
-      else if (def.type === 'themind') renderTheMindSheet(container);
-      else if (def.type === 'carcassonne') renderCarcassonneSheet(container, def);
+      try {
+        if (def.id === 'doolhof' || def.type === 'doolhof') renderDoolhofSheet(container);
+        else if (def.id === 'wingspan' && typeof renderWingspanDashboard === 'function') renderWingspanDashboard(container);
+        else if (def.type === 'kok1' || def.type === 'kok2') renderKokSheet(container, def);
+        else if (def.type === 'azul') renderAzulSheet(container, def);
+        else if (def.type === 'rounds') renderRoundsSheet(container, def);
+        else if (def.type === 'flip7') renderFlip7Sheet(container, def);
+        else if (def.type === 'qwixx') renderQwixxSheet(container);
+        else if (def.type === 'clever') renderCleverSheet(container);
+        else if (def.type === 'cascadia') renderCascadiaSheet(container);
+        else if (def.type === 'regenwormen') renderRegenwormenSheet(container);
+        else if (def.type === 'categories') renderCategoriesSheet(container, def);
+        else if (def.type === 'wonders7') renderWonders7Sheet(container);
+        else if (def.type === 'ttr') renderTtrSheet(container);
+        else if (def.type === 'yahtzee') renderYahtzeeSheet(container);
+        else if (def.type === 'catan') renderCatanSheet(container);
+        else if (def.type === 'sushigo') renderSushiGoSheet(container);
+        else if (def.type === 'lostcities') renderLostCitiesSheet(container);
+        else if (def.type === 'koehandel') renderKoehandelSheet(container);
+        else if (def.type === 'machiavelli') renderMachiavelliSheet(container);
+        else if (def.type === 'arknova') renderArkNovaSheet(container);
+        else if (def.type === 'heat') renderHeatSheet(container);
+        else if (def.type === 'dorfromantik') renderDorfromantikSheet(container);
+        else if (def.type === 'coop') renderCoopSheet(container, def);
+        else if (def.type === 'codenames') renderCodenamesSheet(container);
+        else if (def.type === 'themind') renderTheMindSheet(container);
+        else if (def.type === 'carcassonne') renderCarcassonneSheet(container, def);
+      } catch (err) {
+        console.error("Fout bij renderen spelblad:", err);
+        container.innerHTML = `<div class="p-4 bg-rose-950/40 border border-rose-500/40 rounded-2xl text-rose-300 text-xs font-bold">Fout bij inladen: ${err.message}</div>`;
+      }
     }
 
     function renderLiveLeaderboard() {
@@ -1837,11 +1807,6 @@
       boardEl.innerHTML = standings.map((item, idx) => {
         const isLeader = standings.some(x => x.score !== 0) && item.score === topEntry?.score && item.tieVal === topEntry?.tieVal;
         const isTurn = (!state.isTeamMode && idx === (ensureGameState().activeTurnPlayerIdx || 0));
-
-        // Controleer live of er een record verbroken wordt
-        if (!item.isTeam) {
-          checkLiveGroepRecord(def.id, item.id, item.score);
-        }
 
         return `
           <div onclick="${!state.isTeamMode ? 'cycleActiveTurn(1)' : ''}" title="${!state.isTeamMode ? 'Tik om de beurt door te schuiven' : ''}"
