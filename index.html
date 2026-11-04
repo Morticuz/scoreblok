@@ -768,12 +768,15 @@
       history: []
     };
 
-    function loadState() {
+        function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('scoreblok_pro_v4');
         if (raw) {
           const parsed = JSON.parse(raw);
           state = { ...state, ...parsed };
+          // Forceer altijd verticaal zodat het scherm nooit meer naar rechts schuift
+          state.layoutOrientation = 'portrait';
+
           if (!Array.isArray(state.teams)) {
             state.teams = [
               { id: 't1', name: 'Team Rood', color: '#ef4444', playerIds: [] },
@@ -795,12 +798,14 @@
         const emergency = localStorage.getItem(SNAPSHOT_KEY);
         if (emergency && !raw) {
           state = JSON.parse(emergency);
+          state.layoutOrientation = 'portrait';
           document.getElementById('crashRecoveryBanner')?.classList.remove('hidden');
         }
       } catch (e) {
         console.error('Kon state niet laden:', e);
       }
     }
+
 
     function saveState() {
       try {
