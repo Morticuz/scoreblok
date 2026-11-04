@@ -843,7 +843,7 @@
       saveState();
     }
 
-    // =========================================================================
+        // =========================================================================
     // 4. GAME STATE INITIALIZATION
     // =========================================================================
     function createEmptyPlayerData() {
@@ -860,10 +860,25 @@
         heartBonus: 0,
         bonusRow: 0,
         azul: {
+          patternLines: [
+            { cap: 1, count: 0, color: null },
+            { cap: 2, count: 0, color: null },
+            { cap: 3, count: 0, color: null },
+            { cap: 4, count: 0, color: null },
+            { cap: 5, count: 0, color: null }
+          ],
           wall: Array(5).fill(null).map(() => Array(5).fill(false)),
           pending: Array(5).fill(null).map(() => Array(5).fill(false)),
           floor: 0,
           baseScore: 0
+        },
+        wingspanBoard: {
+          forest: Array(5).fill(null).map(() => ({ active: false, pts: 0, eggs: 0, tucked: 0, food: 0 })),
+          grass: Array(5).fill(null).map(() => ({ active: false, pts: 0, eggs: 0, tucked: 0, food: 0 })),
+          wetland: Array(5).fill(null).map(() => ({ active: false, pts: 0, eggs: 0, tucked: 0, food: 0 })),
+          bonusCards: 0,
+          roundGoals: 0,
+          nectar: 0
         },
         qwixx: { red: 0, yellow: 0, green: 0, blue: 0, fails: 0 },
         clever: { yellow: 0, blue: 0, greenCount: 0, orange: 0, purple: 0, foxes: 0 },
@@ -895,6 +910,7 @@
           activeExpansions: {},
           azulMode: 'wall',
           azulRound: 1,
+          tilesLeft: (gameId === 'carcassonne') ? 72 : undefined,
           dorf: { forest: 0, grain: 0, village: 0, rail: 0, river: 0, greenFlags: 0, yellowFlags: 0, redFlags: 0, longestTrack: 0, longestRiver: 0 },
           coop: { won: true, mission: 1, attempts: 1 },
           codenames: { red: 0, blue: 0 },
@@ -912,6 +928,17 @@
         } else {
           if (gs.playerData[p.id].liveScore === undefined) gs.playerData[p.id].liveScore = 0;
           if (!gs.playerData[p.id].categories) gs.playerData[p.id].categories = {};
+          if (!gs.playerData[p.id].azul) gs.playerData[p.id].azul = createEmptyPlayerData().azul;
+          if (!gs.playerData[p.id].azul.patternLines) {
+            gs.playerData[p.id].azul.patternLines = [
+              { cap: 1, count: 0, color: null },
+              { cap: 2, count: 0, color: null },
+              { cap: 3, count: 0, color: null },
+              { cap: 4, count: 0, color: null },
+              { cap: 5, count: 0, color: null }
+            ];
+          }
+          if (!gs.playerData[p.id].wingspanBoard) gs.playerData[p.id].wingspanBoard = createEmptyPlayerData().wingspanBoard;
         }
       });
       return gs;
@@ -1058,7 +1085,7 @@
       return 0;
     }
 
-    // =========================================================================
+        // =========================================================================
     // 6. SCORE CALCULATIONS PER GAME
     // =========================================================================
     function calculatePlayerTotal(gameId, playerId) {
@@ -1077,6 +1104,28 @@
           const bon = computeAzulEndBonuses(pd.azul?.wall || []);
           rawScore = Number(pd.azul?.baseScore || 0) + bon.total;
         }
+      } else if (def.id === 'wingspan' && pd.wingspanBoard) {
+        const wb = pd.wingspanBoard;
+        let birdPts = 0;
+        let eggPts = 0;
+        let tuckedPts = 0;
+        let foodPts = 0;
+
+        ['forest', 'grass', 'wetland'].forEach(hab => {
+          (wb[hab] || []).forEach(slot => {
+            if (slot && slot.active) {
+              birdPts += Number(slot.pts || 0);
+              eggPts += Number(slot.eggs || 0);
+              tuckedPts += Number(slot.tucked || 0);
+              foodPts += Number(slot.food || 0);
+            }
+          });
+        });
+
+        rawScore = birdPts + eggPts + tuckedPts + foodPts +
+                   Number(wb.bonusCards || 0) +
+                   Number(wb.roundGoals || 0) +
+                   Number(wb.nectar || 0);
       } else if (def.type === 'kok1' || def.type === 'kok2') {
         let colSum = 0;
         KOK_COLS.forEach(c => {
@@ -1196,7 +1245,6 @@
     function getStandings(gameId = state.activeGameId) {
       const lowWins = isLowestWins(gameId);
       
-      // Als Team-modus aan staat: bereken per samengesteld team
       if (state.isTeamMode && state.teams && state.teams.length > 0) {
         const activeTeams = state.teams.filter(t => (t.playerIds || []).some(id => state.players.find(p => p.id === id)?.active !== false));
         const list = activeTeams.map(t => {
@@ -1223,7 +1271,6 @@
         return list;
       }
 
-      // Individuele stand
       const activePlayers = getActivePlayers();
       const list = activePlayers.map(p => ({
         ...p,
@@ -1238,6 +1285,7 @@
       });
       return list;
     }
+
 
     // =========================================================================
     // 7. VIEWS & NAVIGATION
@@ -1452,7 +1500,7 @@
           </div>`;
       }).join('');
     }
-    // =========================================================================
+        // =========================================================================
     // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND
     // =========================================================================
     function toggleLayoutOrientation() {
@@ -1480,6 +1528,12 @@
       gs.activeTurnPlayerIdx = (curIdx + delta + active.length) % active.length;
       triggerHaptic(20);
       SoundFX.click();
+
+      // Reset de bedenktijd-klok indien ingeschakeld in instellingen
+      if (state.apTimerEnabled) {
+        startTableTimer(45);
+      }
+
       saveState();
       renderLiveLeaderboard();
       
@@ -1540,7 +1594,7 @@
         });
         if (completedBy.length > 0) {
           banner.classList.remove('hidden');
-          banner.innerHTML = `<span>🏁 <b>Einde spel bereikt!</b> ${completedBy.map(p => p.name).join(', ')} heeft een horizontale rij compleet! Dit is de laatste ronde.</span>`;
+          banner.innerHTML = `<span>🏁 <b>Einde spel bereikt!</b> ${completedBy.map(p => p.name).join(', ')} heeft een horizontale rij van 5 tegels compleet. Dit is de laatste ronde!</span>`;
           return;
         }
       }
@@ -1558,10 +1612,11 @@
               </button>
             `).join('')}
           </div>
-          ${knocker ? `<div class="text-[11px] text-amber-300 font-bold">👉 ${knocker.name} klopte! Nog 1 beurt voor: <b>${others || '-'}</b></div>` : `<div class="text-[11px] text-slate-400">Tik op een naam zodra iemand klopt / laatste beurt inzet.</div>`}
+          ${knocker ? `<div class="text-[11px] text-amber-300 font-bold">👉 ${knocker.name} klopte! Nog 1 beurt voor: <b>${others || '-'}</b></div>` : `<div class="text-[11px] text-slate-400">Tik op een naam zodra iemand klopt / laatste ronde inzet.</div>`}
         `;
         return;
       }
+
       banner.classList.add('hidden');
     }
 
@@ -1743,6 +1798,7 @@
       if (!container) return;
 
       if (def.id === 'doolhof' || def.type === 'doolhof') renderDoolhofSheet(container);
+      else if (def.id === 'wingspan') renderWingspanDashboard(container);
       else if (def.type === 'kok1' || def.type === 'kok2') renderKokSheet(container, def);
       else if (def.type === 'azul') renderAzulSheet(container, def);
       else if (def.type === 'rounds') renderRoundsSheet(container, def);
@@ -1782,6 +1838,11 @@
         const isLeader = standings.some(x => x.score !== 0) && item.score === topEntry?.score && item.tieVal === topEntry?.tieVal;
         const isTurn = (!state.isTeamMode && idx === (ensureGameState().activeTurnPlayerIdx || 0));
 
+        // Controleer live of er een record verbroken wordt
+        if (!item.isTeam) {
+          checkLiveGroepRecord(def.id, item.id, item.score);
+        }
+
         return `
           <div onclick="${!state.isTeamMode ? 'cycleActiveTurn(1)' : ''}" title="${!state.isTeamMode ? 'Tik om de beurt door te schuiven' : ''}"
             class="cursor-pointer rounded-2xl p-3 border transition ${isTurn ? 'player-active-turn bg-slate-900/90' : (isLeader ? 'bg-indigo-950/60 border-indigo-500/60 shadow-lg' : 'bg-slate-900 border-slate-800')}"
@@ -1802,118 +1863,205 @@
             <div class="score-number text-2xl font-black mt-1 ${isLeader ? 'text-indigo-300' : 'text-white'}">${item.score}</div>
             ${item.isTeam ? `<div class="text-[10px] text-slate-400 truncate mt-0.5">Leden: ${item.members.join(', ')}</div>` : ''}
             ${isLeader && hasTieBreak ? `<div class="text-[10px] text-emerald-300 font-bold">⚖️ Tie-val: ${item.tieVal}</div>` : ''}
+            ${item.handicap ? `<div class="text-[10px] text-slate-400">Handicap: ${item.handicap > 0 ? '+' : ''}${item.handicap}</div>` : ''}
           </div>`;
       }).join('');
     }
 
+        // =========================================================================
+    // 10. ALLE SPELBLADEN & INTERACTIEVE DASHBOARDS
     // =========================================================================
-    // 10A. AZUL
-    // =========================================================================
+
+    // --- 10A. AZUL (VOLLEDIG BORD: PATROONLIJNEN + 5x5 MUUR) ---
+    let activeAzulTabPlayerId = null;
+
     function renderAzulSheet(container, def) {
       const gs = ensureGameState(def.id);
       const isWall = gs.azulMode !== 'manual';
       const activePlayers = getActivePlayers();
+
+      if (!activeAzulTabPlayerId || !activePlayers.some(p => p.id === activeAzulTabPlayerId)) {
+        activeAzulTabPlayerId = activePlayers[0]?.id || null;
+      }
+
+      const activeP = state.players.find(p => p.id === activeAzulTabPlayerId) || activePlayers[0];
+      const az = gs.playerData[activeP.id]?.azul;
+      if (!az.patternLines) {
+        az.patternLines = [
+          { cap: 1, count: 0, color: null },
+          { cap: 2, count: 0, color: null },
+          { cap: 3, count: 0, color: null },
+          { cap: 4, count: 0, color: null },
+          { cap: 5, count: 0, color: null }
+        ];
+      }
+
+      const prev = computeAzulPreview(az);
+      const bon = computeAzulEndBonuses(az.wall);
+      const total = Number(az.baseScore || 0) + bon.total;
 
       container.innerHTML = `
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-bold text-slate-300">Telling:</span>
-              <button type="button" onclick="setAzulMode('wall')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${isWall ? 'bg-indigo-600 text-white shadow' : 'bg-slate-950 text-slate-400 border border-slate-800'}">🧱 5x5 Muur + Vloerlijn (Auto)</button>
+              <button type="button" onclick="setAzulMode('wall')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${isWall ? 'bg-indigo-600 text-white shadow' : 'bg-slate-950 text-slate-400 border border-slate-800'}">🧱 Volledig Bord + Muur</button>
               <button type="button" onclick="setAzulMode('manual')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${!isWall ? 'bg-indigo-600 text-white shadow' : 'bg-slate-950 text-slate-400 border border-slate-800'}">✍️ Handmatig</button>
             </div>
             ${isWall ? `
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold text-sky-400">Ronde ${gs.azulRound || 1}</span>
-              <button type="button" onclick="commitAzulRound()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow active:scale-95 transition">✓ Ronde ${gs.azulRound || 1} Scoren</button>
+              <button type="button" onclick="commitAzulRound()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow active:scale-95 transition">✓ Ronde Scoren & Doorschuiven</button>
             </div>` : ''}
           </div>
-          ${isWall ? `<p class="text-[11px] text-slate-400">💡 Tik per speler de <b>nieuw geschoven tegels van deze ronde</b> aan op de 5x5 muur en kies het aantal strafstenen op de <b>vloerlijn</b>. Klik daarna op <b>"Ronde Scoren"</b>.</p>` : ''}
+
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
+            ${activePlayers.map(p => `
+              <button type="button" onclick="activeAzulTabPlayerId='${p.id}'; renderScoreboard();" class="px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition ${p.id === activeP.id ? 'bg-indigo-600 border-indigo-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+                ${renderMeepleSvg(p.color, 'w-3.5 h-3.5')}
+                <span>${p.name}</span>
+                <span class="font-mono text-[10px] opacity-80">(${calculatePlayerTotal('azul', p.id)}p)</span>
+              </button>
+            `).join('')}
+          </div>
         </div>
 
-        ${!isWall ? `
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            ${activePlayers.map(p => {
-              const pd = gs.playerData[p.id];
-              return `
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
-                      ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                      <span class="font-bold text-sm text-white">${p.name}</span>
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2.5">
+              ${renderMeepleSvg(activeP.color, 'w-6 h-6')}
+              <div>
+                <h3 class="font-black text-sm sm:text-base text-white">${activeP.name} • Spelersbord</h3>
+                <p class="text-[11px] text-slate-400">Rondescore: <b>${az.baseScore}</b> • Bonus: <b>+${bon.total}</b></p>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black text-sky-400 font-mono">${total} pnt</div>
+              ${prev.delta !== 0 ? `<div class="text-[11px] font-bold ${prev.delta >= 0 ? 'text-emerald-400' : 'text-rose-400'}">Deze ronde: ${prev.delta >= 0 ? '+' : ''}${prev.delta}</div>` : ''}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center justify-center">
+            <div class="md:col-span-6 bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3.5 space-y-2">
+              <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Patroonlijnen (Tik om te vullen)</div>
+              ${az.patternLines.map((line, rIdx) => {
+                const isFull = line.count === line.cap;
+                return `
+                  <div class="flex items-center justify-end gap-1.5 py-0.5">
+                    <span class="text-[10px] font-mono text-slate-500 mr-2">R${rIdx + 1}</span>
+                    <div class="flex items-center justify-end gap-1.5 cursor-pointer" onclick="openPatternLineColorPicker('${activeP.id}', ${rIdx})">
+                      ${Array(line.cap).fill(null).map((_, slotIdx) => {
+                        const filled = slotIdx < line.count;
+                        const clr = line.color || 'blue';
+                        return `
+                          <div class="w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-black transition ${filled ? `azul-${clr} border-white/50 text-white shadow` : 'bg-slate-900 border-slate-800 text-slate-600'} ${isFull ? 'ring-2 ring-amber-400/80' : ''}">
+                            ${filled ? '■' : ''}
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
+                    <span class="text-xs ml-2 w-4 text-center ${isFull ? 'text-amber-400 font-black' : 'text-slate-600'}">${isFull ? '✓' : ''}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <div class="md:col-span-6 flex flex-col items-center">
+              <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">5x5 Mozaïek Muur</div>
+              <div class="grid grid-cols-5 gap-1.5 max-w-[240px]">
+                ${AZUL_WALL_PATTERN.map((row, rIdx) => row.map((clr, cIdx) => {
+                  const locked = az.wall[rIdx][cIdx];
+                  const pending = az.pending[rIdx][cIdx];
+                  return `
+                    <button type="button" onclick="toggleAzulTile('${activeP.id}', ${rIdx}, ${cIdx})"
+                      class="azul-tile azul-${clr} w-10 h-10 rounded-xl border flex items-center justify-center text-white font-black text-xs ${locked ? 'locked' : ''} ${pending ? 'pending' : ''}">
+                      ${locked ? '✓' : (pending ? '+' : '')}
                     </button>
-                    <span class="text-xl font-black text-indigo-400">${pd.liveScore || 0} pnt</span>
-                  </div>
-                  <div class="grid grid-cols-5 gap-1.5">
-                    ${[1, 2, 5, 10, -1].map(b => `
-                      <button type="button" onclick="addLivePoints('${p.id}',${b})" class="py-2 rounded-xl font-extrabold text-xs ${b < 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'}">${b > 0 ? '+' + b : b}</button>
-                    `).join('')}
-                  </div>
-                </div>`;
-            }).join('')}
+                  `;
+                }).join('')).join('')}
+              </div>
+            </div>
           </div>
-        ` : `
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-            ${activePlayers.map(p => {
-              const az = gs.playerData[p.id].azul;
-              const prev = computeAzulPreview(az);
-              const bon = computeAzulEndBonuses(az.wall);
-              const total = Number(az.baseScore || 0) + bon.total;
-              return `
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-                  <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-                    <div>
-                      <h3 class="font-bold text-sm text-white flex items-center gap-1.5">
-                        <button type="button" onclick="openQuickColorModal('${p.id}')" class="hover:scale-110 transition">
-                          ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                        </button>
-                        <span>${p.name}</span>
-                      </h3>
-                      <p class="text-[11px] text-slate-400">Rondescore: <b>${az.baseScore}</b> • Eindbonus: <b>+${bon.total}</b></p>
-                    </div>
-                    <div class="text-right">
-                      <span class="text-xl font-black text-sky-400">${total} pnt</span>
-                      ${(prev.gained > 0 || az.floor > 0) ? `<div class="text-[11px] font-bold ${prev.delta >= 0 ? 'text-emerald-400' : 'text-rose-400'}">Deze ronde: ${prev.delta >= 0 ? '+' : ''}${prev.delta}</div>` : ''}
-                    </div>
-                  </div>
 
-                  <div class="grid grid-cols-5 gap-1.5 max-w-[235px] mx-auto py-1">
-                    ${AZUL_WALL_PATTERN.map((row, rIdx) => row.map((clr, cIdx) => {
-                      const locked = az.wall[rIdx][cIdx];
-                      const pending = az.pending[rIdx][cIdx];
-                      return `
-                        <button type="button" onclick="toggleAzulTile('${p.id}', ${rIdx},${cIdx})"
-                          class="azul-tile azul-${clr} aspect-square rounded-xl border flex items-center justify-center text-white font-extrabold text-xs ${locked ? 'locked' : ''} ${pending ? 'pending' : ''}">
-                          ${locked ? '✓' : (pending ? '+' : '')}
-                        </button>`;
-                    }).join('')).join('')}
-                  </div>
-
-                  <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 space-y-1.5">
-                    <div class="flex items-center justify-between text-xs">
-                      <span class="text-slate-300 font-semibold">Vloerlijn:</span>
-                      <span class="font-extrabold text-rose-400">${AZUL_FLOOR_PENALTIES[az.floor || 0]} pnt</span>
-                    </div>
-                    <div class="grid grid-cols-8 gap-1">
-                      ${[0,1,2,3,4,5,6,7].map(cnt => `
-                        <button type="button" onclick="setAzulFloor('${p.id}',${cnt})"
-                          class="py-1 rounded-lg text-[11px] font-bold border ${az.floor === cnt ? 'bg-rose-600 border-rose-400 text-white' : 'bg-slate-900 border-slate-800 text-slate-400'}">
-                          ${cnt}
-                        </button>
-                      `).join('')}
-                    </div>
-                  </div>
-
-                  <div class="flex items-center justify-between text-[11px] text-slate-400 bg-slate-950/70 px-3 py-1.5 rounded-xl border border-slate-800/80">
-                    <span>↔️ Rijen (+2): <b class="text-white">${bon.rows}</b></span>
-                    <span>↕️ Kolommen (+7): <b class="text-white">${bon.cols}</b></span>
-                    <span>🎨 Kleuren (+10): <b class="text-white">${bon.colors}</b></span>
-                  </div>
-                </div>`;
-            }).join('')}
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-2">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-300 font-bold">Vloerlijn (Strafpunten):</span>
+              <span class="font-extrabold text-rose-400 font-mono">${AZUL_FLOOR_PENALTIES[az.floor || 0]} pnt</span>
+            </div>
+            <div class="grid grid-cols-8 gap-1.5">
+              ${[0, 1, 2, 3, 4, 5, 6, 7].map(cnt => `
+                <button type="button" onclick="setAzulFloor('${activeP.id}', ${cnt})"
+                  class="py-1.5 rounded-xl text-xs font-black border transition ${az.floor === cnt ? 'bg-rose-600 border-rose-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-400'}">
+                  ${cnt}
+                </button>
+              `).join('')}
+            </div>
           </div>
-        `}
+
+          <div class="flex items-center justify-between text-[11px] text-slate-400 bg-slate-950 px-3 py-2 rounded-xl border border-slate-800">
+            <span>↔️ Rijen (+2): <b class="text-white">${bon.rows}</b></span>
+            <span>↕️ Kolommen (+7): <b class="text-white">${bon.cols}</b></span>
+            <span>🎨 Volle Kleuren (+10): <b class="text-white">${bon.colors}</b></span>
+          </div>
+        </div>
       `;
+    }
+
+    function openPatternLineColorPicker(playerId, lineIdx) {
+      const colors = [
+        { id: 'blue', name: 'Blauw' },
+        { id: 'yellow', name: 'Geel' },
+        { id: 'red', name: 'Rood' },
+        { id: 'black', name: 'Zwart' },
+        { id: 'teal', name: 'Sneeuwwit/Teal' }
+      ];
+
+      const modalHtml = `
+        <div id="azulLineModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+            <h3 class="font-bold text-sm text-white">Patroonlijn ${lineIdx + 1} vullen</h3>
+            <div class="grid grid-cols-1 gap-2">
+              ${colors.map(c => `
+                <button type="button" onclick="setAzulPatternLine('${playerId}', ${lineIdx}, '${c.id}')" class="p-2.5 rounded-xl azul-${c.id} text-white font-extrabold text-xs shadow flex items-center justify-between">
+                  <span>${c.name}</span>
+                  <span>+1 tegel</span>
+                </button>
+              `).join('')}
+              <button type="button" onclick="clearAzulPatternLine('${playerId}', ${lineIdx})" class="p-2 rounded-xl bg-rose-500/20 text-rose-300 font-bold text-xs border border-rose-500/30">
+                🧹 Rij leegmaken
+              </button>
+            </div>
+            <button type="button" onclick="document.getElementById('azulLineModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Sluiten</button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function setAzulPatternLine(playerId, lineIdx, color) {
+      const gs = ensureGameState('azul');
+      const line = gs.playerData[playerId].azul.patternLines[lineIdx];
+      if (line.color && line.color !== color) {
+        if (!confirm(`Deze rij bevat al ${line.color}. Overschrijven met ${color}?`)) return;
+        line.count = 0;
+      }
+      line.color = color;
+      line.count = Math.min(line.cap, line.count + 1);
+      triggerHaptic(20);
+      SoundFX.click();
+      saveState();
+      renderScoreboard();
+      document.getElementById('azulLineModal')?.remove();
+    }
+
+    function clearAzulPatternLine(playerId, lineIdx) {
+      const gs = ensureGameState('azul');
+      gs.playerData[playerId].azul.patternLines[lineIdx].count = 0;
+      gs.playerData[playerId].azul.patternLines[lineIdx].color = null;
+      triggerHaptic(15);
+      saveState();
+      renderScoreboard();
+      document.getElementById('azulLineModal')?.remove();
     }
 
     function setAzulMode(mode) {
@@ -1927,9 +2075,7 @@
       const gs = ensureGameState('azul');
       const az = gs.playerData[playerId].azul;
       if (az.wall[r][c]) {
-        if (confirm('Deze tegel ligt al vast. Wil je hem echt verwijderen?')) {
-          az.wall[r][c] = false;
-        }
+        if (confirm('Deze tegel ligt al vast. Verwijderen?')) az.wall[r][c] = false;
       } else {
         az.pending[r][c] = !az.pending[r][c];
       }
@@ -1949,9 +2095,22 @@
     }
 
     function commitAzulRound() {
+      pushUndoSnapshot();
       const gs = ensureGameState('azul');
       getActivePlayers().forEach(p => {
         const az = gs.playerData[p.id].azul;
+
+        (az.patternLines || []).forEach((line, rIdx) => {
+          if (line.count === line.cap && line.color) {
+            const cIdx = AZUL_WALL_PATTERN[rIdx].indexOf(line.color);
+            if (cIdx !== -1) {
+              az.pending[rIdx][cIdx] = true;
+            }
+            line.count = 0;
+            line.color = null;
+          }
+        });
+
         const prev = computeAzulPreview(az);
         az.baseScore = prev.newBase;
         for (let r = 0; r < 5; r++) {
@@ -1964,17 +2123,171 @@
         }
         az.floor = 0;
       });
+
       gs.azulRound = (gs.azulRound || 1) + 1;
       triggerHaptic(40);
       SoundFX.fanfare();
       saveState();
       renderScoreboard();
-      showToast(`✅ Ronde berekend!`);
+      showToast(`✅ Ronde ${gs.azulRound - 1} berekend & tegels doorgeschoven!`);
     }
 
-    // =========================================================================
-    // 10B. KEER OP KEER 1 & 2
-    // =========================================================================
+    // --- 10B. WINGSPAN (INTERACTIEVE SPEELMAT MET 3 HABITATS) ---
+    let activeWingspanTabPlayerId = null;
+
+    function renderWingspanDashboard(container) {
+      const gs = ensureGameState('wingspan');
+      const activePlayers = getActivePlayers();
+
+      if (!activeWingspanTabPlayerId || !activePlayers.some(p => p.id === activeWingspanTabPlayerId)) {
+        activeWingspanTabPlayerId = activePlayers[0]?.id || null;
+      }
+
+      const activeP = state.players.find(p => p.id === activeWingspanTabPlayerId) || activePlayers[0];
+      const pd = gs.playerData[activeP.id];
+      const wb = pd.wingspanBoard;
+
+      const habitats = [
+        { id: 'forest', name: '🌲 Bos (Voedsel)', icon: '🌲', bg: 'bg-emerald-950/40 border-emerald-500/30 text-emerald-300' },
+        { id: 'grass', name: '🌾 Weide (Eieren)', icon: '🌾', bg: 'bg-amber-950/40 border-amber-500/30 text-amber-300' },
+        { id: 'wetland', name: '🌊 Moeras (Kaarten)', icon: '🌊', bg: 'bg-sky-950/40 border-sky-500/30 text-sky-300' }
+      ];
+
+      container.innerHTML = `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-300">Spelersbord selectie:</span>
+            <span class="text-xs font-black text-amber-400 font-mono">Totaal: ${calculatePlayerTotal('wingspan', activeP.id)} pnt</span>
+          </div>
+
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            ${activePlayers.map(p => `
+              <button type="button" onclick="activeWingspanTabPlayerId='${p.id}'; renderScoreboard();" class="px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition ${p.id === activeP.id ? 'bg-indigo-600 border-indigo-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+                ${renderMeepleSvg(p.color, 'w-3.5 h-3.5')}
+                <span>${p.name}</span>
+                <span class="font-mono text-[10px] opacity-80">(${calculatePlayerTotal('wingspan', p.id)}p)</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2.5">
+              ${renderMeepleSvg(activeP.color, 'w-6 h-6')}
+              <h3 class="font-black text-base text-white">${activeP.name} • Natuurreservaat</h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400">Tik op een vogel om eieren of fiches toe te voegen</span>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            ${habitats.map(hab => `
+              <div class="rounded-2xl border p-3 space-y-2 ${hab.bg}">
+                <div class="flex items-center justify-between">
+                  <span class="font-extrabold text-xs flex items-center gap-1.5">${hab.name}</span>
+                </div>
+                <div class="grid grid-cols-5 gap-2">
+                  ${(wb[hab.id] || []).map((slot, sIdx) => {
+                    return slot.active ? `
+                      <div onclick="openBirdSlotEditor('${activeP.id}', '${hab.id}', ${sIdx})" class="cursor-pointer bg-slate-900/90 border border-slate-700/80 hover:border-amber-400 rounded-xl p-2 space-y-1 text-center shadow-lg transition">
+                        <div class="text-[10px] font-black text-amber-300 font-mono">${slot.pts} VP</div>
+                        <div class="text-xs">🥚 ${slot.eggs}</div>
+                        <div class="text-[10px] text-slate-400">🃏 ${slot.tucked} • 🍒 ${slot.food}</div>
+                      </div>
+                    ` : `
+                      <button type="button" onclick="openBirdSlotEditor('${activeP.id}', '${hab.id}', ${sIdx})" class="h-16 rounded-xl border border-dashed border-slate-700 hover:border-slate-500 bg-slate-950/50 flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 transition text-[11px] font-bold">
+                        <span>+ Vogel</span>
+                        <span class="text-[9px] opacity-60">#${sIdx + 1}</span>
+                      </button>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-300">📜 Bonuskaarten</span>
+              ${renderNumberStepper(`ws_bonus_${activeP.id}`, wb.bonusCards, `val => { wb.bonusCards = Number(val); saveState(); renderLiveLeaderboard(); }`)}
+            </div>
+            <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+              <span class="text-xs font-bold text-sky-400">🎯 Rondedoelen</span>
+              ${renderNumberStepper(`ws_goals_${activeP.id}`, wb.roundGoals, `val => { wb.roundGoals = Number(val); saveState(); renderLiveLeaderboard(); }`)}
+            </div>
+            <div class="bg-slate-950 border border-rose-500/40 rounded-xl p-2.5 flex items-center justify-between">
+              <span class="text-xs font-bold text-rose-300">🌺 Nectar (Oceanië)</span>
+              ${renderNumberStepper(`ws_nectar_${activeP.id}`, wb.nectar, `val => { wb.nectar = Number(val); saveState(); renderLiveLeaderboard(); }`)}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openBirdSlotEditor(playerId, habId, slotIdx) {
+      const gs = ensureGameState('wingspan');
+      const slot = gs.playerData[playerId].wingspanBoard[habId][slotIdx];
+
+      const modalHtml = `
+        <div id="birdEditorModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <h3 class="font-black text-sm text-white">Vogel op Slot #${slotIdx + 1}</h3>
+              <button type="button" onclick="document.getElementById('birdEditorModal').remove()" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            
+            <div class="space-y-3 text-xs">
+              <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
+                <span class="text-amber-300 font-bold">Overwinningspunten:</span>
+                ${renderNumberStepper('birdPtsInp', slot.pts, `val => { slot.pts = Number(val); }`)}
+              </div>
+              <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
+                <span class="text-slate-200 font-bold">🥚 Eieren op kaart:</span>
+                ${renderNumberStepper('birdEggsInp', slot.eggs, `val => { slot.eggs = Number(val); }`)}
+              </div>
+              <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
+                <span class="text-slate-200 font-bold">🃏 Weggestopte kaarten:</span>
+                ${renderNumberStepper('birdTuckedInp', slot.tucked, `val => { slot.tucked = Number(val); }`)}
+              </div>
+              <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
+                <span class="text-slate-200 font-bold">🍒 Opgeslagen voedsel:</span>
+                ${renderNumberStepper('birdFoodInp', slot.food, `val => { slot.food = Number(val); }`)}
+              </div>
+            </div>
+
+            <div class="flex gap-2 pt-2 border-t border-slate-800">
+              <button type="button" onclick="removeBirdFromSlot('${playerId}', '${habId}', ${slotIdx})" class="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 font-bold text-xs border border-rose-500/30">Wis</button>
+              <button type="button" onclick="saveBirdSlot('${playerId}', '${habId}', ${slotIdx})" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg">✓ Opslaan</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function saveBirdSlot(playerId, habId, slotIdx) {
+      const gs = ensureGameState('wingspan');
+      const slot = gs.playerData[playerId].wingspanBoard[habId][slotIdx];
+      slot.active = true;
+      triggerHaptic(20);
+      SoundFX.point();
+      saveState();
+      renderScoreboard();
+      document.getElementById('birdEditorModal')?.remove();
+    }
+
+    function removeBirdFromSlot(playerId, habId, slotIdx) {
+      const gs = ensureGameState('wingspan');
+      gs.playerData[playerId].wingspanBoard[habId][slotIdx] = { active: false, pts: 0, eggs: 0, tucked: 0, food: 0 };
+      triggerHaptic(15);
+      saveState();
+      renderScoreboard();
+      document.getElementById('birdEditorModal')?.remove();
+    }
+
+    // --- 10C. KEER OP KEER 1 & 2 ---
     function renderKokSheet(container, def) {
       const gs = ensureGameState(def.id);
       const isKok2 = def.type === 'kok2';
@@ -2092,9 +2405,7 @@
       }
     }
 
-    // =========================================================================
-    // 10C. ROUNDS & FLIP 7
-    // =========================================================================
+    // --- 10D. ROUNDS & FLIP 7 ---
     function renderRoundsSheet(container, def) {
       const gs = ensureGameState(def.id);
       const activePlayers = getActivePlayers();
@@ -2259,9 +2570,7 @@
       document.getElementById('roundGraphModal')?.classList.add('hidden');
     }
 
-    // =========================================================================
-    // 10D. QWIXX, CLEVER & CASCADIA
-    // =========================================================================
+    // --- 10E. QWIXX, CLEVER & CASCADIA ---
     function renderQwixxSheet(container) {
       const gs = ensureGameState('qwixx');
       const rows = [
@@ -2365,6 +2674,11 @@
       if (key === 'greenCount') renderScoreboard();
     }
 
+    const CASCADIA_RULES = {
+      salmon: { A: [0, 2, 5, 9, 14, 20, 27], B: [0, 2, 4, 9, 11, 17] },
+      bear: { A: [0, 4, 11, 19, 27], B: [0, 10] }
+    };
+
     function renderCascadiaSheet(container) {
       const gs = ensureGameState('cascadia');
       const habBonuses = computeCascadiaHabitatBonuses('cascadia');
@@ -2386,11 +2700,14 @@
               </button>
               <span class="text-xs font-extrabold text-emerald-400">Gebiedsbonus: +${habBonuses[p.id] || 0} • Totaal: ${calculatePlayerTotal('cascadia', p.id)}</span>
             </div>
-            <div class="text-xs font-semibold text-slate-400">Dierenkaarten</div>
+            <div class="text-xs font-semibold text-slate-400">Dierenkaarten (Tik icoon voor scorehulp)</div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               ${animals.map(a => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
-                  <span class="text-[11px] font-bold text-slate-300 truncate">${a.l}</span>
+                  <button type="button" onclick="openCascadiaCardHelper('${p.id}', '${a.k}')" class="text-[11px] font-bold text-slate-300 hover:text-amber-300 flex items-center gap-1 truncate">
+                    <span>${a.l}</span>
+                    <span class="text-[9px] opacity-60">ℹ️</span>
+                  </button>
                   ${renderNumberStepper(`casc_${p.id}_${a.k}`, c[a.k], `val => setCascadiaVal('${p.id}','${a.k}', val)`)}
                 </div>`).join('')}
             </div>
@@ -2418,9 +2735,42 @@
       renderScoreboard();
     }
 
-    // =========================================================================
-    // 10E. REGENWORMEN
-    // =========================================================================
+    function openCascadiaCardHelper(playerId, animalKey) {
+      const player = state.players.find(p => p.id === playerId);
+      if (!player) return;
+
+      const helperHtml = `
+        <div id="cascCardModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+            <h3 class="font-bold text-sm text-white">🌲 Cascadia Scorehulp: ${animalKey.toUpperCase()}</h3>
+            <p class="text-xs text-slate-400">Kies de kaartregel uit jullie spel:</p>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <button type="button" onclick="applyCascadiaPreset('${playerId}', '${animalKey}', 'A')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold">Kaart A (Standaard)</button>
+              <button type="button" onclick="applyCascadiaPreset('${playerId}', '${animalKey}', 'B')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold">Kaart B (Groepen)</button>
+            </div>
+            <button type="button" onclick="document.getElementById('cascCardModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Sluiten</button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', helperHtml);
+    }
+
+    function applyCascadiaPreset(playerId, animalKey, cardType) {
+      const gs = ensureGameState('cascadia');
+      const count = prompt(`Hoeveel ${animalKey}-sets of formaties heeft ${state.players.find(p => p.id === playerId)?.name}?`, '1');
+      if (count === null) return;
+      const num = Number(count || 0);
+      const ruleTable = CASCADIA_RULES[animalKey]?.[cardType] || [];
+      const score = ruleTable[Math.min(num, ruleTable.length - 1)] || (num * 3);
+      gs.playerData[playerId].cascadia[animalKey] = score;
+      saveState();
+      renderScoreboard();
+      document.getElementById('cascCardModal')?.remove();
+      SoundFX.point();
+      showToast(`🌲 +${score} punten berekend!`);
+    }
+
+    // --- 10F. REGENWORMEN ---
     function isRegenwormenExpActive(gs) {
       if (!gs || !gs.activeExpansions) return false;
       return Object.keys(gs.activeExpansions).some(k => gs.activeExpansions[k]);
@@ -2533,9 +2883,7 @@
       renderScoreboard();
     }
 
-    // =========================================================================
-    // 10F. CATEGORIES, WONDERS, TTR, YAHTZEE, CATAN, ETC.
-    // =========================================================================
+    // --- 10G. CATEGORIES, WONDERS, TTR, YAHTZEE, CATAN, ETC. ---
     function renderCategoriesSheet(container, def) {
       const gs = ensureGameState(def.id);
       let cats = [...(def.categories || ['Punten'])];
@@ -2580,6 +2928,7 @@
     }
 
     function renderWonders7Sheet(container) { renderCategoriesSheet(container, getGameDef('wonders7')); }
+
     function renderTtrSheet(container) {
       const gs = ensureGameState('ttr');
       const routeBtns = [
@@ -2721,6 +3070,7 @@
                 <button type="button" onclick="openQuickColorModal('${p.id}')" title="Kleur snel wisselen" class="flex items-center gap-1.5 hover:opacity-80 transition">
                   ${renderMeepleSvg(p.color, 'w-5 h-5')}
                   <span class="font-extrabold text-sm text-white">${p.name}</span>
+                  <span class="text-[10px] text-slate-500">🎨</span>
                 </button>
                 <div class="text-xl font-black ${isWinner ? 'text-amber-300 animate-pulse' : 'text-indigo-400'}">
                   ${totalPts} <span class="text-xs font-normal text-slate-400">/ 10</span>
@@ -2770,6 +3120,7 @@
     }
 
     function renderSushiGoSheet(container) { renderCategoriesSheet(container, getGameDef('sushigo')); }
+
     function renderLostCitiesSheet(container) {
       const gs = ensureGameState('lostcities');
       container.innerHTML = getActivePlayers().map(p => {
@@ -2855,12 +3206,49 @@
     function renderCoopSheet(container, def) { renderCarcassonneSheet(container, def); }
     function renderCodenamesSheet(container) { renderCarcassonneSheet(container, getGameDef('codenames')); }
     function renderTheMindSheet(container) { renderCarcassonneSheet(container, getGameDef('themind')); }
+
+    function renderCarcaTileCounter(gs) {
+      if (gs.tilesLeft === undefined) {
+        let startTiles = 72;
+        if (gs.activeExpansions?.['⛪ Kathedralen & Herbergen']) startTiles += 18;
+        if (gs.activeExpansions?.['🍷 Kooplieden & Bouwmeesters']) startTiles += 24;
+        gs.tilesLeft = startTiles;
+      }
+
+      return `
+        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🎴</span>
+            <div>
+              <div class="text-xs font-bold text-white">Tegels in Zak</div>
+              <div class="text-[10px] text-slate-400">Aftellen naar het eindspel</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="adjCarcaTiles(-1)" class="w-8 h-8 rounded-xl bg-slate-800 text-white font-black text-sm hover:bg-slate-700">-</button>
+            <span class="font-mono font-black text-base ${gs.tilesLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-amber-300'} w-10 text-center">${gs.tilesLeft}</span>
+            <button type="button" onclick="adjCarcaTiles(1)" class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-500">+</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function adjCarcaTiles(delta) {
+      const gs = ensureGameState('carcassonne');
+      gs.tilesLeft = Math.max(0, (gs.tilesLeft || 72) + delta);
+      triggerHaptic(15);
+      SoundFX.click();
+      saveState();
+      renderScoreboard();
+    }
+
     function renderCarcassonneSheet(container, def) {
       const gs = ensureGameState(def.id);
       const isCarc = def.id === 'carcassonne';
       const btns = [1, 2, 3, 5, 9, 10, -1];
+      const tileBar = isCarc ? renderCarcaTileCounter(gs) : '';
 
-      container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">` + getActivePlayers().map(p => {
+      container.innerHTML = tileBar + `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">` + getActivePlayers().map(p => {
         const pd = gs.playerData[p.id];
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
