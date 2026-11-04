@@ -151,7 +151,7 @@
           <button type="button" id="navBtnHistory" onclick="switchMainView('history')" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center">🏆 Statistieken</button>
         </div>
 
-        <!-- Desktop actieknoppen rechts -->
+                <!-- Desktop actieknoppen rechts -->
         <div class="hidden sm:flex items-center gap-1.5 shrink-0">
           <button type="button" onclick="openGamePickerWheelModal()" class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/40 border border-indigo-400 text-indigo-200 text-xs font-black transition text-center">🎲 Wat spelen we?</button>
           <button type="button" onclick="openStartTournamentModal()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-extrabold transition text-center">🏆 Toernooi</button>
@@ -164,6 +164,7 @@
 
   <!-- Main Container -->
   <main class="max-w-5xl mx-auto p-4 space-y-5">
+
     <!-- VIEW 1: GAME PICKER -->
     <section id="viewPicker" class="space-y-4">
       <div id="quickFavWidget" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-2.5">
@@ -1734,8 +1735,8 @@
       }).join('');
     }
 
-    // =========================================================================
-    // 9. SCOREBOARD RENDERING, ORIËNTATIE & LIVE STAND
+        // =========================================================================
+    // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND
     // =========================================================================
     function toggleLayoutOrientation() {
       state.layoutOrientation = (state.layoutOrientation === 'landscape') ? 'portrait' : 'landscape';
@@ -1748,7 +1749,7 @@
       const isLandscape = (state.layoutOrientation === 'landscape');
       const isScoreboardOpen = !document.getElementById('viewScoreboard')?.classList.contains('hidden');
 
-      // Pas horizontale klasse alleen toe als we daadwerkelijk in het actieve spel zitten
+      // Forceer 'layout-landscape' UIT als we niet in het actieve spelbord zitten
       const shouldApplyLandscape = isLandscape && isScoreboardOpen;
       document.body.classList.toggle('layout-landscape', shouldApplyLandscape);
 
