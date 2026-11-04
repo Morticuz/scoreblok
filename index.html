@@ -84,7 +84,7 @@
     <button type="button" onclick="dismissCrashBanner()" class="bg-slate-950 text-white px-2.5 py-1 rounded-xl text-[10px]">Prima</button>
   </div>
 
-  <!-- Top Header -->
+    <!-- Top Header -->
   <header class="sticky top-0 z-30 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 py-3">
     <div class="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div class="flex items-center justify-between">
@@ -107,6 +107,9 @@
           <button type="button" onclick="openLiveRoomModal()" class="w-32 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold text-center transition">
             📡 Live Tafel
           </button>
+          <button type="button" onclick="openSecretRolesModal()" class="w-32 py-1.5 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-extrabold text-center transition">
+            🤫 Geheime Rollen
+          </button>
         </div>
       </div>
 
@@ -122,6 +125,7 @@
           <button type="button" onclick="openStartTournamentModal()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-extrabold transition text-center">🏆 Toernooi</button>
           <button type="button" onclick="openLiveRoomModal()" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold transition text-center">📡 Live Tafel</button>
           <button type="button" onclick="openStartPlayerModal()" class="px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 text-xs font-extrabold transition text-center">🎲 Wie begint?</button>
+          <button type="button" onclick="openSecretRolesModal()" class="px-3 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 text-xs font-extrabold transition text-center">🤫 Geheime Rollen</button>
         </div>
       </div>
     </div>
@@ -1346,8 +1350,8 @@
       }
     }
 
-    // =========================================================================
-    // 8. GAME PICKER & FAVORITES
+        // =========================================================================
+    // 8. GAME PICKER & FAVORITES (INCL. SPELKEUZE-HULP #12)
     // =========================================================================
     function setPickerTab(tab) {
       state.pickerTab = tab;
@@ -1401,6 +1405,160 @@
       if (typeof checkShowPreMatchRivalry === 'function') {
         checkShowPreMatchRivalry(gameId);
       }
+    }
+
+    // =========================================================================
+    // 12. SLIMME SPELKEUZE-HULP ("WAT SPELEN WE VANAVOND?")
+    // =========================================================================
+    let pickerWheelInterval = null;
+
+    function openGamePickerWheelModal() {
+      let modal = document.getElementById('gamePickerWheelModal');
+      if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+          <div id="gamePickerWheelModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-2xl">🎲</span>
+                  <h3 class="font-black text-sm text-white">Wat spelen we vanavond?</h3>
+                </div>
+                <button type="button" onclick="closeGamePickerWheelModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+              </div>
+
+              <div class="space-y-3 text-xs text-left">
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Aantal Spelers:</label>
+                    <select id="wheelPlayersSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white font-bold">
+                      <option value="active">👥 Huidige groep (${getActivePlayers().length}p)</option>
+                      <option value="2">2 Spelers</option>
+                      <option value="3">3 Spelers</option>
+                      <option value="4">4 Spelers</option>
+                      <option value="5">5+ Spelers</option>
+                      <option value="all">Alle spelers</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Beschikbare Tijd:</label>
+                    <select id="wheelDurationSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white font-bold">
+                      <option value="all">⏱️ Maakt niet uit</option>
+                      <option value="short">⚡ Kort (&lt;30m)</option>
+                      <option value="medium">🎲 Middel (30-60m)</option>
+                      <option value="long">🏰 Lang (60m+)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <label class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer">
+                  <input type="checkbox" id="wheelFavsOnlyCheck" class="rounded border-slate-700 text-indigo-600 focus:ring-0" />
+                  <span class="font-bold text-slate-300">Alleen kiezen uit Favorieten ⭐</span>
+                </label>
+              </div>
+
+              <!-- Het 'Rad van Fortuin' display -->
+              <div id="wheelCardDisplay" class="bg-slate-950 border-2 border-indigo-500/40 rounded-2xl p-4 flex flex-col items-center justify-center min-h-[110px] space-y-2 shadow-inner">
+                <div id="wheelArtworkBox" class="w-12 h-12 flex items-center justify-center">🎲</div>
+                <div id="wheelGameTitle" class="font-black text-base text-white">Tik op 'Kies voor ons!'</div>
+                <div id="wheelGameSubtitle" class="text-[11px] text-slate-400">De app kiest een passend spel</div>
+              </div>
+
+              <div class="flex gap-2 pt-1">
+                <button type="button" onclick="spinGamePickerWheel()" class="flex-1 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition active:scale-95">
+                  🎲 Kies voor ons!
+                </button>
+                <button type="button" id="wheelStartChosenGameBtn" onclick="launchChosenWheelGame()" disabled class="px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 text-white font-black text-xs shadow-lg transition">
+                  ▶️ Start Spel
+                </button>
+              </div>
+            </div>
+          </div>
+        `);
+        modal = document.getElementById('gamePickerWheelModal');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeGamePickerWheelModal() {
+      clearInterval(pickerWheelInterval);
+      pickerWheelInterval = null;
+      document.getElementById('gamePickerWheelModal')?.classList.add('hidden');
+    }
+
+    let lastChosenWheelGameId = null;
+
+    function spinGamePickerWheel() {
+      const allCatalog = getAllGames();
+      const pFilter = document.getElementById('wheelPlayersSelect')?.value || 'active';
+      const dFilter = document.getElementById('wheelDurationSelect')?.value || 'all';
+      const favsOnly = !!document.getElementById('wheelFavsOnlyCheck')?.checked;
+
+      const activeCnt = getActivePlayers().length;
+      let pool = favsOnly 
+        ? (state.favorites || []).map(id => allCatalog.find(g => g.id === id)).filter(Boolean)
+        : [...allCatalog];
+
+      if (pFilter !== 'all') {
+        const targetP = pFilter === 'active' ? activeCnt : Number(pFilter);
+        pool = pool.filter(g => {
+          const min = g.minP || 1, max = g.maxP || 10;
+          return targetP >= min && targetP <= max;
+        });
+      }
+
+      if (dFilter !== 'all') {
+        pool = pool.filter(g => (g.dur || 'medium') === dFilter);
+      }
+
+      if (pool.length === 0) {
+        showToast('⚠️ Geen spellen gevonden met deze filters!');
+        return;
+      }
+
+      clearInterval(pickerWheelInterval);
+      const titleEl = document.getElementById('wheelGameTitle');
+      const subEl = document.getElementById('wheelGameSubtitle');
+      const artBox = document.getElementById('wheelArtworkBox');
+      const launchBtn = document.getElementById('wheelStartChosenGameBtn');
+      if (launchBtn) launchBtn.disabled = true;
+
+      let speed = 40;
+      let steps = 0;
+      const maxSteps = 24 + Math.floor(Math.random() * 8);
+
+      triggerHaptic(20);
+      SoundFX.click();
+
+      function step() {
+        const randG = pool[Math.floor(Math.random() * pool.length)];
+        titleEl.textContent = randG.name;
+        subEl.textContent = randG.subtitle || 'Bordspel';
+        artBox.innerHTML = renderGameArtwork(randG.id, 'w-12 h-12');
+        SoundFX.click();
+        triggerHaptic(10);
+        steps++;
+
+        if (steps < maxSteps) {
+          speed += 12;
+          pickerWheelInterval = setTimeout(step, speed);
+        } else {
+          lastChosenWheelGameId = randG.id;
+          if (launchBtn) launchBtn.disabled = false;
+          triggerHaptic(40);
+          triggerConfetti();
+          SoundFX.fanfare();
+          SoundFX.speak(`Vanavond spelen we: ${randG.name}!`);
+        }
+      }
+
+      step();
+    }
+
+    function launchChosenWheelGame() {
+      if (!lastChosenWheelGameId) return;
+      closeGamePickerWheelModal();
+      openGame(lastChosenWheelGameId);
     }
 
     function renderGamePicker() {
@@ -1479,8 +1637,25 @@
       const grid = document.getElementById('gamesGrid');
       if (!grid) return;
 
+      // Voeg bovenaan de grid een opvallende "Wat spelen we vanavond?" balk toe
+      const pickHelperBanner = `
+        <div class="col-span-full bg-gradient-to-r from-indigo-950/70 via-slate-900 to-indigo-950/70 border border-indigo-500/40 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2.5 shadow-lg">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">🎲</span>
+            <div>
+              <div class="font-extrabold text-xs text-white">Twijfels aan tafel?</div>
+              <div class="text-[11px] text-slate-400">Laat de app een perfect spel loten voor ${activeCnt} spelers</div>
+            </div>
+          </div>
+          <button type="button" onclick="openGamePickerWheelModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5 active:scale-95">
+            <span>🎲</span>
+            <span>Wat spelen we?</span>
+          </button>
+        </div>
+      `;
+
       if (games.length === 0) {
-        grid.innerHTML = `
+        grid.innerHTML = pickHelperBanner + `
           <div class="col-span-full bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
             <div class="text-3xl">${isFavTab ? '⭐' : '🔍'}</div>
             <h3 class="font-bold text-sm text-white">${isFavTab ? 'Je hebt nog geen favorieten ingesteld' : 'Geen spellen gevonden met dit filter'}</h3>
@@ -1489,7 +1664,7 @@
         return;
       }
 
-      grid.innerHTML = games.map((g, idx) => {
+      grid.innerHTML = pickHelperBanner + games.map((g, idx) => {
         const isFav = (state.favorites || []).includes(g.id);
         const catBadge = g.category === 'board'
           ? '<span class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 text-[10px] font-bold">Bordspel</span>'
@@ -3709,9 +3884,95 @@
     }
 
         // =========================================================================
-    // 12. STATISTIEKEN, SEIZOENSWISSEL, BEKERS, ELO & RIVALS
+    // 12. STATISTIEKEN, SEIZOENSWISSEL, BEKERS, ELO & RIVALS (INCL. ACHIEVEMENTS #7)
     // =========================================================================
     let eloTimelineChartInstance = null;
+
+    // DEFINITIE VAN AUTOMATISCHE ACHIEVEMENTS (#7)
+    const ACHIEVEMENTS_DEF = [
+      {
+        id: 'hattrick',
+        name: 'Hattrick',
+        icon: '🔥',
+        desc: '3 overwinningen op rij behaald',
+        check: (pId, history) => {
+          let streak = 0;
+          for (let m of history) {
+            if ((m.players || []).includes(pId)) {
+              if ((m.winners || []).includes(pId)) {
+                streak++;
+                if (streak >= 3) return true;
+              } else {
+                streak = 0;
+              }
+            }
+          }
+          return false;
+        }
+      },
+      {
+        id: 'comeback',
+        name: 'Comeback Kid',
+        icon: '🦅',
+        desc: 'Gewonnen na een laatste plek in het vorige potje',
+        check: (pId, history) => {
+          const pMatches = history.filter(m => (m.players || []).includes(pId));
+          for (let i = 0; i < pMatches.length - 1; i++) {
+            const current = pMatches[i];
+            const previous = pMatches[i + 1];
+            const wonCurrent = (current.winners || []).includes(pId);
+            if (wonCurrent && previous.results && previous.results.length > 1) {
+              const lastPlaceId = previous.results[previous.results.length - 1]?.playerId;
+              if (lastPlaceId === pId) return true;
+            }
+          }
+          return false;
+        }
+      },
+      {
+        id: 'nightowl',
+        name: 'Nachtuil',
+        icon: '🦉',
+        desc: 'Een potje gewonnen na 00:30 uur \'s nachts',
+        check: (pId, history) => {
+          return history.some(m => {
+            if (!(m.winners || []).includes(pId)) return false;
+            const hour = new Date(m.date || m.timestamp).getHours();
+            return hour >= 0 && hour < 5;
+          });
+        }
+      },
+      {
+        id: 'centurion',
+        name: 'Veteraan',
+        icon: '🎖️',
+        desc: 'Minstens 25 potjes gespeeld',
+        check: (pId, history) => {
+          return history.filter(m => (m.players || []).includes(pId)).length >= 25;
+        }
+      },
+      {
+        id: 'versatile',
+        name: 'Allrounder',
+        icon: '🌐',
+        desc: 'Gewonnen in minstens 5 verschillende spellen',
+        check: (pId, history) => {
+          const wonGames = new Set();
+          history.forEach(m => {
+            if ((m.winners || []).includes(pId)) wonGames.add(m.gameId);
+          });
+          return wonGames.size >= 5;
+        }
+      }
+    ];
+
+    function getPlayerAchievements(playerId) {
+      const history = state.history || [];
+      return ACHIEVEMENTS_DEF.map(ach => ({
+        ...ach,
+        unlocked: ach.check(playerId, history)
+      }));
+    }
 
     function renderEloTimelineChart() {
       const canvas = document.getElementById('eloTimelineCanvas');
@@ -4041,6 +4302,10 @@
       document.getElementById('hallOfFameList').innerHTML = playerStats.map((p, idx) => {
         const sCups = p.seasonCups ? `<span class="px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-black" title="${p.seasonCups}x Seizoensbeker">🏆 ${p.seasonCups}</span>` : '';
         const tCups = p.tournamentCups ? `<span class="px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-black" title="${p.tournamentCups}x Toernooibeker">🥇 ${p.tournamentCups}</span>` : '';
+        
+        // Mini badge tellertje in de Hall of Fame
+        const badgesUnlocked = getPlayerAchievements(p.id).filter(a => a.unlocked).length;
+        const bBadge = badgesUnlocked > 0 ? `<span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold">🎖️ ${badgesUnlocked}</span>` : '';
 
         return `
           <div onclick="openPlayerProfileModal('${p.id}')" class="bg-slate-950 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-3 flex items-center justify-between cursor-pointer transition">
@@ -4050,7 +4315,7 @@
               <div>
                 <div class="font-extrabold text-sm text-white flex items-center gap-1.5">
                   <span>${p.name}</span>
-                  ${sCups}${tCups}
+                  ${sCups}${tCups}${bBadge}
                 </div>
                 <div class="text-[11px] text-slate-400 flex items-center gap-2">
                   <span>${p.played} potjes</span>
@@ -4111,35 +4376,35 @@
       const mList = document.getElementById('historyMatchesList');
       if (filteredMatches.length === 0) {
         mList.innerHTML = '<div class="text-xs text-slate-500 py-3 text-center">Geen potjes gevonden voor dit filter.</div>';
-      } else {
-        mList.innerHTML = filteredMatches.map((m, mIdx) => {
-          const game = allCatalog.find(g => g.id === m.gameId) || { name: 'Bordspel', icon: 'free' };
-          const winnerNames = (m.winners || []).map(id => state.players.find(p => p.id === id)?.name || 'Onbekend').join(', ');
-          const dateStr = new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
-          const durBadge = m.duration ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-amber-300 font-bold font-mono">⏱️ ${m.duration}m</span>` : '';
-          const teamBadge = m.isTeamMatch ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">👥 Teams</span>` : '';
-
-          return `
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3">
-              <div class="flex items-center gap-3 min-w-0">
-                ${renderGameArtwork(m.gameId, 'w-10 h-10')}
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2 flex-wrap">
-                    <h4 class="font-black text-xs text-white truncate">${game.name}</h4>
-                    <span class="text-[10px] text-slate-500 font-bold">${dateStr}</span>
-                    ${durBadge}${teamBadge}
-                  </div>
-                  <div class="text-xs text-indigo-400 font-semibold truncate">🏆 ${winnerNames}</div>
-                  ${m.note ? `<div class="text-[11px] text-slate-400 italic mt-0.5 truncate">"${m.note}"</div>` : ''}
-                </div>
-              </div>
-              <button type="button" onclick="deleteHistoryMatch(${mIdx})" class="text-slate-600 hover:text-rose-400 text-xs font-bold p-1">✕</button>
-            </div>
-          `;
-        }).join('');
+        return;
       }
 
-      // Render de Elo-verloop grafiek
+      mList.innerHTML = filteredMatches.map((m, mIdx) => {
+        const game = allCatalog.find(g => g.id === m.gameId) || { name: 'Bordspel', icon: 'free' };
+        const winnerNames = (m.winners || []).map(id => state.players.find(p => p.id === id)?.name || 'Onbekend').join(', ');
+        const dateStr = new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+        const durBadge = m.duration ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-amber-300 font-bold font-mono">⏱️ ${m.duration}m</span>` : '';
+        const teamBadge = m.isTeamMatch ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">👥 Teams</span>` : '';
+
+        return `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+              ${renderGameArtwork(m.gameId, 'w-10 h-10')}
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h4 class="font-black text-xs text-white truncate">${game.name}</h4>
+                  <span class="text-[10px] text-slate-500 font-bold">${dateStr}</span>
+                  ${durBadge}${teamBadge}
+                </div>
+                <div class="text-xs text-indigo-400 font-semibold truncate">🏆 ${winnerNames}</div>
+                ${m.note ? `<div class="text-[11px] text-slate-400 italic mt-0.5 truncate">"${m.note}"</div>` : ''}
+              </div>
+            </div>
+            <button type="button" onclick="deleteHistoryMatch(${mIdx})" class="text-slate-600 hover:text-rose-400 text-xs font-bold p-1">✕</button>
+          </div>
+        `;
+      }).join('');
+
       renderEloTimelineChart();
     }
 
@@ -4159,7 +4424,7 @@
       }
     }
 
-    // SPELER PROFIEL MODAL
+    // SPELER PROFIEL MODAL MET RADAR & ACHIEVEMENTS (#7)
     let profileRadarChart = null;
 
     function openPlayerProfileModal(playerId) {
@@ -4219,12 +4484,35 @@
       const bestGameObj = getAllGames().find(g => g.id === bestGameId);
       document.getElementById('profFavGame').textContent = bestGameObj ? `${bestGameObj.name} (${bestCount} wins)` : 'Nog geen favoriet';
 
+      // ACHIEVEMENTS TONEN IN HET PROFIEL (#7)
+      const achievements = getPlayerAchievements(p.id);
+      const achHtml = `
+        <div class="space-y-2 pt-1 border-t border-slate-800">
+          <h4 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider flex items-center justify-between">
+            <span>🎖️ Medailles & Badges</span>
+            <span class="text-amber-400 font-bold">${achievements.filter(a => a.unlocked).length} / ${achievements.length}</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            ${achievements.map(a => `
+              <div class="p-2 rounded-xl border flex items-center gap-2.5 transition ${a.unlocked ? 'bg-indigo-950/40 border-indigo-500/40' : 'bg-slate-950/60 border-slate-800/80 opacity-40'}">
+                <span class="text-2xl">${a.icon}</span>
+                <div class="min-w-0">
+                  <div class="font-extrabold text-xs ${a.unlocked ? 'text-white' : 'text-slate-400'}">${a.name}</div>
+                  <div class="text-[10px] text-slate-400 truncate">${a.desc}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+
       const rList = document.getElementById('profRivalsList');
       const rEntries = Object.entries(rivals);
+      let rivalsHtml = '';
       if (rEntries.length === 0) {
-        rList.innerHTML = '<div class="text-xs text-slate-500 py-2">Nog geen onderlinge duels gespeeld.</div>';
+        rivalsHtml = '<div class="text-xs text-slate-500 py-2">Nog geen onderlinge duels gespeeld.</div>';
       } else {
-        rList.innerHTML = rEntries.map(([oId, data]) => {
+        rivalsHtml = rEntries.map(([oId, data]) => {
           const other = state.players.find(x => x.id === oId) || { name: 'Onbekend', color: '#6366f1' };
           return `
             <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between text-xs">
@@ -4238,6 +4526,10 @@
             </div>
           `;
         }).join('');
+      }
+
+      if (rList) {
+        rList.innerHTML = rivalsHtml + achHtml;
       }
 
       setTimeout(() => {
@@ -4291,8 +4583,8 @@
       }
     }
 
-    // =========================================================================
-    // 13. WIE START ER VANDAAG?
+        // =========================================================================
+    // 13. WIE START ER VANDAAG? & GEHEIME ROLLEN (HOLD-TO-PEEK #8)
     // =========================================================================
     function openStartPlayerModal() {
       rollStartPlayer();
@@ -4374,6 +4666,142 @@
       triggerHaptic(20);
       SoundFX.click();
       SoundFX.speak(c);
+    }
+
+    // =========================================================================
+    // 8. GEHEIME ROLLEN ENGINE & HOLD-TO-PEEK LOGICA
+    // =========================================================================
+    const ROLE_PRESETS = {
+      saboteur: {
+        name: '⛏️ Saboteur',
+        roles: (count) => {
+          const sabs = count <= 4 ? 1 : (count <= 6 ? 2 : 3);
+          const miners = count - sabs;
+          return [
+            ...Array(sabs).fill({ role: 'Saboteur 💣', desc: 'Dwarsboom de goudzoekers zonder ontdekt te worden!' }),
+            ...Array(miners).fill({ role: 'Goudzoeker ⛏️', desc: 'Bouw een gang naar de schat met goud!' })
+          ];
+        }
+      },
+      weerwolven: {
+        name: '🐺 Weerwolven',
+        roles: (count) => {
+          const wolves = count <= 5 ? 1 : 2;
+          const list = [
+            ...Array(wolves).fill({ role: 'Weerwolf 🐺', desc: 'Schakel elke nacht stiekem een dorpeling uit.' }),
+            { role: 'Ziener 🔮', desc: 'Bekijk elke nacht de ware identiteit van een speler.' }
+          ];
+          while (list.length < count) {
+            list.push({ role: 'Burger 👨‍🌾', desc: 'Ontmasker de weerwolven tijdens de dorpsraad.' });
+          }
+          return list;
+        }
+      },
+      secret_agent: {
+        name: '🕵️ Spion / Verrader',
+        roles: (count) => [
+          { role: 'Verrader 🗡️', desc: 'Jij speelt in het geheim tegen de groep!' },
+          ...Array(count - 1).fill({ role: 'Trouwe Bondgenoot 🛡️', desc: 'Voltooi de missie en vertrouw niemand zomaar.' })
+        ]
+      }
+    };
+
+    let activeAssignedRoles = {};
+
+    function openSecretRolesModal() {
+      const act = getActivePlayers();
+      const body = document.getElementById('secretRolesBody');
+      if (!body) return;
+
+      body.innerHTML = `
+        <div class="space-y-3 text-xs text-left">
+          <p class="text-slate-400">Deel in het geheim rollen of doelen uit. Iedereen bekijkt zijn eigen rol discreet via <b>Hold-to-Peek</b>.</p>
+          
+          <div>
+            <label class="block text-slate-300 font-bold mb-1">Kies een rol-verdeling (${act.length} spelers):</label>
+            <div class="grid grid-cols-1 gap-2">
+              ${Object.entries(ROLE_PRESETS).map(([k, pre]) => `
+                <button type="button" onclick="distributeSecretRoles('${k}')" class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-purple-500/50 text-white font-extrabold flex items-center justify-between transition">
+                  <span>${pre.name}</span>
+                  <span class="text-[10px] text-purple-400 font-normal">Deel willekeurig uit 🎲</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('secretRolesModal')?.classList.remove('hidden');
+    }
+
+    function closeSecretRolesModal() {
+      document.getElementById('secretRolesModal')?.classList.add('hidden');
+    }
+
+    function distributeSecretRoles(presetKey) {
+      const act = getActivePlayers();
+      const preset = ROLE_PRESETS[presetKey];
+      if (!preset || act.length === 0) return;
+
+      const roles = preset.roles(act.length).sort(() => Math.random() - 0.5);
+      activeAssignedRoles = {};
+
+      act.forEach((p, idx) => {
+        activeAssignedRoles[p.id] = roles[idx];
+      });
+
+      triggerHaptic(30);
+      SoundFX.fanfare();
+      renderSecretRolesPeekingView();
+    }
+
+    function renderSecretRolesPeekingView() {
+      const act = getActivePlayers();
+      const body = document.getElementById('secretRolesBody');
+      if (!body) return;
+
+      body.innerHTML = `
+        <div class="space-y-3 text-xs">
+          <div class="text-[11px] text-purple-300 font-black uppercase tracking-wider">Geheime Rollen Uitgedeeld!</div>
+          <p class="text-slate-400 text-[11px]">Geef de telefoon door. Iedereen <b>houdt zijn eigen knop ingedrukt</b> om zijn rol te zien zonder dat anderen meekijken.</p>
+
+          <div class="space-y-2">
+            ${act.map(p => `
+              <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                  <span class="font-extrabold text-sm text-white">${p.name}</span>
+                </div>
+                <button type="button"
+                  onmousedown="startHoldPeek('${p.id}')"
+                  onmouseup="stopHoldPeek('${p.id}')"
+                  ontouchstart="startHoldPeek('${p.id}')"
+                  ontouchend="stopHoldPeek('${p.id}')"
+                  class="select-none px-3 py-1.5 rounded-xl bg-purple-600/30 border border-purple-500/50 hover:bg-purple-600/50 active:scale-95 text-purple-200 text-xs font-black transition flex items-center gap-1.5">
+                  <span>👁️</span><span>Houd ingedrukt</span>
+                </button>
+              </div>
+
+              <!-- Het verborgen rol-vakje dat tijdelijk opent -->
+              <div id="peekBox_${p.id}" class="hidden p-3 rounded-2xl bg-gradient-to-br from-purple-950 via-slate-900 to-black border-2 border-purple-400 text-center space-y-1 shadow-2xl animate-pulse">
+                <div class="text-lg font-black text-amber-300">${activeAssignedRoles[p.id]?.role || 'Rol'}</div>
+                <div class="text-[11px] text-slate-300 font-semibold">${activeAssignedRoles[p.id]?.desc || ''}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function startHoldPeek(playerId) {
+      triggerHaptic(25);
+      const box = document.getElementById(`peekBox_${playerId}`);
+      if (box) box.classList.remove('hidden');
+    }
+
+    function stopHoldPeek(playerId) {
+      const box = document.getElementById(`peekBox_${playerId}`);
+      if (box) box.classList.add('hidden');
     }
 
     // =========================================================================
@@ -5989,7 +6417,7 @@
   <!-- Onzichtbaar Canvas voor Deelbare Podium Afbeelding -->
   <canvas id="shareExportCanvas" class="hidden"></canvas>
 
-  <!-- ZWEVENDE TIMER / ZANDLOPER WIDGET -->
+    <!-- ZWEVENDE TIMER / ZANDLOPER WIDGET -->
   <div id="floatingTimerWidget" class="fixed bottom-20 right-4 z-40 flex flex-col items-end gap-2 pointer-events-none">
     <div id="timerCard" class="hidden pointer-events-auto bg-slate-900/95 border border-slate-700 backdrop-blur rounded-2xl p-3 shadow-2xl flex items-center gap-3 transition">
       <span id="timerDisplay" class="font-black text-lg text-amber-400 font-mono">00:30</span>
@@ -6005,6 +6433,20 @@
     </button>
   </div>
 
+  <!-- MODAL: GEHEIME ROLLEN & DOELEN (HOLD-TO-PEEK #8) -->
+  <div id="secretRolesModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-purple-500/40 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="text-2xl">🤫</span>
+          <h3 class="font-black text-sm text-white">Geheime Rollen & Doelen</h3>
+        </div>
+        <button type="button" onclick="closeSecretRolesModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+      </div>
+      <div id="secretRolesBody" class="space-y-3"></div>
+      <button type="button" onclick="closeSecretRolesModal()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">Sluiten</button>
+    </div>
+  </div>
+
 </body>
 </html>
-
