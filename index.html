@@ -272,6 +272,20 @@
     <section id="viewHistory" class="hidden space-y-4">
       <div id="championCupWidget" class="bg-gradient-to-r from-amber-950/60 via-slate-900 to-amber-950/60 border border-amber-500/50 rounded-2xl p-4 shadow-xl"></div>
       <div id="banterStatsWidget" class="space-y-3"></div>
+     
+      <!-- ELO TIJDLINIE GRAFIEK (#6) -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-black text-sm text-white flex items-center gap-2">📈 Elo Rating Verloop</h3>
+            <p class="text-xs text-slate-400">Ontwikkeling van spelersratings door de tijd heen</p>
+          </div>
+          <button type="button" onclick="renderEloTimelineChart()" class="text-xs font-bold text-indigo-400 hover:text-indigo-300">↻ Ververs</button>
+        </div>
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 h-52 flex items-center justify-center">
+          <canvas id="eloTimelineCanvas"></canvas>
+        </div>
+      </div>
 
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
@@ -3694,9 +3708,98 @@
       }
     }
 
-    // =========================================================================
+        // =========================================================================
     // 12. STATISTIEKEN, SEIZOENSWISSEL, BEKERS, ELO & RIVALS
     // =========================================================================
+    let eloTimelineChartInstance = null;
+
+    function renderEloTimelineChart() {
+      const canvas = document.getElementById('eloTimelineCanvas');
+      if (!canvas || typeof Chart === 'undefined') return;
+
+      const matches = [...(state.history || [])].reverse();
+      const activeP = getActivePlayers();
+      if (activeP.length === 0) return;
+
+      const labels = ['Start', ...matches.map((m, idx) => {
+        const gDef = getGameDef(m.gameId);
+        return `#${idx + 1} ${gDef ? gDef.name.substring(0, 8) : 'Match'}`;
+      })];
+
+      const datasets = activeP.map(player => {
+        const historyPts = [1200];
+        let runningElo = 1200;
+
+        matches.forEach(m => {
+          const participants = m.players || [];
+          const winners = m.winners || [];
+
+          if (participants.includes(player.id)) {
+            const K = 32;
+            let totalExpected = 0;
+            let actualScore = winners.includes(player.id) ? 1 : 0;
+            let opponentsCount = 0;
+
+            participants.forEach(oId => {
+              if (oId === player.id) return;
+              const opp = state.players.find(x => x.id === oId);
+              const oppElo = opp?.elo || 1200;
+              totalExpected += 1 / (1 + Math.pow(10, (oppElo - runningElo) / 400));
+              opponentsCount++;
+            });
+
+            if (opponentsCount > 0) {
+              const avgExpected = totalExpected / opponentsCount;
+              const delta = Math.round(K * (actualScore - avgExpected));
+              runningElo = Math.max(800, runningElo + delta);
+            }
+          }
+          historyPts.push(runningElo);
+        });
+
+        return {
+          label: player.name,
+          data: historyPts,
+          borderColor: player.color || '#6366f1',
+          backgroundColor: (player.color || '#6366f1') + '22',
+          borderWidth: 2.5,
+          pointRadius: matches.length > 20 ? 1 : 3.5,
+          tension: 0.25,
+          fill: false
+        };
+      });
+
+      if (eloTimelineChartInstance) {
+        eloTimelineChartInstance.destroy();
+      }
+
+      eloTimelineChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          scales: {
+            x: {
+              grid: { color: '#1e293b' },
+              ticks: { color: '#64748b', font: { size: 9, weight: 'bold' }, maxRotation: 45 }
+            },
+            y: {
+              grid: { color: '#1e293b' },
+              ticks: { color: '#94a3b8', font: { size: 10, weight: 'bold' } }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#f8fafc', boxWidth: 10, font: { size: 11, weight: 'bold' } }
+            }
+          }
+        }
+      });
+    }
+
     function setStatsSortMode(mode) {
       state.statsSortMode = mode;
       saveState();
@@ -4008,34 +4111,36 @@
       const mList = document.getElementById('historyMatchesList');
       if (filteredMatches.length === 0) {
         mList.innerHTML = '<div class="text-xs text-slate-500 py-3 text-center">Geen potjes gevonden voor dit filter.</div>';
-        return;
+      } else {
+        mList.innerHTML = filteredMatches.map((m, mIdx) => {
+          const game = allCatalog.find(g => g.id === m.gameId) || { name: 'Bordspel', icon: 'free' };
+          const winnerNames = (m.winners || []).map(id => state.players.find(p => p.id === id)?.name || 'Onbekend').join(', ');
+          const dateStr = new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+          const durBadge = m.duration ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-amber-300 font-bold font-mono">⏱️ ${m.duration}m</span>` : '';
+          const teamBadge = m.isTeamMatch ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">👥 Teams</span>` : '';
+
+          return `
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                ${renderGameArtwork(m.gameId, 'w-10 h-10')}
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h4 class="font-black text-xs text-white truncate">${game.name}</h4>
+                    <span class="text-[10px] text-slate-500 font-bold">${dateStr}</span>
+                    ${durBadge}${teamBadge}
+                  </div>
+                  <div class="text-xs text-indigo-400 font-semibold truncate">🏆 ${winnerNames}</div>
+                  ${m.note ? `<div class="text-[11px] text-slate-400 italic mt-0.5 truncate">"${m.note}"</div>` : ''}
+                </div>
+              </div>
+              <button type="button" onclick="deleteHistoryMatch(${mIdx})" class="text-slate-600 hover:text-rose-400 text-xs font-bold p-1">✕</button>
+            </div>
+          `;
+        }).join('');
       }
 
-      mList.innerHTML = filteredMatches.map((m, mIdx) => {
-        const game = allCatalog.find(g => g.id === m.gameId) || { name: 'Bordspel', icon: 'free' };
-        const winnerNames = (m.winners || []).map(id => state.players.find(p => p.id === id)?.name || 'Onbekend').join(', ');
-        const dateStr = new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
-        const durBadge = m.duration ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-900 text-amber-300 font-bold font-mono">⏱️ ${m.duration}m</span>` : '';
-        const teamBadge = m.isTeamMatch ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">👥 Teams</span>` : '';
-
-        return `
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3 min-w-0">
-              ${renderGameArtwork(m.gameId, 'w-10 h-10')}
-              <div class="min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <h4 class="font-black text-xs text-white truncate">${game.name}</h4>
-                  <span class="text-[10px] text-slate-500 font-bold">${dateStr}</span>
-                  ${durBadge}${teamBadge}
-                </div>
-                <div class="text-xs text-indigo-400 font-semibold truncate">🏆 ${winnerNames}</div>
-                ${m.note ? `<div class="text-[11px] text-slate-400 italic mt-0.5 truncate">"${m.note}"</div>` : ''}
-              </div>
-            </div>
-            <button type="button" onclick="deleteHistoryMatch(${mIdx})" class="text-slate-600 hover:text-rose-400 text-xs font-bold p-1">✕</button>
-          </div>
-        `;
-      }).join('');
+      // Render de Elo-verloop grafiek
+      renderEloTimelineChart();
     }
 
     function deleteHistoryMatch(idx) {
@@ -4418,7 +4523,7 @@
       switchMainView('history');
     }
 
-    // =========================================================================
+        // =========================================================================
     // 16. PODIUM MODAL, TIE-BREAKER OVERRULE & TOERNOOI ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
@@ -4601,7 +4706,7 @@
       };
 
       if (!state.tournament) {
-        state.tournament = { active: false, name: 'Bordspel Toernooi', matches: [] };
+        state.tournament = { active: false, mode: 'bracket', name: 'Bordspel Beker', rounds: [], matches: [] };
       }
       if (state.tournament.active) {
         if (!Array.isArray(state.tournament.matches)) state.tournament.matches = [];
@@ -4637,8 +4742,8 @@
       let modal = document.getElementById('tournamentModal');
       if (!modal) {
         document.body.insertAdjacentHTML('beforeend', `
-          <div id="tournamentModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div id="tournamentModalContent" class="bg-slate-900 border border-amber-500/40 rounded-3xl max-w-md w-full p-5 space-y-4 shadow-2xl"></div>
+          <div id="tournamentModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+            <div id="tournamentModalContent" class="bg-slate-900 border border-amber-500/40 rounded-3xl max-w-xl w-full p-5 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto"></div>
           </div>
         `);
         modal = document.getElementById('tournamentModal');
@@ -4657,77 +4762,162 @@
       if (!content) return;
 
       if (!state.tournament) {
-        state.tournament = { active: false, name: 'Bordspel Toernooi', matches: [] };
+        state.tournament = { active: false, mode: 'bracket', name: 'Bordspel Beker', bracketRounds: [], matches: [] };
       }
       const tour = state.tournament;
 
       if (!tour.active) {
+        const act = getActivePlayers();
         content.innerHTML = `
           <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
             <div class="flex items-center gap-2">
               <span class="text-2xl">🏆</span>
-              <h3 class="font-black text-sm text-white">Nieuw Toernooi Starten</h3>
+              <h3 class="font-black text-sm sm:text-base text-white">Nieuw Toernooi Opzetten</h3>
             </div>
             <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
           </div>
-          <div class="space-y-3 text-xs">
+
+          <div class="space-y-3.5 text-xs">
             <div>
               <label class="block text-slate-400 font-semibold mb-1">Toernooinaam:</label>
-              <input type="text" id="tourNameInput" value="Spelavond Beker" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
+              <input type="text" id="tourNameInput" value="Tafelkampioenschap ${new Date().getFullYear()}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
             </div>
+
             <div>
-              <label class="block text-slate-400 font-semibold mb-1">Deelnemers (${getActivePlayers().length} actief):</label>
+              <label class="block text-slate-400 font-semibold mb-1.5">Toernooivorm:</label>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer">
+                  <input type="radio" name="tourModeRadio" value="bracket" checked class="text-amber-500 focus:ring-0" />
+                  <div>
+                    <div class="font-extrabold text-white">🥊 Knock-out (Brackets)</div>
+                    <div class="text-[10px] text-slate-400">Directe duels tot in de finale</div>
+                  </div>
+                </label>
+                <label class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer">
+                  <input type="radio" name="tourModeRadio" value="poule" class="text-amber-500 focus:ring-0" />
+                  <div>
+                    <div class="font-extrabold text-white">📊 Competitie (Poule)</div>
+                    <div class="text-[10px] text-slate-400">Iedereen tegen iedereen</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-400 font-semibold mb-1">Deelnemers (${act.length} geselecteerd):</label>
               <div class="flex flex-wrap gap-1.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                ${getActivePlayers().map(p => `
-                  <span class="px-2 py-1 rounded-lg bg-slate-900 text-white font-bold flex items-center gap-1 text-[11px]">
+                ${act.map(p => `
+                  <span class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-white font-bold flex items-center gap-1.5 text-[11px]">
                     ${renderMeepleSvg(p.color, 'w-3 h-3')} ${p.name}
                   </span>
                 `).join('')}
               </div>
+              ${act.length < 2 ? `<p class="text-rose-400 text-[11px] mt-1 font-bold">⚠️ Activeer minstens 2 spelers via het menu 'Spelers'.</p>` : ''}
             </div>
           </div>
+
           <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
             <button type="button" onclick="closeTournamentModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">Annuleren</button>
-            <button type="button" onclick="startTournamentAction()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20">🏆 Start Toernooi</button>
+            <button type="button" onclick="startTournamentAction()" ${act.length < 2 ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20">🏆 Genereer Toernooi</button>
+          </div>
+        `;
+      } else if (tour.mode === 'bracket') {
+        content.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">🥊</span>
+              <div>
+                <h3 class="font-black text-sm sm:text-base text-white">${tour.name}</h3>
+                <span class="text-[10px] text-amber-400 font-bold">Knock-out Toernooi</span>
+              </div>
+            </div>
+            <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+          </div>
+
+          <div class="space-y-4 py-1">
+            ${(tour.bracketRounds || []).map((round, rIdx) => `
+              <div class="space-y-2">
+                <div class="text-[11px] font-black uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                  <span>${round.name}</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  ${round.matches.map((m, mIdx) => {
+                    const p1 = state.players.find(x => x.id === m.player1Id);
+                    const p2 = state.players.find(x => x.id === m.player2Id);
+                    const isDone = !!m.winnerId;
+
+                    return `
+                      <div class="bg-slate-950 border ${isDone ? 'border-amber-500/50' : 'border-slate-800'} rounded-2xl p-2.5 space-y-1.5 shadow">
+                        <div class="text-[10px] text-slate-500 font-bold">Match #${m.id}</div>
+                        <div class="space-y-1">
+                          <button type="button" onclick="setBracketMatchWinner(${rIdx}, ${mIdx}, '${m.player1Id}')" ${(!p1 || isDone) ? 'disabled' : ''}
+                            class="w-full px-2.5 py-1.5 rounded-xl border text-left font-bold text-xs flex items-center justify-between transition ${m.winnerId === m.player1Id ? 'bg-amber-500 text-slate-950 border-amber-300 font-black' : 'bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700'}">
+                            <span class="flex items-center gap-1.5 truncate">
+                              ${p1 ? renderMeepleSvg(p1.color, 'w-3 h-3') : ''}
+                              <span>${p1 ? p1.name : (m.player1Placeholder || 'TBD')}</span>
+                            </span>
+                            ${m.winnerId === m.player1Id ? '👑' : ''}
+                          </button>
+
+                          <button type="button" onclick="setBracketMatchWinner(${rIdx}, ${mIdx}, '${m.player2Id}')" ${(!p2 || isDone) ? 'disabled' : ''}
+                            class="w-full px-2.5 py-1.5 rounded-xl border text-left font-bold text-xs flex items-center justify-between transition ${m.winnerId === m.player2Id ? 'bg-amber-500 text-slate-950 border-amber-300 font-black' : 'bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700'}">
+                            <span class="flex items-center gap-1.5 truncate">
+                              ${p2 ? renderMeepleSvg(p2.color, 'w-3 h-3') : ''}
+                              <span>${p2 ? p2.name : (m.player2Placeholder || 'TBD')}</span>
+                            </span>
+                            ${m.winnerId === m.player2Id ? '👑' : ''}
+                          </button>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="flex gap-2 pt-2 border-t border-slate-800">
+            <button type="button" onclick="finishTournamentAction()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 font-extrabold text-xs">
+              🏁 Toernooi Voltooien & Beker Uitreiken
+            </button>
+            <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
+              Sluiten
+            </button>
           </div>
         `;
       } else {
-        const tourWins = {};
-        getActivePlayers().forEach(p => tourWins[p.id] = 0);
+        const act = getActivePlayers();
+        const pWins = {};
+        act.forEach(p => pWins[p.id] = 0);
         (tour.matches || []).forEach(m => {
-          (m.winners || []).forEach(wId => {
-            if (tourWins[wId] !== undefined) tourWins[wId]++;
-          });
+          (m.winners || []).forEach(wId => { if (pWins[wId] !== undefined) pWins[wId]++; });
         });
 
-        const sortedStandings = getActivePlayers().map(p => ({
-          ...p,
-          wins: tourWins[p.id] || 0
-        })).sort((a, b) => b.wins - a.wins);
+        const standings = act.map(p => ({ ...p, wins: pWins[p.id] || 0 })).sort((a, b) => b.wins - a.wins);
 
         content.innerHTML = `
           <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
             <div class="flex items-center gap-2">
-              <span class="text-2xl">🏆</span>
+              <span class="text-2xl">📊</span>
               <div>
-                <h3 class="font-black text-sm text-white">${tour.name}</h3>
-                <span class="text-[10px] text-amber-400 font-bold">${(tour.matches || []).length} gespeelde potjes</span>
+                <h3 class="font-black text-sm sm:text-base text-white">${tour.name}</h3>
+                <span class="text-[10px] text-amber-400 font-bold">Poule Competitie</span>
               </div>
             </div>
             <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
           </div>
 
           <div class="space-y-2">
-            <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Tussenstand Beker</div>
-            <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-              ${sortedStandings.map((p, idx) => `
+            <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Poule Klassement</div>
+            <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+              ${standings.map((p, idx) => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs">
                   <div class="flex items-center gap-2">
                     <span class="font-black ${idx === 0 ? 'text-amber-400' : 'text-slate-500'}">#${idx + 1}</span>
                     ${renderMeepleSvg(p.color, 'w-4 h-4')}
                     <span class="font-bold text-white">${p.name}</span>
                   </div>
-                  <span class="font-black text-amber-300 font-mono text-sm">${p.wins} winst${p.wins === 1 ? '' : 'en'}</span>
+                  <span class="font-black text-amber-300 font-mono">${p.wins} winst${p.wins === 1 ? '' : 'en'}</span>
                 </div>
               `).join('')}
             </div>
@@ -4735,7 +4925,7 @@
 
           <div class="flex gap-2 pt-2 border-t border-slate-800">
             <button type="button" onclick="finishTournamentAction()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 font-extrabold text-xs">
-              🏁 Beëindig Toernooi
+              🏁 Competitie Afronden & Beker Uitreiken
             </button>
             <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
               Sluiten
@@ -4746,43 +4936,132 @@
     }
 
     function startTournamentAction() {
-      const name = document.getElementById('tourNameInput')?.value.trim() || 'Bordspel Toernooi';
-      state.tournament = {
-        active: true,
-        name,
-        matches: []
-      };
+      const name = document.getElementById('tourNameInput')?.value.trim() || 'Bordspel Beker';
+      const mode = document.querySelector('input[name="tourModeRadio"]:checked')?.value || 'bracket';
+      const act = getActivePlayers();
+
+      if (act.length < 2) return;
+
+      if (mode === 'poule') {
+        state.tournament = {
+          active: true,
+          mode: 'poule',
+          name,
+          matches: []
+        };
+      } else {
+        const shuffled = [...act].sort(() => Math.random() - 0.5);
+        let round1Matches = [];
+
+        for (let i = 0; i < shuffled.length; i += 2) {
+          round1Matches.push({
+            id: (i / 2) + 1,
+            player1Id: shuffled[i]?.id || null,
+            player2Id: shuffled[i + 1]?.id || null,
+            winnerId: shuffled[i + 1] ? null : shuffled[i].id
+          });
+        }
+
+        const bracketRounds = [{ name: 'Eerste Ronde', matches: round1Matches }];
+        let matchCount = round1Matches.length;
+
+        while (matchCount > 1) {
+          const nextCount = Math.ceil(matchCount / 2);
+          const roundName = nextCount === 1 ? 'Grote Finale 🏆' : (nextCount === 2 ? 'Halve Finale' : 'Kwartfinale');
+          const nextMatches = [];
+          for (let m = 0; m < nextCount; m++) {
+            nextMatches.push({
+              id: m + 1,
+              player1Id: null,
+              player2Id: null,
+              player1Placeholder: `Winnaar #${m * 2 + 1}`,
+              player2Placeholder: `Winnaar #${m * 2 + 2}`,
+              winnerId: null
+            });
+          }
+          bracketRounds.push({ name: roundName, matches: nextMatches });
+          matchCount = nextCount;
+        }
+
+        state.tournament = {
+          active: true,
+          mode: 'bracket',
+          name,
+          bracketRounds,
+          matches: []
+        };
+      }
+
       triggerHaptic(30);
       SoundFX.fanfare();
       saveState();
       renderTournamentModalContent();
-      showToast(`🏆 Toernooi "${name}" is gestart!`);
+      showToast(`🏆 Toernooi "${name}" aangemaakt!`);
+    }
+
+    function setBracketMatchWinner(roundIdx, matchIdx, winnerPlayerId) {
+      if (!winnerPlayerId) return;
+      const tour = state.tournament;
+      const curRound = tour.bracketRounds[roundIdx];
+      const match = curRound.matches[matchIdx];
+      match.winnerId = winnerPlayerId;
+
+      if (roundIdx + 1 < tour.bracketRounds.length) {
+        const nextRound = tour.bracketRounds[roundIdx + 1];
+        const nextMatchIdx = Math.floor(matchIdx / 2);
+        const nextMatch = nextRound.matches[nextMatchIdx];
+        if (nextMatch) {
+          if (matchIdx % 2 === 0) {
+            nextMatch.player1Id = winnerPlayerId;
+          } else {
+            nextMatch.player2Id = winnerPlayerId;
+          }
+        }
+      }
+
+      triggerHaptic(25);
+      SoundFX.point();
+      saveState();
+      renderTournamentModalContent();
     }
 
     function finishTournamentAction() {
-      if (confirm('Weet je zeker dat je het huidige toernooi wilt afronden en de beker wilt uitreiken?')) {
-        const tourWins = {};
-        getActivePlayers().forEach(p => tourWins[p.id] = 0);
-        (state.tournament?.matches || []).forEach(m => {
-          (m.winners || []).forEach(wId => { if (tourWins[wId] !== undefined) tourWins[wId]++; });
+      if (!confirm('Weet je zeker dat je het huidige toernooi wilt beëindigen en de winnaar wilt belonen?')) return;
+
+      const tour = state.tournament;
+      let finalWinnerId = null;
+
+      if (tour.mode === 'bracket') {
+        const finalRound = tour.bracketRounds[tour.bracketRounds.length - 1];
+        finalWinnerId = finalRound?.matches[0]?.winnerId || null;
+      } else {
+        const act = getActivePlayers();
+        const pWins = {};
+        act.forEach(p => pWins[p.id] = 0);
+        (tour.matches || []).forEach(m => {
+          (m.winners || []).forEach(wId => { if (pWins[wId] !== undefined) pWins[wId]++; });
         });
         let topW = 0;
-        Object.values(tourWins).forEach(w => { if (w > topW) topW = w; });
-        if (topW > 0) {
-          state.players.forEach(p => {
-            if (tourWins[p.id] === topW) p.tournamentCups = (p.tournamentCups || 0) + 1;
-          });
-        }
-
-        triggerHaptic(40);
-        SoundFX.fanfare();
-        triggerConfetti();
-        state.tournament.active = false;
-        saveState();
-        closeTournamentModal();
-        showToast('🏆 Toernooi afgerond & toernooibeker uitgereikt!');
-        renderHistoryView();
+        Object.entries(pWins).forEach(([id, w]) => {
+          if (w > topW) { topW = w; finalWinnerId = id; }
+        });
       }
+
+      if (finalWinnerId) {
+        const winP = state.players.find(x => x.id === finalWinnerId);
+        if (winP) {
+          winP.tournamentCups = (winP.tournamentCups || 0) + 1;
+          showToast(`🏆 ${winP.name} wint het toernooi! Beker toegekend.`);
+        }
+      }
+
+      triggerHaptic(40);
+      SoundFX.fanfare();
+      triggerConfetti();
+      state.tournament.active = false;
+      saveState();
+      closeTournamentModal();
+      renderHistoryView();
     }
 
     // =========================================================================
