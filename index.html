@@ -4523,7 +4523,7 @@
       switchMainView('history');
     }
 
-         // =========================================================================
+        // =========================================================================
     // 16. PODIUM MODAL, TIE-BREAKER OVERRULE & TOERNOOI ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
@@ -4777,27 +4777,42 @@
 
       if (!tour.active) {
         const act = getActivePlayers();
-        const activeGameName = getGameDef(state.activeGameId)?.name || 'Rummikub';
+        const activeGameName = getGameDef(state.activeGameId)?.name || 'Spel';
 
         content.innerHTML = `
           <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
             <div class="flex items-center gap-2">
               <span class="text-2xl">🏆</span>
-              <h3 class="font-black text-sm sm:text-base text-white">Nieuw Toernooi Opzetten</h3>
+              <div>
+                <h3 class="font-black text-sm sm:text-base text-white">Nieuw Toernooi Opzetten</h3>
+                <span class="text-[10px] text-amber-400 font-bold">Speel om de officiële 🥇 Toernooibeker</span>
+              </div>
             </div>
             <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
           </div>
 
+          <!-- Duidelijke uitleg over bekers en namen -->
+          <div class="bg-slate-950 border border-amber-500/25 rounded-2xl p-3 text-xs space-y-1.5">
+            <div class="font-bold text-amber-300 flex items-center gap-1.5">
+              <span>ℹ️</span>
+              <span>Hoe werkt het toernooi?</span>
+            </div>
+            <p class="text-slate-300 text-[11px] leading-relaxed">
+              De winnaar van dit toernooi krijgt één <b>🥇 Toernooibeker</b> achter zijn naam in het profiel en de Hall of Fame. 
+              De toernooinaam hieronder is puur het label voor vanavond (bijvoorbeeld voor één specifiek spel of een hele spelavond).
+            </p>
+          </div>
+
           <div class="space-y-3.5 text-xs">
             <div>
-              <label class="block text-slate-400 font-semibold mb-1">Toernooinaam:</label>
-              <input type="text" id="tourNameInput" value="" placeholder="bijv. ${activeGameName} Cup" onfocus="this.select()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold placeholder-slate-500 focus:outline-none focus:border-amber-400" />
+              <label class="block text-slate-400 font-semibold mb-1">Toernooinaam / Titel van vanavond:</label>
+              <input type="text" id="tourNameInput" value="" placeholder="bijv. ${activeGameName} Cup of Spelavond Beker" onfocus="this.select()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold placeholder-slate-500 focus:outline-none focus:border-amber-400" />
               
               <div class="flex flex-wrap items-center gap-1.5 pt-1.5">
-                <span class="text-[10px] text-slate-500 font-bold">Snelkeuze:</span>
-                <button type="button" onclick="setTourNamePreset('${activeGameName} Cup')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold">🏆 ${activeGameName} Cup</button>
-                <button type="button" onclick="setTourNamePreset('Spelavond Beker')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold">🎲 Spelavond Beker</button>
-                <button type="button" onclick="setTourNamePreset('Kampioenschap')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold">👑 Kampioenschap</button>
+                <span class="text-[10px] text-slate-500 font-bold">Snelle voorbeelden:</span>
+                <button type="button" onclick="setTourNamePreset('${activeGameName} Cup')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold" title="Toernooi in alleen dit spel">🎮 ${activeGameName} Cup</button>
+                <button type="button" onclick="setTourNamePreset('Spelavond Beker')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold" title="Toernooi over meerdere verschillende spellen">🎲 Spelavond Beker</button>
+                <button type="button" onclick="setTourNamePreset('Kampioenschap')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold" title="Grote finale">👑 Kampioenschap</button>
               </div>
             </div>
 
@@ -4954,7 +4969,7 @@
     }
 
     function startTournamentAction() {
-      const activeGameName = getGameDef(state.activeGameId)?.name || 'Rummikub';
+      const activeGameName = getGameDef(state.activeGameId)?.name || 'Spel';
       const rawName = document.getElementById('tourNameInput')?.value.trim();
       const name = rawName || `${activeGameName} Cup`;
       const mode = document.querySelector('input[name="tourModeRadio"]:checked')?.value || 'bracket';
