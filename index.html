@@ -1723,16 +1723,30 @@
         // =========================================================================
     // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND
     // =========================================================================
+        
     function toggleLayoutOrientation() {
-      state.layoutOrientation = (state.layoutOrientation === 'landscape') ? 'portrait' : 'landscape';
-      triggerHaptic(25);
+      // Horizontaal forceren uitgeschakeld om schermproblemen te voorkomen
+      document.body.classList.remove('layout-landscape');
+      state.layoutOrientation = 'portrait';
       saveState();
       applyLayoutOrientation();
     }
 
     function applyLayoutOrientation() {
-      const isLandscape = (state.layoutOrientation === 'landscape');
-      const isScoreboardOpen = !document.getElementById('viewScoreboard')?.classList.contains('hidden');
+      // Zorgt dat de body altijd schoon blijft en niet kan uitbreken
+      document.body.classList.remove('layout-landscape');
+
+      const orientBtn = document.getElementById('layoutOrientBtn');
+      if (orientBtn) {
+        orientBtn.style.display = 'none'; // Verbergt het knopje zodat niemand er per ongeluk op klikt
+      }
+
+      const tBtn = document.getElementById('teamModeToggleBtn');
+      if (tBtn) {
+        tBtn.className = `px-2.5 py-2 rounded-xl text-xs font-black border transition ${state.isTeamMode ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-800 text-slate-300'}`;
+        tBtn.textContent = state.isTeamMode ? '👥 Teams' : '👤 Solo';
+      }
+    }
 
       // Forceer 'layout-landscape' UIT als we niet in het actieve spelbord zitten
       const shouldApplyLandscape = isLandscape && isScoreboardOpen;
