@@ -2585,7 +2585,7 @@
       document.getElementById('roundGraphModal')?.classList.add('hidden');
     }
 
-    // --- 10E. QWIXX, CLEVER & CASCADIA ---
+        // --- 10E. QWIXX, CLEVER & CASCADIA ---
     function renderQwixxSheet(container) {
       const gs = ensureGameState('qwixx');
       const rows = [
@@ -2731,7 +2731,7 @@
               ${habs.map(h => `
                 <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
                   <span class="text-[11px] font-bold text-slate-300 truncate">${h.l}</span>
-                  ${renderNumberStepper(`casc_${p.id}_${h.k}`, c[h.k], `val => setCascadiaVal('${p.id                  ${renderNumberStepper(`casc_${p.id}_${h.k}`, c[h.k], `val => setCascadiaVal('${p.id}','${h.k}', val)`)}
+                  ${renderNumberStepper(`casc_${p.id}_${h.k}`, c[h.k], `val => setCascadiaVal('${p.id}','${h.k}', val)`)}
                 </div>`).join('')}
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
                 <span class="text-[11px] font-bold text-amber-300">🌲 Appels</span>
