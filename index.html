@@ -5903,12 +5903,12 @@
     }
 
         // =========================================================================
-    // 19. WEBRTC LIVE MULTIPLAYER ENGINE (TWEE-RICHTINGSVERKEER)
+    // 19. WEBRTC LIVE MULTIPLAYER ENGINE & VIRTUELE DOBBELBEKER
     // =========================================================================
     let peerInstance = null;
     let activeConnections = [];
     let isLiveHost = false;
-    let hostConnection = null; // Voor niet-hosts om naar de host te sturen
+    let hostConnection = null;
 
     function openLiveRoomModal() {
       let modal = document.getElementById('liveRoomModal');
@@ -6055,7 +6055,6 @@
       if (badge) badge.textContent = `Verbonden spelers: ${activeConnections.length}`;
     }
 
-    // Centraal broadcasten vanaf host naar alle aangesloten telefoons
     function broadcastLiveState() {
       if (!isLiveHost || activeConnections.length === 0) return;
       activeConnections.forEach(conn => {
@@ -6070,13 +6069,10 @@
       });
     }
 
-    // Verzenden van een bewerking vanaf een telefoon naar de host
     function sendActionToHost(actionType, payload) {
       if (isLiveHost) {
-        // We zijn zelf host, direct lokaal uitvoeren
         executeAction(actionType, payload);
       } else if (hostConnection && hostConnection.open) {
-        // Wij zijn aangesloten telefoon: stuur naar host
         hostConnection.send({
           type: 'client_action',
           actionType: actionType,
@@ -6084,7 +6080,6 @@
         });
         triggerHaptic(15);
       } else {
-        // Niet verbonden: voer lokaal uit
         executeAction(actionType, payload);
       }
     }
@@ -6097,7 +6092,6 @@
         saveState();
         renderScoreboard();
         showToast('🔄 Live tafel gesynchroniseerd!');
-        // Open direct de wie-ben-ik selector op een aangesloten apparaat
         if (!isLiveHost && (!state.myPlayerId || !state.players.some(p => p.id === state.myPlayerId))) {
           openLiveWhoAmIModal();
         }
@@ -6109,13 +6103,16 @@
         renderScoreboard();
         SoundFX.point();
       } else if (data.type === 'client_action' && isLiveHost) {
-        // Host ontvangt een actie van een speler aan tafel
         executeAction(data.actionType, data.payload);
         broadcastLiveState();
+      } else if (data.type === 'client_dice_roll' && isLiveHost) {
+        displayDiceResults(data.results, data.rollerName);
+        broadcastDiceRoll(data.results, data.rollerName);
+      } else if (data.type === 'sync_dice_roll') {
+        displayDiceResults(data.results, data.rollerName);
       }
     }
 
-    // Uitvoerder van live acties
     function executeAction(actionType, p) {
       const gs = ensureGameState(p.gameId || state.activeGameId);
 
@@ -6144,7 +6141,6 @@
       renderScoreboard();
     }
 
-    // --- "Wie ben ik aan tafel?" Functies ---
     function openLiveWhoAmIModal() {
       const list = document.getElementById('liveWhoAmIPlayerList');
       if (!list) return;
@@ -6257,43 +6253,11 @@
         history.replaceState(null, '', window.location.pathname + window.location.search);
       } catch (e) {}
     }
-    
-    function handleIncomingLiveSync(data) {
-      if (!data) return;
-
-      if (data.type === 'sync_full') {
-        state = data.state;
-        saveState();
-        renderScoreboard();
-        showToast('🔄 Live tafel gesynchroniseerd!');
-        if (!isLiveHost && (!state.myPlayerId || !state.players.some(p => p.id === state.myPlayerId))) {
-          openLiveWhoAmIModal();
-        }
-      } else if (data.type === 'sync_table') {
-        state.activeGameId = data.activeGameId;
-        state.players = data.players;
-        state.gamesState[data.activeGameId] = data.gameState;
-        saveState();
-        renderScoreboard();
-        SoundFX.point();
-      } else if (data.type === 'client_action' && isLiveHost) {
-        executeAction(data.actionType, data.payload);
-        broadcastLiveState();
-      } else if (data.type === 'client_dice_roll' && isLiveHost) {
-        // Een aangesloten speler gooit: de host toont het en broadcast het door naar alle anderen
-        displayDiceResults(data.results, data.rollerName);
-        broadcastDiceRoll(data.results, data.rollerName);
-      } else if (data.type === 'sync_dice_roll') {
-        // Bericht van de host ontvangen dat er gedobbeld is
-        displayDiceResults(data.results, data.rollerName);
-      }
-    }
 
     // =========================================================================
     // VIRTUELE DOBBELBEKER & REALTIME WEBRTC SYNC
     // =========================================================================
     let activeDiceCount = 2;
-    const DICE_FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 
     function openDiceRollerModal() {
       document.getElementById('diceRollerModal')?.classList.remove('hidden');
@@ -6326,10 +6290,8 @@
         ? state.players.find(p => p.id === state.myPlayerId).name
         : 'Iemand';
 
-      // Toon direct lokaal
       displayDiceResults(results, rollerName);
 
-      // Stuur door via WebRTC naar tafelgenoten
       if (isLiveHost) {
         broadcastDiceRoll(results, rollerName);
       } else if (hostConnection && hostConnection.open) {
@@ -6341,6 +6303,28 @@
       }
     }
 
+    // Render echte visuele dobbelstenen met stippen (werkt gegarandeerd op elk apparaat)
+    function renderDieSvg(value) {
+      const dotCoords = {
+        1: [[25, 25]],
+        2: [[14, 14], [36, 36]],
+        3: [[14, 14], [25, 25], [36, 36]],
+        4: [[14, 14], [36, 14], [14, 36], [36, 36]],
+        5: [[14, 14], [36, 14], [25, 25], [14, 36], [36, 36]],
+        6: [[14, 12], [36, 12], [14, 25], [36, 25], [14, 38], [36, 38]]
+      };
+      const dots = (dotCoords[value] || []).map(([cx, cy]) => `
+        <circle cx="${cx}" cy="${cy}" r="4.2" fill="#0f172a" />
+      `).join('');
+
+      return `
+        <svg class="w-12 h-12 rounded-2xl bg-white shadow-xl border border-slate-200 transition-transform active:scale-95" viewBox="0 0 50 50">
+          <rect x="2" y="2" width="46" height="46" rx="10" fill="#ffffff" stroke="#cbd5e1" stroke-width="2"/>
+          ${dots}
+        </svg>
+      `;
+    }
+
     function displayDiceResults(results, rollerName = '') {
       const box = document.getElementById('diceResultsContainer');
       const totLabel = document.getElementById('diceTotalScoreLabel');
@@ -6350,10 +6334,9 @@
       triggerHaptic(30);
       SoundFX.click();
 
-      // Animatie effect
       box.innerHTML = results.map(r => `
-        <div class="w-11 h-11 bg-white text-slate-950 font-black text-3xl rounded-xl flex items-center justify-center shadow-lg border border-slate-300 transform scale-90 animate-bounce">
-          ${DICE_FACES[r]}
+        <div class="transform scale-95 transition hover:scale-105">
+          ${renderDieSvg(r)}
         </div>
       `).join('');
 
@@ -6381,6 +6364,7 @@
         }
       });
     }
+
 
     // =========================================================================
     // 20. OPSTARTEN, RESIZE LISTENER & INITIALISATIE
