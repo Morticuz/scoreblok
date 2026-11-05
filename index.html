@@ -20,7 +20,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-  <style>
+    <style>
     html {
       background-color: #020617 !important;
       height: 100%;
@@ -36,13 +36,44 @@
       background-attachment: fixed !important;
       color: #f8fafc;
       min-height: 100%;
-      /* Maakt soepel verticaal swipen en scrollen weer mogelijk */
       touch-action: pan-y pinch-zoom;
       -webkit-overflow-scrolling: touch;
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Zorgt dat horizontale lijstjes (tabs, spelers, favorieten) vrij kunnen swipen */
+    /* Dynamische Tafel Thema's */
+    body.theme-indigo {
+      background-color: #020617 !important;
+      background-image: 
+        radial-gradient(rgba(99, 102, 241, 0.15) 1.5px, transparent 1.5px),
+        radial-gradient(rgba(30, 41, 59, 0.65) 1.5px, #020617 1.5px) !important;
+      background-size: 20px 20px, 100% 100% !important;
+    }
+
+    body.theme-felt {
+      background-color: #064e3b !important;
+      background-image: 
+        radial-gradient(rgba(52, 211, 153, 0.12) 1.5px, transparent 1.5px),
+        radial-gradient(rgba(6, 78, 59, 0.9) 1.5px, #022c22 1.5px) !important;
+      background-size: 16px 16px, 100% 100% !important;
+    }
+
+    body.theme-wood {
+      background-color: #27170e !important;
+      background-image: 
+        radial-gradient(rgba(217, 119, 6, 0.12) 1.5px, transparent 1.5px),
+        radial-gradient(rgba(69, 39, 21, 0.85) 1.5px, #1c0f08 1.5px) !important;
+      background-size: 20px 20px, 100% 100% !important;
+    }
+
+    body.theme-midnight {
+      background-color: #000000 !important;
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px) !important;
+      background-size: 24px 24px !important;
+    }
+
+    /* Zorgt dat horizontale lijstjes vrij kunnen swipen */
     .no-scrollbar {
       touch-action: pan-x pan-y;
       -webkit-overflow-scrolling: touch;
@@ -53,7 +84,6 @@
       display: none;
     }
 
-    /* Knoppen en invoervelden behouden directe responsiviteit zonder tap-delay */
     button, select, input, a {
       touch-action: manipulation;
       cursor: pointer;
@@ -677,7 +707,7 @@
     ];
 
 
-    // =========================================================================
+        // =========================================================================
     // 3. STATE MANAGEMENT, LOCAL STORAGE & INITIALISATIE
     // =========================================================================
     const STORAGE_KEY = 'scoreblok_pro_v5';
@@ -708,6 +738,7 @@
       audioMuted: false,
       apTimerEnabled: false,
       layoutOrientation: 'portrait',
+      appTheme: 'indigo',
       championCup: { currentHolder: null, previousHolder: null },
       gamesState: {},
       history: []
@@ -739,6 +770,9 @@
           }
           if (!state.championCup) {
             state.championCup = { currentHolder: null, previousHolder: null };
+          }
+          if (!state.appTheme) {
+            state.appTheme = 'indigo';
           }
           state.players.forEach(p => {
             if (p.elo === undefined) p.elo = 1200;
@@ -821,11 +855,41 @@
       if (hCheck) hCheck.checked = (state.hapticFeedback !== false);
       if (aCheck) aCheck.checked = (!state.audioMuted);
       if (apCheck) apCheck.checked = !!state.apTimerEnabled;
+      
+      updateThemeButtonsUI();
       document.getElementById('settingsModal')?.classList.remove('hidden');
     }
 
     function closeSettingsModal() {
       document.getElementById('settingsModal')?.classList.add('hidden');
+    }
+
+    function setAppTheme(themeKey) {
+      state.appTheme = themeKey;
+      applyAppTheme();
+      updateThemeButtonsUI();
+      triggerHaptic(20);
+      SoundFX.click();
+      saveState();
+    }
+
+    function applyAppTheme() {
+      const theme = state.appTheme || 'indigo';
+      document.body.classList.remove('theme-indigo', 'theme-felt', 'theme-wood', 'theme-midnight');
+      document.body.classList.add(`theme-${theme}`);
+    }
+
+    function updateThemeButtonsUI() {
+      const current = state.appTheme || 'indigo';
+      ['indigo', 'felt', 'wood', 'midnight'].forEach(key => {
+        const btn = document.getElementById(`themeBtn_${key}`);
+        if (!btn) return;
+        if (key === current) {
+          btn.className = "p-2 rounded-xl border border-indigo-400 bg-indigo-600 text-white font-extrabold text-[11px] shadow-sm";
+        } else {
+          btn.className = "p-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:text-white font-bold text-[11px]";
+        }
+      });
     }
 
     function toggleHapticSetting(val) {
@@ -6547,10 +6611,11 @@
     }
 
 
-    // =========================================================================
+        // =========================================================================
     // 20. OPSTARTEN, RESIZE LISTENER & INITIALISATIE
     // =========================================================================
     loadState();
+    applyAppTheme();
     applyLayoutOrientation();
     switchMainView('picker');
     checkUrlForIncomingHashAction();
@@ -6573,26 +6638,48 @@
     }
   </script>
 
-  <!-- MODAL: SNELLE INSTELLINGEN -->
+  <!-- MODAL: SNELLE INSTELLINGEN (INCLUSIEF TAFELACHTERGRONDEN) -->
   <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
         <h3 class="font-black text-sm text-white flex items-center gap-2">⚙️ Tafel Instellingen</h3>
         <button type="button" onclick="closeSettingsModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
       </div>
+
       <div class="space-y-3 text-xs">
-        <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
-          <span class="text-slate-300 font-bold">📳 Haptische feedback (trillen)</span>
-          <input type="checkbox" id="settingHapticCheck" onchange="toggleHapticSetting(this.checked)" class="rounded bg-slate-900 border-slate-700 text-indigo-500 w-4 h-4" />
-        </label>
-        <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
-          <span class="text-slate-300 font-bold">🔊 Audio effecten</span>
-          <input type="checkbox" id="settingAudioCheck" onchange="toggleAudioSetting(this.checked)" class="rounded bg-slate-900 border-slate-700 text-indigo-500 w-4 h-4" />
-        </label>
-        <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
-          <span class="text-slate-300 font-bold">⏱️ Bedenktijd-klok (AP-Timer)</span>
-          <input type="checkbox" id="settingApTimerCheck" onchange="toggleApTimerSetting(this.checked)" class="rounded bg-slate-900 border-slate-700 text-indigo-500 w-4 h-4" />
-        </label>
+        <!-- Thema / Achtergrond Kiezer -->
+        <div class="space-y-1.5">
+          <label class="block text-slate-400 font-bold">🎨 Tafelachtergrond</label>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" onclick="setAppTheme('indigo')" id="themeBtn_indigo" class="p-2 rounded-xl border text-center font-bold text-[11px] transition">
+              🌌 Indigo Dark
+            </button>
+            <button type="button" onclick="setAppTheme('felt')" id="themeBtn_felt" class="p-2 rounded-xl border text-center font-bold text-[11px] transition">
+              🎲 Groen Vilt
+            </button>
+            <button type="button" onclick="setAppTheme('wood')" id="themeBtn_wood" class="p-2 rounded-xl border text-center font-bold text-[11px] transition">
+              🪵 Houttafel
+            </button>
+            <button type="button" onclick="setAppTheme('midnight')" id="themeBtn_midnight" class="p-2 rounded-xl border text-center font-bold text-[11px] transition">
+              🌑 Diep Zwart
+            </button>
+          </div>
+        </div>
+
+        <div class="border-t border-slate-800 pt-2 space-y-2">
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+            <span class="text-slate-300 font-bold">📳 Haptische feedback (trillen)</span>
+            <input type="checkbox" id="settingHapticCheck" onchange="toggleHapticSetting(this.checked)" class="rounded bg-slate-900 border-slate-700 text-indigo-500 w-4 h-4" />
+          </label>
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+            <span class="text-slate-300 font-bold">🔊 Audio effecten</span>
+            <input type="checkbox" id="settingAudioCheck" onchange="toggleAudioSetting(this.checked)" class="rounded bg-slate-900 border-slate-700 text-indigo-500 w-4 h-4" />
+          </label>
+          <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer">
+            <span class="text-slate-300 font-bold">⏱️ Bedenktijd-klok (AP-Timer)</span>
+            <input type="checkbox" id="settingApTimerCheck" onchange="toggleApTimerSetting(this.checked)" class="rounded bg-slate-900 border-slate-700 text-indigo-500 w-4 h-4" />
+          </label>
+        </div>
       </div>
       <button type="button" onclick="closeSettingsModal()" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold">Sluiten</button>
     </div>
@@ -6701,7 +6788,7 @@
         <input type="text" id="matchNoteInput" placeholder="Bijv. Op het nippertje de winst gepakt!" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" />
       </div>
 
-            <div class="flex flex-wrap gap-2 pt-2">
+      <div class="flex flex-wrap gap-2 pt-2">
         <button type="button" onclick="closePodiumModal()" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">
           Terug
         </button>
@@ -6758,7 +6845,7 @@
     </div>
   </div>
 
-    <!-- MODAL: WIE START ER VANDAAG? -->
+  <!-- MODAL: WIE START ER VANDAAG? -->
   <div id="startPlayerModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 text-center space-y-4 shadow-2xl">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -6885,7 +6972,8 @@
       ⏱️
     </button>
   </div>
-    <!-- MODAL: KIES WIE JE BENT (LIVE TAFEL) -->
+
+  <!-- MODAL: KIES WIE JE BENT (LIVE TAFEL) -->
   <div id="liveWhoAmIModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-emerald-500/40 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -6905,7 +6993,7 @@
     </div>
   </div>
   
-    <!-- MODAL: DOBBELBEKER (LOKAAL & GESYNCHRONISEERD) -->
+  <!-- MODAL: DOBBELBEKER (LOKAAL & GESYNCHRONISEERD) -->
   <div id="diceRollerModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
@@ -6916,7 +7004,6 @@
         <button type="button" onclick="closeDiceRollerModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
       </div>
 
-      <!-- Keuze aantal dobbelstenen (1 t/m 6) -->
       <div class="flex items-center justify-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
         <span class="text-[10px] text-slate-400 font-bold px-1">Aantal:</span>
         <button type="button" onclick="setDiceCount(1)" id="diceCntBtn_1" class="w-7 h-7 rounded-lg text-xs font-bold bg-indigo-600 text-white transition">1</button>
@@ -6927,17 +7014,14 @@
         <button type="button" onclick="setDiceCount(6)" id="diceCntBtn_6" class="w-7 h-7 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">6</button>
       </div>
 
-      <!-- Dobbelsteen weergaveveld -->
       <div id="diceResultsContainer" class="min-h-24 bg-slate-950/80 rounded-2xl border border-slate-800/80 p-3 flex flex-wrap items-center justify-center gap-2.5 transition">
         <span class="text-xs text-slate-500 font-bold">Tik op Gooi om te rollen</span>
       </div>
 
-      <!-- Totaalscore label -->
       <div id="diceTotalScoreLabel" class="text-xs font-black text-indigo-400 hidden">
         Totaal: <span id="diceTotalVal" class="text-white text-base">0</span>
       </div>
 
-      <!-- Actieknoppen -->
       <div class="flex gap-2 pt-1">
         <button type="button" onclick="rollActiveDice()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-lg active:scale-95 transition">
           🎲 Schud & Gooi!
@@ -6948,7 +7032,6 @@
       </div>
     </div>
   </div>
-
 
 </body>
 </html>
