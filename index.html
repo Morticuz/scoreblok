@@ -20,7 +20,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-    <style>
+      <style>
     html {
       background-color: #020617 !important;
       height: 100%;
@@ -127,6 +127,26 @@
       border-color: var(--player-turn-color) !important;
     }
 
+    /* TV / Spectator Mode Stijlen */
+    #viewSpectator {
+      user-select: none;
+    }
+
+    .tv-turn-glow {
+      animation: tvGlow 1.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes tvGlow {
+      from {
+        box-shadow: 0 0 15px -2px var(--player-turn-color);
+        transform: scale(1.01);
+      }
+      to {
+        box-shadow: 0 0 35px 6px var(--player-turn-color);
+        transform: scale(1.03);
+      }
+    }
+
     .hidden {
       display: none !important;
       pointer-events: none !important;
@@ -148,38 +168,7 @@
     <button type="button" onclick="dismissCrashBanner()" class="bg-slate-950 text-white px-2.5 py-1 rounded-xl text-[10px]">Prima</button>
   </div>
 
-            <!-- Top Header -->
-  <header class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur border-b border-slate-800 px-3 py-2.5 w-full max-w-full">
-    <div class="max-w-5xl mx-auto flex flex-col gap-2 w-full">
-      <div class="flex items-center justify-between gap-2 w-full flex-wrap">
-        <div class="flex items-center gap-2 cursor-pointer shrink-0" onclick="switchMainView('picker')">
-          <img src="./icon.png" alt="Scoreblok" class="w-8 h-8 rounded-xl shadow-lg border border-indigo-500/40 bg-slate-900 object-cover" />
-          <div class="flex items-center gap-1.5">
-            <h1 class="font-black text-sm sm:text-base tracking-tight text-white">Scoreblok</h1>
-            <span id="pwaOfflineDot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)] inline-block"></span>
-          </div>
-        </div>
-
-        <!-- Snelle actieknoppen -->
-        <div class="flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0 max-w-full py-0.5">
-          <button type="button" onclick="openDiceRollerModal()" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[11px] font-bold whitespace-nowrap shadow-sm">🎲 Dobbelen</button>
-          <button type="button" onclick="openStartTournamentModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm">🏆 Toernooi</button>
-          <button type="button" onclick="openStartPlayerModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm">🎲 Wie begint?</button>
-          <button type="button" onclick="openLiveRoomModal()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold whitespace-nowrap shadow-sm">📡 Live Tafel</button>
-        </div>
-      </div>
-
-      <!-- Hoofd tabs -->
-      <div class="flex items-center gap-1.5 w-full pt-1 border-t border-slate-900">
-        <button type="button" id="navBtnPicker" onclick="switchMainView('picker')" class="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center shadow-sm">🎮 Spellen</button>
-        <button type="button" id="navBtnPlayers" onclick="switchMainView('players')" class="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center shadow-sm">👥 Spelers (<span id="activePlayerCntLabel">2</span>)</button>
-        <button type="button" id="navBtnHistory" onclick="switchMainView('history')" class="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center shadow-sm">🏆 Statistieken</button>
-      </div>
-    </div>
-  </header>
-
-
-  <!-- Main Container -->
+                    <!-- Main Container -->
   <main class="max-w-5xl mx-auto p-4 space-y-5">
 
     <!-- VIEW 1: GAME PICKER -->
@@ -374,6 +363,48 @@
         <div id="historyMatchesList" class="space-y-2"></div>
       </div>
     </section>
+
+    <!-- VIEW 5: TV & SPECTATOR MODE (GROOT SCHERM) -->
+    <section id="viewSpectator" class="hidden space-y-6 max-w-7xl mx-auto py-2">
+      <!-- TV Bovenbalk -->
+      <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-4 sm:p-6 flex items-center justify-between shadow-2xl backdrop-blur">
+        <div class="flex items-center gap-4">
+          <div id="tvGameIcon" class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center shrink-0"></div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-extrabold uppercase tracking-wider">● LIVE TAFEL</span>
+              <span id="tvDealerInfo" class="text-xs text-amber-300 font-bold"></span>
+            </div>
+            <h2 id="tvGameTitle" class="font-black text-2xl sm:text-4xl text-white tracking-tight">Spelnaam</h2>
+          </div>
+        </div>
+
+        <!-- TV Beurt Indicator & Bediening -->
+        <div class="flex items-center gap-3">
+          <div id="tvActiveTurnBanner" class="hidden px-4 py-2 rounded-2xl bg-indigo-950 border border-indigo-500/50 flex items-center gap-2 shadow-lg">
+            <span class="w-3 h-3 rounded-full bg-indigo-400 animate-ping inline-block"></span>
+            <span class="text-xs sm:text-sm font-black text-white">Aan beurt: <strong id="tvTurnPlayerName" class="text-indigo-300 text-base">...</strong></span>
+          </div>
+          <button type="button" onclick="switchMainView('scoreboard')" class="px-4 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+            ✕ Sluit TV
+          </button>
+        </div>
+      </div>
+
+      <!-- TV Live Stand Grid (Grote Kaarten) -->
+      <div id="tvStandingsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"></div>
+
+      <!-- TV Grote Dobbelsteen Pop-up Overlay (als iemand rolt) -->
+      <div id="tvDiceOverlay" class="hidden bg-slate-950/95 border-2 border-indigo-500/60 rounded-3xl p-6 text-center space-y-4 shadow-2xl animate-bounce">
+        <div class="text-sm font-black uppercase tracking-widest text-indigo-400 flex items-center justify-center gap-2">
+          <span>🎲</span>
+          <span id="tvDiceRollerName">Iemand dobbelt</span>
+        </div>
+        <div id="tvDiceDisplay" class="flex flex-wrap items-center justify-center gap-4 py-2"></div>
+        <div class="text-2xl font-black text-white font-mono">Totaal: <span id="tvDiceTotal" class="text-amber-400 text-3xl">0</span></div>
+      </div>
+    </section>
+
   </main>
 
   <script>
@@ -1349,16 +1380,16 @@
       return list;
     }
 
-    // =========================================================================
-    // 7. VIEWS & NAVIGATION
+        // =========================================================================
+    // 7. VIEWS & NAVIGATION (INCLUSIEF TV / SPECTATOR ENGINE)
     // =========================================================================
     function switchMainView(view) {
       releaseAppWakeLock();
-      ['viewPicker', 'viewScoreboard', 'viewPlayers', 'viewHistory'].forEach(id => {
+      ['viewPicker', 'viewScoreboard', 'viewPlayers', 'viewHistory', 'viewSpectator'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
       });
-      ['navBtnPicker', 'navBtnPlayers', 'navBtnHistory'].forEach(id => {
+      ['navBtnPicker', 'navBtnPlayers', 'navBtnHistory', 'navBtnSpectator'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center';
       });
@@ -1382,10 +1413,107 @@
         const btn = document.getElementById('navBtnHistory');
         if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
         renderHistoryView();
+      } else if (view === 'spectator') {
+        document.getElementById('viewSpectator')?.classList.remove('hidden');
+        requestAppWakeLock();
+        const btn = document.getElementById('navBtnSpectator');
+        if (btn) btn.className = 'px-3 py-1.5 rounded-lg text-xs font-black bg-indigo-600 text-white shadow transition text-center';
+        renderSpectatorView();
       }
 
       applyLayoutOrientation();
     }
+
+    // --- TV & SPECTATOR ENGINE LOGICA ---
+    let tvDiceHideTimeout = null;
+
+    function renderSpectatorView() {
+      const def = getGameDef(state.activeGameId);
+      const gs = ensureGameState(def.id);
+      const standings = getStandings();
+
+      const titleEl = document.getElementById('tvGameTitle');
+      if (titleEl) titleEl.textContent = def.name;
+
+      const iconEl = document.getElementById('tvGameIcon');
+      if (iconEl) iconEl.innerHTML = renderGameArtwork(def.id, 'w-12 h-12 sm:w-14 sm:h-14');
+
+      const starterP = computeCurrentStarterPlayer(def.id);
+      const dealerEl = document.getElementById('tvDealerInfo');
+      if (dealerEl && starterP) {
+        dealerEl.textContent = `• 🃏 Start: ${starterP.name}`;
+      }
+
+      const activeIdx = gs.activeTurnPlayerIdx || 0;
+      const turnBanner = document.getElementById('tvActiveTurnBanner');
+      const turnName = document.getElementById('tvTurnPlayerName');
+      const act = getActivePlayers();
+      if (turnBanner && turnName && act[activeIdx]) {
+        turnName.textContent = act[activeIdx].name;
+        turnBanner.classList.remove('hidden');
+      }
+
+      const grid = document.getElementById('tvStandingsGrid');
+      if (!grid) return;
+
+      const top = standings[0];
+
+      grid.innerHTML = standings.map((item, idx) => {
+        const isLeader = standings.some(x => x.score !== 0) && item.score === top?.score;
+        const isTurn = (!state.isTeamMode && idx === activeIdx);
+        const playerColor = item.color || '#6366f1';
+
+        return `
+          <div class="rounded-3xl p-5 border-2 transition shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[160px] sm:min-h-[200px] ${isTurn ? 'tv-turn-glow bg-slate-900/95' : (isLeader ? 'bg-indigo-950/70 border-indigo-500/70' : 'bg-slate-900/80 border-slate-800')}"
+               style="border-color: ${isTurn ? playerColor : (isLeader ? '#818cf8' : '#334155')}; --player-turn-color: ${playerColor};">
+            
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-lg text-xs font-black ${isTurn ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}">#${idx + 1}</span>
+                ${renderMeepleSvg(playerColor, 'w-6 h-6')}
+                <span class="font-black text-base sm:text-xl text-white truncate max-w-[120px] sm:max-w-[160px]">${item.name}</span>
+              </div>
+              <div class="text-xl">
+                ${isLeader ? '👑' : ''}
+                ${isTurn ? '<span class="text-xs font-black px-2 py-1 rounded-full bg-indigo-500 text-white animate-pulse">BEURT</span>' : ''}
+              </div>
+            </div>
+
+            <div class="my-auto py-2 text-center">
+              <div class="text-5xl sm:text-7xl font-black font-mono tracking-tight ${isLeader ? 'text-amber-300 drop-shadow-[0_0_15px_rgba(252,211,77,0.3)]' : 'text-white'}">
+                ${item.score}
+              </div>
+              <div class="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">punten</div>
+            </div>
+
+            ${item.tieVal ? `<div class="text-right text-[11px] font-bold text-emerald-400">Tie-break: ${item.tieVal}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showTvDiceOverlay(results, rollerName) {
+      const overlay = document.getElementById('tvDiceOverlay');
+      const nameEl = document.getElementById('tvDiceRollerName');
+      const box = document.getElementById('tvDiceDisplay');
+      const totEl = document.getElementById('tvDiceTotal');
+      if (!overlay || !box) return;
+
+      if (nameEl) nameEl.textContent = `${rollerName || 'Iemand'} gooit:`;
+      box.innerHTML = results.map(r => `
+        <div class="transform scale-125 mx-2">
+          ${renderDieSvg(r)}
+        </div>
+      `).join('');
+      if (totEl) totEl.textContent = results.reduce((a, b) => a + b, 0);
+
+      overlay.classList.remove('hidden');
+      clearTimeout(tvDiceHideTimeout);
+      tvDiceHideTimeout = setTimeout(() => {
+        overlay.classList.add('hidden');
+      }, 5000);
+    }
+
 
     // =========================================================================
     // 8. GAME PICKER & FAVORITES
@@ -6148,8 +6276,8 @@
       showToast('⏰ TIJD IS OM!');
     }
 
-        // =========================================================================
-    // 19. WEBRTC LIVE MULTIPLAYER ENGINE & VIRTUELE DOBBELBEKER
+          // =========================================================================
+    // 19. WEBRTC LIVE MULTIPLAYER ENGINE, TV SYNC & VIRTUELE DOBBELBEKER
     // =========================================================================
     let peerInstance = null;
     let activeConnections = [];
@@ -6337,6 +6465,9 @@
         state = data.state;
         saveState();
         renderScoreboard();
+        if (!document.getElementById('viewSpectator')?.classList.contains('hidden')) {
+          renderSpectatorView();
+        }
         showToast('🔄 Live tafel gesynchroniseerd!');
         if (!isLiveHost && (!state.myPlayerId || !state.players.some(p => p.id === state.myPlayerId))) {
           openLiveWhoAmIModal();
@@ -6347,6 +6478,9 @@
         state.gamesState[data.activeGameId] = data.gameState;
         saveState();
         renderScoreboard();
+        if (!document.getElementById('viewSpectator')?.classList.contains('hidden')) {
+          renderSpectatorView();
+        }
         SoundFX.point();
       } else if (data.type === 'client_action' && isLiveHost) {
         executeAction(data.actionType, data.payload);
@@ -6385,6 +6519,9 @@
 
       saveState();
       renderScoreboard();
+      if (!document.getElementById('viewSpectator')?.classList.contains('hidden')) {
+        renderSpectatorView();
+      }
     }
 
     function openLiveWhoAmIModal() {
@@ -6549,7 +6686,6 @@
       }
     }
 
-    // Render echte visuele dobbelstenen met stippen (werkt gegarandeerd op elk apparaat)
     function renderDieSvg(value) {
       const dotCoords = {
         1: [[25, 25]],
@@ -6592,7 +6728,12 @@
         totLabel.classList.remove('hidden');
       }
 
-      openDiceRollerModal();
+      if (!document.getElementById('viewSpectator')?.classList.contains('hidden')) {
+        showTvDiceOverlay(results, rollerName);
+      } else {
+        openDiceRollerModal();
+      }
+
       if (rollerName && rollerName !== 'Iemand') {
         showToast(`🎲 ${rollerName} gooit: ${total}!`);
       }
@@ -6610,7 +6751,6 @@
         }
       });
     }
-
 
         // =========================================================================
     // 20. OPSTARTEN, RESIZE LISTENER & INITIALISATIE
