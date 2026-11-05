@@ -2891,7 +2891,7 @@
       showToast(`🌲 +${score} punten berekend!`);
     }
 
-    // --- 10F. REGENWORMEN ---
+        // --- 10F. REGENWORMEN ---
     function isRegenwormenExpActive(gs) {
       if (!gs || !gs.activeExpansions) return false;
       return Object.keys(gs.activeExpansions).some(k => gs.activeExpansions[k]);
@@ -3003,6 +3003,7 @@
       saveState();
       renderScoreboard();
     }
+
 
     // --- 10G. CATEGORIES, WONDERS, TTR, YAHTZEE, CATAN, ETC. ---
     function renderCategoriesSheet(container, def) {
