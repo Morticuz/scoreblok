@@ -5874,12 +5874,13 @@
       showToast('⏰ TIJD IS OM!');
     }
 
-    // =========================================================================
-    // 19. WEBRTC LIVE MULTIPLAYER ENGINE
+        // =========================================================================
+    // 19. WEBRTC LIVE MULTIPLAYER ENGINE (TWEE-RICHTINGSVERKEER)
     // =========================================================================
     let peerInstance = null;
     let activeConnections = [];
     let isLiveHost = false;
+    let hostConnection = null; // Voor niet-hosts om naar de host te sturen
 
     function openLiveRoomModal() {
       let modal = document.getElementById('liveRoomModal');
@@ -5896,7 +5897,7 @@
               </div>
 
               <div id="liveRoomSetupView" class="space-y-3">
-                <p class="text-xs text-slate-400">Verbind direct met alle telefoons aan tafel zonder server of login.</p>
+                <p class="text-xs text-slate-400">Verbind alle telefoons aan tafel om live scores bij te houden en te synchroniseren.</p>
                 <div class="grid grid-cols-2 gap-2">
                   <button type="button" onclick="startHostRoom()" class="p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs shadow-lg transition">
                     👑 Start als Host (Tafel)
@@ -5908,7 +5909,7 @@
               </div>
 
               <div id="liveHostActiveView" class="hidden space-y-3">
-                <div class="text-[11px] uppercase tracking-wider font-extrabold text-emerald-400">Kamer Actief</div>
+                <div class="text-[11px] uppercase tracking-wider font-extrabold text-emerald-400">Tafel is Live</div>
                 <div id="hostQrBox" class="bg-white p-3 rounded-2xl mx-auto w-fit shadow-inner"></div>
                 <div class="text-xs font-mono font-bold text-white bg-slate-950 p-2 rounded-xl border border-slate-800">
                   Kamercode: <span id="hostRoomCodeLabel" class="text-amber-300">...</span>
@@ -5942,6 +5943,7 @@
         return;
       }
       isLiveHost = true;
+      hostConnection = null;
       const randomRoomId = 'sb_' + Math.random().toString(36).substring(2, 8);
       peerInstance = new Peer(randomRoomId);
 
@@ -5963,7 +5965,7 @@
             correctLevel: QRCode.CorrectLevel.M
           });
         }
-        showToast('📡 Tafel is live!');
+        showToast('📡 Tafel is live! Laat anderen de code scannen.');
       });
 
       peerInstance.on('connection', (conn) => {
@@ -5998,6 +6000,8 @@
       peerInstance = new Peer();
       peerInstance.on('open', () => {
         const conn = peerInstance.connect(code);
+        isLiveHost = false;
+        hostConnection = conn;
         activeConnections = [conn];
 
         conn.on('open', () => {
@@ -6010,6 +6014,11 @@
         conn.on('data', (data) => {
           handleIncomingLiveSync(data);
         });
+
+        conn.on('close', () => {
+          showToast('⚠️ Verbinding met de tafel verbroken.');
+          hostConnection = null;
+        });
       });
     }
 
@@ -6018,8 +6027,9 @@
       if (badge) badge.textContent = `Verbonden spelers: ${activeConnections.length}`;
     }
 
+    // Centraal broadcasten vanaf host naar alle aangesloten telefoons
     function broadcastLiveState() {
-      if (activeConnections.length === 0) return;
+      if (!isLiveHost || activeConnections.length === 0) return;
       activeConnections.forEach(conn => {
         if (conn.open) {
           conn.send({
@@ -6032,12 +6042,37 @@
       });
     }
 
+    // Verzenden van een bewerking vanaf een telefoon naar de host
+    function sendActionToHost(actionType, payload) {
+      if (isLiveHost) {
+        // We zijn zelf host, direct lokaal uitvoeren
+        executeAction(actionType, payload);
+      } else if (hostConnection && hostConnection.open) {
+        // Wij zijn aangesloten telefoon: stuur naar host
+        hostConnection.send({
+          type: 'client_action',
+          actionType: actionType,
+          payload: payload
+        });
+        triggerHaptic(15);
+      } else {
+        // Niet verbonden: voer lokaal uit
+        executeAction(actionType, payload);
+      }
+    }
+
     function handleIncomingLiveSync(data) {
+      if (!data) return;
+
       if (data.type === 'sync_full') {
         state = data.state;
         saveState();
         renderScoreboard();
         showToast('🔄 Live tafel gesynchroniseerd!');
+        // Open direct de wie-ben-ik selector op een aangesloten apparaat
+        if (!isLiveHost && (!state.myPlayerId || !state.players.some(p => p.id === state.myPlayerId))) {
+          openLiveWhoAmIModal();
+        }
       } else if (data.type === 'sync_table') {
         state.activeGameId = data.activeGameId;
         state.players = data.players;
@@ -6045,7 +6080,75 @@
         saveState();
         renderScoreboard();
         SoundFX.point();
+      } else if (data.type === 'client_action' && isLiveHost) {
+        // Host ontvangt een actie van een speler aan tafel
+        executeAction(data.actionType, data.payload);
+        broadcastLiveState();
       }
+    }
+
+    // Uitvoerder van live acties
+    function executeAction(actionType, p) {
+      const gs = ensureGameState(p.gameId || state.activeGameId);
+
+      if (actionType === 'add_live_points') {
+        pushUndoSnapshot();
+        const pd = gs.playerData[p.playerId];
+        if (pd) pd.liveScore = Number(pd.liveScore || 0) + Number(p.delta || 0);
+      } else if (actionType === 'set_category_val') {
+        const pd = gs.playerData[p.playerId];
+        if (pd && pd.categories) pd.categories[p.category] = Number(p.val || 0);
+      } else if (actionType === 'add_round') {
+        pushUndoSnapshot();
+        gs.rounds.push(p.roundObj);
+      } else if (actionType === 'toggle_azul_tile') {
+        const az = gs.playerData[p.playerId]?.azul;
+        if (az) {
+          if (az.wall[p.r][p.c]) az.wall[p.r][p.c] = false;
+          else az.pending[p.r][p.c] = !az.pending[p.r][p.c];
+        }
+      } else if (actionType === 'set_azul_floor') {
+        const az = gs.playerData[p.playerId]?.azul;
+        if (az) az.floor = p.cnt;
+      }
+
+      saveState();
+      renderScoreboard();
+    }
+
+    // --- "Wie ben ik aan tafel?" Functies ---
+    function openLiveWhoAmIModal() {
+      const list = document.getElementById('liveWhoAmIPlayerList');
+      if (!list) return;
+      const activeP = getActivePlayers();
+
+      list.innerHTML = activeP.map(p => `
+        <button type="button" onclick="selectMyPlayerIdentity('${p.id}')"
+          class="w-full p-2.5 rounded-2xl border text-left flex items-center justify-between transition ${state.myPlayerId === p.id ? 'bg-indigo-600 border-indigo-400 text-white font-extrabold shadow-lg' : 'bg-slate-950 border-slate-800 text-slate-200 hover:border-slate-700'}">
+          <div class="flex items-center gap-2">
+            ${renderMeepleSvg(p.color, 'w-4 h-4')}
+            <span>${p.name}</span>
+          </div>
+          ${state.myPlayerId === p.id ? '<span class="text-xs">✓ Jouw profiel</span>' : ''}
+        </button>
+      `).join('');
+
+      document.getElementById('liveWhoAmIModal')?.classList.remove('hidden');
+    }
+
+    function closeLiveWhoAmIModal() {
+      document.getElementById('liveWhoAmIModal')?.classList.add('hidden');
+    }
+
+    function selectMyPlayerIdentity(playerId) {
+      state.myPlayerId = playerId;
+      saveState();
+      closeLiveWhoAmIModal();
+      const p = state.players.find(x => x.id === playerId);
+      triggerHaptic(30);
+      SoundFX.fanfare();
+      showToast(`👋 Welkom, ${p ? p.name : 'Speler'}! Je scores worden nu live gekoppeld.`);
+      renderScoreboard();
     }
 
     function checkUrlForIncomingHashAction() {
@@ -6126,6 +6229,7 @@
         history.replaceState(null, '', window.location.pathname + window.location.search);
       } catch (e) {}
     }
+
 
     // =========================================================================
     // 20. OPSTARTEN, RESIZE LISTENER & INITIALISATIE
@@ -6460,5 +6564,25 @@
       ⏱️
     </button>
   </div>
+    <!-- MODAL: KIES WIE JE BENT (LIVE TAFEL) -->
+  <div id="liveWhoAmIModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-emerald-500/40 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="font-black text-sm text-white flex items-center gap-1.5">
+          <span>👋</span>
+          <span>Wie ben jij aan tafel?</span>
+        </h3>
+        <button type="button" onclick="closeLiveWhoAmIModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+      </div>
+      <p class="text-xs text-slate-300">Kies je naam zodat jouw telefoon direct jouw persoonlijke scoreblad en invoerknoppen toont:</p>
+      
+      <div id="liveWhoAmIPlayerList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+
+      <button type="button" onclick="closeLiveWhoAmIModal()" class="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">
+        Later kiezen
+      </button>
+    </div>
+  </div>
+
 </body>
 </html>
