@@ -130,13 +130,15 @@
           </div>
         </div>
 
-        <!-- Snelle actieknoppen (Toernooi, Wie begint?, Live Tafel) -->
+                        <!-- Snelle actieknoppen -->
         <div class="flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0 max-w-full py-0.5">
+          <button type="button" onclick="openDiceRollerModal()" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[11px] font-bold whitespace-nowrap shadow-sm">🎲 Dobbelen</button>
           <button type="button" onclick="openStartTournamentModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm">🏆 Toernooi</button>
           <button type="button" onclick="openStartPlayerModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm">🎲 Wie begint?</button>
           <button type="button" onclick="openLiveRoomModal()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold whitespace-nowrap shadow-sm">📡 Live Tafel</button>
         </div>
-      </div>
+
+
 
       <!-- Hoofd tabs -->
       <div class="flex items-center gap-1.5 w-full pt-1 border-t border-slate-900">
@@ -1669,7 +1671,7 @@
       }).join('');
     }
 
-    // =========================================================================
+        // =========================================================================
     // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND
     // =========================================================================
     function toggleLayoutOrientation() {
@@ -1870,7 +1872,26 @@
       
       const titleEl = document.getElementById('activeGameTitle');
       if (titleEl) titleEl.textContent = def.name;
-      
+
+      // Persoonlijke Focus Banner
+      let myPlayerBannerHtml = '';
+      if (state.myPlayerId) {
+        const me = state.players.find(p => p.id === state.myPlayerId);
+        if (me) {
+          myPlayerBannerHtml = `
+            <div class="mb-3 px-3 py-2 rounded-2xl bg-indigo-950/60 border border-indigo-500/40 flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2">
+                ${renderMeepleSvg(me.color, 'w-4 h-4')}
+                <span class="text-slate-300">Jij scoort als: <strong class="text-white">${me.name}</strong></span>
+              </div>
+              <button type="button" onclick="openLiveWhoAmIModal()" class="text-[10px] text-indigo-300 hover:text-white font-bold underline">
+                Wissel
+              </button>
+            </div>
+          `;
+        }
+      }
+
       updateActiveFavStar();
       updateUndoButtonUI();
 
@@ -1963,6 +1984,10 @@
         else if (def.type === 'codenames') renderCodenamesSheet(container);
         else if (def.type === 'themind') renderTheMindSheet(container);
         else if (def.type === 'carcassonne') renderCarcassonneSheet(container, def);
+
+        if (myPlayerBannerHtml) {
+          container.insertAdjacentHTML('afterbegin', myPlayerBannerHtml);
+        }
       } catch (err) {
         console.error("Fout bij renderen spelblad:", err);
         container.innerHTML = `<div class="p-4 bg-rose-950/40 border border-rose-500/40 rounded-2xl text-rose-300 text-xs font-bold">Fout bij inladen: ${err.message}</div>`;
@@ -2010,6 +2035,7 @@
           </div>`;
       }).join('');
     }
+
 
     // =========================================================================
     // 10. SPELBLADEN
@@ -6231,7 +6257,130 @@
         history.replaceState(null, '', window.location.pathname + window.location.search);
       } catch (e) {}
     }
+    
+    function handleIncomingLiveSync(data) {
+      if (!data) return;
 
+      if (data.type === 'sync_full') {
+        state = data.state;
+        saveState();
+        renderScoreboard();
+        showToast('🔄 Live tafel gesynchroniseerd!');
+        if (!isLiveHost && (!state.myPlayerId || !state.players.some(p => p.id === state.myPlayerId))) {
+          openLiveWhoAmIModal();
+        }
+      } else if (data.type === 'sync_table') {
+        state.activeGameId = data.activeGameId;
+        state.players = data.players;
+        state.gamesState[data.activeGameId] = data.gameState;
+        saveState();
+        renderScoreboard();
+        SoundFX.point();
+      } else if (data.type === 'client_action' && isLiveHost) {
+        executeAction(data.actionType, data.payload);
+        broadcastLiveState();
+      } else if (data.type === 'client_dice_roll' && isLiveHost) {
+        // Een aangesloten speler gooit: de host toont het en broadcast het door naar alle anderen
+        displayDiceResults(data.results, data.rollerName);
+        broadcastDiceRoll(data.results, data.rollerName);
+      } else if (data.type === 'sync_dice_roll') {
+        // Bericht van de host ontvangen dat er gedobbeld is
+        displayDiceResults(data.results, data.rollerName);
+      }
+    }
+
+    // =========================================================================
+    // VIRTUELE DOBBELBEKER & REALTIME WEBRTC SYNC
+    // =========================================================================
+    let activeDiceCount = 2;
+    const DICE_FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+
+    function openDiceRollerModal() {
+      document.getElementById('diceRollerModal')?.classList.remove('hidden');
+      setDiceCount(activeDiceCount);
+    }
+
+    function closeDiceRollerModal() {
+      document.getElementById('diceRollerModal')?.classList.add('hidden');
+    }
+
+    function setDiceCount(cnt) {
+      activeDiceCount = cnt;
+      for (let i = 1; i <= 6; i++) {
+        const btn = document.getElementById(`diceCntBtn_${i}`);
+        if (btn) {
+          btn.className = (i === cnt) 
+            ? "w-7 h-7 rounded-lg text-xs font-bold bg-indigo-600 text-white transition shadow-sm"
+            : "w-7 h-7 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+        }
+      }
+    }
+
+    function rollActiveDice() {
+      const results = [];
+      for (let i = 0; i < activeDiceCount; i++) {
+        results.push(Math.floor(Math.random() * 6) + 1);
+      }
+      
+      const rollerName = (state.myPlayerId && state.players.find(p => p.id === state.myPlayerId))
+        ? state.players.find(p => p.id === state.myPlayerId).name
+        : 'Iemand';
+
+      // Toon direct lokaal
+      displayDiceResults(results, rollerName);
+
+      // Stuur door via WebRTC naar tafelgenoten
+      if (isLiveHost) {
+        broadcastDiceRoll(results, rollerName);
+      } else if (hostConnection && hostConnection.open) {
+        hostConnection.send({
+          type: 'client_dice_roll',
+          results: results,
+          rollerName: rollerName
+        });
+      }
+    }
+
+    function displayDiceResults(results, rollerName = '') {
+      const box = document.getElementById('diceResultsContainer');
+      const totLabel = document.getElementById('diceTotalScoreLabel');
+      const totVal = document.getElementById('diceTotalVal');
+      if (!box) return;
+
+      triggerHaptic(30);
+      SoundFX.click();
+
+      // Animatie effect
+      box.innerHTML = results.map(r => `
+        <div class="w-11 h-11 bg-white text-slate-950 font-black text-3xl rounded-xl flex items-center justify-center shadow-lg border border-slate-300 transform scale-90 animate-bounce">
+          ${DICE_FACES[r]}
+        </div>
+      `).join('');
+
+      const total = results.reduce((a, b) => a + b, 0);
+      if (totLabel && totVal) {
+        totVal.textContent = total;
+        totLabel.classList.remove('hidden');
+      }
+
+      openDiceRollerModal();
+      if (rollerName && rollerName !== 'Iemand') {
+        showToast(`🎲 ${rollerName} gooit: ${total}!`);
+      }
+    }
+
+    function broadcastDiceRoll(results, rollerName) {
+      if (!isLiveHost || activeConnections.length === 0) return;
+      activeConnections.forEach(conn => {
+        if (conn.open) {
+          conn.send({
+            type: 'sync_dice_roll',
+            results: results,
+            rollerName: rollerName
+          });
+        }
+      });
+    }
 
     // =========================================================================
     // 20. OPSTARTEN, RESIZE LISTENER & INITIALISATIE
@@ -6585,6 +6734,51 @@
       </button>
     </div>
   </div>
+  
+    <!-- MODAL: DOBBELBEKER (LOKAAL & GESYNCHRONISEERD) -->
+  <div id="diceRollerModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="font-black text-sm text-white flex items-center gap-2">
+          <span>🎲</span>
+          <span>Virtuele Dobbelbeker</span>
+        </h3>
+        <button type="button" onclick="closeDiceRollerModal()" class="text-slate-400 hover:text-white font-bold text-xs">✕</button>
+      </div>
+
+      <!-- Keuze aantal dobbelstenen (1 t/m 6) -->
+      <div class="flex items-center justify-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+        <span class="text-[10px] text-slate-400 font-bold px-1">Aantal:</span>
+        <button type="button" onclick="setDiceCount(1)" id="diceCntBtn_1" class="w-7 h-7 rounded-lg text-xs font-bold bg-indigo-600 text-white transition">1</button>
+        <button type="button" onclick="setDiceCount(2)" id="diceCntBtn_2" class="w-7 h-7 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">2</button>
+        <button type="button" onclick="setDiceCount(3)" id="diceCntBtn_3" class="w-7 h-7 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">3</button>
+        <button type="button" onclick="setDiceCount(4)" id="diceCntBtn_4" class="w-7 h-7 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">4</button>
+        <button type="button" onclick="setDiceCount(5)" id="diceCntBtn_5" class="w-7 h-7 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">5</button>
+        <button type="button" onclick="setDiceCount(6)" id="diceCntBtn_6" class="w-7 h-7 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">6</button>
+      </div>
+
+      <!-- Dobbelsteen weergaveveld -->
+      <div id="diceResultsContainer" class="min-h-24 bg-slate-950/80 rounded-2xl border border-slate-800/80 p-3 flex flex-wrap items-center justify-center gap-2.5 transition">
+        <span class="text-xs text-slate-500 font-bold">Tik op Gooi om te rollen</span>
+      </div>
+
+      <!-- Totaalscore label -->
+      <div id="diceTotalScoreLabel" class="text-xs font-black text-indigo-400 hidden">
+        Totaal: <span id="diceTotalVal" class="text-white text-base">0</span>
+      </div>
+
+      <!-- Actieknoppen -->
+      <div class="flex gap-2 pt-1">
+        <button type="button" onclick="rollActiveDice()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-lg active:scale-95 transition">
+          🎲 Schud & Gooi!
+        </button>
+        <button type="button" onclick="closeDiceRollerModal()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">
+          Sluit
+        </button>
+      </div>
+    </div>
+  </div>
+
 
 </body>
 </html>
