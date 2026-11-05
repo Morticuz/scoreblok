@@ -5650,8 +5650,8 @@
         }
       }
     }
-    // =========================================================================
-    // 18. CONFETTI, TOAST, WAKELOCK, UNDO, BACKUP & TIMER
+        // =========================================================================
+    // 18. CONFETTI, TOAST, WAKELOCK, UNDO, BACKUP, RECAP & TIMER
     // =========================================================================
     function triggerConfetti() {
       const container = document.getElementById('confettiContainer');
@@ -5771,57 +5771,240 @@
       reader.readAsText(file);
     }
 
-    function exportPodiumImage() {
+    // =========================================================================
+    // MATCH RECAP CARD ENGINE (CANVAS & WHATSAPP SHARE)
+    // =========================================================================
+    function generateMatchRecapCanvas() {
       const def = getGameDef(state.activeGameId);
       const standings = getStandings();
-      if (!standings.length) return;
+      if (!standings.length) return null;
 
       const canvas = document.getElementById('shareExportCanvas');
+      if (!canvas) return null;
       const ctx = canvas.getContext('2d');
-      canvas.width = 600;
-      canvas.height = 420;
 
-      const grad = ctx.createLinearGradient(0, 0, 600, 420);
-      grad.addColorStop(0, '#020617');
-      grad.addColorStop(1, '#0f172a');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 600, 420);
+      const W = 1080;
+      const H = 1350;
+      canvas.width = W;
+      canvas.height = H;
 
-      ctx.strokeStyle = '#6366f1';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(10, 10, 580, 400);
+      const bgGrad = ctx.createRadialGradient(W / 2, H * 0.25, 50, W / 2, H / 2, 800);
+      bgGrad.addColorStop(0, '#1e1b4b');
+      bgGrad.addColorStop(0.5, '#0f172a');
+      bgGrad.addColorStop(1, '#020617');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, W, H);
 
-      ctx.fillStyle = '#f8fafc';
-      ctx.font = 'bold 24px sans-serif';
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(30, 30, W - 60, H - 60);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(45, 45, W - 90, H - 90);
+
       ctx.textAlign = 'center';
-      ctx.fillText(`🏆 Scoreblok Pro • ${def.name}`, 300, 50);
+      ctx.fillStyle = '#818cf8';
+      ctx.font = '900 32px sans-serif';
+      ctx.fillText('SCOREBLOK PRO • MATCH RECAP', W / 2, 115);
 
-      ctx.font = '14px sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 68px sans-serif';
+      ctx.fillText(def.name, W / 2, 195);
+
+      const dateStr = new Date().toLocaleDateString('nl-NL', {
+        weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      const durMinutes = state.activeGameStartTime
+        ? Math.max(1, Math.round((Date.now() - state.activeGameStartTime) / 60000))
+        : null;
+      const metaText = durMinutes ? `${dateStr}  •  ⏱️ ${durMinutes} min` : dateStr;
+
       ctx.fillStyle = '#94a3b8';
-      ctx.fillText(new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), 300, 75);
+      ctx.font = '600 28px sans-serif';
+      ctx.fillText(metaText, W / 2, 245);
 
-      standings.slice(0, 5).forEach((p, idx) => {
-        const y = 130 + idx * 52;
-        ctx.fillStyle = idx === 0 ? 'rgba(234, 179, 8, 0.15)' : 'rgba(30, 41, 59, 0.6)';
-        ctx.fillRect(40, y - 26, 520, 42);
+      const p1 = standings[0];
+      const p2 = standings[1];
+      const p3 = standings[2];
+
+      const podiumBaseY = 780;
+      const colWidth = 260;
+
+      function drawRoundedBar(x, y, w, h, radius, fillStyle, strokeStyle) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + w - radius, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+        ctx.lineTo(x + w, y + h);
+        ctx.lineTo(x, y + h);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        ctx.fillStyle = fillStyle;
+        ctx.fill();
+        if (strokeStyle) {
+          ctx.strokeStyle = strokeStyle;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+      }
+
+      if (p2) {
+        const x2 = W / 2 - colWidth - 25;
+        const h2 = 250;
+        const y2 = podiumBaseY - h2;
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '900 36px sans-serif';
+        ctx.fillText(p2.name, x2 + colWidth / 2, y2 - 55);
+
+        ctx.fillStyle = p2.color || '#94a3b8';
+        ctx.font = '800 32px monospace';
+        ctx.fillText(`${p2.score} pt`, x2 + colWidth / 2, y2 - 18);
+
+        const grad2 = ctx.createLinearGradient(0, y2, 0, podiumBaseY);
+        grad2.addColorStop(0, '#475569');
+        grad2.addColorStop(1, '#1e293b');
+        drawRoundedBar(x2, y2, colWidth, h2, 24, grad2, '#94a3b8');
+
+        ctx.font = '54px sans-serif';
+        ctx.fillText('🥈', x2 + colWidth / 2, y2 + 80);
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '900 36px sans-serif';
+        ctx.fillText('#2', x2 + colWidth / 2, y2 + 135);
+      }
+
+      if (p1) {
+        const x1 = W / 2 - colWidth / 2;
+        const h1 = 340;
+        const y1 = podiumBaseY - h1;
+
+        ctx.fillStyle = '#fde047';
+        ctx.font = '900 44px sans-serif';
+        ctx.fillText(`👑 ${p1.name}`, x1 + colWidth / 2, y1 - 65);
+
+        ctx.fillStyle = '#facc15';
+        ctx.font = '900 40px monospace';
+        ctx.fillText(`${p1.score} pt`, x1 + colWidth / 2, y1 - 20);
+
+        const grad1 = ctx.createLinearGradient(0, y1, 0, podiumBaseY);
+        grad1.addColorStop(0, '#b45309');
+        grad1.addColorStop(0.4, '#d97706');
+        grad1.addColorStop(1, '#78350f');
+        drawRoundedBar(x1, y1, colWidth, h1, 24, grad1, '#fde047');
+
+        ctx.font = '72px sans-serif';
+        ctx.fillText('🥇', x1 + colWidth / 2, y1 + 95);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '900 42px sans-serif';
+        ctx.fillText('#1', x1 + colWidth / 2, y1 + 160);
+      }
+
+      if (p3) {
+        const x3 = W / 2 + 25;
+        const h3 = 190;
+        const y3 = podiumBaseY - h3;
+
+        ctx.fillStyle = '#fdba74';
+        ctx.font = '900 34px sans-serif';
+        ctx.fillText(p3.name, x3 + colWidth / 2, y3 - 55);
+
+        ctx.fillStyle = p3.color || '#ea580c';
+        ctx.font = '800 32px monospace';
+        ctx.fillText(`${p3.score} pt`, x3 + colWidth / 2, y3 - 18);
+
+        const grad3 = ctx.createLinearGradient(0, y3, 0, podiumBaseY);
+        grad3.addColorStop(0, '#7c2d12');
+        grad3.addColorStop(1, '#292524');
+        drawRoundedBar(x3, y3, colWidth, h3, 24, grad3, '#ea580c');
+
+        ctx.font = '48px sans-serif';
+        ctx.fillText('🥉', x3 + colWidth / 2, y3 + 70);
+        ctx.fillStyle = '#fed7aa';
+        ctx.font = '900 34px sans-serif';
+        ctx.fillText('#3', x3 + colWidth / 2, y3 + 120);
+      }
+
+      let startListY = 830;
+      standings.slice(3, 6).forEach((p, idx) => {
+        const rowY = startListY + idx * 75;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+        ctx.strokeStyle = 'rgba(51, 65, 85, 0.8)';
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.roundRect(140, rowY, W - 280, 60, 16);
+        ctx.fill();
+        ctx.stroke();
 
         ctx.textAlign = 'left';
-        ctx.font = 'bold 18px sans-serif';
-        ctx.fillStyle = idx === 0 ? '#facc15' : '#e2e8f0';
-        ctx.fillText(`${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : '#' + (idx + 1)))}  ${p.name}`, 60, y);
+        ctx.font = '800 26px sans-serif';
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillText(`#${idx + 4}`, 170, rowY + 40);
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillText(p.name, 230, rowY + 40);
 
         ctx.textAlign = 'right';
-        ctx.font = 'bold 20px monospace';
+        ctx.font = '800 28px monospace';
         ctx.fillStyle = '#818cf8';
-        ctx.fillText(`${p.score} pt`, 540, y);
+        ctx.fillText(`${p.score} pt`, W - 170, rowY + 40);
       });
 
-      const dataUrl = canvas.toDataURL('image/png');
-      const a = document.createElement('a');
-      a.href = dataUrl;
-      a.download = `scoreblok_${def.id}_${Date.now()}.png`;
-      a.click();
-      showToast('📸 Podium-afbeelding gedownload!');
+      const note = document.getElementById('matchNoteInput')?.value.trim();
+      if (note) {
+        ctx.textAlign = 'center';
+        ctx.font = 'italic 26px sans-serif';
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText(`"${note}"`, W / 2, 1160);
+      }
+
+      ctx.textAlign = 'center';
+      ctx.font = '700 22px sans-serif';
+      ctx.fillStyle = '#475569';
+      ctx.fillText('Gegenereerd met Scoreblok Pro', W / 2, 1270);
+
+      return canvas;
+    }
+
+    async function shareMatchRecapCard() {
+      const def = getGameDef(state.activeGameId);
+      const standings = getStandings();
+      const winnerName = standings[0] ? standings[0].name : 'de winnaar';
+
+      const canvas = generateMatchRecapCanvas();
+      if (!canvas) {
+        showToast('⚠️ Kon geen kaart genereren.');
+        return;
+      }
+
+      triggerHaptic(30);
+      SoundFX.click();
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `scoreblok_${def.id}_recap.png`, { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              title: `Uitslag ${def.name}`,
+              text: `🏆 Gefeliciteerd ${winnerName} met de winst bij ${def.name}!`,
+              files: [file]
+            });
+            showToast('✅ Gedeeld via WhatsApp!');
+          } catch (err) {
+            // Geannuleerd door gebruiker
+          }
+        } else {
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png');
+          a.download = `scoreblok_${def.id}_recap.png`;
+          a.click();
+          showToast('📸 Afbeelding opgeslagen!');
+        }
+      }, 'image/png');
     }
 
     function checkBackupPromptCounter() {
@@ -6518,12 +6701,17 @@
         <input type="text" id="matchNoteInput" placeholder="Bijv. Op het nippertje de winst gepakt!" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500" />
       </div>
 
-      <div class="flex gap-2 pt-2">
-        <button type="button" onclick="closePodiumModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">Terug</button>
-        <button type="button" onclick="exportPodiumImage()" class="px-3.5 py-2.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold flex items-center gap-1.5 transition">
-          📸 Deel Foto
+            <div class="flex flex-wrap gap-2 pt-2">
+        <button type="button" onclick="closePodiumModal()" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold">
+          Terug
         </button>
-        <button type="button" onclick="confirmSaveFinishedMatch()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold shadow-lg shadow-emerald-600/20">🏆 Definitief Opslaan</button>
+        <button type="button" onclick="shareMatchRecapCard()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-1.5 transition active:scale-95">
+          <span>📲</span>
+          <span>Deel via WhatsApp</span>
+        </button>
+        <button type="button" onclick="confirmSaveFinishedMatch()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold shadow-lg shadow-indigo-600/20">
+          🏆 Opslaan
+        </button>
       </div>
     </div>
   </div>
