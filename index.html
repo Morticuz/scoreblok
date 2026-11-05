@@ -3423,22 +3423,24 @@
       }).join('') + `</div>`;
     }
 
-    function addLivePoints(playerId, delta) {
-      pushUndoSnapshot();
+        function addLivePoints(playerId, delta) {
+      sendActionToHost('add_live_points', {
+        gameId: state.activeGameId,
+        playerId: playerId,
+        delta: delta
+      });
       triggerHaptic(20);
-      const gs = ensureGameState(state.activeGameId);
-      const pd = gs.playerData[playerId];
-      pd.liveScore = Number(pd.liveScore || 0) + Number(delta || 0);
       SoundFX.point();
-      saveState();
-      renderScoreboard();
     }
 
-    function addCustomLivePoints(playerId) {
-      const el = document.getElementById('customLive_' + playerId);
-      if (!el || el.value === '') return;
-      addLivePoints(playerId, Number(el.value));
-      el.value = '';
+    function setCategoryVal(gameId, playerId, cat, val) {
+      sendActionToHost('set_category_val', {
+        gameId: gameId,
+        playerId: playerId,
+        category: cat,
+        val: val
+      });
+      triggerHaptic(15);
     }
 
     function openCarcassonneCalcModal(playerId) {
