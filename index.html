@@ -1065,7 +1065,7 @@
       return 0;
     }
 
-    // =========================================================================
+        // =========================================================================
     // 6. SCORE CALCULATIONS PER GAME
     // =========================================================================
     function calculatePlayerTotal(gameId, playerId) {
@@ -1139,7 +1139,6 @@
       } else if (def.type === 'regenwormen') {
         const r = pd.regenwormen || {};
         const expOn = typeof isRegenwormenExpActive === 'function' ? isRegenwormenExpActive(gs) : false;
-        const tileList = expOn ? [...REGENWORMEN_EXP_TILES
         const tileList = expOn ? [...REGENWORMEN_EXP_TILES, ...REGENWORMEN_TILES] : REGENWORMEN_TILES;
         let worms = 0;
         tileList.forEach(item => {
