@@ -676,6 +676,7 @@
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
 
+
     // =========================================================================
     // 3. STATE MANAGEMENT, LOCAL STORAGE & INITIALISATIE
     // =========================================================================
@@ -1188,7 +1189,7 @@
         const y = pd.yahtzee || {};
         const upper = Number(y.ones || 0) + Number(y.twos || 0) + Number(y.threes || 0) + Number(y.fours || 0) + Number(y.fives || 0) + Number(y.sixes || 0);
         const bonus = upper >= 63 ? 35 : 0;
-        const lower = Number(y.toak || 0) + Number(y.foak || 0) + Number(y.fh || 0) + Number(y.smStr || 0) + Number(lgStr || 0) + Number(y.yahtzee || 0) + Number(y.chance || 0) + (Number(y.extraY || 0) * 100);
+        const lower = Number(y.toak || 0) + Number(y.foak || 0) + Number(y.fh || 0) + Number(y.smStr || 0) + Number(y.lgStr || 0) + Number(y.yahtzee || 0) + Number(y.chance || 0) + (Number(y.extraY || 0) * 100);
         rawScore = upper + bonus + lower;
       } else if (def.type === 'catan') {
         const ct = pd.catan || {};
