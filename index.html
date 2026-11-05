@@ -4517,9 +4517,14 @@
       }
     }
 
-    // =========================================================================
+        // =========================================================================
     // 13. WIE START ER VANDAAG? & GEHEIME ROLLEN
     // =========================================================================
+    let fingerCountdownTimer = null;
+    let activeTouchesMap = {};
+    let isFingerDecided = false;
+    let lastPickedStarterId = null;
+
     function openStartPlayerModal() {
       rollStartPlayer();
       rollStartChallenge();
@@ -4528,29 +4533,42 @@
     }
 
     function closeStartPlayerModal() {
+      stopFingerCountdown();
       document.getElementById('startPlayerModal')?.classList.add('hidden');
     }
 
     function setStartPlayerMode(mode) {
       const bRand = document.getElementById('spTabRandom');
+      const bFing = document.getElementById('spTabFingers');
       const bChal = document.getElementById('spTabChallenge');
       const boxRand = document.getElementById('spRandomBox');
+      const boxFing = document.getElementById('spFingersBox');
       const boxChal = document.getElementById('spChallengeBox');
 
-      if (mode === 'random') {
-        bRand.className = "flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-600 text-white transition";
-        bChal.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
-        boxRand.classList.remove('hidden');
-        boxChal.classList.add('hidden');
+      const tabs = [
+        { id: 'random', btn: bRand, box: boxRand },
+        { id: 'fingers', btn: bFing, box: boxFing },
+        { id: 'challenge', btn: bChal, box: boxChal }
+      ];
+
+      tabs.forEach(t => {
+        if (!t.btn || !t.box) return;
+        if (t.id === mode) {
+          t.btn.className = "flex-1 py-1.5 rounded-lg text-[11px] font-extrabold bg-indigo-600 text-white transition";
+          t.box.classList.remove('hidden');
+        } else {
+          t.btn.className = "flex-1 py-1.5 rounded-lg text-[11px] font-bold text-slate-400 hover:text-white transition";
+          t.box.classList.add('hidden');
+        }
+      });
+
+      if (mode === 'fingers') {
+        initFingerPickerEvents();
+        resetFingerPickerUI();
       } else {
-        bChal.className = "flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-600 text-white transition";
-        bRand.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
-        boxChal.classList.remove('hidden');
-        boxRand.classList.add('hidden');
+        stopFingerCountdown();
       }
     }
-
-    let lastPickedStarterId = null;
 
     function rollStartPlayer() {
       const act = getActivePlayers();
@@ -4558,8 +4576,10 @@
       const pick = act[Math.floor(Math.random() * act.length)];
       lastPickedStarterId = pick.id;
       const nameEl = document.getElementById('startPlayerWinnerName');
-      nameEl.textContent = pick.name;
-      nameEl.style.color = pick.color || '#818cf8';
+      if (nameEl) {
+        nameEl.textContent = pick.name;
+        nameEl.style.color = pick.color || '#818cf8';
+      }
       triggerHaptic(20);
       SoundFX.click();
       SoundFX.speak(`${pick.name} begint vandaag met spelen!`);
@@ -4589,18 +4609,198 @@
 
     function rollStartChallenge() {
       const c = START_CHALLENGES[Math.floor(Math.random() * START_CHALLENGES.length)];
-      document.getElementById('startChallengeText').textContent = c;
+      const chalEl = document.getElementById('startChallengeText');
+      if (chalEl) chalEl.textContent = c;
       const pGrid = document.getElementById('spChallengePlayers');
-      pGrid.innerHTML = getActivePlayers().map(p => `
-        <button type="button" onclick="setPlayerFirstAtTable('${p.id}'); closeStartPlayerModal();" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-400 text-xs font-bold text-white flex items-center justify-center gap-1.5 transition">
-          ${renderMeepleSvg(p.color, 'w-3 h-3')}
-          <span>${p.name}</span>
-        </button>
-      `).join('');
+      if (pGrid) {
+        pGrid.innerHTML = getActivePlayers().map(p => `
+          <button type="button" onclick="setPlayerFirstAtTable('${p.id}'); closeStartPlayerModal();" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-amber-400 text-xs font-bold text-white flex items-center justify-center gap-1.5 transition">
+            ${renderMeepleSvg(p.color, 'w-3 h-3')}
+            <span>${p.name}</span>
+          </button>
+        `).join('');
+      }
       triggerHaptic(20);
       SoundFX.click();
       SoundFX.speak(c);
     }
+
+    // --- Vinger-op-scherm logica ---
+    let fingerEventsAttached = false;
+
+    function initFingerPickerEvents() {
+      if (fingerEventsAttached) return;
+      const zone = document.getElementById('fingerTouchZone');
+      if (!zone) return;
+
+      zone.addEventListener('touchstart', handleFingerTouch, { passive: false });
+      zone.addEventListener('touchmove', handleFingerTouch, { passive: false });
+      zone.addEventListener('touchend', handleFingerTouchEnd, { passive: false });
+      zone.addEventListener('touchcancel', handleFingerTouchEnd, { passive: false });
+
+      fingerEventsAttached = true;
+    }
+
+    function resetFingerPickerUI() {
+      isFingerDecided = false;
+      stopFingerCountdown();
+      activeTouchesMap = {};
+      const layer = document.getElementById('fingerCirclesLayer');
+      if (layer) layer.innerHTML = '';
+      const instr = document.getElementById('fingerInstruction');
+      if (instr) {
+        instr.classList.remove('opacity-0');
+        instr.innerHTML = `
+          <span class="text-3xl animate-bounce inline-block mb-1">👆</span>
+          <div class="text-xs font-black text-white">Iedereen 1 vinger op het scherm!</div>
+          <div class="text-[10px] text-slate-400 mt-1">Houd 2,5 seconde vast tot de winnaar oplicht</div>
+        `;
+      }
+      const footer = document.getElementById('fingerResultFooter');
+      if (footer) footer.classList.add('hidden');
+    }
+
+    function handleFingerTouch(e) {
+      e.preventDefault();
+      if (isFingerDecided) return;
+
+      const zone = document.getElementById('fingerTouchZone');
+      const rect = zone.getBoundingClientRect();
+      const act = getActivePlayers();
+      const palette = act.map(p => p.color || '#6366f1');
+
+      const currentIds = [];
+      for (let i = 0; i < e.touches.length; i++) {
+        const t = e.touches[i];
+        const id = t.identifier;
+        currentIds.push(id);
+        const x = t.clientX - rect.left;
+        const y = t.clientY - rect.top;
+
+        if (!activeTouchesMap[id]) {
+          const color = palette[Object.keys(activeTouchesMap).length % palette.length];
+          activeTouchesMap[id] = { id, color, x, y };
+          triggerHaptic(15);
+          SoundFX.click();
+        } else {
+          activeTouchesMap[id].x = x;
+          activeTouchesMap[id].y = y;
+        }
+      }
+
+      // Verwijder vingers die losgelaten zijn
+      Object.keys(activeTouchesMap).forEach(k => {
+        if (!currentIds.includes(Number(k))) {
+          delete activeTouchesMap[k];
+        }
+      });
+
+      renderFingerRings();
+
+      const touchCount = Object.keys(activeTouchesMap).length;
+      if (touchCount >= 2 && !fingerCountdownTimer) {
+        startFingerCountdown();
+      } else if (touchCount < 2) {
+        stopFingerCountdown();
+      }
+    }
+
+    function handleFingerTouchEnd(e) {
+      e.preventDefault();
+      if (isFingerDecided) return;
+
+      const currentIds = [];
+      for (let i = 0; i < e.touches.length; i++) {
+        currentIds.push(e.touches[i].identifier);
+      }
+
+      Object.keys(activeTouchesMap).forEach(k => {
+        if (!currentIds.includes(Number(k))) {
+          delete activeTouchesMap[k];
+        }
+      });
+
+      renderFingerRings();
+
+      if (Object.keys(activeTouchesMap).length < 2) {
+        stopFingerCountdown();
+      }
+    }
+
+    function renderFingerRings() {
+      const layer = document.getElementById('fingerCirclesLayer');
+      if (!layer) return;
+
+      layer.innerHTML = Object.values(activeTouchesMap).map(f => `
+        <div class="absolute -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none transition-transform"
+             style="left: ${f.x}px; top: ${f.y}px; width: 70px; height: 70px; background-color: ${f.color}33; border: 3px solid ${f.color}; box-shadow: 0 0 20px ${f.color};">
+          <div class="w-full h-full rounded-full animate-ping opacity-75" style="border: 2px solid ${f.color};"></div>
+        </div>
+      `).join('');
+    }
+
+    function startFingerCountdown() {
+      stopFingerCountdown();
+      let ticks = 0;
+      fingerCountdownTimer = setInterval(() => {
+        ticks++;
+        triggerHaptic(20);
+        SoundFX.beep(400 + ticks * 80, 'sine', 0.05, 0.08);
+
+        if (ticks >= 8) {
+          stopFingerCountdown();
+          chooseWinningFinger();
+        }
+      }, 300);
+    }
+
+    function stopFingerCountdown() {
+      if (fingerCountdownTimer) {
+        clearInterval(fingerCountdownTimer);
+        fingerCountdownTimer = null;
+      }
+    }
+
+    function chooseWinningFinger() {
+      const keys = Object.keys(activeTouchesMap);
+      if (keys.length === 0) return;
+
+      isFingerDecided = true;
+      const winnerKey = keys[Math.floor(Math.random() * keys.length)];
+      const winnerFinger = activeTouchesMap[winnerKey];
+
+      const act = getActivePlayers();
+      const chosenPlayer = act[Math.floor(Math.random() * act.length)];
+      lastPickedStarterId = chosenPlayer.id;
+
+      const layer = document.getElementById('fingerCirclesLayer');
+      if (layer) {
+        layer.innerHTML = `
+          <div class="absolute -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none transition-transform animate-bounce"
+               style="left: ${winnerFinger.x}px; top: ${winnerFinger.y}px; width: 100px; height: 100px; background-color: ${winnerFinger.color}; border: 4px solid #ffffff; box-shadow: 0 0 35px ${winnerFinger.color};">
+            <div class="w-full h-full flex items-center justify-center text-3xl">👑</div>
+          </div>
+        `;
+      }
+
+      const instr = document.getElementById('fingerInstruction');
+      if (instr) {
+        instr.classList.remove('opacity-0');
+        instr.innerHTML = `
+          <div class="text-2xl font-black text-amber-300 drop-shadow">🎉 ${chosenPlayer.name}!</div>
+          <div class="text-xs text-slate-300 mt-1">Deze vinger mag vanavond beginnen!</div>
+        `;
+      }
+
+      const footer = document.getElementById('fingerResultFooter');
+      if (footer) footer.classList.remove('hidden');
+
+      triggerHaptic(50);
+      triggerConfetti();
+      SoundFX.fanfare();
+      SoundFX.speak(`${chosenPlayer.name} begint!`);
+    }
+
 
     // =========================================================================
     // 14. EIGEN SPEL TOEVOEGEN & BEHEREN
@@ -6131,19 +6331,27 @@
     </div>
   </div>
 
-  <!-- MODAL: WIE START ER VANDAAG? -->
-  <div id="startPlayerModal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 text-center space-y-4 shadow-2xl">
-      <div class="text-3xl">🎲</div>
-      <h3 class="font-black text-base text-white">Wie start er vandaag?</h3>
-
-      <div class="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800 w-full">
-        <button type="button" id="spTabRandom" onclick="setStartPlayerMode('random')" class="flex-1 py-1.5 rounded-lg text-xs font-extrabold bg-indigo-600 text-white transition">🎲 Loting op Naam</button>
-        <button type="button" id="spTabChallenge" onclick="setStartPlayerMode('challenge')" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">🎯 Uitdaging!</button>
+    <!-- MODAL: WIE START ER VANDAAG? -->
+  <div id="startPlayerModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 text-center space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="font-black text-sm text-white flex items-center gap-2">
+          <span>🎲</span>
+          <span>Wie start er vandaag?</span>
+        </h3>
+        <button type="button" onclick="closeStartPlayerModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
       </div>
 
+      <!-- 3 Tabs: Loting, Vingers & Uitdaging -->
+      <div class="inline-flex bg-slate-950 p-1 rounded-xl border border-slate-800 w-full gap-1">
+        <button type="button" id="spTabRandom" onclick="setStartPlayerMode('random')" class="flex-1 py-1.5 rounded-lg text-[11px] font-extrabold bg-indigo-600 text-white transition">🎲 Loting</button>
+        <button type="button" id="spTabFingers" onclick="setStartPlayerMode('fingers')" class="flex-1 py-1.5 rounded-lg text-[11px] font-bold text-slate-400 hover:text-white transition">👆 Vingers</button>
+        <button type="button" id="spTabChallenge" onclick="setStartPlayerMode('challenge')" class="flex-1 py-1.5 rounded-lg text-[11px] font-bold text-slate-400 hover:text-white transition">🎯 Uitdaging</button>
+      </div>
+
+      <!-- Tab 1: Snelle loting -->
       <div id="spRandomBox" class="space-y-3">
-        <div id="startPlayerWinnerName" class="text-xl font-black text-indigo-400 py-2">...</div>
+        <div id="startPlayerWinnerName" class="text-xl font-black text-indigo-400 py-3">...</div>
         <p class="text-xs text-slate-400">Wil je de tafelvolgorde meedraaien zodat deze speler op Plek #1 staat?</p>
         <div class="flex gap-2 pt-1">
           <button type="button" onclick="makePickedStarterFirstAtTable()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold">🪑 Zet op #1 aan tafel</button>
@@ -6152,6 +6360,23 @@
         </div>
       </div>
 
+      <!-- Tab 2: Vingers op scherm -->
+      <div id="spFingersBox" class="hidden space-y-3">
+        <div id="fingerTouchZone" class="relative bg-slate-950 border-2 border-dashed border-indigo-500/40 rounded-2xl h-64 flex flex-col items-center justify-center select-none overflow-hidden touch-none cursor-pointer">
+          <div id="fingerInstruction" class="text-center p-4 pointer-events-none transition">
+            <span class="text-3xl animate-bounce inline-block mb-1">👆</span>
+            <div class="text-xs font-black text-white">Iedereen 1 vinger op het scherm!</div>
+            <div class="text-[10px] text-slate-400 mt-1">Houd 2,5 seconde vast tot de winnaar oplicht</div>
+          </div>
+          <div id="fingerCirclesLayer" class="absolute inset-0 pointer-events-none"></div>
+        </div>
+        <div id="fingerResultFooter" class="hidden flex gap-2 pt-1">
+          <button type="button" onclick="makePickedStarterFirstAtTable()" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold">🪑 Zet op #1 aan tafel</button>
+          <button type="button" onclick="resetFingerPickerUI()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold" title="Opnieuw">🔄</button>
+        </div>
+      </div>
+
+      <!-- Tab 3: Uitdaging -->
       <div id="spChallengeBox" class="hidden space-y-3">
         <div class="bg-slate-950 border border-amber-500/30 rounded-2xl p-4">
           <div class="text-[10px] uppercase tracking-wider font-extrabold text-amber-400 mb-1">Degene die begint is...</div>
