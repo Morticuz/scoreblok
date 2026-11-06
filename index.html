@@ -253,7 +253,7 @@
         <!-- Snelle actieknoppen -->
         <div class="flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0 max-w-full py-0.5">
           <button type="button" onclick="openDiceRollerModal()" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[11px] font-bold whitespace-nowrap shadow-sm">🎲 Dobbelen</button>
-          <button type="button" onclick="openStartTournamentModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm">🏆 Toernooi</button>
+          <button type="button" onclick="openStartTournamentModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">🏆 Competitie</button>
           <button type="button" onclick="openStartPlayerModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm">🎲 Wie begint?</button>
           <button type="button" onclick="openLiveRoomModal()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold whitespace-nowrap shadow-sm">📡 Live Tafel</button>
         </div>
@@ -5538,8 +5538,8 @@
       switchMainView('history');
     }
 
-       // =========================================================================
-    // 16. PODIUM MODAL, WISSELTROFEE & TOERNOOI ENGINE
+         // =========================================================================
+    // 16. PODIUM MODAL, WISSELTROFEE & COMPETITIE / SPELAVOND ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
 
@@ -5714,7 +5714,7 @@
         const prevP = state.players.find(p => p.id === previousCupHolder);
         const newP = state.players.find(p => p.id === newCupHolderId);
         if (prevP && newP) {
-          showToast(`⚔️ Wissel van de wacht! ${newP.name} pakt de wisseltrofee van ${prevP.name}!`);
+          showToast(`⚔️ Wissel van de wacht! ${newP.name} pakt de trofee van ${prevP.name}!`);
           SoundFX.speak(`Wissel van de wacht! ${newP.name} ontkroont ${prevP.name}!`);
         }
       }
@@ -5735,12 +5735,17 @@
         results: standings.map(p => ({ playerId: p.id, score: p.score, tieVal: p.tieVal }))
       };
 
+      // Spelavond Sessie check: telt dit spel mee voor het avondklassement?
       if (!state.tournament) {
-        state.tournament = { active: false, mode: 'bracket', name: 'Bordspel Beker', bracketRounds: [], matches: [] };
+        state.tournament = { active: false, mode: 'gamenight', name: 'Spelavond', matches: [] };
       }
       if (state.tournament.active) {
         if (!Array.isArray(state.tournament.matches)) state.tournament.matches = [];
         state.tournament.matches.push(match);
+
+        if (state.tournament.mode === 'gamenight') {
+          showToast(`🎲 Toegevoegd aan Spelavond: ${state.tournament.name}!`);
+        }
       }
 
       if (!Array.isArray(state.history)) state.history = [];
@@ -5752,7 +5757,6 @@
 
       closePodiumModal();
 
-      // Toon direct op de TV als het tv-scherm openstaat
       if (!document.getElementById('viewSpectator')?.classList.contains('hidden')) {
         showTvPodium(standings, def.name);
       } else {
@@ -5774,6 +5778,7 @@
       }
     }
 
+    // --- COMPETITIE & SPELAVOND MODAL ---
     function openStartTournamentModal() {
       let modal = document.getElementById('tournamentModal');
       if (!modal) {
@@ -5802,12 +5807,48 @@
       }
     }
 
+    function updateCompModeExplanation() {
+      const mode = document.querySelector('input[name="tourModeRadio"]:checked')?.value || 'gamenight';
+      const explEl = document.getElementById('compModeExplanationBox');
+      if (!explEl) return;
+
+      if (mode === 'gamenight') {
+        explEl.innerHTML = `
+          <div class="font-bold text-amber-300 flex items-center gap-1.5 mb-1">
+            <span>🎲</span><span>Hoe werkt een Spelavond Klassement?</span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            Jullie spelen vanavond <b>meerdere verschillende spellen</b> achter elkaar. Elk spel levert klassementspunten op 
+            (1e = 5p, 2e = 3p, 3e = 2p, 4e = 1p). Wie over alle spellen heen het meest constant scoort, wint de avondbeker!
+          </p>
+        `;
+      } else if (mode === 'bracket') {
+        explEl.innerHTML = `
+          <div class="font-bold text-indigo-300 flex items-center gap-1.5 mb-1">
+            <span>🥊</span><span>Hoe werkt een Knock-out Toernooi?</span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            Ideaal voor <b>één specifiek spel</b> (bijv. wie is vanavond kampioen van Azul of Catan). Directe 1-tegen-1 duels via een toernooischema richting de grote finale.
+          </p>
+        `;
+      } else {
+        explEl.innerHTML = `
+          <div class="font-bold text-emerald-300 flex items-center gap-1.5 mb-1">
+            <span>📊</span><span>Hoe werkt een Poule Competitie?</span>
+          </div>
+          <p class="text-slate-300 text-[11px] leading-relaxed">
+            Iedereen speelt tegen iedereen binnen één spel. De speler met de meeste losse overwinningen wint de poule.
+          </p>
+        `;
+      }
+    }
+
     function renderTournamentModalContent() {
       const content = document.getElementById('tournamentModalContent');
       if (!content) return;
 
       if (!state.tournament) {
-        state.tournament = { active: false, mode: 'bracket', name: 'Bordspel Beker', bracketRounds: [], matches: [] };
+        state.tournament = { active: false, mode: 'gamenight', name: 'Spelavond', bracketRounds: [], matches: [] };
       }
       const tour = state.tournament;
 
@@ -5820,59 +5861,58 @@
             <div class="flex items-center gap-2">
               <span class="text-2xl">🏆</span>
               <div>
-                <h3 class="font-black text-sm sm:text-base text-white">Nieuw Toernooi Opzetten</h3>
-                <span class="text-[10px] text-amber-400 font-bold">Speel om de officiële 🥇 Toernooibeker</span>
+                <h3 class="font-black text-sm sm:text-base text-white">Competitie & Spelavond</h3>
+                <span class="text-[10px] text-amber-400 font-bold">Kies een competitievorm voor vanavond</span>
               </div>
             </div>
             <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
           </div>
 
-          <div class="bg-slate-950 border border-amber-500/25 rounded-2xl p-3 text-xs space-y-1.5">
-            <div class="font-bold text-amber-300 flex items-center gap-1.5">
-              <span>ℹ️</span>
-              <span>Hoe werkt het toernooi?</span>
-            </div>
-            <p class="text-slate-300 text-[11px] leading-relaxed">
-              De winnaar van dit toernooi krijgt één <b>🥇 Toernooibeker</b> achter zijn naam in het profiel en de Hall of Fame. 
-              De toernooinaam hieronder is puur het label voor vanavond (bijvoorbeeld voor één specifiek spel of een hele spelavond).
-            </p>
-          </div>
+          <!-- Dynamisch Uitlegblok -->
+          <div id="compModeExplanationBox" class="bg-slate-950 border border-amber-500/30 rounded-2xl p-3 text-xs"></div>
 
           <div class="space-y-3.5 text-xs">
             <div>
-              <label class="block text-slate-400 font-semibold mb-1">Toernooinaam / Titel van vanavond:</label>
-              <input type="text" id="tourNameInput" value="" placeholder="bijv. ${activeGameName} Cup of Spelavond Beker" onfocus="this.select()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold placeholder-slate-500 focus:outline-none focus:border-amber-400" />
+              <label class="block text-slate-400 font-semibold mb-1.5">1. Kies de gewenste opzet:</label>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <label class="flex items-center gap-2.5 bg-slate-950 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-amber-400/60 transition">
+                  <input type="radio" name="tourModeRadio" value="gamenight" checked onchange="updateCompModeExplanation()" class="text-amber-500 focus:ring-0" />
+                  <div>
+                    <div class="font-extrabold text-white">🎲 Spelavond</div>
+                    <div class="text-[10px] text-slate-400">Meerdere spellen samen</div>
+                  </div>
+                </label>
+                <label class="flex items-center gap-2.5 bg-slate-950 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-indigo-400/60 transition">
+                  <input type="radio" name="tourModeRadio" value="bracket" onchange="updateCompModeExplanation()" class="text-amber-500 focus:ring-0" />
+                  <div>
+                    <div class="font-extrabold text-white">🥊 Knock-out</div>
+                    <div class="text-[10px] text-slate-400">Duels tot de finale</div>
+                  </div>
+                </label>
+                <label class="flex items-center gap-2.5 bg-slate-950 p-3 rounded-2xl border border-slate-800 cursor-pointer hover:border-emerald-400/60 transition">
+                  <input type="radio" name="tourModeRadio" value="poule" onchange="updateCompModeExplanation()" class="text-amber-500 focus:ring-0" />
+                  <div>
+                    <div class="font-extrabold text-white">📊 Poule</div>
+                    <div class="text-[10px] text-slate-400">Iedereen vs iedereen</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-slate-400 font-semibold mb-1">2. Naam van de competitie:</label>
+              <input type="text" id="tourNameInput" value="Spelavond" placeholder="bijv. Spelavond of ${activeGameName} Beker" onfocus="this.select()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold placeholder-slate-500 focus:outline-none focus:border-amber-400" />
               
               <div class="flex flex-wrap items-center gap-1.5 pt-1.5">
-                <span class="text-[10px] text-slate-500 font-bold">Snelle voorbeelden:</span>
-                <button type="button" onclick="setTourNamePreset('${activeGameName} Cup')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold btn-3d">🎮 ${activeGameName} Cup</button>
-                <button type="button" onclick="setTourNamePreset('Spelavond Beker')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold btn-3d">🎲 Spelavond Beker</button>
-                <button type="button" onclick="setTourNamePreset('Kampioenschap')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold btn-3d">👑 Kampioenschap</button>
+                <span class="text-[10px] text-slate-500 font-bold">Voorbeelden:</span>
+                <button type="button" onclick="setTourNamePreset('Spelavond')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold btn-3d">🎲 Spelavond</button>
+                <button type="button" onclick="setTourNamePreset('${activeGameName} Beker')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold btn-3d">🎮 ${activeGameName} Beker</button>
+                <button type="button" onclick="setTourNamePreset('Grote Vrijdagbokaal')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold btn-3d">🏆 Vrijdagbokaal</button>
               </div>
             </div>
 
             <div>
-              <label class="block text-slate-400 font-semibold mb-1.5">Toernooivorm:</label>
-              <div class="grid grid-cols-2 gap-2">
-                <label class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer">
-                  <input type="radio" name="tourModeRadio" value="bracket" checked class="text-amber-500 focus:ring-0" />
-                  <div>
-                    <div class="font-extrabold text-white">🥊 Knock-out (Brackets)</div>
-                    <div class="text-[10px] text-slate-400">Directe duels tot de finale</div>
-                  </div>
-                </label>
-                <label class="flex items-center gap-2 bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer">
-                  <input type="radio" name="tourModeRadio" value="poule" class="text-amber-500 focus:ring-0" />
-                  <div>
-                    <div class="font-extrabold text-white">📊 Competitie (Poule)</div>
-                    <div class="text-[10px] text-slate-400">Iedereen tegen iedereen</div>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-slate-400 font-semibold mb-1">Deelnemers (${act.length} geselecteerd):</label>
+              <label class="block text-slate-400 font-semibold mb-1">3. Deelnemers (${act.length} actief):</label>
               <div class="flex flex-wrap gap-1.5 bg-slate-950 p-2.5 rounded-xl border border-slate-800">
                 ${act.map(p => `
                   <span class="px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-white font-bold flex items-center gap-1.5 text-[11px]">
@@ -5886,7 +5926,95 @@
 
           <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
             <button type="button" onclick="closeTournamentModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs btn-3d">Annuleren</button>
-            <button type="button" onclick="startTournamentAction()" ${act.length < 2 ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 btn-3d">🏆 Genereer Toernooi</button>
+            <button type="button" onclick="startTournamentAction()" ${act.length < 2 ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 btn-3d">🏆 Start Competitie</button>
+          </div>
+        `;
+        updateCompModeExplanation();
+      } else if (tour.mode === 'gamenight') {
+        // --- ACTIEVE SPELAVOND WEERGAVE ---
+        const act = getActivePlayers();
+        const pointsTable = [5, 3, 2, 1]; // 1e, 2e, 3e, 4e plek
+        const playerScores = {};
+        const gamesPlayedList = tour.matches || [];
+        act.forEach(p => playerScores[p.id] = { points: 0, wins: 0 });
+
+        gamesPlayedList.forEach(m => {
+          (m.results || []).forEach((res, rankIdx) => {
+            if (playerScores[res.playerId]) {
+              playerScores[res.playerId].points += pointsTable[rankIdx] || 0;
+              if (rankIdx === 0) playerScores[res.playerId].wins += 1;
+            }
+          });
+        });
+
+        const standings = act.map(p => ({
+          ...p,
+          totalNightPoints: playerScores[p.id]?.points || 0,
+          nightWins: playerScores[p.id]?.wins || 0
+        })).sort((a, b) => b.totalNightPoints - a.totalNightPoints);
+
+        content.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">🎲</span>
+              <div>
+                <h3 class="font-black text-sm sm:text-base text-white">${tour.name}</h3>
+                <span class="text-[10px] text-amber-400 font-bold">Live Spelavond Klassement</span>
+              </div>
+            </div>
+            <button type="button" onclick="closeTournamentModal()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+          </div>
+
+          <div class="space-y-3">
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3">
+              <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
+                <span>Tussenstand (${gamesPlayedList.length} spel${gamesPlayedList.length === 1 ? '' : 'len'} gespeeld)</span>
+                <span class="text-amber-400 text-[10px]">1e = 5p • 2e = 3p • 3e = 2p • 4e = 1p</span>
+              </div>
+              <div class="space-y-1.5">
+                ${standings.map((p, idx) => `
+                  <div class="bg-slate-900 border ${idx === 0 ? 'border-amber-500/50' : 'border-slate-800'} rounded-xl p-2.5 flex items-center justify-between text-xs player-card-glow" style="--card-glow-color: ${p.color || '#6366f1'}20;">
+                    <div class="flex items-center gap-2">
+                      <span class="font-black ${idx === 0 ? 'text-amber-400' : 'text-slate-500'}">#${idx + 1}</span>
+                      ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                      <span class="font-bold text-white">${p.name}</span>
+                      ${idx === 0 && gamesPlayedList.length > 0 ? '<span class="text-xs">👑</span>' : ''}
+                    </div>
+                    <div class="text-right">
+                      <span class="font-black text-amber-300 font-mono text-sm">${p.totalNightPoints} pt</span>
+                      <span class="text-[10px] text-slate-400 block">${p.nightWins}x goud</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Lijst van gespeelde spellen vanavond -->
+            <div>
+              <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-1.5">Gespeelde spellen vanavond:</div>
+              <div class="space-y-1 max-h-36 overflow-y-auto pr-1">
+                ${gamesPlayedList.length === 0 ? `<div class="text-xs text-slate-500 py-2">Nog geen spellen voltooid. Speel een spel en tik op 'Opslaan' om punten toe te voegen!</div>` : ''}
+                ${gamesPlayedList.map((m, mIdx) => {
+                  const gDef = getGameDef(m.gameId);
+                  const wName = (m.winners || []).map(id => state.players.find(x => x.id === id)?.name).join(' & ');
+                  return `
+                    <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between text-xs">
+                      <span class="font-bold text-slate-300">${mIdx + 1}. ${gDef.name}</span>
+                      <span class="text-amber-300 font-semibold">🏆 ${wName}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-2 pt-2 border-t border-slate-800">
+            <button type="button" onclick="finishTournamentAction()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 font-extrabold text-xs btn-3d">
+              🏁 Spelavond Afronden & Beker Uitreiken
+            </button>
+            <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs btn-3d">
+              Sluiten
+            </button>
           </div>
         `;
       } else if (tour.mode === 'bracket') {
@@ -6004,15 +6132,22 @@
     }
 
     function startTournamentAction() {
-      const activeGameName = getGameDef(state.activeGameId)?.name || 'Spel';
+      const mode = document.querySelector('input[name="tourModeRadio"]:checked')?.value || 'gamenight';
+      const defaultName = mode === 'gamenight' ? 'Spelavond' : `${getGameDef(state.activeGameId)?.name || 'Spel'} Beker`;
       const rawName = document.getElementById('tourNameInput')?.value.trim();
-      const name = rawName || `${activeGameName} Cup`;
-      const mode = document.querySelector('input[name="tourModeRadio"]:checked')?.value || 'bracket';
+      const name = rawName || defaultName;
       const act = getActivePlayers();
 
       if (act.length < 2) return;
 
-      if (mode === 'poule') {
+      if (mode === 'gamenight') {
+        state.tournament = {
+          active: true,
+          mode: 'gamenight',
+          name,
+          matches: []
+        };
+      } else if (mode === 'poule') {
         state.tournament = {
           active: true,
           mode: 'poule',
@@ -6066,7 +6201,7 @@
       SoundFX.fanfare();
       saveState();
       renderTournamentModalContent();
-      showToast(`🏆 Toernooi "${name}" aangemaakt!`);
+      showToast(`🏆 Competitie "${name}" gestart!`);
     }
 
     function setBracketMatchWinner(roundIdx, matchIdx, winnerPlayerId) {
@@ -6096,12 +6231,28 @@
     }
 
     function finishTournamentAction() {
-      if (!confirm('Weet je zeker dat je het huidige toernooi wilt beëindigen en de winnaar wilt belonen?')) return;
+      if (!confirm('Weet je zeker dat je de huidige competitie wilt beëindigen en de beker wilt uitreiken?')) return;
 
       const tour = state.tournament;
       let finalWinnerId = null;
 
-      if (tour.mode === 'bracket') {
+      if (tour.mode === 'gamenight') {
+        const act = getActivePlayers();
+        const pointsTable = [5, 3, 2, 1];
+        const playerScores = {};
+        act.forEach(p => playerScores[p.id] = 0);
+        (tour.matches || []).forEach(m => {
+          (m.results || []).forEach((res, rankIdx) => {
+            if (playerScores[res.playerId] !== undefined) {
+              playerScores[res.playerId] += pointsTable[rankIdx] || 0;
+            }
+          });
+        });
+        let maxP = -1;
+        Object.entries(playerScores).forEach(([id, pts]) => {
+          if (pts > maxP) { maxP = pts; finalWinnerId = id; }
+        });
+      } else if (tour.mode === 'bracket') {
         const finalRound = tour.bracketRounds[tour.bracketRounds.length - 1];
         finalWinnerId = finalRound?.matches[0]?.winnerId || null;
       } else {
@@ -6121,7 +6272,8 @@
         const winP = state.players.find(x => x.id === finalWinnerId);
         if (winP) {
           winP.tournamentCups = (winP.tournamentCups || 0) + 1;
-          showToast(`🏆 ${winP.name} wint het toernooi! Beker toegekend.`);
+          showToast(`🏆 ${winP.name} wint de competitie! Beker toegekend.`);
+          SoundFX.speak(`Gefeliciteerd ${winP.name}, jij bent de kampioen van de competitie!`);
         }
       }
 
