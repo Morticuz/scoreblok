@@ -2039,8 +2039,8 @@
       }).join('');
     }
 
-        // =========================================================================
-    // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND
+       // =========================================================================
+    // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND (INCL. COMMENTATOR)
     // =========================================================================
     function toggleLayoutOrientation() {
       document.body.classList.remove('layout-landscape');
@@ -2241,7 +2241,6 @@
       const titleEl = document.getElementById('activeGameTitle');
       if (titleEl) titleEl.textContent = def.name;
 
-      // Persoonlijke Focus Banner
       let myPlayerBannerHtml = '';
       if (state.myPlayerId) {
         const me = state.players.find(p => p.id === state.myPlayerId);
@@ -2402,11 +2401,14 @@
             ${item.handicap ? `<div class="text-[10px] text-slate-400">Handicap: ${item.handicap > 0 ? '+' : ''}${item.handicap}</div>` : ''}
           </div>`;
       }).join('');
+
+      // Activeer de live commentator bij wisseling van koploper
+      checkLiveLeaderAnnounce(standings);
     }
 
 
-        // =========================================================================
-    // 10. SPELBLADEN
+       // =========================================================================
+    // 10. SPELBLADEN (INCLUSIEF SLIMME AZUL VULLING & CATEGORIE AUTOFOCUS)
     // =========================================================================
 
     // --- AZUL ---
@@ -2479,7 +2481,6 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center justify-center">
-            <!-- Patroonlijnen links -->
             <div class="md:col-span-6 bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3.5 space-y-2">
               <div class="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
                 <span>Patroonlijnen</span>
@@ -2514,7 +2515,6 @@
               }).join('')}
             </div>
 
-            <!-- Muur rechts -->
             <div class="md:col-span-6 flex flex-col items-center">
               <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">5x5 Mozaïek Muur</div>
               <div class="grid grid-cols-5 gap-1.5 max-w-[240px]">
@@ -2532,7 +2532,6 @@
             </div>
           </div>
 
-          <!-- Vloerlijn -->
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-2">
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-300 font-bold">Vloerlijn (Strafpunten):</span>
@@ -2691,7 +2690,6 @@
       renderScoreboard();
       showToast(`✅ Ronde ${gs.azulRound - 1} berekend & tegels doorgeschoven!`);
     }
-
 
     // --- WINGSPAN ---
     let activeWingspanTabPlayerId = null;
@@ -3234,7 +3232,7 @@
       if (key === 'greenCount') renderScoreboard();
     }
 
-    // --- 10E. CASCADIA ---
+    // --- CASCADIA ---
     const CASCADIA_RULES = {
       salmon: { A: [0, 2, 5, 9, 14, 20, 27], B: [0, 2, 4, 9, 11, 17] },
       bear: { A: [0, 4, 11, 19, 27], B: [0, 10] }
@@ -3331,7 +3329,7 @@
       showToast(`🌲 +${score} punten berekend!`);
     }
 
-        // --- 10F. REGENWORMEN ---
+    // --- REGENWORMEN ---
     function isRegenwormenExpActive(gs) {
       if (!gs || !gs.activeExpansions) return false;
       return Object.keys(gs.activeExpansions).some(k => gs.activeExpansions[k]);
@@ -3444,53 +3442,85 @@
       renderScoreboard();
     }
 
-
-    // --- 10G. CATEGORIES, WONDERS, TTR, YAHTZEE, CATAN, ETC. ---
+    // --- CATEGORIES (MET BATCH ACTION & AUTOFOCUS) ---
     function renderCategoriesSheet(container, def) {
       const gs = ensureGameState(def.id);
       let cats = [...(def.categories || ['Punten'])];
       if (def.id === 'wingspan' && gs.activeExpansions?.['🌺 Oceanië (Nectar)']) {
         cats.push('🌺 Nectar (Oceanië)');
       }
+      const activePlayers = getActivePlayers();
 
-      container.innerHTML = getActivePlayers().map(p => {
-        const cMap = gs.playerData[p.id].categories;
-        return `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-            <div class="flex justify-between items-center">
-              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
-                ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                <span class="font-bold text-sm text-white">${p.name}</span>
+      container.innerHTML = `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+          <span class="text-xs font-bold text-slate-400 whitespace-nowrap">⚡ Snelle Acties:</span>
+          <div class="flex items-center gap-1.5">
+            ${cats.slice(0, 3).map(cat => `
+              <button type="button" onclick="batchAddCategoryPoints('${def.id}', '${cat.replace(/'/g, "\\'")}', 1)" class="px-2.5 py-1 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 text-[11px] font-bold whitespace-nowrap">
+                Iedereen +1 ${cat.split(' ')[0]}
               </button>
-              <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal(def.id, p.id)} pnt</span>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              ${cats.map(cat => `
-                <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-2">
-                  <label class="text-[11px] font-bold text-slate-300 truncate">${cat}</label>
-                  ${renderNumberStepper(
-                    `cat_${p.id}_${cat}`, 
-                    cMap[cat], 
-                    `val => setCategoryVal('${def.id}', '${p.id}', '${cat.replace(/'/g, "\\'")}', val)`
-                  )}
-                </div>`).join('')}
-            </div>
-          </div>`;
-      }).join('');
+            `).join('')}
+          </div>
+        </div>
+
+        ${activePlayers.map((p, pIdx) => {
+          const cMap = gs.playerData[p.id].categories;
+          return `
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+              <div class="flex justify-between items-center">
+                <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
+                  ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                  <span class="font-bold text-sm text-white">${p.name}</span>
+                </button>
+                <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal(def.id, p.id)} pnt</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                ${cats.map((cat, cIdx) => `
+                  <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-2">
+                    <label class="text-[11px] font-bold text-slate-300 truncate">${cat}</label>
+                    <div class="inline-flex items-center bg-slate-950 border border-slate-700/80 rounded-xl p-0.5 shadow-inner shrink-0">
+                      <button type="button" onclick="SoundFX.minus(); setCategoryVal('${def.id}', '${p.id}', '${cat.replace(/'/g, "\\'")}', Math.max(0, Number(${cMap[cat] || 0}) - 1))" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-sm flex items-center justify-center transition shrink-0">-</button>
+                      <input type="number" 
+                             id="cat_${p.id}_${cat}" 
+                             value="${valOrEmpty(cMap[cat])}" 
+                             placeholder="0" 
+                             onkeydown="if(event.key==='Enter'){ event.preventDefault(); focusNextCategoryInput(${pIdx}, ${cIdx}, ${activePlayers.length}, ${cats.length}); }"
+                             oninput="setCategoryVal('${def.id}', '${p.id}', '${cat.replace(/'/g, "\\'")}', this.value)" 
+                             class="cat-field-input w-12 bg-transparent text-center font-mono font-black text-sm text-white focus:outline-none placeholder-slate-600" />
+                      <button type="button" onclick="SoundFX.plus(); setCategoryVal('${def.id}', '${p.id}', '${cat.replace(/'/g, "\\'")}', Number(${cMap[cat] || 0}) + 1)" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm flex items-center justify-center transition shrink-0">+</button>
+                    </div>
+                  </div>`).join('')}
+              </div>
+            </div>`;
+        }).join('')}
+      `;
     }
 
-    function setCategoryVal(gameId, playerId, cat, val) {
-      triggerHaptic(15);
-      const gs = ensureGameState(gameId);
-      gs.playerData[playerId].categories[cat] = Number(val || 0);
-      saveState();
-      renderLiveLeaderboard();
-      const inp = document.getElementById(`cat_${playerId}_${cat}`);
-      if (inp) inp.value = valOrEmpty(val);
+    function batchAddCategoryPoints(gameId, cat, delta) {
+      pushUndoSnapshot();
+      getActivePlayers().forEach(p => {
+        const gs = ensureGameState(gameId);
+        const cur = Number(gs.playerData[p.id]?.categories?.[cat] || 0);
+        setCategoryVal(gameId, p.id, cat, cur + delta);
+      });
+      SoundFX.fanfare();
+      showToast(`⚡ Iedereen +${delta} bij ${cat}!`);
+      renderScoreboard();
+    }
+
+    function focusNextCategoryInput(curPlayerIdx, curCatIdx, totalPlayers, totalCats) {
+      const inputs = document.querySelectorAll('.cat-field-input');
+      const curIndex = (curPlayerIdx * totalCats) + curCatIdx;
+      const nextInput = inputs[curIndex + 1] || inputs[0];
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select();
+      }
     }
 
     function renderWonders7Sheet(container) { renderCategoriesSheet(container, getGameDef('wonders7')); }
 
+    // --- TICKET TO RIDE ---
     function renderTtrSheet(container) {
       const gs = ensureGameState('ttr');
       const routeBtns = [
@@ -3556,6 +3586,7 @@
       renderScoreboard();
     }
 
+    // --- YAHTZEE ---
     function renderYahtzeeSheet(container) {
       const gs = ensureGameState('yahtzee');
       const upperFields = [
@@ -3619,6 +3650,7 @@
       renderScoreboard();
     }
 
+    // --- CATAN ---
     function renderCatanSheet(container) {
       const gs = ensureGameState('catan');
       container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">` + getActivePlayers().map(p => {
@@ -3683,6 +3715,7 @@
 
     function renderSushiGoSheet(container) { renderCategoriesSheet(container, getGameDef('sushigo')); }
 
+    // --- LOST CITIES ---
     function renderLostCitiesSheet(container) {
       const gs = ensureGameState('lostcities');
       container.innerHTML = getActivePlayers().map(p => {
@@ -3721,6 +3754,7 @@
       }).join('');
     }
 
+    // --- KOEHANDEL ---
     function renderKoehandelSheet(container) {
       const gs = ensureGameState('koehandel');
       container.innerHTML = getActivePlayers().map(p => {
@@ -3769,6 +3803,7 @@
     function renderCodenamesSheet(container) { renderCarcassonneSheet(container, getGameDef('codenames')); }
     function renderTheMindSheet(container) { renderCarcassonneSheet(container, getGameDef('themind')); }
 
+    // --- CARCASSONNE ---
     function renderCarcaTileCounter(gs) {
       if (gs.tilesLeft === undefined) {
         let startTiles = 72;
@@ -3841,7 +3876,7 @@
       }).join('') + `</div>`;
     }
 
-        function addLivePoints(playerId, delta) {
+    function addLivePoints(playerId, delta) {
       sendActionToHost('add_live_points', {
         gameId: state.activeGameId,
         playerId: playerId,
@@ -3916,6 +3951,7 @@
       document.getElementById('carcaModal')?.remove();
     }
 
+    // --- DOOLHOF ---
     function renderDoolhofSheet(container) {
       const act = getActivePlayers();
       const gs = ensureGameState('doolhof');
@@ -5371,8 +5407,8 @@
       switchMainView('history');
     }
 
-    // =========================================================================
-    // 16. PODIUM MODAL & TOERNOOI ENGINE
+        // =========================================================================
+    // 16. PODIUM MODAL, WISSELTROFEE & TOERNOOI ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
 
@@ -5539,6 +5575,21 @@
       const activeIds = getActivePlayers().map(p => p.id);
       updateEloRatingsForMatch(activeIds, winners);
 
+      // Wissel van de wacht / Wisseltrofee check
+      const previousCupHolder = state.championCup?.currentHolder;
+      const newCupHolderId = winners[0];
+
+      if (previousCupHolder && previousCupHolder !== newCupHolderId) {
+        const prevP = state.players.find(p => p.id === previousCupHolder);
+        const newP = state.players.find(p => p.id === newCupHolderId);
+        if (prevP && newP) {
+          showToast(`⚔️ Wissel van de wacht! ${newP.name} pakt de wisseltrofee van ${prevP.name}!`);
+          SoundFX.speak(`Wissel van de wacht! ${newP.name} ontkroont ${prevP.name}!`);
+        }
+      }
+      state.championCup.previousHolder = previousCupHolder;
+      state.championCup.currentHolder = newCupHolderId;
+
       const match = {
         id: 'm_' + Date.now(),
         gameId: def.id,
@@ -5569,9 +5620,15 @@
       broadcastLiveState();
 
       closePodiumModal();
-      showToast('🏆 Match opgeslagen & Elo bijgewerkt!');
-      checkBackupPromptCounter();
-      switchMainView('history');
+
+      // Schakel TV over naar podium als het TV-scherm aanstaat
+      if (!document.getElementById('viewSpectator')?.classList.contains('hidden')) {
+        showTvPodium(standings, def.name);
+      } else {
+        showToast('🏆 Match opgeslagen & Elo bijgewerkt!');
+        checkBackupPromptCounter();
+        switchMainView('history');
+      }
     }
 
     function resetCurrentGameConfirm() {
@@ -5945,6 +6002,7 @@
       closeTournamentModal();
       renderHistoryView();
     }
+
 
     // =========================================================================
     // 17. STATISTIEK HELPERS: RECORDS & DUELS
