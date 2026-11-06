@@ -156,7 +156,75 @@
     #confettiContainer {
       pointer-events: none !important;
     }
-  </style>
+        /* --- 3D TACTIELE BORDSPEL KNOPPEN --- */
+    .btn-3d {
+      border-bottom-width: 3px !important;
+      border-color: rgba(2, 6, 23, 0.7) !important;
+      transition: all 0.08s ease-in-out !important;
+    }
+    .btn-3d:active {
+      transform: translateY(2px) !important;
+      border-bottom-width: 1px !important;
+    }
+
+    /* --- DYNAMISCHE NEON GLOW VOOR SPELERSKAARTEN --- */
+    .player-card-glow {
+      background: radial-gradient(circle at 10% 15%, var(--card-glow-color, rgba(99, 102, 241, 0.12)) 0%, rgba(15, 23, 42, 0.92) 70%) !important;
+      box-shadow: 0 10px 25px -5px var(--card-glow-color, rgba(0, 0, 0, 0.4)) !important;
+      border-color: rgba(51, 65, 85, 0.6) !important;
+    }
+
+    /* --- MICRO-ANIMATIE: ZWEVENDE SCORE POPUP (+2, +5) --- */
+    @keyframes floatScoreUp {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(0.6);
+      }
+      25% {
+        opacity: 1;
+        transform: translate(-50%, -15px) scale(1.15);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -45px) scale(0.9);
+      }
+    }
+    .floating-score-badge {
+      position: absolute;
+      left: 50%;
+      top: 20%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      z-index: 40;
+      font-weight: 900;
+      font-family: monospace;
+      animation: floatScoreUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* --- SCORE NUMBER POP PULSE --- */
+    @keyframes scorePop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.22); filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6)); }
+      100% { transform: scale(1); }
+    }
+    .animate-score-pop {
+      animation: scorePop 0.35s ease-out forwards;
+    }
+
+    /* --- TV GROOT WATERMERK ACHTERGROND --- */
+    .tv-watermark-bg {
+      position: absolute;
+      right: -30px;
+      bottom: -30px;
+      width: 280px;
+      height: 280px;
+      opacity: 0.05;
+      pointer-events: none;
+      z-index: 0;
+      transform: rotate(-12deg);
+    }
+
+ </style>
 </head>
 
 <body class="min-h-screen pb-20">
@@ -1442,8 +1510,8 @@
       return list;
     }
 
-        // =========================================================================
-    // 7. VIEWS & NAVIGATION (INCLUSIEF TV PODIUM & LIVE COMMENTATOR)
+       // =========================================================================
+    // 7. VIEWS & NAVIGATION (INCLUSIEF TV WATERMERK & LIVE COMMENTATOR)
     // =========================================================================
     let lastKnownLeaderId = null;
 
@@ -1477,13 +1545,13 @@
       });
       ['navBtnPicker', 'navBtnPlayers', 'navBtnHistory', 'navBtnSpectator'].forEach(id => {
         const btn = document.getElementById(id);
-        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center';
+        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center btn-3d';
       });
 
       if (view === 'picker') {
         document.getElementById('viewPicker')?.classList.remove('hidden');
         const btn = document.getElementById('navBtnPicker');
-        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
+        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition text-center btn-3d shadow-lg shadow-indigo-600/30';
         renderGamePicker();
       } else if (view === 'scoreboard') {
         document.getElementById('viewScoreboard')?.classList.remove('hidden');
@@ -1492,18 +1560,18 @@
       } else if (view === 'players') {
         document.getElementById('viewPlayers')?.classList.remove('hidden');
         const btn = document.getElementById('navBtnPlayers');
-        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
+        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition text-center btn-3d shadow-lg shadow-indigo-600/30';
         renderPlayersManager();
       } else if (view === 'history') {
         document.getElementById('viewHistory')?.classList.remove('hidden');
         const btn = document.getElementById('navBtnHistory');
-        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center';
+        if (btn) btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-600 text-white transition text-center btn-3d shadow-lg shadow-indigo-600/30';
         renderHistoryView();
       } else if (view === 'spectator') {
         document.getElementById('viewSpectator')?.classList.remove('hidden');
         requestAppWakeLock();
         const btn = document.getElementById('navBtnSpectator');
-        if (btn) btn.className = 'px-3 py-1.5 rounded-lg text-xs font-black bg-indigo-600 text-white shadow transition text-center';
+        if (btn) btn.className = 'px-3 py-1.5 rounded-xl text-xs font-black bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition text-center btn-3d';
         renderSpectatorView();
       }
 
@@ -1551,30 +1619,47 @@
         const isTurn = (!state.isTeamMode && idx === activeIdx);
         const playerColor = item.color || '#6366f1';
 
+        // Progress bar richting doelscore als spel een limiet heeft (bv. 10pt Catan)
+        let progressBarHtml = '';
+        if (def.limit && def.limit > 0) {
+          const pct = Math.min(100, Math.max(0, (item.score / def.limit) * 100));
+          progressBarHtml = `
+            <div class="w-full bg-slate-950/80 rounded-full h-2 mt-2 border border-slate-800 overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background-color: ${playerColor};"></div>
+            </div>
+          `;
+        }
+
         return `
-          <div class="rounded-3xl p-4 sm:p-5 border-2 transition shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[140px] sm:min-h-[180px] ${isTurn ? 'tv-turn-glow bg-slate-900/95' : (isLeader ? 'bg-indigo-950/70 border-indigo-500/70' : 'bg-slate-900/80 border-slate-800')}"
-               style="border-color: ${isTurn ? playerColor : (isLeader ? '#818cf8' : '#334155')}; --player-turn-color: ${playerColor};">
+          <div class="rounded-3xl p-5 border-2 transition shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[160px] sm:min-h-[200px] player-card-glow ${isTurn ? 'tv-turn-glow' : ''}"
+               style="border-color: ${isTurn ? playerColor : (isLeader ? '#818cf8' : '#334155')}; --player-turn-color: ${playerColor}; --card-glow-color: ${playerColor}25;">
             
-            <div class="flex items-center justify-between gap-1">
-              <div class="flex items-center gap-1.5 min-w-0">
-                <span class="px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-black ${isTurn ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}">#${idx + 1}</span>
-                ${renderMeepleSvg(playerColor, 'w-5 h-5 sm:w-6 sm:h-6')}
-                <span class="font-black text-sm sm:text-lg text-white truncate max-w-[100px] sm:max-w-[150px]">${item.name}</span>
+            <!-- Groot subtiel artwork watermerk achterin de kaart -->
+            <div class="tv-watermark-bg">
+              ${renderGameArtwork(def.id, 'w-full h-full')}
+            </div>
+
+            <div class="flex items-center justify-between gap-1 relative z-10">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="px-2 py-0.5 rounded-lg text-xs font-black ${isTurn ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}">#${idx + 1}</span>
+                ${renderMeepleSvg(playerColor, 'w-6 h-6')}
+                <span class="font-black text-base sm:text-xl text-white truncate max-w-[120px] sm:max-w-[160px]">${item.name}</span>
               </div>
-              <div class="shrink-0">
-                ${isLeader ? '<span>👑</span>' : ''}
-                ${isTurn ? '<span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-full bg-indigo-500 text-white animate-pulse">BEURT</span>' : ''}
+              <div class="shrink-0 flex items-center gap-1">
+                ${isLeader ? '<span class="text-xl">👑</span>' : ''}
+                ${isTurn ? '<span class="text-xs font-black px-2 py-1 rounded-full bg-indigo-500 text-white animate-pulse">BEURT</span>' : ''}
               </div>
             </div>
 
-            <div class="my-auto py-1 text-center">
-              <div class="text-4xl sm:text-6xl font-black font-mono tracking-tight ${isLeader ? 'text-amber-300 drop-shadow-[0_0_15px_rgba(252,211,77,0.3)]' : 'text-white'}">
+            <div class="my-auto py-2 text-center relative z-10">
+              <div id="tvScoreNum_${item.id}" class="text-5xl sm:text-7xl font-black font-mono tracking-tight ${isLeader ? 'text-amber-300 drop-shadow-[0_0_15px_rgba(252,211,77,0.35)]' : 'text-white'}">
                 ${item.score}
               </div>
-              <div class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider">punten</div>
+              <div class="text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">punten</div>
+              ${progressBarHtml}
             </div>
 
-            ${item.tieVal ? `<div class="text-right text-[10px] font-bold text-emerald-400">Tie-break: ${item.tieVal}</div>` : ''}
+            ${item.tieVal ? `<div class="text-right text-[11px] font-bold text-emerald-400 relative z-10">Tie-break: ${item.tieVal}</div>` : ''}
           </div>
         `;
       }).join('');
@@ -2039,8 +2124,8 @@
       }).join('');
     }
 
-       // =========================================================================
-    // 9. SCOREBOARD RENDERING, SPLIT-VIEW & LIVE STAND (INCL. COMMENTATOR)
+         // =========================================================================
+    // 9. SCOREBOARD RENDERING & LIVE STAND (INCLUSIEF NEON GLOW & COMMENTATOR)
     // =========================================================================
     function toggleLayoutOrientation() {
       document.body.classList.remove('layout-landscape');
@@ -2059,7 +2144,7 @@
 
       const tBtn = document.getElementById('teamModeToggleBtn');
       if (tBtn) {
-        tBtn.className = `px-2.5 py-2 rounded-xl text-xs font-black border transition ${state.isTeamMode ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-800 text-slate-300'}`;
+        tBtn.className = `px-2.5 py-2 rounded-xl text-xs font-black border transition btn-3d ${state.isTeamMode ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-800 text-slate-300'}`;
         tBtn.textContent = state.isTeamMode ? '👥 Teams' : '👤 Solo';
       }
     }
@@ -2160,7 +2245,7 @@
           <div class="flex items-center gap-2 flex-wrap">
             <span>🔔 <b>Laatste ronde geklopt:</b></span>
             ${activePlayers.map(p => `
-              <button type="button" onclick="setLastRoundKnocker('${p.id}')" class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border transition ${gs.knockerPlayerId === p.id ? 'bg-amber-400 text-slate-950 border-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+              <button type="button" onclick="setLastRoundKnocker('${p.id}')" class="px-2.5 py-1 rounded-xl text-[11px] font-extrabold border transition btn-3d ${gs.knockerPlayerId === p.id ? 'bg-amber-400 text-slate-950 border-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">
                 ${gs.knockerPlayerId === p.id ? '🔔 ' : ''}${p.name}
               </button>
             `).join('')}
@@ -2287,7 +2372,7 @@
           expBar.innerHTML = `<span class="text-[11px] font-bold text-slate-400">🧩 Uitbreidingen:</span>` +
             def.expansions.map(ex => {
               const on = !!gs.activeExpansions[ex];
-              return `<button type="button" onclick="toggleExpansion('${ex.replace(/'/g, "\\'")}')" class="px-2.5 py-1 rounded-xl text-[11px] font-bold border transition ${on ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">${on ? '✓ ' : '+ '}${ex}</button>`;
+              return `<button type="button" onclick="toggleExpansion('${ex.replace(/'/g, "\\'")}')" class="px-2.5 py-1 rounded-xl text-[11px] font-bold border transition btn-3d ${on ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">${on ? '✓ ' : '+ '}${ex}</button>`;
             }).join('');
         } else {
           expBar.classList.add('hidden');
@@ -2373,20 +2458,21 @@
       boardEl.innerHTML = standings.map((item, idx) => {
         const isLeader = standings.some(x => x.score !== 0) && item.score === topEntry?.score && item.tieVal === topEntry?.tieVal;
         const isTurn = (!state.isTeamMode && idx === (ensureGameState().activeTurnPlayerIdx || 0));
+        const pColor = item.color || '#6366f1';
 
         if (!item.isTeam && typeof checkLiveGroepRecord === 'function') {
           checkLiveGroepRecord(def.id, item.id, item.score);
         }
 
         return `
-          <div onclick="${!state.isTeamMode ? 'cycleActiveTurn(1)' : ''}" title="${!state.isTeamMode ? 'Tik om de beurt door te schuiven' : ''}"
-            class="cursor-pointer rounded-2xl p-3 border transition ${isTurn ? 'player-active-turn bg-slate-900/90' : (isLeader ? 'bg-indigo-950/60 border-indigo-500/60 shadow-lg' : 'bg-slate-900 border-slate-800')}"
-            style="border-left: 5px solid ${item.color || '#6366f1'}; --player-turn-color: ${item.color || '#6366f1'};">
+          <div id="cardLeader_${item.id}" onclick="${!state.isTeamMode ? 'cycleActiveTurn(1)' : ''}" title="${!state.isTeamMode ? 'Tik om de beurt door te schuiven' : ''}"
+            class="relative overflow-hidden cursor-pointer rounded-2xl p-3.5 border transition btn-3d player-card-glow ${isTurn ? 'player-active-turn' : ''}"
+            style="border-left: 5px solid ${pColor}; --player-turn-color: ${pColor}; --card-glow-color: ${pColor}20;">
             
             <div class="flex items-center justify-between text-xs text-slate-400">
               <span class="player-title font-bold truncate flex items-center gap-1.5 text-slate-100">
                 <span class="text-[10px] px-1.5 py-0.5 rounded ${isTurn ? 'bg-indigo-600 text-white font-extrabold' : 'bg-slate-800 text-slate-400'}">#${idx + 1}</span>
-                ${renderMeepleSvg(item.color, 'w-4 h-4')}
+                ${renderMeepleSvg(pColor, 'w-4 h-4')}
                 <span class="${isTurn ? 'text-white font-black' : ''}">${item.name}</span>
               </span>
               <span class="flex items-center gap-1">
@@ -2395,20 +2481,20 @@
               </span>
             </div>
             
-            <div class="score-number text-2xl font-black mt-1 ${isLeader ? 'text-indigo-300' : 'text-white'}">${item.score}</div>
+            <div id="leaderScoreNum_${item.id}" class="score-number text-2xl sm:text-3xl font-black mt-1 font-mono ${isLeader ? 'text-indigo-300' : 'text-white'}">${item.score}</div>
             ${item.isTeam ? `<div class="text-[10px] text-slate-400 truncate mt-0.5">Leden: ${item.members.join(', ')}</div>` : ''}
             ${isLeader && hasTieBreak ? `<div class="text-[10px] text-emerald-300 font-bold">⚖️ Tie-val: ${item.tieVal}</div>` : ''}
             ${item.handicap ? `<div class="text-[10px] text-slate-400">Handicap: ${item.handicap > 0 ? '+' : ''}${item.handicap}</div>` : ''}
           </div>`;
       }).join('');
 
-      // Activeer de live commentator bij wisseling van koploper
+      // Commentator check
       checkLiveLeaderAnnounce(standings);
     }
 
 
-       // =========================================================================
-    // 10. SPELBLADEN (INCLUSIEF SLIMME AZUL VULLING & CATEGORIE AUTOFOCUS)
+        // =========================================================================
+    // 10. SPELBLADEN (DEEL A: AZUL MET SLIMME VULLING & WINGSPAN)
     // =========================================================================
 
     // --- AZUL ---
@@ -2444,19 +2530,19 @@
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div class="flex items-center gap-1.5">
               <span class="text-xs font-bold text-slate-300">Telling:</span>
-              <button type="button" onclick="setAzulMode('wall')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${isWall ? 'bg-indigo-600 text-white shadow' : 'bg-slate-950 text-slate-400 border border-slate-800'}">🧱 Volledig Bord + Muur</button>
-              <button type="button" onclick="setAzulMode('manual')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${!isWall ? 'bg-indigo-600 text-white shadow' : 'bg-slate-950 text-slate-400 border border-slate-800'}">✍️ Handmatig</button>
+              <button type="button" onclick="setAzulMode('wall')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition btn-3d ${isWall ? 'bg-indigo-600 text-white shadow' : 'bg-slate-950 text-slate-400 border border-slate-800'}">🧱 Volledig Bord + Muur</button>
+              <button type="button" onclick="setAzulMode('manual')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition btn-3d ${!isWall ? 'bg-indigo-600 text-white shadow' : 'bg-slate-950 text-slate-400 border border-slate-800'}">✍️ Handmatig</button>
             </div>
             ${isWall ? `
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold text-sky-400">Ronde ${gs.azulRound || 1}</span>
-              <button type="button" onclick="commitAzulRound()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow active:scale-95 transition">✓ Ronde Scoren & Doorschuiven</button>
+              <button type="button" onclick="commitAzulRound()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow active:scale-95 transition btn-3d">✓ Ronde Scoren & Doorschuiven</button>
             </div>` : ''}
           </div>
 
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
             ${activePlayers.map(p => `
-              <button type="button" onclick="activeAzulTabPlayerId='${p.id}'; renderScoreboard();" class="px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition ${p.id === activeP.id ? 'bg-indigo-600 border-indigo-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+              <button type="button" onclick="activeAzulTabPlayerId='${p.id}'; renderScoreboard();" class="px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition btn-3d ${p.id === activeP.id ? 'bg-indigo-600 border-indigo-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
                 ${renderMeepleSvg(p.color, 'w-3.5 h-3.5')}
                 <span>${p.name}</span>
                 <span class="font-mono text-[10px] opacity-80">(${calculatePlayerTotal('azul', p.id)}p)</span>
@@ -2481,6 +2567,7 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center justify-center">
+            <!-- Patroonlijnen links -->
             <div class="md:col-span-6 bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3.5 space-y-2">
               <div class="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
                 <span>Patroonlijnen</span>
@@ -2503,7 +2590,7 @@
                         const filled = slotIdx < line.count;
                         const clr = line.color || 'blue';
                         return `
-                          <div class="w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-black transition ${filled ? `azul-${clr} border-white/50 text-white shadow` : 'bg-slate-900 border-slate-800 text-slate-600'} ${isFull ? 'ring-2 ring-amber-400/80' : ''}">
+                          <div class="w-8 h-8 rounded-lg border flex items-center justify-center text-xs font-black transition btn-3d ${filled ? `azul-${clr} border-white/50 text-white shadow` : 'bg-slate-900 border-slate-800 text-slate-600'} ${isFull ? 'ring-2 ring-amber-400/80' : ''}">
                             ${filled ? '■' : ''}
                           </div>
                         `;
@@ -2515,6 +2602,7 @@
               }).join('')}
             </div>
 
+            <!-- Muur rechts -->
             <div class="md:col-span-6 flex flex-col items-center">
               <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">5x5 Mozaïek Muur</div>
               <div class="grid grid-cols-5 gap-1.5 max-w-[240px]">
@@ -2523,7 +2611,7 @@
                   const pending = az.pending[rIdx][cIdx];
                   return `
                     <button type="button" onclick="toggleAzulTile('${activeP.id}', ${rIdx}, ${cIdx})"
-                      class="azul-tile azul-${clr} w-10 h-10 rounded-xl border flex items-center justify-center text-white font-black text-xs ${locked ? 'locked' : ''} ${pending ? 'pending' : ''}">
+                      class="azul-tile azul-${clr} w-10 h-10 rounded-xl border flex items-center justify-center text-white font-black text-xs btn-3d ${locked ? 'locked' : ''} ${pending ? 'pending' : ''}">
                       ${locked ? '✓' : (pending ? '+' : '')}
                     </button>
                   `;
@@ -2532,6 +2620,7 @@
             </div>
           </div>
 
+          <!-- Vloerlijn -->
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-2">
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-300 font-bold">Vloerlijn (Strafpunten):</span>
@@ -2540,7 +2629,7 @@
             <div class="grid grid-cols-8 gap-1.5">
               ${[0, 1, 2, 3, 4, 5, 6, 7].map(cnt => `
                 <button type="button" onclick="setAzulFloor('${activeP.id}', ${cnt})"
-                  class="py-1.5 rounded-xl text-xs font-black border transition ${az.floor === cnt ? 'bg-rose-600 border-rose-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-400'}">
+                  class="py-1.5 rounded-xl text-xs font-black border transition btn-3d ${az.floor === cnt ? 'bg-rose-600 border-rose-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-400'}">
                   ${cnt}
                 </button>
               `).join('')}
@@ -2588,7 +2677,7 @@
             <h3 class="font-bold text-sm text-white">Kies kleur voor Rij ${lineIdx + 1}</h3>
             <div class="grid grid-cols-1 gap-2">
               ${colors.map(c => `
-                <button type="button" onclick="setAzulPatternLine('${playerId}', ${lineIdx}, '${c.id}')" class="p-2.5 rounded-xl azul-${c.id} text-white font-extrabold text-xs shadow flex items-center justify-between">
+                <button type="button" onclick="setAzulPatternLine('${playerId}', ${lineIdx}, '${c.id}')" class="p-2.5 rounded-xl azul-${c.id} text-white font-extrabold text-xs shadow flex items-center justify-between btn-3d">
                   <span>${c.name}</span>
                   <span>Kies kleur</span>
                 </button>
@@ -2721,7 +2810,7 @@
 
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             ${activePlayers.map(p => `
-              <button type="button" onclick="activeWingspanTabPlayerId='${p.id}'; renderScoreboard();" class="px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition ${p.id === activeP.id ? 'bg-indigo-600 border-indigo-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
+              <button type="button" onclick="activeWingspanTabPlayerId='${p.id}'; renderScoreboard();" class="px-3 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition btn-3d ${p.id === activeP.id ? 'bg-indigo-600 border-indigo-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">
                 ${renderMeepleSvg(p.color, 'w-3.5 h-3.5')}
                 <span>${p.name}</span>
                 <span class="font-mono text-[10px] opacity-80">(${calculatePlayerTotal('wingspan', p.id)}p)</span>
@@ -2750,7 +2839,7 @@
                 <div class="grid grid-cols-5 gap-2">
                   ${(wb[hab.id] || []).map((slot, sIdx) => {
                     return slot.active ? `
-                      <div onclick="openBirdSlotEditor('${activeP.id}', '${hab.id}', ${sIdx})" class="cursor-pointer bg-slate-900/90 border border-slate-700/80 hover:border-amber-400 rounded-xl p-2 space-y-1 text-center shadow-lg transition">
+                      <div onclick="openBirdSlotEditor('${activeP.id}', '${hab.id}', ${sIdx})" class="cursor-pointer bg-slate-900/90 border border-slate-700/80 hover:border-amber-400 rounded-xl p-2 space-y-1 text-center shadow-lg transition btn-3d">
                         <div class="text-[10px] font-black text-amber-300 font-mono">${slot.pts} VP</div>
                         <div class="text-xs">🥚 ${slot.eggs}</div>
                         <div class="text-[10px] text-slate-400">🃏 ${slot.tucked} • 🍒 ${slot.food}</div>
@@ -2818,7 +2907,7 @@
 
             <div class="flex gap-2 pt-2 border-t border-slate-800">
               <button type="button" onclick="removeBirdFromSlot('${playerId}', '${habId}', ${slotIdx})" class="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 font-bold text-xs border border-rose-500/30">Wis</button>
-              <button type="button" onclick="saveBirdSlot('${playerId}', '${habId}', ${slotIdx})" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg">✓ Opslaan</button>
+              <button type="button" onclick="saveBirdSlot('${playerId}', '${habId}', ${slotIdx})" class="flex-1 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg btn-3d">✓ Opslaan</button>
             </div>
           </div>
         </div>
@@ -2846,7 +2935,7 @@
       document.getElementById('birdEditorModal')?.remove();
     }
 
-    // --- KEER OP KEER 1 & 2 ---
+        // --- KEER OP KEER 1 & 2 ---
     function renderKokSheet(container, def) {
       const gs = ensureGameState(def.id);
       const isKok2 = def.type === 'kok2';
@@ -2873,8 +2962,8 @@
                       <div class="w-5 h-5 rounded-md ${c.bg} mx-auto"></div>
                       <div class="text-[11px] font-bold text-slate-300">${c.name}</div>
                       <div class="flex justify-center gap-1">
-                        <button type="button" onclick="setKokColor('${p.id}','${c.id}',5)" class="px-2 py-1 rounded text-xs font-bold ${val === 5 ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}">5</button>
-                        <button type="button" onclick="setKokColor('${p.id}','${c.id}',3)" class="px-2 py-1 rounded text-xs font-bold ${val === 3 ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}">3</button>
+                        <button type="button" onclick="setKokColor('${p.id}','${c.id}',5)" class="px-2 py-1 rounded text-xs font-bold btn-3d ${val === 5 ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}">5</button>
+                        <button type="button" onclick="setKokColor('${p.id}','${c.id}',3)" class="px-2 py-1 rounded text-xs font-bold btn-3d ${val === 3 ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400'}">3</button>
                       </div>
                     </div>`;
                 }).join('')}
@@ -2898,7 +2987,7 @@
                     subTxt = `+${p2}`;
                   }
                   return `
-                    <button type="button" onclick="cycleKokCol('${p.id}','${col.id}')" class="p-1.5 rounded-xl border text-center transition ${btnCls}">
+                    <button type="button" onclick="cycleKokCol('${p.id}','${col.id}')" class="p-1.5 rounded-xl border text-center transition btn-3d ${btnCls}">
                       <div class="text-xs font-extrabold">${col.id}</div>
                       <div class="text-[10px] font-bold opacity-95">${subTxt}</div>
                     </button>`;
@@ -2996,7 +3085,7 @@
                 <input type="number" id="roundInput_${p.id}" placeholder="0" class="w-16 bg-slate-900 border border-slate-700 rounded-lg py-1 text-sm font-bold text-white text-center" />
               </div>`).join('')}
           </div>
-          <button type="button" onclick="addRoundNow()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition">+ Ronde Opslaan</button>
+          <button type="button" onclick="addRoundNow()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition btn-3d">+ Ronde Opslaan</button>
         </div>
 
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
@@ -3304,8 +3393,8 @@
             <h3 class="font-bold text-sm text-white">🌲 Cascadia Scorehulp: ${animalKey.toUpperCase()}</h3>
             <p class="text-xs text-slate-400">Kies de kaartregel uit jullie spel:</p>
             <div class="grid grid-cols-2 gap-2 text-xs">
-              <button type="button" onclick="applyCascadiaPreset('${playerId}', '${animalKey}', 'A')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold">Kaart A (Standaard)</button>
-              <button type="button" onclick="applyCascadiaPreset('${playerId}', '${animalKey}', 'B')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold">Kaart B (Groepen)</button>
+              <button type="button" onclick="applyCascadiaPreset('${playerId}', '${animalKey}', 'A')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold btn-3d">Kaart A (Standaard)</button>
+              <button type="button" onclick="applyCascadiaPreset('${playerId}', '${animalKey}', 'B')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold btn-3d">Kaart B (Groepen)</button>
             </div>
             <button type="button" onclick="document.getElementById('cascCardModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Sluiten</button>
           </div>
@@ -3381,7 +3470,7 @@
                 const takenByOther = !on && owners[item.t];
                 return `
                   <button type="button" onclick="toggleRegenwormenTile('${p.id}', ${item.t})"
-                    class="p-1.5 rounded-xl border text-center transition ${on ? 'bg-amber-500 text-slate-950 border-amber-300 font-extrabold shadow' : (takenByOther ? 'bg-slate-950/40 border-slate-900 text-slate-600 line-through' : (item.special ? 'bg-indigo-950/60 border-indigo-500/50 text-indigo-200' : 'bg-slate-950 border-slate-800 text-slate-300'))}">
+                    class="p-1.5 rounded-xl border text-center transition btn-3d ${on ? 'bg-amber-500 text-slate-950 border-amber-300 font-extrabold shadow' : (takenByOther ? 'bg-slate-950/40 border-slate-900 text-slate-600 line-through' : (item.special ? 'bg-indigo-950/60 border-indigo-500/50 text-indigo-200' : 'bg-slate-950 border-slate-800 text-slate-300'))}">
                     <div class="text-xs font-bold">${item.t}</div>
                     <div class="text-[10px]">${'🐛'.repeat(item.w)}</div>
                   </button>`;
@@ -3395,9 +3484,9 @@
                   <span class="text-[11px] text-slate-400 block">Elk fiche telt als +1 🐛 (max. 7 totaal in het spel)</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', -1)" ${myTokens <= 0 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 border border-slate-700 text-white font-black text-sm">-</button>
+                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', -1)" ${myTokens <= 0 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-30 border border-slate-700 text-white font-black text-sm btn-3d">-</button>
                   <span class="w-12 text-center font-black text-sm text-amber-300">${myTokens} 🐛</span>
-                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', 1)" ${totalTokensTaken >= 7 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-30 text-slate-950 font-black text-sm">+</button>
+                  <button type="button" onclick="adjRegenwormenTokens('${p.id}', 1)" ${totalTokensTaken >= 7 ? 'disabled' : ''} class="w-8 h-8 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-30 text-slate-950 font-black text-sm btn-3d">+</button>
                 </div>
               </div>` : ''}
           </div>`;
@@ -3442,7 +3531,7 @@
       renderScoreboard();
     }
 
-    // --- CATEGORIES (MET BATCH ACTION & AUTOFOCUS) ---
+        // --- 10G. CATEGORIES MET BATCH-ACTIONS & AUTOFOCUS ---
     function renderCategoriesSheet(container, def) {
       const gs = ensureGameState(def.id);
       let cats = [...(def.categories || ['Punten'])];
@@ -3456,7 +3545,7 @@
           <span class="text-xs font-bold text-slate-400 whitespace-nowrap">⚡ Snelle Acties:</span>
           <div class="flex items-center gap-1.5">
             ${cats.slice(0, 3).map(cat => `
-              <button type="button" onclick="batchAddCategoryPoints('${def.id}', '${cat.replace(/'/g, "\\'")}', 1)" class="px-2.5 py-1 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 text-[11px] font-bold whitespace-nowrap">
+              <button type="button" onclick="batchAddCategoryPoints('${def.id}', '${cat.replace(/'/g, "\\'")}', 1)" class="px-2.5 py-1 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-300 text-[11px] font-bold whitespace-nowrap btn-3d">
                 Iedereen +1 ${cat.split(' ')[0]}
               </button>
             `).join('')}
@@ -3479,7 +3568,7 @@
                   <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-2">
                     <label class="text-[11px] font-bold text-slate-300 truncate">${cat}</label>
                     <div class="inline-flex items-center bg-slate-950 border border-slate-700/80 rounded-xl p-0.5 shadow-inner shrink-0">
-                      <button type="button" onclick="SoundFX.minus(); setCategoryVal('${def.id}', '${p.id}', '${cat.replace(/'/g, "\\'")}', Math.max(0, Number(${cMap[cat] || 0}) - 1))" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-sm flex items-center justify-center transition shrink-0">-</button>
+                      <button type="button" onclick="SoundFX.minus(); setCategoryVal('${def.id}', '${p.id}', '${cat.replace(/'/g, "\\'")}', Math.max(0, Number(${cMap[cat] || 0}) - 1))" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-sm flex items-center justify-center transition btn-3d">-</button>
                       <input type="number" 
                              id="cat_${p.id}_${cat}" 
                              value="${valOrEmpty(cMap[cat])}" 
@@ -3487,7 +3576,7 @@
                              onkeydown="if(event.key==='Enter'){ event.preventDefault(); focusNextCategoryInput(${pIdx}, ${cIdx}, ${activePlayers.length}, ${cats.length}); }"
                              oninput="setCategoryVal('${def.id}', '${p.id}', '${cat.replace(/'/g, "\\'")}', this.value)" 
                              class="cat-field-input w-12 bg-transparent text-center font-mono font-black text-sm text-white focus:outline-none placeholder-slate-600" />
-                      <button type="button" onclick="SoundFX.plus(); setCategoryVal('${def.id}', '${p.id}', '${cat.replace(/'/g, "\\'")}', Number(${cMap[cat] || 0}) + 1)" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm flex items-center justify-center transition shrink-0">+</button>
+                      <button type="button" onclick="SoundFX.plus(); setCategoryVal('${def.id}', '${p.id}', '${cat.replace(/'/g, "\\'")}', Number(${cMap[cat] || 0}) + 1)" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm flex items-center justify-center transition btn-3d">+</button>
                     </div>
                   </div>`).join('')}
               </div>
@@ -3518,9 +3607,19 @@
       }
     }
 
+    function setCategoryVal(gameId, playerId, cat, val) {
+      sendActionToHost('set_category_val', {
+        gameId: gameId,
+        playerId: playerId,
+        category: cat,
+        val: val
+      });
+      triggerHaptic(15);
+    }
+
     function renderWonders7Sheet(container) { renderCategoriesSheet(container, getGameDef('wonders7')); }
 
-    // --- TICKET TO RIDE ---
+    // --- TTR ---
     function renderTtrSheet(container) {
       const gs = ensureGameState('ttr');
       const routeBtns = [
@@ -3539,7 +3638,7 @@
               <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('ttr', p.id)} pnt</span>
             </div>
             <div class="flex flex-wrap gap-1.5">
-              ${routeBtns.map(rb => `<button type="button" onclick="addTtrRoute('${p.id}',${rb.pts})" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-200 text-xs font-bold">+${rb.len}🚂 (${rb.pts}p)</button>`).join('')}
+              ${routeBtns.map(rb => `<button type="button" onclick="addTtrRoute('${p.id}',${rb.pts})" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-200 text-xs font-bold btn-3d">+${rb.len}🚂 (${rb.pts}p)</button>`).join('')}
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2 flex items-center justify-between">
@@ -3560,7 +3659,7 @@
                   ${[0, 1, 2, 3].map(cnt => `<option value="${cnt}" ${Number(t.stations || 0) === cnt ? 'selected' : ''}>${cnt} over (+${cnt * 4}p)</option>`).join('')}
                 </select>
               </div>
-              <button type="button" onclick="toggleTtrLongest('${p.id}')" class="rounded-xl border p-2 text-xs font-bold ${t.longest ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">🏆 Langste Route (+10)</button>
+              <button type="button" onclick="toggleTtrLongest('${p.id}')" class="rounded-xl border p-2 text-xs font-bold btn-3d ${t.longest ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">🏆 Langste Route (+10)</button>
             </div>
           </div>`;
       }).join('');
@@ -3625,7 +3724,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
               ${fixedToggles.map(ft => {
                 const on = Number(y[ft.k] || 0) === ft.pts;
-                return `<button type="button" onclick="toggleYahtzeeFixed('${p.id}','${ft.k}',${ft.pts})" class="p-2.5 rounded-xl border text-xs font-bold transition ${on ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">${ft.l}</button>`;
+                return `<button type="button" onclick="toggleYahtzeeFixed('${p.id}','${ft.k}',${ft.pts})" class="p-2.5 rounded-xl border text-xs font-bold transition btn-3d ${on ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">${ft.l}</button>`;
               }).join('')}
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -3686,10 +3785,10 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-1.5 pt-1">
-                  <button type="button" onclick="toggleCatanAward('${p.id}', 'longestRoad')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition ${ct.longestRoad ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
+                  <button type="button" onclick="toggleCatanAward('${p.id}', 'longestRoad')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition btn-3d ${ct.longestRoad ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
                     🛣️ Route (+2)
                   </button>
-                  <button type="button" onclick="toggleCatanAward('${p.id}', 'largestArmy')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition ${ct.largestArmy ? 'bg-rose-500/20 border-rose-400 text-rose-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
+                  <button type="button" onclick="toggleCatanAward('${p.id}', 'largestArmy')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition btn-3d ${ct.largestArmy ? 'bg-rose-500/20 border-rose-400 text-rose-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
                     ⚔️ Ridder (+2)
                   </button>
                 </div>
@@ -3771,7 +3870,7 @@
               ${KOEHANDEL_ANIMALS.map(an => {
                 const owned = !!kh.sets[an.id];
                 return `
-                  <button type="button" onclick="toggleKoehandelSet('${p.id}','${an.id}')" class="p-2 rounded-xl border text-left transition ${owned ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">
+                  <button type="button" onclick="toggleKoehandelSet('${p.id}','${an.id}')" class="p-2 rounded-xl border text-left transition btn-3d ${owned ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">
                     <div class="text-xs font-bold">${an.name}</div>
                     <div class="text-[10px] opacity-80">${an.val} pnt</div>
                   </button>`;
@@ -3803,7 +3902,7 @@
     function renderCodenamesSheet(container) { renderCarcassonneSheet(container, getGameDef('codenames')); }
     function renderTheMindSheet(container) { renderCarcassonneSheet(container, getGameDef('themind')); }
 
-    // --- CARCASSONNE ---
+    // --- CARCASSONNE MET ZWEVENDE SCORE-BADGES ---
     function renderCarcaTileCounter(gs) {
       if (gs.tilesLeft === undefined) {
         let startTiles = 72;
@@ -3822,9 +3921,9 @@
             </div>
           </div>
           <div class="flex items-center gap-2">
-            <button type="button" onclick="adjCarcaTiles(-1)" class="w-8 h-8 rounded-xl bg-slate-800 text-white font-black text-sm hover:bg-slate-700">-</button>
+            <button type="button" onclick="adjCarcaTiles(-1)" class="w-8 h-8 rounded-xl bg-slate-800 text-white font-black text-sm hover:bg-slate-700 btn-3d">-</button>
             <span class="font-mono font-black text-base ${gs.tilesLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-amber-300'} w-10 text-center">${gs.tilesLeft}</span>
-            <button type="button" onclick="adjCarcaTiles(1)" class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-500">+</button>
+            <button type="button" onclick="adjCarcaTiles(1)" class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-500 btn-3d">+</button>
           </div>
         </div>
       `;
@@ -3848,7 +3947,7 @@
       container.innerHTML = tileBar + `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">` + getActivePlayers().map(p => {
         const pd = gs.playerData[p.id];
         return `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div id="carcaCard_${p.id}" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 relative overflow-hidden player-card-glow" style="--card-glow-color: ${p.color || '#6366f1'}20;">
             <div class="flex items-center justify-between">
               <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
                 ${renderMeepleSvg(p.color, 'w-4 h-4')}
@@ -3856,27 +3955,28 @@
               </button>
               <div class="flex items-center gap-2">
                 ${isCarc ? `
-                  <button type="button" onclick="openCarcassonneCalcModal('${p.id}')" class="px-2.5 py-1 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition">
+                  <button type="button" onclick="openCarcassonneCalcModal('${p.id}')" class="px-2.5 py-1 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition btn-3d">
                     🏰 Calculator
                   </button>
                 ` : ''}
-                <span class="text-lg font-black text-indigo-400">${pd.liveScore || 0} pnt</span>
+                <span id="carcaLiveScore_${p.id}" class="text-xl font-black text-indigo-400 font-mono transition-transform duration-200">${pd.liveScore || 0} pnt</span>
               </div>
             </div>
             <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
               ${btns.map(b => `
-                <button type="button" onclick="addLivePoints('${p.id}',${b})" class="py-2 rounded-xl font-extrabold text-xs transition active:scale-95 ${b < 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'}">${b > 0 ? '+' + b : b}</button>
+                <button type="button" onclick="addLivePoints('${p.id}',${b}, event)" class="py-2.5 rounded-xl font-extrabold text-xs transition active:scale-95 btn-3d ${b < 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'}">${b > 0 ? '+' + b : b}</button>
               `).join('')}
             </div>
             <div class="flex gap-2 pt-1">
               <input type="number" id="customLive_${p.id}" placeholder="Vrije punten (+/-)" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-bold text-white placeholder-slate-600" />
-              <button type="button" onclick="addCustomLivePoints('${p.id}')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200">+ Tel bij</button>
+              <button type="button" onclick="addCustomLivePoints('${p.id}')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 btn-3d">+ Tel bij</button>
             </div>
           </div>`;
       }).join('') + `</div>`;
     }
 
-    function addLivePoints(playerId, delta) {
+    // Aangepaste addLivePoints met zwevend +X getalletje en score-pop
+    function addLivePoints(playerId, delta, ev = null) {
       sendActionToHost('add_live_points', {
         gameId: state.activeGameId,
         playerId: playerId,
@@ -3884,16 +3984,33 @@
       });
       triggerHaptic(20);
       SoundFX.point();
+
+      // Visuele floating badge animatie
+      const card = document.getElementById(`carcaCard_${playerId}`) || document.getElementById(`cardLeader_${playerId}`);
+      if (card) {
+        const badge = document.createElement('div');
+        badge.className = `floating-score-badge ${delta >= 0 ? 'text-emerald-400 text-xl' : 'text-rose-400 text-xl'}`;
+        badge.textContent = delta > 0 ? `+${delta}` : delta;
+        card.appendChild(badge);
+        setTimeout(() => badge.remove(), 750);
+      }
+
+      // Pop animatie op het getal
+      const numEl = document.getElementById(`carcaLiveScore_${playerId}`) || document.getElementById(`leaderScoreNum_${playerId}`);
+      if (numEl) {
+        numEl.classList.remove('animate-score-pop');
+        void numEl.offsetWidth;
+        numEl.classList.add('animate-score-pop');
+      }
     }
 
-    function setCategoryVal(gameId, playerId, cat, val) {
-      sendActionToHost('set_category_val', {
-        gameId: gameId,
-        playerId: playerId,
-        category: cat,
-        val: val
-      });
-      triggerHaptic(15);
+    function addCustomLivePoints(playerId) {
+      const inp = document.getElementById(`customLive_${playerId}`);
+      const val = Number(inp?.value || 0);
+      if (val !== 0) {
+        addLivePoints(playerId, val);
+        inp.value = '';
+      }
     }
 
     function openCarcassonneCalcModal(playerId) {
@@ -3927,8 +4044,8 @@
             </div>
 
             <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-              <button type="button" onclick="document.getElementById('carcaModal').remove()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs">Annuleren</button>
-              <button type="button" onclick="applyCarcaCalculation('${playerId}')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30">+ Punten Toevoegen</button>
+              <button type="button" onclick="document.getElementById('carcaModal').remove()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs btn-3d">Annuleren</button>
+              <button type="button" onclick="applyCarcaCalculation('${playerId}')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 btn-3d">+ Punten Toevoegen</button>
             </div>
           </div>
         </div>
@@ -5407,7 +5524,7 @@
       switchMainView('history');
     }
 
-        // =========================================================================
+       // =========================================================================
     // 16. PODIUM MODAL, WISSELTROFEE & TOERNOOI ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
@@ -5449,7 +5566,7 @@
             <div class="bg-slate-950 p-2.5 rounded-2xl border border-amber-500/40 text-center space-y-1.5 mt-2">
               <div class="text-xs text-amber-300 font-extrabold">⚖️ Gelijkspel op punten (${top.score}p)!</div>
               <div class="text-[11px] text-slate-300">Officiële regel: <b>${def.tieBreakerDesc || 'Hoogste tie-breaker waarde'}</b></div>
-              <button type="button" onclick="toggleTieBreakOverrule()" class="px-3 py-1 rounded-xl text-[10px] font-black border transition ${tieBreakOverruledShared ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-300'}">
+              <button type="button" onclick="toggleTieBreakOverrule()" class="px-3 py-1 rounded-xl text-[10px] font-black border transition btn-3d ${tieBreakOverruledShared ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-900 border-slate-700 text-slate-300'}">
                 ${tieBreakOverruledShared ? '🤝 Overruled: Gedeelde Winst!' : '✋ Tafeloverrule: Tel als gelijkspel'}
               </button>
             </div>
@@ -5621,7 +5738,7 @@
 
       closePodiumModal();
 
-      // Schakel TV over naar podium als het TV-scherm aanstaat
+      // Toon direct op de TV als het tv-scherm openstaat
       if (!document.getElementById('viewSpectator')?.classList.contains('hidden')) {
         showTvPodium(standings, def.name);
       } else {
@@ -5714,9 +5831,9 @@
               
               <div class="flex flex-wrap items-center gap-1.5 pt-1.5">
                 <span class="text-[10px] text-slate-500 font-bold">Snelle voorbeelden:</span>
-                <button type="button" onclick="setTourNamePreset('${activeGameName} Cup')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold">🎮 ${activeGameName} Cup</button>
-                <button type="button" onclick="setTourNamePreset('Spelavond Beker')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold">🎲 Spelavond Beker</button>
-                <button type="button" onclick="setTourNamePreset('Kampioenschap')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold">👑 Kampioenschap</button>
+                <button type="button" onclick="setTourNamePreset('${activeGameName} Cup')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold btn-3d">🎮 ${activeGameName} Cup</button>
+                <button type="button" onclick="setTourNamePreset('Spelavond Beker')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold btn-3d">🎲 Spelavond Beker</button>
+                <button type="button" onclick="setTourNamePreset('Kampioenschap')" class="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold btn-3d">👑 Kampioenschap</button>
               </div>
             </div>
 
@@ -5754,8 +5871,8 @@
           </div>
 
           <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-            <button type="button" onclick="closeTournamentModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs">Annuleren</button>
-            <button type="button" onclick="startTournamentAction()" ${act.length < 2 ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20">🏆 Genereer Toernooi</button>
+            <button type="button" onclick="closeTournamentModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs btn-3d">Annuleren</button>
+            <button type="button" onclick="startTournamentAction()" ${act.length < 2 ? 'disabled' : ''} class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/20 btn-3d">🏆 Genereer Toernooi</button>
           </div>
         `;
       } else if (tour.mode === 'bracket') {
@@ -5788,7 +5905,7 @@
                         <div class="text-[10px] text-slate-500 font-bold">Match #${m.id}</div>
                         <div class="space-y-1">
                           <button type="button" onclick="setBracketMatchWinner(${rIdx}, ${mIdx}, '${m.player1Id}')" ${(!p1 || isDone) ? 'disabled' : ''}
-                            class="w-full px-2.5 py-1.5 rounded-xl border text-left font-bold text-xs flex items-center justify-between transition ${m.winnerId === m.player1Id ? 'bg-amber-500 text-slate-950 border-amber-300 font-black' : 'bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700'}">
+                            class="w-full px-2.5 py-1.5 rounded-xl border text-left font-bold text-xs flex items-center justify-between transition btn-3d ${m.winnerId === m.player1Id ? 'bg-amber-500 text-slate-950 border-amber-300 font-black' : 'bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700'}">
                             <span class="flex items-center gap-1.5 truncate">
                               ${p1 ? renderMeepleSvg(p1.color, 'w-3 h-3') : ''}
                               <span>${p1 ? p1.name : (m.player1Placeholder || 'TBD')}</span>
@@ -5797,7 +5914,7 @@
                           </button>
 
                           <button type="button" onclick="setBracketMatchWinner(${rIdx}, ${mIdx}, '${m.player2Id}')" ${(!p2 || isDone) ? 'disabled' : ''}
-                            class="w-full px-2.5 py-1.5 rounded-xl border text-left font-bold text-xs flex items-center justify-between transition ${m.winnerId === m.player2Id ? 'bg-amber-500 text-slate-950 border-amber-300 font-black' : 'bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700'}">
+                            class="w-full px-2.5 py-1.5 rounded-xl border text-left font-bold text-xs flex items-center justify-between transition btn-3d ${m.winnerId === m.player2Id ? 'bg-amber-500 text-slate-950 border-amber-300 font-black' : 'bg-slate-900 border-slate-800 text-slate-200 hover:border-slate-700'}">
                             <span class="flex items-center gap-1.5 truncate">
                               ${p2 ? renderMeepleSvg(p2.color, 'w-3 h-3') : ''}
                               <span>${p2 ? p2.name : (m.player2Placeholder || 'TBD')}</span>
@@ -5814,10 +5931,10 @@
           </div>
 
           <div class="flex gap-2 pt-2 border-t border-slate-800">
-            <button type="button" onclick="finishTournamentAction()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 font-extrabold text-xs">
+            <button type="button" onclick="finishTournamentAction()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 font-extrabold text-xs btn-3d">
               🏁 Toernooi Voltooien & Beker Uitreiken
             </button>
-            <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
+            <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs btn-3d">
               Sluiten
             </button>
           </div>
@@ -5861,10 +5978,10 @@
           </div>
 
           <div class="flex gap-2 pt-2 border-t border-slate-800">
-            <button type="button" onclick="finishTournamentAction()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 font-extrabold text-xs">
+            <button type="button" onclick="finishTournamentAction()" class="flex-1 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 text-rose-300 font-extrabold text-xs btn-3d">
               🏁 Competitie Afronden & Beker Uitreiken
             </button>
-            <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs">
+            <button type="button" onclick="closeTournamentModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs btn-3d">
               Sluiten
             </button>
           </div>
