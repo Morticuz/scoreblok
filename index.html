@@ -191,7 +191,7 @@
         </div>
       </div>
 
-      <!-- Hoofd tabs -->
+            <!-- Hoofd tabs -->
       <div class="flex items-center gap-1.5 w-full pt-1 border-t border-slate-900">
         <button type="button" id="navBtnPicker" onclick="switchMainView('picker')" class="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white transition text-center shadow-sm">🎮 Spellen</button>
         <button type="button" id="navBtnPlayers" onclick="switchMainView('players')" class="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition text-center shadow-sm">👥 Spelers (<span id="activePlayerCntLabel">2</span>)</button>
@@ -1552,6 +1552,45 @@
       tvDiceHideTimeout = setTimeout(() => {
         overlay.classList.add('hidden');
       }, 5000);
+    }
+    // =========================================================================
+    // GOOGLE CHROMECAST INTEGRATIE
+    // =========================================================================
+    window['__onGCastApiAvailable'] = function(isAvailable) {
+      if (isAvailable) {
+        initializeCastApi();
+      }
+    };
+
+    function initializeCastApi() {
+      cast.framework.CastContext.getInstance().setOptions({
+        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+      });
+    }
+
+    function triggerAppCast() {
+      // 1. Schakel de app direct over naar de Spectator weergave
+      switchMainView('spectator');
+
+      // 2. Probeer het native Cast-dialoogvenster te openen
+      if (window.cast && cast.framework) {
+        try {
+          cast.framework.CastContext.getInstance().requestSession().then(
+            () => { showToast('📡 Verbonden met TV!'); },
+            (err) => {
+              // Gebruiker heeft weggeklikt of native cast is niet ondersteund
+              if (err !== 'cancel') {
+                showToast('📺 TV Modus geopend. Gebruik "Casten" in Chrome als het popup-venster niet verscheen.');
+              }
+            }
+          );
+        } catch(e) {
+          showToast('📺 TV Modus actief!');
+        }
+      } else {
+        showToast('📺 TV Modus geopend!');
+      }
     }
 
 
