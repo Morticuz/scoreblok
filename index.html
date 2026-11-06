@@ -1420,8 +1420,8 @@
       return list;
     }
 
-        // =========================================================================
-    // 7. VIEWS & NAVIGATION (INCLUSIEF TV / SPECTATOR ENGINE)
+            // =========================================================================
+    // 7. VIEWS & NAVIGATION (INCLUSIEF TV & SPECTATOR ENGINE)
     // =========================================================================
     function switchMainView(view) {
       releaseAppWakeLock();
@@ -1553,43 +1553,33 @@
         overlay.classList.add('hidden');
       }, 5000);
     }
-    // =========================================================================
-    // GOOGLE CHROMECAST INTEGRATIE
-    // =========================================================================
+
+    // Google Cast trigger (wordt nu alleen aangeroepen via de knop binnen het TV-scherm)
     window['__onGCastApiAvailable'] = function(isAvailable) {
-      if (isAvailable) {
-        initializeCastApi();
+      if (isAvailable && window.cast && cast.framework) {
+        cast.framework.CastContext.getInstance().setOptions({
+          receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+          autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+        });
       }
     };
 
-    function initializeCastApi() {
-      cast.framework.CastContext.getInstance().setOptions({
-        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
-      });
-    }
-
     function triggerAppCast() {
-      // 1. Schakel de app direct over naar de Spectator weergave
-      switchMainView('spectator');
-
-      // 2. Probeer het native Cast-dialoogvenster te openen
       if (window.cast && cast.framework) {
         try {
           cast.framework.CastContext.getInstance().requestSession().then(
             () => { showToast('📡 Verbonden met TV!'); },
             (err) => {
-              // Gebruiker heeft weggeklikt of native cast is niet ondersteund
               if (err !== 'cancel') {
-                showToast('📺 TV Modus geopend. Gebruik "Casten" in Chrome als het popup-venster niet verscheen.');
+                showToast('ℹ️ Open Chrome menu (3 puntjes) en kies "Casten..." als het pop-upvenster niet opent.');
               }
             }
           );
         } catch(e) {
-          showToast('📺 TV Modus actief!');
+          showToast('⚠️ Kon cast-sessie niet openen.');
         }
       } else {
-        showToast('📺 TV Modus geopend!');
+        showToast('ℹ️ Open Chrome menu (3 puntjes) en kies "Casten..." om dit scherm te streamen.');
       }
     }
 
@@ -6355,7 +6345,7 @@
       showToast('⏰ TIJD IS OM!');
     }
 
-          // =========================================================================
+              // =========================================================================
     // 19. WEBRTC LIVE MULTIPLAYER ENGINE, TV SYNC & VIRTUELE DOBBELBEKER
     // =========================================================================
     let peerInstance = null;
@@ -6830,6 +6820,7 @@
         }
       });
     }
+
 
         // =========================================================================
     // 20. OPSTARTEN, RESIZE LISTENER & INITIALISATIE
