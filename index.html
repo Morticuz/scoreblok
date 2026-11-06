@@ -2311,7 +2311,7 @@
     }
 
 
-    // =========================================================================
+        // =========================================================================
     // 10. SPELBLADEN
     // =========================================================================
 
@@ -2385,14 +2385,25 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center justify-center">
+            <!-- Patroonlijnen links -->
             <div class="md:col-span-6 bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3.5 space-y-2">
-              <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Patroonlijnen (Tik om te vullen)</div>
+              <div class="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
+                <span>Patroonlijnen</span>
+                <span class="text-[10px] text-slate-500 font-normal">Tik op rij voor +1</span>
+              </div>
               ${az.patternLines.map((line, rIdx) => {
                 const isFull = line.count === line.cap;
                 return `
                   <div class="flex items-center justify-end gap-1.5 py-0.5">
-                    <span class="text-[10px] font-mono text-slate-500 mr-2">R${rIdx + 1}</span>
-                    <div class="flex items-center justify-end gap-1.5 cursor-pointer" onclick="openPatternLineColorPicker('${activeP.id}', ${rIdx})">
+                    <span class="text-[10px] font-mono text-slate-500 mr-1">R${rIdx + 1}</span>
+
+                    ${line.count > 0 ? `
+                      <button type="button" onclick="clearAzulPatternLine('${activeP.id}', ${rIdx})" title="Maak deze rij leeg" class="text-slate-600 hover:text-rose-400 text-xs px-1">
+                        🗑️
+                      </button>
+                    ` : ''}
+
+                    <div class="flex items-center justify-end gap-1.5 cursor-pointer select-none" onclick="tapAzulPatternLine('${activeP.id}', ${rIdx})">
                       ${Array(line.cap).fill(null).map((_, slotIdx) => {
                         const filled = slotIdx < line.count;
                         const clr = line.color || 'blue';
@@ -2403,12 +2414,13 @@
                         `;
                       }).join('')}
                     </div>
-                    <span class="text-xs ml-2 w-4 text-center ${isFull ? 'text-amber-400 font-black' : 'text-slate-600'}">${isFull ? '✓' : ''}</span>
+                    <span class="text-xs ml-1.5 w-4 text-center ${isFull ? 'text-amber-400 font-black' : 'text-slate-600'}">${isFull ? '✓' : ''}</span>
                   </div>
                 `;
               }).join('')}
             </div>
 
+            <!-- Muur rechts -->
             <div class="md:col-span-6 flex flex-col items-center">
               <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">5x5 Mozaïek Muur</div>
               <div class="grid grid-cols-5 gap-1.5 max-w-[240px]">
@@ -2426,6 +2438,7 @@
             </div>
           </div>
 
+          <!-- Vloerlijn -->
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-2">
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-300 font-bold">Vloerlijn (Strafpunten):</span>
@@ -2450,6 +2463,23 @@
       `;
     }
 
+    function tapAzulPatternLine(playerId, lineIdx) {
+      const gs = ensureGameState('azul');
+      const line = gs.playerData[playerId].azul.patternLines[lineIdx];
+
+      if (!line.color || line.count === 0) {
+        openPatternLineColorPicker(playerId, lineIdx);
+      } else if (line.count < line.cap) {
+        line.count += 1;
+        triggerHaptic(15);
+        SoundFX.click();
+        saveState();
+        renderScoreboard();
+      } else {
+        showToast('ℹ️ Deze rij is al vol!');
+      }
+    }
+
     function openPatternLineColorPicker(playerId, lineIdx) {
       const colors = [
         { id: 'blue', name: 'Blauw' },
@@ -2462,17 +2492,14 @@
       const modalHtml = `
         <div id="azulLineModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
-            <h3 class="font-bold text-sm text-white">Patroonlijn ${lineIdx + 1} vullen</h3>
+            <h3 class="font-bold text-sm text-white">Kies kleur voor Rij ${lineIdx + 1}</h3>
             <div class="grid grid-cols-1 gap-2">
               ${colors.map(c => `
                 <button type="button" onclick="setAzulPatternLine('${playerId}', ${lineIdx}, '${c.id}')" class="p-2.5 rounded-xl azul-${c.id} text-white font-extrabold text-xs shadow flex items-center justify-between">
                   <span>${c.name}</span>
-                  <span>+1 tegel</span>
+                  <span>Kies kleur</span>
                 </button>
               `).join('')}
-              <button type="button" onclick="clearAzulPatternLine('${playerId}', ${lineIdx})" class="p-2 rounded-xl bg-rose-500/20 text-rose-300 font-bold text-xs border border-rose-500/30">
-                🧹 Rij leegmaken
-              </button>
             </div>
             <button type="button" onclick="document.getElementById('azulLineModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Sluiten</button>
           </div>
@@ -2484,12 +2511,8 @@
     function setAzulPatternLine(playerId, lineIdx, color) {
       const gs = ensureGameState('azul');
       const line = gs.playerData[playerId].azul.patternLines[lineIdx];
-      if (line.color && line.color !== color) {
-        if (!confirm(`Deze rij bevat al ${line.color}. Overschrijven met ${color}?`)) return;
-        line.count = 0;
-      }
       line.color = color;
-      line.count = Math.min(line.cap, line.count + 1);
+      line.count = 1;
       triggerHaptic(20);
       SoundFX.click();
       saveState();
@@ -2502,9 +2525,9 @@
       gs.playerData[playerId].azul.patternLines[lineIdx].count = 0;
       gs.playerData[playerId].azul.patternLines[lineIdx].color = null;
       triggerHaptic(15);
+      SoundFX.click();
       saveState();
       renderScoreboard();
-      document.getElementById('azulLineModal')?.remove();
     }
 
     function setAzulMode(mode) {
@@ -2574,6 +2597,7 @@
       renderScoreboard();
       showToast(`✅ Ronde ${gs.azulRound - 1} berekend & tegels doorgeschoven!`);
     }
+
 
     // --- WINGSPAN ---
     let activeWingspanTabPlayerId = null;
