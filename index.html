@@ -3749,7 +3749,7 @@
       renderScoreboard();
     }
 
-    // --- CATAN ---
+        // --- CATAN (GECORRIGEERDE +/- KNOPPEN EN INSTANT SYNC) ---
     function renderCatanSheet(container) {
       const gs = ensureGameState('catan');
       container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">` + getActivePlayers().map(p => {
@@ -3773,15 +3773,15 @@
               <div class="space-y-2 text-xs">
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
                   <span class="text-slate-300 font-bold flex items-center gap-1">🏠 Dorpen (1p)</span>
-                  ${renderNumberStepper(`catan_v_${p.id}`, ct.villages, `val => { ct.villages = Number(val); saveState(); renderScoreboard(); }`)}
+                  ${renderNumberStepper(`catan_v_${p.id}`, ct.villages, `setCatanProp.bind(null, '${p.id}', 'villages')`)}
                 </div>
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
                   <span class="text-slate-300 font-bold flex items-center gap-1">🏰 Steden (2p)</span>
-                  ${renderNumberStepper(`catan_c_${p.id}`, ct.cities, `val => { ct.cities = Number(val); saveState(); renderScoreboard(); }`)}
+                  ${renderNumberStepper(`catan_c_${p.id}`, ct.cities, `setCatanProp.bind(null, '${p.id}', 'cities')`)}
                 </div>
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
                   <span class="text-slate-300 font-bold flex items-center gap-1">📜 OP-Kaarten (1p)</span>
-                  ${renderNumberStepper(`catan_d_${p.id}`, ct.dev, `val => { ct.dev = Number(val); saveState(); renderScoreboard(); }`)}
+                  ${renderNumberStepper(`catan_d_${p.id}`, ct.dev, `setCatanProp.bind(null, '${p.id}', 'dev')`)}
                 </div>
 
                 <div class="grid grid-cols-2 gap-1.5 pt-1">
@@ -3798,6 +3798,18 @@
       }).join('') + `</div>`;
     }
 
+    function setCatanProp(playerId, prop, val) {
+      pushUndoSnapshot();
+      const gs = ensureGameState('catan');
+      if (!gs.playerData[playerId]) return;
+      if (!gs.playerData[playerId].catan) gs.playerData[playerId].catan = {};
+      
+      gs.playerData[playerId].catan[prop] = Math.max(0, Number(val || 0));
+      saveState();
+      broadcastLiveState();
+      renderScoreboard();
+    }
+
     function toggleCatanAward(playerId, awardKey) {
       pushUndoSnapshot();
       triggerHaptic(20);
@@ -3809,10 +3821,9 @@
       gs.playerData[playerId].catan[awardKey] = !cur;
       SoundFX.fanfare();
       saveState();
+      broadcastLiveState();
       renderScoreboard();
     }
-
-    function renderSushiGoSheet(container) { renderCategoriesSheet(container, getGameDef('sushigo')); }
 
     // --- LOST CITIES ---
     function renderLostCitiesSheet(container) {
