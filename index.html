@@ -2805,7 +2805,7 @@
     // --- AZUL ---
     let activeAzulTabPlayerId = null;
 
-    function renderAzulSheet(container, def) {
+        function renderAzulSheet(container, def) {
       const gs = ensureGameState(def.id);
       const isWall = gs.azulMode !== 'manual';
       const activePlayers = getActivePlayers();
@@ -2842,6 +2842,7 @@
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold text-sky-400">Ronde ${gs.azulRound || 1}</span>
               <button type="button" onclick="commitAzulRound()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow active:scale-95 transition btn-3d">✓ Ronde Scoren & Doorschuiven</button>
+            </div>` : ''}
           </div>
 
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
@@ -2948,6 +2949,7 @@
         </div>
       `;
     }
+
 
     function tapAzulPatternLine(playerId, lineIdx) {
       const gs = ensureGameState('azul');
