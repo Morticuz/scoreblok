@@ -5417,7 +5417,7 @@
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-    // =========================================================================
+        // =========================================================================
     // 13. DOBBELEN & WIE BEGINT (3 KEUZES: VINGERS, RANDOM & CHALLENGE)
     // =========================================================================
 
@@ -5507,7 +5507,7 @@
       `;
     }
 
-    // --- KEUZEMENU: 3 MANIEREN OM TE STARTEN ---
+    // --- KEUZEMENU: ALTIJD EERST 3 KEUZES TONEN ---
     function openWhoStartsMenu() {
       document.getElementById('startPlayerChoiceModal')?.remove();
 
@@ -5563,6 +5563,7 @@
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
+    // Blokkeer de oude functie en stuur geforceerd door naar het menu
     function openStartPlayerModal() {
       openWhoStartsMenu();
     }
@@ -5884,6 +5885,7 @@
 
       fingerAnimFrame = requestAnimationFrame(renderFingerCanvasLoop);
     }
+
 
     // =========================================================================
     // 14. EIGEN SPEL TOEVOEGEN & SNEL WINNAAR
