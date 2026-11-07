@@ -5452,7 +5452,7 @@
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-        // =========================================================================
+         // =========================================================================
     // 13. DOBBELEN & WIE BEGINT (3 KEUZES: VINGERS, RANDOM & CHALLENGE)
     // =========================================================================
 
@@ -5598,7 +5598,6 @@
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-    // Alias zodat ook eventuele oude code altijd dit menu opent
     function openStartPlayerModal() {
       openWhoStartsMenu();
     }
@@ -5921,7 +5920,6 @@
       fingerAnimFrame = requestAnimationFrame(renderFingerCanvasLoop);
     }
 
-
     // =========================================================================
     // 14. EIGEN SPEL TOEVOEGEN & SNEL WINNAAR
     // =========================================================================
@@ -6215,8 +6213,8 @@
       }
     }
 
-    // =========================================================================
-    // 16. PODIUM MODAL, WISSELTROFEE & COMPETITIE / SPELAVOND ENGINE
+        // =========================================================================
+    // 16. PODIUM MODAL, DEEL EINDSTAND ALS PLAATJE & SPELAVOND ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
 
@@ -6335,6 +6333,139 @@
 
     function closePodiumModal() {
       document.getElementById('podiumModal')?.classList.add('hidden');
+    }
+
+    // --- DEEL EINDSTAND ALS AFBEELDING (WHATSAPP / STORIES) ---
+    async function shareMatchResultCard() {
+      const def = getGameDef(state.activeGameId);
+      const standings = getStandings();
+      if (!standings || !standings.length) return;
+
+      triggerHaptic(25);
+      showToast('🎨 Afbeelding klaarmaken...');
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1350;
+      const ctx = canvas.getContext('2d');
+
+      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1350);
+      bgGrad.addColorStop(0, '#020617');
+      bgGrad.addColorStop(0.5, '#0f172a');
+      bgGrad.addColorStop(1, '#020617');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1080, 1350);
+
+      const glowGrad = ctx.createRadialGradient(540, 400, 50, 540, 400, 600);
+      glowGrad.addColorStop(0, 'rgba(99, 102, 241, 0.18)');
+      glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = glowGrad;
+      ctx.fillRect(0, 0, 1080, 1350);
+
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+      ctx.lineWidth = 12;
+      ctx.strokeRect(30, 30, 1020, 1290);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#818cf8';
+      ctx.font = '900 32px sans-serif';
+      ctx.fillText('SCOREBLOK PRO • RESULTAAT', 540, 120);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 64px sans-serif';
+      ctx.fillText(def.name, 540, 200);
+
+      const dateStr = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '600 28px sans-serif';
+      ctx.fillText(dateStr, 540, 255);
+
+      const winner = standings[0];
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.roundRect(140, 310, 800, 240, 36);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = '900 34px sans-serif';
+      ctx.fillText('👑 WINNAAR 👑', 540, 380);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 58px sans-serif';
+      ctx.fillText(winner.name, 540, 450);
+
+      ctx.fillStyle = '#fde68a';
+      ctx.font = '900 42px monospace';
+      ctx.fillText(`${winner.score} PUNTEN`, 540, 515);
+
+      let startY = 620;
+      const rowHeight = 110;
+
+      standings.forEach((p, idx) => {
+        if (idx === 0) return;
+        if (idx > 5) return;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+        ctx.strokeStyle = 'rgba(51, 65, 85, 0.6)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(140, startY, 800, 90, 24);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#64748b';
+        ctx.font = '900 36px sans-serif';
+        ctx.fillText(`#${idx + 1}`, 180, startY + 58);
+
+        ctx.fillStyle = p.color || '#6366f1';
+        ctx.beginPath();
+        ctx.arc(260, startY + 45, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#f1f5f9';
+        ctx.font = '800 36px sans-serif';
+        ctx.fillText(p.name, 305, startY + 58);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '900 38px monospace';
+        ctx.fillText(`${p.score}p`, 900, startY + 58);
+
+        startY += rowHeight;
+      });
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#475569';
+      ctx.font = '700 24px sans-serif';
+      ctx.fillText('Gespeeld met Scoreblok Pro', 540, 1260);
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `eindstand-${def.id}.png`, { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: `Eindstand ${def.name}`,
+              text: `Eindstand van ${def.name}: ${winner.name} heeft gewonnen met ${winner.score} punten! 🏆`
+            });
+            showToast('✅ Gedeeld!');
+          } catch (e) {
+            if (e.name !== 'AbortError') showToast('⚠️ Delen geannuleerd.');
+          }
+        } else {
+          const link = document.createElement('a');
+          link.download = `eindstand-${def.id}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          showToast('📥 Afbeelding gedownload!');
+        }
+      }, 'image/png');
     }
 
     function updateEloRatingsForMatch(playerIds, winnerIds) {
