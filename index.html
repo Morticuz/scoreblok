@@ -254,7 +254,7 @@
         <div class="flex items-center gap-1 overflow-x-auto no-scrollbar shrink-0 max-w-full py-0.5">
           <button type="button" onclick="openDiceRollerModal()" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">🎲 Dobbelen</button>
           <button type="button" onclick="openStartTournamentModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">🏆 Competitie</button>
-          <button type="button" onclick="openStartPlayerModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">🎲 Wie begint?</button>
+          <button type="button" onclick="openWhoStartsMenu()" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">🎲 Wie begint?</button>
           <button type="button" onclick="openLiveRoomModal()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">📡 Live Tafel</button>
         </div>
       </div>
@@ -375,6 +375,10 @@
 
       <div id="endgameAlertBanner" class="hidden bg-amber-500/15 border border-amber-500/40 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-200"></div>
       <div id="expansionsBar" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center gap-2"></div>
+      
+      <!-- GROTE INHAALSLAG & RACE-INDICATOR -->
+      <div id="winMarginBanner" class="hidden bg-indigo-950/70 border border-indigo-500/40 rounded-2xl p-3.5 shadow-lg flex items-center justify-between gap-3 text-xs"></div>
+
       <div id="starterTrackerBar" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs"></div>
       <div id="liveLeaderboard" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
       <div id="gameSheetContainer" class="space-y-4"></div>
@@ -401,7 +405,7 @@
           </div>
           <div class="flex items-center gap-2">
             <button type="button" onclick="rotatePlayersClockwise()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold btn-3d">🔄 Schuif 1 plek door</button>
-            <button type="button" onclick="openStartPlayerModal()" class="px-3 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-extrabold btn-3d">🎲 Wie begint?</button>
+            <button type="button" onclick="openWhoStartsMenu()" class="px-3 py-2 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-extrabold btn-3d">🎲 Wie begint?</button>
           </div>
         </div>
 
@@ -795,7 +799,7 @@
       `;
     }
 
-        // =========================================================================
+    // =========================================================================
     // 2. VOLLEDIGE SPELLEN CATALOGUS
     // =========================================================================
     const BUILTIN_GAMES = [
@@ -1135,7 +1139,7 @@
       saveState();
     }
 
-        // =========================================================================
+    // =========================================================================
     // 4. GAME STATE INITIALIZATION (INCLUSIEF NIEUWE DATASTRUCTUREN)
     // =========================================================================
     function createEmptyPlayerData() {
@@ -1237,7 +1241,6 @@
             ];
           }
           if (!pd.wingspanBoard) pd.wingspanBoard = createEmptyPlayerData().wingspanBoard;
-          // Zorg dat ontbrekende velden worden geïnitieerd
           if (!pd.parijs) pd.parijs = { buildings: 0, lanterns: 0, cluster: 0, cardsBonus: 0, unbuiltPenalty: 0 };
           if (!pd.beverbendeCards) pd.beverbendeCards = [0, 0, 0, 0];
           if (!pd.seasaltCurrent) pd.seasaltCurrent = { duos: 0, swimmers: 0, sharks: 0, shells: 0, octos: 0, penguins: 0, sailors: 0, mermaids: 0, colorCards: 0, colorMultis: 0 };
@@ -1247,7 +1250,6 @@
       });
       return gs;
     }
-
 
     // =========================================================================
     // 5. HELPER CALCULATIONS
@@ -1367,6 +1369,15 @@
         if (gameId === 'cascadia') {
           return Number(pd.cascadia?.cones || 0);
         }
+        if (gameId === 'parijs') {
+          return Number(pd.parijs?.cluster || 0);
+        }
+        if (gameId === 'harmonies') {
+          return Number(pd.harmoniesData?.animals || 0);
+        }
+        if (gameId === 'machiavelli') {
+          return Number(pd.machiavelliData?.goldVal || 0);
+        }
         if (gameId === 'eldorado') {
           return Number(pd.categories?.['🚧 Barrières (aantal)'] || 0);
         }
@@ -1391,8 +1402,8 @@
       return 0;
     }
 
-        // =========================================================================
-    // 6. SCORE CALCULATIONS PER GAME (MET LOGICA VOOR ALLE NIEUWE SPELLEN)
+    // =========================================================================
+    // 6. SCORE CALCULATIONS PER GAME
     // =========================================================================
     function calculatePlayerTotal(gameId, playerId) {
       const def = getGameDef(gameId);
@@ -1555,51 +1566,6 @@
       return rawScore + handicap;
     }
 
-    function getTieBreakerValue(gameId, playerId) {
-      try {
-        const gs = ensureGameState(gameId);
-        const pd = gs.playerData[playerId];
-        if (!pd) return 0;
-
-        if (gameId === 'azul' && gs.azulMode !== 'manual') {
-          return computeAzulEndBonuses(pd.azul?.wall || []).rows || 0;
-        }
-        if (gameId === 'cascadia') {
-          return Number(pd.cascadia?.cones || 0);
-        }
-        if (gameId === 'parijs') {
-          return Number(pd.parijs?.cluster || 0);
-        }
-        if (gameId === 'harmonies') {
-          return Number(pd.harmoniesData?.animals || 0);
-        }
-        if (gameId === 'machiavelli') {
-          return Number(pd.machiavelliData?.goldVal || 0);
-        }
-        if (gameId === 'eldorado') {
-          return Number(pd.categories?.['🚧 Barrières (aantal)'] || 0);
-        }
-        if (gameId === 'keeropkeer' || gameId === 'keeropkeer2') {
-          return Number(pd.exclamations || 0);
-        }
-        if (gameId === 'wonders7') {
-          return Number(pd.wonders?.coins || 0);
-        }
-        if (gameId === 'sushigo') {
-          return Number(pd.sushigo?.pudding || 0);
-        }
-        if (gameId === 'ttr') {
-          return pd.ttr?.longest ? 1 : 0;
-        }
-        if (gameId === 'regenwormen') {
-          const tMap = pd.regenwormen?.tiles || {};
-          const owned = Object.keys(tMap).filter(k => tMap[k]).map(Number);
-          return owned.length ? Math.max(...owned) : 0;
-        }
-      } catch (e) {}
-      return 0;
-    }
-
     function getStandings(gameId = state.activeGameId) {
       const lowWins = isLowestWins(gameId);
       
@@ -1645,7 +1611,7 @@
     }
 
     // =========================================================================
-    // 7. VIEWS & NAVIGATION (INCLUSIEF TV WATERMERK & LIVE COMMENTATOR)
+    // 7. VIEWS & NAVIGATION
     // =========================================================================
     let lastKnownLeaderId = null;
 
@@ -2345,8 +2311,8 @@
       }).join('');
     }
 
-         // =========================================================================
-    // 9. SCOREBOARD RENDERING & LIVE STAND (INCLUSIEF NEON GLOW & GROTE WIN INDICATOR)
+    // =========================================================================
+    // 9. SCOREBOARD RENDERING & LIVE STAND
     // =========================================================================
     function toggleLayoutOrientation() {
       document.body.classList.remove('layout-landscape');
@@ -2359,7 +2325,9 @@
       document.body.classList.remove('layout-landscape');
 
       const orientBtn = document.getElementById('layoutOrientBtn');
-      if (orientBtn) orientBtn.style.display = 'none';
+      if (orientBtn) {
+        orientBtn.style.display = 'none';
+      }
 
       const tBtn = document.getElementById('teamModeToggleBtn');
       if (tBtn) {
@@ -2874,7 +2842,6 @@
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-bold text-sky-400">Ronde ${gs.azulRound || 1}</span>
               <button type="button" onclick="commitAzulRound()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow active:scale-95 transition btn-3d">✓ Ronde Scoren & Doorschuiven</button>
-            </div>` : ''}
           </div>
 
           <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
@@ -4448,7 +4415,8 @@
         </div>
       `;
     }
-        // =========================================================================
+
+    // =========================================================================
     // 10D. PARIJS: DE LICHTSTAD (INTERACTIEVE LANTAARN CALCULATOR)
     // =========================================================================
     function renderParijsSheet(container) {
@@ -4520,7 +4488,6 @@
       broadcastLiveState();
       renderScoreboard();
     }
-
 
     // =========================================================================
     // 10E. BEVERBENDE & BEVERCLAN (SNELLE KAART-SELECTOR MET KLOP-VERDUBBELAAR)
@@ -4665,7 +4632,6 @@
       renderScoreboard();
     }
 
-
     // =========================================================================
     // 10F. SEA SALT & PAPER (DUO-SETS & ZEEMEERMIN CALCULATOR)
     // =========================================================================
@@ -4795,7 +4761,6 @@
       renderScoreboard();
     }
 
-
     // =========================================================================
     // 10G. HARMONIES (LANDSCHAPPEN & DIEREN STRUCTUUR)
     // =========================================================================
@@ -4835,7 +4800,7 @@
                 <span class="font-bold text-amber-300">🐾 Dierkaarten (Voltooide fiches):</span>
                 ${renderNumberStepper(`hm_a_${p.id}`, hm.animals, `val => { hm.animals = Number(val); renderScoreboard(); }`)}
               </div>
-              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+              <div class="bg-slate-950 border border-purple-400/30 rounded-xl p-2.5 flex items-center justify-between">
                 <span class="font-bold text-purple-400">🍃 Geheime Natuurdoelen:</span>
                 ${renderNumberStepper(`hm_g_${p.id}`, hm.secretGoals, `val => { hm.secretGoals = Number(val); renderScoreboard(); }`)}
               </div>
@@ -4844,7 +4809,6 @@
         `;
       }).join('') + `</div>`;
     }
-
 
     // =========================================================================
     // 10H. MACHIAVELLI (GEBOUWENWAARDE & BONUS-CHECKBOXES)
@@ -4900,7 +4864,6 @@
         `;
       }).join('') + `</div>`;
     }
-
 
     // =========================================================================
     // 11. SPELERSBEHEER, TEAMS & GROEPEN
@@ -5452,7 +5415,7 @@
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-         // =========================================================================
+    // =========================================================================
     // 13. DOBBELEN & WIE BEGINT (3 KEUZES: VINGERS, RANDOM & CHALLENGE)
     // =========================================================================
 
@@ -6213,7 +6176,7 @@
       }
     }
 
-        // =========================================================================
+    // =========================================================================
     // 16. PODIUM MODAL, DEEL EINDSTAND ALS PLAATJE & SPELAVOND ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
@@ -6899,7 +6862,8 @@
             <div class="flex items-center gap-2">
               <span class="text-2xl">📊</span>
               <div>
-                <h3 class="font-black text-sm sm:text-base text-white">${tour.name}</h3>
+                <h3 class="font
+black text-sm sm:text-base text-white">${tour.name}</h3>
                 <span class="text-[10px] text-amber-400 font-bold">Poule Competitie</span>
               </div>
             </div>
@@ -7087,6 +7051,139 @@
       saveState();
       closeTournamentModal();
       renderHistoryView();
+    }
+
+    // --- DEEL EINDSTAND ALS AFBEELDING (WHATSAPP / STORIES) ---
+    async function shareMatchResultCard() {
+      const def = getGameDef(state.activeGameId);
+      const standings = getStandings();
+      if (!standings || !standings.length) return;
+
+      triggerHaptic(25);
+      showToast('🎨 Afbeelding klaarmaken...');
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1350;
+      const ctx = canvas.getContext('2d');
+
+      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1350);
+      bgGrad.addColorStop(0, '#020617');
+      bgGrad.addColorStop(0.5, '#0f172a');
+      bgGrad.addColorStop(1, '#020617');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, 1080, 1350);
+
+      const glowGrad = ctx.createRadialGradient(540, 400, 50, 540, 400, 600);
+      glowGrad.addColorStop(0, 'rgba(99, 102, 241, 0.18)');
+      glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = glowGrad;
+      ctx.fillRect(0, 0, 1080, 1350);
+
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
+      ctx.lineWidth = 12;
+      ctx.strokeRect(30, 30, 1020, 1290);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#818cf8';
+      ctx.font = '900 32px sans-serif';
+      ctx.fillText('SCOREBLOK PRO • RESULTAAT', 540, 120);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 64px sans-serif';
+      ctx.fillText(def.name, 540, 200);
+
+      const dateStr = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '600 28px sans-serif';
+      ctx.fillText(dateStr, 540, 255);
+
+      const winner = standings[0];
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.roundRect(140, 310, 800, 240, 36);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = '900 34px sans-serif';
+      ctx.fillText('👑 WINNAAR 👑', 540, 380);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 58px sans-serif';
+      ctx.fillText(winner.name, 540, 450);
+
+      ctx.fillStyle = '#fde68a';
+      ctx.font = '900 42px monospace';
+      ctx.fillText(`${winner.score} PUNTEN`, 540, 515);
+
+      let startY = 620;
+      const rowHeight = 110;
+
+      standings.forEach((p, idx) => {
+        if (idx === 0) return;
+        if (idx > 5) return;
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+        ctx.strokeStyle = 'rgba(51, 65, 85, 0.6)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.roundRect(140, startY, 800, 90, 24);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#64748b';
+        ctx.font = '900 36px sans-serif';
+        ctx.fillText(`#${idx + 1}`, 180, startY + 58);
+
+        ctx.fillStyle = p.color || '#6366f1';
+        ctx.beginPath();
+        ctx.arc(260, startY + 45, 18, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#f1f5f9';
+        ctx.font = '800 36px sans-serif';
+        ctx.fillText(p.name, 305, startY + 58);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '900 38px monospace';
+        ctx.fillText(`${p.score}p`, 900, startY + 58);
+
+        startY += rowHeight;
+      });
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#475569';
+      ctx.font = '700 24px sans-serif';
+      ctx.fillText('Gespeeld met Scoreblok Pro', 540, 1260);
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `eindstand-${def.id}.png`, { type: 'image/png' });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: `Eindstand ${def.name}`,
+              text: `Eindstand van ${def.name}: ${winner.name} heeft gewonnen met ${winner.score} punten! 🏆`
+            });
+            showToast('✅ Gedeeld!');
+          } catch (e) {
+            if (e.name !== 'AbortError') showToast('⚠️ Delen geannuleerd.');
+          }
+        } else {
+          const link = document.createElement('a');
+          link.download = `eindstand-${def.id}.png`;
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+          showToast('📥 Afbeelding gedownload!');
+        }
+      }, 'image/png');
     }
 
     // =========================================================================
@@ -7285,14 +7382,15 @@
       setTimeout(() => { container.innerHTML = ''; }, 3200);
     }
 
-       // =========================================================================
+    // =========================================================================
     // 20. INITIALISATIE BIJ OPSTARTEN (DOMContentLoaded & OFFLINE PWA REGISTRATIE)
     // =========================================================================
     window.addEventListener('DOMContentLoaded', () => {
       // 1. Service Worker registreren voor 100% offline ondersteuning
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
-          .then(() => {
+          .then((reg) => {
+            reg.update();
             const dot = document.getElementById('pwaOfflineDot');
             if (dot) dot.title = 'Offline gereed';
           })
@@ -7352,10 +7450,15 @@
         <input type="text" id="matchNoteInput" placeholder="Leuke opmerking van de match..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-white" />
       </div>
 
-      <div class="flex gap-2 pt-2 border-t border-slate-800">
-        <button type="button" onclick="closePodiumModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs btn-3d">Terug</button>
-        <button type="button" onclick="confirmSaveFinishedMatch()" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg shadow-emerald-600/30 btn-3d">
-          💾 Definitief Opslaan & Afsluiten
+      <div class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-800">
+        <div class="flex gap-2 flex-1">
+          <button type="button" onclick="closePodiumModal()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs btn-3d">Terug</button>
+          <button type="button" onclick="shareMatchResultCard()" class="flex-1 py-2.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/40 border border-indigo-500/50 text-indigo-200 font-extrabold text-xs flex items-center justify-center gap-1.5 transition btn-3d shadow">
+            <span>📸</span><span>Deel als Plaatje</span>
+          </button>
+        </div>
+        <button type="button" onclick="confirmSaveFinishedMatch()" class="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg shadow-emerald-600/30 btn-3d">
+          💾 Definitief Opslaan
         </button>
       </div>
     </div>
@@ -7454,5 +7557,3 @@
 
 </body>
 </html>
-
-  
