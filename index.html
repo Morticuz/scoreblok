@@ -560,7 +560,7 @@
 
   <script>
 
-    // =========================================================================
+        // =========================================================================
     // 1. GAME ARTWORK, SCHONE VECTOR BADGES, MEEPLE & GELUIDEN
     // =========================================================================
     const SoundFX = {
@@ -623,40 +623,6 @@
         try { navigator.vibrate(duration); } catch(e) {}
       }
     }
-
-    const START_CHALLENGES = [
-      "Wie het dichtst bij de koelkast zit!",
-      "Wie vandaag het vroegst is opgestaan!",
-      "Degene die gisteren als laatste naar bed is gegaan!",
-      "Wie het verst heeft moeten reizen om aan deze tafel te komen!",
-      "Wie het dichtst bij de voordeur zit!",
-      "Wie vandaag de eerste slok koffie of thee heeft gedronken!",
-      "Degene die vandaag als laatste op zijn telefoon heeft gekeken!",
-      "Degene met de kleurrijkste sokken aan!",
-      "Wie de kleinste handen heeft!",
-      "Wie de grootste schoenmaat heeft!",
-      "Wie de meeste knopen op zijn/haar kleding heeft!",
-      "Degene met de meeste zakken in zijn broek of jas!",
-      "Wie vandaag als eerste schoenen heeft aangetrokken!",
-      "Degene die als laatste jarig is geweest!",
-      "Wie als eerste jarig is in het kalenderjaar!",
-      "De jongste speler aan tafel!",
-      "De oudste speler aan tafel!",
-      "Degene wiens verjaardag het dichtst bij vandaag ligt!",
-      "Wie het meest recent een nieuw bordspel heeft gekocht!",
-      "Wie als laatste een doos van een bordspel netjes heeft ingeruimd!",
-      "Degene die het vorige potje aan tafel heeft verloren!",
-      "Wie de spelregels van dit spel zojuist heeft uitgelegd!",
-      "Degene met de meeste spellen in zijn eigen kast!",
-      "Wie als eerste een dobbelsteen van tafel gooit tijdens het spelen!",
-      "Degene die als laatste een meeple heeft laten vallen!",
-      "Wie vandaag als laatste iets warms heeft gegeten!",
-      "Degene die vanavond voor de snacks of drankjes heeft gezorgd!",
-      "Wie het scherpste gekruide gerecht van de week heeft gegeten!",
-      "Wie als laatste in een bos of op het strand heeft gewandeld!",
-      "Wie het meest recent een vogel of ander dier in de tuin heeft gevoerd!",
-      "Wie vandaag het langst buiten in de frisse lucht is geweest!"
-    ];
 
     const REGENWORMEN_TILES = [
       { t: 21, w: 1 }, { t: 22, w: 1 }, { t: 23, w: 1 }, { t: 24, w: 1 },
@@ -915,6 +881,7 @@
       { id: 'kingen', name: 'Kingen / Brikken', subtitle: 'Rondeteller voor min-contracten en plus-contracten per beurt', category: 'card', type: 'rounds', icon: 'kingen', lowestWins: false, minP: 4, maxP: 4, dur: 'medium' },
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
+
     // =========================================================================
     // 3. STATE MANAGEMENT, LOCAL STORAGE & INITIALISATIE (INCL. DRAFT AUTO-SAVE)
     // =========================================================================
