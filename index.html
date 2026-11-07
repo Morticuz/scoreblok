@@ -224,7 +224,7 @@
       z-index: 0;
       transform: rotate(-12deg);
     }
- </style>
+  </style>
 </head>
 
 <body class="min-h-screen pb-20">
@@ -625,11 +625,37 @@
     }
 
     const START_CHALLENGES = [
-      "Wie het laatst een bordspel gekocht heeft!",
       "Wie het dichtst bij de koelkast zit!",
-      "Degene met de kleurrijkste sokken aan!",
       "Wie vandaag het vroegst is opgestaan!",
-      "Degene die als laatste jarig is geweest!"
+      "Degene die gisteren als laatste naar bed is gegaan!",
+      "Wie het verst heeft moeten reizen om aan deze tafel te komen!",
+      "Wie het dichtst bij de voordeur zit!",
+      "Wie vandaag de eerste slok koffie of thee heeft gedronken!",
+      "Degene die vandaag als laatste op zijn telefoon heeft gekeken!",
+      "Degene met de kleurrijkste sokken aan!",
+      "Wie de kleinste handen heeft!",
+      "Wie de grootste schoenmaat heeft!",
+      "Wie de meeste knopen op zijn/haar kleding heeft!",
+      "Degene met de meeste zakken in zijn broek of jas!",
+      "Wie vandaag als eerste schoenen heeft aangetrokken!",
+      "Degene die als laatste jarig is geweest!",
+      "Wie als eerste jarig is in het kalenderjaar!",
+      "De jongste speler aan tafel!",
+      "De oudste speler aan tafel!",
+      "Degene wiens verjaardag het dichtst bij vandaag ligt!",
+      "Wie het meest recent een nieuw bordspel heeft gekocht!",
+      "Wie als laatste een doos van een bordspel netjes heeft ingeruimd!",
+      "Degene die het vorige potje aan tafel heeft verloren!",
+      "Wie de spelregels van dit spel zojuist heeft uitgelegd!",
+      "Degene met de meeste spellen in zijn eigen kast!",
+      "Wie als eerste een dobbelsteen van tafel gooit tijdens het spelen!",
+      "Degene die als laatste een meeple heeft laten vallen!",
+      "Wie vandaag als laatste iets warms heeft gegeten!",
+      "Degene die vanavond voor de snacks of drankjes heeft gezorgd!",
+      "Wie het scherpste gekruide gerecht van de week heeft gegeten!",
+      "Wie als laatste in een bos of op het strand heeft gewandeld!",
+      "Wie het meest recent een vogel of ander dier in de tuin heeft gevoerd!",
+      "Wie vandaag het langst buiten in de frisse lucht is geweest!"
     ];
 
     const REGENWORMEN_TILES = [
@@ -639,7 +665,7 @@
       { t: 33, w: 4 }, { t: 34, w: 4 }, { t: 35, w: 4 }, { t: 36, w: 4 }
     ];
     const REGENWORMEN_EXP_TILES = [
-      { t: 11, w: 1, special: true }, { t: 13, w: 2, special: true }
+      { t: 11, w: 1, special: true }, { t: 13, w: 1, special: true }
     ];
 
     const AZUL_WALL_PATTERN = [
@@ -889,7 +915,6 @@
       { id: 'kingen', name: 'Kingen / Brikken', subtitle: 'Rondeteller voor min-contracten en plus-contracten per beurt', category: 'card', type: 'rounds', icon: 'kingen', lowestWins: false, minP: 4, maxP: 4, dur: 'medium' },
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
-
     // =========================================================================
     // 3. STATE MANAGEMENT, LOCAL STORAGE & INITIALISATIE (INCL. DRAFT AUTO-SAVE)
     // =========================================================================
@@ -1141,7 +1166,7 @@
     }
 
     // =========================================================================
-    // 4. GAME STATE INITIALIZATION (INCLUSIEF NIEUWE DATASTRUCTUREN)
+    // 4. GAME STATE INITIALIZATION
     // =========================================================================
     function createEmptyPlayerData() {
       const lostcities = {};
@@ -1191,7 +1216,6 @@
         koehandel: { sets: {}, cashBonus: 0 },
         arknova: { appeal: 0, conservation: 0, endgame: 0 },
         heat: { pos: 1, pts: 0 },
-        // Nieuwe datastructuren voor de 5 verbeterde spellen
         parijs: { buildings: 0, lanterns: 0, cluster: 0, cardsBonus: 0, unbuiltPenalty: 0 },
         beverbendeCards: [0, 0, 0, 0],
         seasaltCurrent: { duos: 0, swimmers: 0, sharks: 0, shells: 0, octos: 0, penguins: 0, sailors: 0, mermaids: 0, colorCards: 0, colorMultis: 0 },
@@ -1241,6 +1265,8 @@
               { cap: 5, count: 0, color: null }
             ];
           }
+          if (!pd.azul.wall) pd.azul.wall = Array(5).fill(null).map(() => Array(5).fill(false));
+          if (!pd.azul.pending) pd.azul.pending = Array(5).fill(null).map(() => Array(5).fill(false));
           if (!pd.wingspanBoard) pd.wingspanBoard = createEmptyPlayerData().wingspanBoard;
           if (!pd.parijs) pd.parijs = { buildings: 0, lanterns: 0, cluster: 0, cardsBonus: 0, unbuiltPenalty: 0 };
           if (!pd.beverbendeCards) pd.beverbendeCards = [0, 0, 0, 0];
@@ -1495,7 +1521,11 @@
         const tileList = expOn ? [...REGENWORMEN_EXP_TILES, ...REGENWORMEN_TILES] : REGENWORMEN_TILES;
         let worms = 0;
         tileList.forEach(item => {
-          if (r.tiles && r.tiles[item.t]) worms += item.w;
+          if (r.tiles && r.tiles[item.t]) {
+            if (item.t === 11) worms += 1;
+            else if (item.t === 13) worms += 1;
+            else worms += item.w;
+          }
         });
         rawScore = worms + (expOn ? Number(r.bonus || 0) : 0);
       } else if (def.type === 'categories') {
@@ -2311,7 +2341,6 @@
           </div>`;
       }).join('');
     }
-
     // =========================================================================
     // 9. SCOREBOARD RENDERING & LIVE STAND
     // =========================================================================
@@ -2800,13 +2829,13 @@
     }
 
     // =========================================================================
-    // 10. SPELBLADEN (DEEL A: AZUL MET SLIMME VULLING & WINGSPAN)
+    // 10. SPELBLADEN (DEEL A: AZUL, WINGSPAN, KEER OP KEER, ROUNDS)
     // =========================================================================
 
     // --- AZUL ---
     let activeAzulTabPlayerId = null;
 
-            function renderAzulSheet(container, def) {
+    function renderAzulSheet(container, def) {
       const gs = ensureGameState(def.id);
       const isWall = gs.azulMode !== 'manual';
       const activePlayers = getActivePlayers();
@@ -2826,6 +2855,8 @@
           { cap: 5, count: 0, color: null }
         ];
       }
+      if (!az.wall) az.wall = Array(5).fill(null).map(() => Array(5).fill(false));
+      if (!az.pending) az.pending = Array(5).fill(null).map(() => Array(5).fill(false));
 
       const prev = computeAzulPreview(az);
       const bon = computeAzulEndBonuses(az.wall);
@@ -2951,8 +2982,146 @@
       `;
     }
 
+    function tapAzulPatternLine(playerId, lineIdx) {
+      const gs = ensureGameState('azul');
+      const line = gs.playerData[playerId].azul.patternLines[lineIdx];
 
-    // --- WINGSPAN ---
+      if (!line.color || line.count === 0) {
+        openPatternLineColorPicker(playerId, lineIdx);
+      } else if (line.count < line.cap) {
+        line.count += 1;
+        triggerHaptic(15);
+        SoundFX.click();
+        saveState();
+        renderScoreboard();
+      } else {
+        showToast('ℹ️ Deze rij is al vol!');
+      }
+    }
+
+    function openPatternLineColorPicker(playerId, lineIdx) {
+      const colors = [
+        { id: 'blue', name: 'Blauw' },
+        { id: 'yellow', name: 'Geel' },
+        { id: 'red', name: 'Rood' },
+        { id: 'black', name: 'Zwart' },
+        { id: 'teal', name: 'Sneeuwwit/Teal' }
+      ];
+
+      const modalHtml = `
+        <div id="azulLineModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+            <h3 class="font-bold text-sm text-white">Kies kleur voor Rij ${lineIdx + 1}</h3>
+            <div class="grid grid-cols-1 gap-2">
+              ${colors.map(c => `
+                <button type="button" onclick="setAzulPatternLine('${playerId}', ${lineIdx}, '${c.id}')" class="p-2.5 rounded-xl azul-${c.id} text-white font-extrabold text-xs shadow flex items-center justify-between btn-3d">
+                  <span>${c.name}</span>
+                  <span>Kies kleur</span>
+                </button>
+              `).join('')}
+            </div>
+            <button type="button" onclick="document.getElementById('azulLineModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Sluiten</button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function setAzulPatternLine(playerId, lineIdx, color) {
+      const gs = ensureGameState('azul');
+      const line = gs.playerData[playerId].azul.patternLines[lineIdx];
+      line.color = color;
+      line.count = 1;
+      triggerHaptic(20);
+      SoundFX.click();
+      saveState();
+      renderScoreboard();
+      document.getElementById('azulLineModal')?.remove();
+    }
+
+    function clearAzulPatternLine(playerId, lineIdx) {
+      const gs = ensureGameState('azul');
+      gs.playerData[playerId].azul.patternLines[lineIdx].count = 0;
+      gs.playerData[playerId].azul.patternLines[lineIdx].color = null;
+      triggerHaptic(15);
+      SoundFX.click();
+      saveState();
+      renderScoreboard();
+    }
+
+    function setAzulMode(mode) {
+      const gs = ensureGameState('azul');
+      gs.azulMode = mode;
+      saveState();
+      renderScoreboard();
+    }
+
+    function toggleAzulTile(playerId, r, c) {
+      pushUndoSnapshot();
+      const gs = ensureGameState('azul');
+      const az = gs.playerData[playerId].azul;
+      if (!az.wall) az.wall = Array(5).fill(null).map(() => Array(5).fill(false));
+      if (!az.pending) az.pending = Array(5).fill(null).map(() => Array(5).fill(false));
+
+      if (az.wall[r][c]) {
+        az.wall[r][c] = false;
+      } else {
+        az.pending[r][c] = !az.pending[r][c];
+      }
+      triggerHaptic(15);
+      SoundFX.click();
+      saveState();
+      renderScoreboard();
+    }
+
+    function setAzulFloor(playerId, cnt) {
+      const gs = ensureGameState('azul');
+      gs.playerData[playerId].azul.floor = cnt;
+      triggerHaptic(15);
+      SoundFX.click();
+      saveState();
+      renderScoreboard();
+    }
+
+    function commitAzulRound() {
+      pushUndoSnapshot();
+      const gs = ensureGameState('azul');
+      getActivePlayers().forEach(p => {
+        const az = gs.playerData[p.id].azul;
+
+        (az.patternLines || []).forEach((line, rIdx) => {
+          if (line.count === line.cap && line.color) {
+            const cIdx = AZUL_WALL_PATTERN[rIdx].indexOf(line.color);
+            if (cIdx !== -1) {
+              az.pending[rIdx][cIdx] = true;
+            }
+            line.count = 0;
+            line.color = null;
+          }
+        });
+
+        const prev = computeAzulPreview(az);
+        az.baseScore = prev.newBase;
+        for (let r = 0; r < 5; r++) {
+          for (let c = 0; c < 5; c++) {
+            if (az.pending[r][c]) {
+              az.wall[r][c] = true;
+              az.pending[r][c] = false;
+            }
+          }
+        }
+        az.floor = 0;
+      });
+
+      gs.azulRound = (gs.azulRound || 1) + 1;
+      triggerHaptic(40);
+      SoundFX.fanfare();
+      saveState();
+      renderScoreboard();
+      showToast(`✅ Ronde ${gs.azulRound - 1} berekend & tegels doorgeschoven!`);
+    }
+
+    // --- WINGSPAN DASHBOARD ---
     let activeWingspanTabPlayerId = null;
 
     function renderWingspanDashboard(container) {
@@ -2997,32 +3166,23 @@
               ${renderMeepleSvg(activeP.color, 'w-6 h-6')}
               <h3 class="font-black text-base text-white">${activeP.name} • Natuurreservaat</h3>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-400">Tik op een vogel om eieren of fiches toe te voegen</span>
-            </div>
           </div>
 
           <div class="space-y-3">
             ${habitats.map(hab => `
               <div class="rounded-2xl border p-3 space-y-2 ${hab.bg}">
-                <div class="flex items-center justify-between">
-                  <span class="font-extrabold text-xs flex items-center gap-1.5">${hab.name}</span>
-                </div>
+                <span class="font-extrabold text-xs flex items-center gap-1.5">${hab.name}</span>
                 <div class="grid grid-cols-5 gap-2">
-                  ${(wb[hab.id] || []).map((slot, sIdx) => {
-                    return slot.active ? `
-                      <div onclick="openBirdSlotEditor('${activeP.id}', '${hab.id}', ${sIdx})" class="cursor-pointer bg-slate-900/90 border border-slate-700/80 hover:border-amber-400 rounded-xl p-2 space-y-1 text-center shadow-lg transition btn-3d">
-                        <div class="text-[10px] font-black text-amber-300 font-mono">${slot.pts} VP</div>
-                        <div class="text-xs">🥚 ${slot.eggs}</div>
-                        <div class="text-[10px] text-slate-400">🃏 ${slot.tucked} • 🍒 ${slot.food}</div>
-                      </div>
-                    ` : `
-                      <button type="button" onclick="openBirdSlotEditor('${activeP.id}', '${hab.id}', ${sIdx})" class="h-16 rounded-xl border border-dashed border-slate-700 hover:border-slate-500 bg-slate-950/50 flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 transition text-[11px] font-bold">
-                        <span>+ Vogel</span>
-                        <span class="text-[9px] opacity-60">#${sIdx + 1}</span>
-                      </button>
-                    `;
-                  }).join('')}
+                  ${(wb[hab.id] || []).map((slot, sIdx) => slot.active ? `
+                    <div onclick="openBirdSlotEditor('${activeP.id}', '${hab.id}', ${sIdx})" class="cursor-pointer bg-slate-900/90 border border-slate-700/80 hover:border-amber-400 rounded-xl p-2 space-y-1 text-center shadow-lg transition btn-3d">
+                      <div class="text-[10px] font-black text-amber-300 font-mono">${slot.pts} VP</div>
+                      <div class="text-xs">🥚 ${slot.eggs}</div>
+                      <div class="text-[10px] text-slate-400">🃏 ${slot.tucked} • 🍒 ${slot.food}</div>
+                    </div>` : `
+                    <button type="button" onclick="openBirdSlotEditor('${activeP.id}', '${hab.id}', ${sIdx})" class="h-16 rounded-xl border border-dashed border-slate-700 hover:border-slate-500 bg-slate-950/50 flex flex-col items-center justify-center text-slate-500 hover:text-slate-300 transition text-[11px] font-bold">
+                      <span>+ Vogel</span>
+                    </button>`
+                  ).join('')}
                 </div>
               </div>
             `).join('')}
@@ -3392,7 +3552,7 @@
     function closeRoundGraph() {
       document.getElementById('roundGraphModal')?.classList.add('hidden');
     }
-
+    // --- QWIXX ---
     function renderQwixxSheet(container) {
       const gs = ensureGameState('qwixx');
       const rows = [
@@ -3441,6 +3601,7 @@
       renderScoreboard();
     }
 
+    // --- CLEVER ---
     function renderCleverSheet(container) {
       const gs = ensureGameState('clever');
       container.innerHTML = getActivePlayers().map(p => {
@@ -3706,7 +3867,7 @@
       renderScoreboard();
     }
 
-    // --- 10C. CATEGORIES MET BATCH-ACTIONS, NUMPAD & AUTOFOCUS ---
+    // --- CATEGORIES SHEET (POINT SALAD, BOONANZA, QWINTO, ETC.) ---
     function renderCategoriesSheet(container, def) {
       const gs = ensureGameState(def.id);
       let cats = [...(def.categories || ['Punten'])];
@@ -4093,7 +4254,7 @@
     function renderCodenamesSheet(container) { renderCarcassonneSheet(container, getGameDef('codenames')); }
     function renderTheMindSheet(container) { renderCarcassonneSheet(container, getGameDef('themind')); }
 
-    // --- CARCASSONNE MET ZWEVENDE SCORE-BADGES ---
+    // --- CARCASSONNE MET CALCULATOR ---
     function renderCarcaTileCounter(gs) {
       if (gs.tilesLeft === undefined) {
         let startTiles = 72;
@@ -4284,9 +4445,7 @@
       `;
     }
 
-    // =========================================================================
-    // 10D. PARIJS: DE LICHTSTAD (INTERACTIEVE LANTAARN CALCULATOR)
-    // =========================================================================
+    // --- PARIJS: DE LICHTSTAD ---
     function renderParijsSheet(container) {
       const gs = ensureGameState('parijs');
       container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">` + getActivePlayers().map(p => {
@@ -4308,7 +4467,6 @@
               </div>
             </div>
 
-            <!-- Lantaarn vermenigvuldiger -->
             <div class="bg-slate-950 border border-amber-500/30 rounded-2xl p-3 space-y-2">
               <div class="flex items-center justify-between text-xs font-bold text-amber-300">
                 <span>💡 Verlichte Gebouwen</span>
@@ -4357,9 +4515,7 @@
       renderScoreboard();
     }
 
-    // =========================================================================
-    // 10E. BEVERBENDE & BEVERCLAN (SNELLE KAART-SELECTOR MET KLOP-VERDUBBELAAR)
-    // =========================================================================
+    // --- BEVERBENDE & BEVERCLAN ---
     function renderBeverbendeSheet(container, def) {
       const gs = ensureGameState(def.id);
       const activePlayers = getActivePlayers();
@@ -4500,9 +4656,7 @@
       renderScoreboard();
     }
 
-    // =========================================================================
-    // 10F. SEA SALT & PAPER (DUO-SETS & ZEEMEERMIN CALCULATOR)
-    // =========================================================================
+    // --- SEA SALT & PAPER ---
     function renderSeaSaltSheet(container, def) {
       const gs = ensureGameState('seasalt');
       const activePlayers = getActivePlayers();
@@ -4629,9 +4783,7 @@
       renderScoreboard();
     }
 
-    // =========================================================================
-    // 10G. HARMONIES (LANDSCHAPPEN & DIEREN STRUCTUUR)
-    // =========================================================================
+    // --- HARMONIES ---
     function renderHarmoniesSheet(container) {
       const gs = ensureGameState('harmonies');
       container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">` + getActivePlayers().map(p => {
@@ -4678,9 +4830,7 @@
       }).join('') + `</div>`;
     }
 
-    // =========================================================================
-    // 10H. MACHIAVELLI (GEBOUWENWAARDE & BONUS-CHECKBOXES)
-    // =========================================================================
+    // --- MACHIAVELLI ---
     function renderMachiavelliSheet(container) {
       const gs = ensureGameState('machiavelli');
       container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">` + getActivePlayers().map(p => {
@@ -4732,7 +4882,6 @@
         `;
       }).join('') + `</div>`;
     }
-
     // =========================================================================
     // 11. SPELERSBEHEER, TEAMS & GROEPEN
     // =========================================================================
@@ -4752,22 +4901,22 @@
       renderGroupPresetsBar();
 
       list.innerHTML = state.players.map((p, idx) => `
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm btn-3d">
-          <div class="flex items-center gap-2 min-w-0">
-            <div class="flex flex-col gap-0.5">
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex items-center justify-between gap-2 sm:gap-3 shadow-sm btn-3d">
+          <div class="flex items-center gap-2 min-w-0 flex-1">
+            <div class="flex flex-col gap-0.5 shrink-0">
               <button type="button" onclick="movePlayerOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-1 py-0.5 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-[10px] text-slate-300 font-bold">▲</button>
               <button type="button" onclick="movePlayerOrder(${idx}, 1)" ${idx === state.players.length - 1 ? 'disabled' : ''} class="px-1 py-0.5 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-[10px] text-slate-300 font-bold">▼</button>
             </div>
             
-            <button type="button" onclick="openQuickColorModal('${p.id}')" class="p-1 rounded-xl hover:bg-slate-900 transition" title="Verander meeple-kleur">
-              ${renderMeepleSvg(p.color, 'w-6 h-6')}
+            <button type="button" onclick="openQuickColorModal('${p.id}')" class="p-1 rounded-xl hover:bg-slate-900 transition shrink-0" title="Verander meeple-kleur">
+              ${renderMeepleSvg(p.color, 'w-5 h-5 sm:w-6 sm:h-6')}
             </button>
 
-            <div class="min-w-0">
-              <div class="flex items-center gap-1.5">
-                <span class="font-extrabold text-sm text-white truncate">${p.name}</span>
-                <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-300 font-mono">Elo ${p.elo || 1200}</span>
-                ${p.tournamentCups ? `<span class="text-[10px] text-amber-400 font-bold">🥇×${p.tournamentCups}</span>` : ''}
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-extrabold text-xs sm:text-sm text-white break-words">${p.name}</span>
+                <span class="text-[9px] sm:text-[10px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-300 font-mono shrink-0">Elo ${p.elo || 1200}</span>
+                ${p.tournamentCups ? `<span class="text-[10px] text-amber-400 font-bold shrink-0">🥇×${p.tournamentCups}</span>` : ''}
               </div>
               <div class="text-[10px] text-slate-400 flex items-center gap-2">
                 <span>Handicap: <b>${p.handicap > 0 ? '+' : ''}${p.handicap || 0}</b></span>
@@ -4775,8 +4924,8 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-1.5 shrink-0">
-            <button type="button" onclick="togglePlayerActive('${p.id}')" class="px-2.5 py-1.5 rounded-xl text-xs font-black border transition btn-3d ${p.active !== false ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-500'}">
+          <div class="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            <button type="button" onclick="togglePlayerActive('${p.id}')" class="px-2 sm:px-2.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-black border transition btn-3d ${p.active !== false ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-500'}">
               ${p.active !== false ? 'Aan tafel' : 'Passief'}
             </button>
             <button type="button" onclick="openEditPlayerModal('${p.id}')" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-3d">✏️</button>
@@ -5283,8 +5432,8 @@
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-        // =========================================================================
-    // 13. DOBBELEN & WIE BEGINT (3 KEUZES: VINGERS, RANDOM & CHALLENGE)
+    // =========================================================================
+    // 13. DOBBELEN & WIE BEGINT (3 KEUZES: VINGERS, RANDOM & 31 CHALLENGES)
     // =========================================================================
 
     // --- VIRTUELE DOBBELSTENEN ---
@@ -5373,7 +5522,7 @@
       `;
     }
 
-    // --- KEUZEMENU: ALTIJD EERST 3 KEUZES TONEN ---
+    // --- KEUZEMENU: ALTIJD 3 KEUZES TONEN ---
     function openWhoStartsMenu() {
       document.getElementById('startPlayerChoiceModal')?.remove();
 
@@ -5429,7 +5578,6 @@
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-    // Blokkeer de oude functie en stuur geforceerd door naar het menu
     function openStartPlayerModal() {
       openWhoStartsMenu();
     }
@@ -5492,7 +5640,7 @@
       SoundFX.point();
     }
 
-    // --- OPTIE 1: INTERACTIEVE VINGER-KIEZER (CHWAZI MET ROYALE TOUCH-CIRKELS) ---
+    // --- OPTIE 1: INTERACTIEVE VINGER-KIEZER (CHWAZI) ---
     let fingerCanvas = null;
     let fingerCtx = null;
     let activeTouchesMap = new Map();
@@ -5752,7 +5900,6 @@
       fingerAnimFrame = requestAnimationFrame(renderFingerCanvasLoop);
     }
 
-
     // =========================================================================
     // 14. EIGEN SPEL TOEVOEGEN & SNEL WINNAAR
     // =========================================================================
@@ -5981,15 +6128,22 @@
       const code = document.getElementById('joinPeerCodeInput')?.value.trim();
       if (!code) return;
 
+      if (peerInstance) peerInstance.destroy();
       peerInstance = new Peer();
+
       peerInstance.on('open', () => {
-        const conn = peerInstance.connect(code);
+        const conn = peerInstance.connect(code, { reliable: true });
         conn.on('open', () => {
           peerConnections = [conn];
           showToast('✅ Verbonden met de tafel!');
           document.getElementById('liveRoomModal')?.classList.add('hidden');
         });
         conn.on('data', data => handleIncomingPeerData(data, conn));
+        conn.on('error', err => showToast('⚠️ Verbinding mislukt: ' + err));
+      });
+
+      peerInstance.on('error', err => {
+        showToast('⚠️ PeerJS serverfout: ' + err.type);
       });
     }
 
@@ -6045,8 +6199,7 @@
         renderScoreboard();
       }
     }
-
-        // =========================================================================
+    // =========================================================================
     // 16. PODIUM MODAL, DEEL EINDSTAND ALS PLAATJE & SPELAVOND ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
@@ -6168,7 +6321,7 @@
       document.getElementById('podiumModal')?.classList.add('hidden');
     }
 
-    // --- DEEL EINDSTAND ALS AFBEELDING (WHATSAPP / STORIES) ---
+    // --- DEEL EINDSTAND ALS AFBEELDING ---
     async function shareMatchResultCard() {
       const def = getGameDef(state.activeGameId);
       const standings = getStandings();
@@ -6922,139 +7075,6 @@
       renderHistoryView();
     }
 
-    // --- DEEL EINDSTAND ALS AFBEELDING (WHATSAPP / STORIES) ---
-    async function shareMatchResultCard() {
-      const def = getGameDef(state.activeGameId);
-      const standings = getStandings();
-      if (!standings || !standings.length) return;
-
-      triggerHaptic(25);
-      showToast('🎨 Afbeelding klaarmaken...');
-
-      const canvas = document.createElement('canvas');
-      canvas.width = 1080;
-      canvas.height = 1350;
-      const ctx = canvas.getContext('2d');
-
-      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1350);
-      bgGrad.addColorStop(0, '#020617');
-      bgGrad.addColorStop(0.5, '#0f172a');
-      bgGrad.addColorStop(1, '#020617');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, 1080, 1350);
-
-      const glowGrad = ctx.createRadialGradient(540, 400, 50, 540, 400, 600);
-      glowGrad.addColorStop(0, 'rgba(99, 102, 241, 0.18)');
-      glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = glowGrad;
-      ctx.fillRect(0, 0, 1080, 1350);
-
-      ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
-      ctx.lineWidth = 12;
-      ctx.strokeRect(30, 30, 1020, 1290);
-
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#818cf8';
-      ctx.font = '900 32px sans-serif';
-      ctx.fillText('SCOREBLOK PRO • RESULTAAT', 540, 120);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 64px sans-serif';
-      ctx.fillText(def.name, 540, 200);
-
-      const dateStr = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '600 28px sans-serif';
-      ctx.fillText(dateStr, 540, 255);
-
-      const winner = standings[0];
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-      ctx.strokeStyle = '#f59e0b';
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.roundRect(140, 310, 800, 240, 36);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#fbbf24';
-      ctx.font = '900 34px sans-serif';
-      ctx.fillText('👑 WINNAAR 👑', 540, 380);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 58px sans-serif';
-      ctx.fillText(winner.name, 540, 450);
-
-      ctx.fillStyle = '#fde68a';
-      ctx.font = '900 42px monospace';
-      ctx.fillText(`${winner.score} PUNTEN`, 540, 515);
-
-      let startY = 620;
-      const rowHeight = 110;
-
-      standings.forEach((p, idx) => {
-        if (idx === 0) return;
-        if (idx > 5) return;
-
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
-        ctx.strokeStyle = 'rgba(51, 65, 85, 0.6)';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.roundRect(140, startY, 800, 90, 24);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#64748b';
-        ctx.font = '900 36px sans-serif';
-        ctx.fillText(`#${idx + 1}`, 180, startY + 58);
-
-        ctx.fillStyle = p.color || '#6366f1';
-        ctx.beginPath();
-        ctx.arc(260, startY + 45, 18, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#f1f5f9';
-        ctx.font = '800 36px sans-serif';
-        ctx.fillText(p.name, 305, startY + 58);
-
-        ctx.textAlign = 'right';
-        ctx.fillStyle = '#e2e8f0';
-        ctx.font = '900 38px monospace';
-        ctx.fillText(`${p.score}p`, 900, startY + 58);
-
-        startY += rowHeight;
-      });
-
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#475569';
-      ctx.font = '700 24px sans-serif';
-      ctx.fillText('Gespeeld met Scoreblok Pro', 540, 1260);
-
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const file = new File([blob], `eindstand-${def.id}.png`, { type: 'image/png' });
-
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: `Eindstand ${def.name}`,
-              text: `Eindstand van ${def.name}: ${winner.name} heeft gewonnen met ${winner.score} punten! 🏆`
-            });
-            showToast('✅ Gedeeld!');
-          } catch (e) {
-            if (e.name !== 'AbortError') showToast('⚠️ Delen geannuleerd.');
-          }
-        } else {
-          const link = document.createElement('a');
-          link.download = `eindstand-${def.id}.png`;
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-          showToast('📥 Afbeelding gedownload!');
-        }
-      }, 'image/png');
-    }
-
     // =========================================================================
     // 17. STATISTIEK HELPERS & GROEPRECORDS
     // =========================================================================
@@ -7255,7 +7275,7 @@
     // 20. INITIALISATIE BIJ OPSTARTEN (DOMContentLoaded & OFFLINE PWA REGISTRATIE)
     // =========================================================================
     window.addEventListener('DOMContentLoaded', () => {
-      // 1. Service Worker registreren voor 100% offline ondersteuning
+      // 1. Service Worker registreren
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
           .then((reg) => {
@@ -7270,7 +7290,7 @@
       loadState();
       applyAppTheme();
 
-      // 3. Controleer of de URL data bevat van een gedeelde QR-code
+      // 3. QR Data Import check
       if (window.location.hash.startsWith('#data=')) {
         try {
           const raw = window.location.hash.substring(6);
@@ -7287,7 +7307,7 @@
         } catch (e) {}
       }
 
-      // 4. Controleer of er een P2P-host invite in de parameters zit
+      // 4. P2P Host join check
       const urlParams = new URLSearchParams(window.location.search);
       const joinCode = urlParams.get('join');
       if (joinCode) {
@@ -7415,7 +7435,7 @@
         <button type="button" onclick="scorePadInputDigit(5)" class="py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-xl font-black text-white font-mono btn-3d shadow">5</button>
         <button type="button" onclick="scorePadInputDigit(6)" class="py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-xl font-black text-white font-mono btn-3d shadow">6</button>
         <button type="button" onclick="scorePadInputDigit(7)" class="py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-xl font-black text-white font-mono btn-3d shadow">7</button>
-        <button type="button" onclick="cachePadInputDigit(8)" class="py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-xl font-black text-white font-mono btn-3d shadow">8</button>
+        <button type="button" onclick="scorePadInputDigit(8)" class="py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-xl font-black text-white font-mono btn-3d shadow">8</button>
         <button type="button" onclick="scorePadInputDigit(9)" class="py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-xl font-black text-white font-mono btn-3d shadow">9</button>
         <button type="button" onclick="scorePadClear()" class="py-3 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-black text-rose-400 uppercase btn-3d">C</button>
         <button type="button" onclick="scorePadInputDigit(0)" class="py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 active:scale-95 text-xl font-black text-white font-mono btn-3d shadow">0</button>
