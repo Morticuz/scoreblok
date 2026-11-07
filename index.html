@@ -4882,7 +4882,7 @@
         `;
       }).join('') + `</div>`;
     }
-         // =========================================================================
+        // =========================================================================
     // 11. SPELERSBEHEER, TEAMS & GROEPEN
     // =========================================================================
     const MEEPLE_COLORS = [
@@ -4901,40 +4901,43 @@
       renderGroupPresetsBar();
 
       list.innerHTML = state.players.map((p, idx) => `
-        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex items-center justify-between gap-2 shadow-sm btn-3d">
-          <!-- Linkerkant: Volgorde-knoppen, Meeple & Speler-info -->
-          <div class="flex items-center gap-2 min-w-0 flex-1">
-            <div class="flex flex-col gap-0.5 shrink-0">
-              <button type="button" onclick="movePlayerOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-[10px] text-slate-300 font-bold">▲</button>
-              <button type="button" onclick="movePlayerOrder(${idx}, 1)" ${idx === state.players.length - 1 ? 'disabled' : ''} class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-[10px] text-slate-300 font-bold">▼</button>
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2.5 shadow-sm btn-3d">
+          
+          <!-- Bovenste rij: Volgorde + Meeple + Volledige Naam (alle ruimte!) -->
+          <div class="flex items-center gap-2.5 w-full">
+            <div class="flex gap-1 shrink-0">
+              <button type="button" onclick="movePlayerOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-xs text-slate-300 font-bold">▲</button>
+              <button type="button" onclick="movePlayerOrder(${idx}, 1)" ${idx === state.players.length - 1 ? 'disabled' : ''} class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-xs text-slate-300 font-bold">▼</button>
             </div>
-            
+
             <button type="button" onclick="openQuickColorModal('${p.id}')" class="p-1 rounded-xl hover:bg-slate-900 transition shrink-0" title="Verander meeple-kleur">
-              ${renderMeepleSvg(p.color, 'w-6 h-6')}
+              ${renderMeepleSvg(p.color, 'w-7 h-7')}
             </button>
 
-            <!-- Naamzone met eigen regel voor de naam en daaronder stats + trofeeën -->
-            <div class="min-w-0 flex-1 flex flex-col justify-center">
-              <div class="font-black text-sm text-white break-words leading-tight">
-                ${p.name}
-              </div>
-              <div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 flex-wrap">
-                <span class="px-1.5 py-0.2 rounded bg-slate-900 text-amber-300 font-mono border border-slate-800 shrink-0">Elo ${p.elo || 1200}</span>
-                <span class="shrink-0">HC: <b>${p.handicap > 0 ? '+' : ''}${p.handicap || 0}</b></span>
-                ${p.tournamentCups ? `<span class="text-amber-400 font-bold shrink-0" title="Toernooizeges">🥇×${p.tournamentCups}</span>` : ''}
-                ${p.loserCups ? `<span class="text-rose-400 font-bold shrink-0" title="Plaagtrofeeën (Houten Lepel)">🥄×${p.loserCups}</span>` : ''}
-              </div>
+            <!-- Naam heeft nu de volledige breedte -->
+            <div class="font-black text-base text-white tracking-wide flex-1 break-words leading-tight">
+              ${p.name}
             </div>
           </div>
 
-          <!-- Rechterkant: Tafelstatus, bewerk- en verwijderknoppen -->
-          <div class="flex items-center gap-1 shrink-0">
-            <button type="button" onclick="togglePlayerActive('${p.id}')" class="px-2.5 py-1.5 rounded-xl text-[11px] font-black border transition btn-3d ${p.active !== false ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-500'}">
-              ${p.active !== false ? 'Aan tafel' : 'Passief'}
-            </button>
-            <button type="button" onclick="openEditPlayerModal('${p.id}')" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-3d" title="Bewerk speler">✏️</button>
-            <button type="button" onclick="deletePlayer('${p.id}')" class="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold btn-3d" title="Verwijder speler">🗑️</button>
+          <!-- Onderste rij: Badges (Elo/HC/Bekers) links + Knoppen rechts -->
+          <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-900 w-full">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="px-2 py-0.5 rounded-md bg-slate-900 text-amber-300 font-mono text-[11px] font-bold border border-slate-800">Elo ${p.elo || 1200}</span>
+              <span class="text-[11px] text-slate-400">HC: <b>${p.handicap > 0 ? '+' : ''}${p.handicap || 0}</b></span>
+              ${p.tournamentCups ? `<span class="text-amber-400 font-bold text-xs" title="Toernooizeges">🥇×${p.tournamentCups}</span>` : ''}
+              ${p.loserCups ? `<span class="text-rose-400 font-bold text-xs" title="Houten Lepel (Plaagtrofee)">🥄×${p.loserCups}</span>` : ''}
+            </div>
+
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="togglePlayerActive('${p.id}')" class="px-3 py-1.5 rounded-xl text-xs font-black border transition btn-3d ${p.active !== false ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-900 border-slate-800 text-slate-500'}">
+                ${p.active !== false ? 'Aan tafel' : 'Passief'}
+              </button>
+              <button type="button" onclick="openEditPlayerModal('${p.id}')" class="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-3d" title="Bewerken">✏️</button>
+              <button type="button" onclick="deletePlayer('${p.id}')" class="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold btn-3d" title="Verwijderen">🗑️</button>
+            </div>
           </div>
+
         </div>
       `).join('');
     }
@@ -5649,8 +5652,7 @@
       }
     }
 
-    // =========================================================================
-        // =========================================================================
+       // =========================================================================
     // 15. LIVE WEBRTC SYNC ENGINE (HOST & GAST)
     // =========================================================================
     let peerInstance = null;
@@ -5816,6 +5818,7 @@
         renderScoreboard();
       }
     }
+
 
     // =========================================================================
     // 16. PODIUM MODAL, DEEL EINDSTAND ALS PLAATJE & SPELAVOND ENGINE
