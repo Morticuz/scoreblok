@@ -4882,7 +4882,7 @@
         `;
       }).join('') + `</div>`;
     }
-        // =========================================================================
+         // =========================================================================
     // 11. SPELERSBEHEER, TEAMS & GROEPEN
     // =========================================================================
     const MEEPLE_COLORS = [
@@ -4913,7 +4913,7 @@
               ${renderMeepleSvg(p.color, 'w-6 h-6')}
             </button>
 
-            <!-- Naamzone met eigen regel voor de naam -->
+            <!-- Naamzone met eigen regel voor de naam en daaronder stats + trofeeën -->
             <div class="min-w-0 flex-1 flex flex-col justify-center">
               <div class="font-black text-sm text-white break-words leading-tight">
                 ${p.name}
@@ -4921,7 +4921,8 @@
               <div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-0.5 flex-wrap">
                 <span class="px-1.5 py-0.2 rounded bg-slate-900 text-amber-300 font-mono border border-slate-800 shrink-0">Elo ${p.elo || 1200}</span>
                 <span class="shrink-0">HC: <b>${p.handicap > 0 ? '+' : ''}${p.handicap || 0}</b></span>
-                ${p.tournamentCups ? `<span class="text-amber-400 font-bold shrink-0">🥇×${p.tournamentCups}</span>` : ''}
+                ${p.tournamentCups ? `<span class="text-amber-400 font-bold shrink-0" title="Toernooizeges">🥇×${p.tournamentCups}</span>` : ''}
+                ${p.loserCups ? `<span class="text-rose-400 font-bold shrink-0" title="Plaagtrofeeën (Houten Lepel)">🥄×${p.loserCups}</span>` : ''}
               </div>
             </div>
           </div>
@@ -4984,7 +4985,8 @@
         handicap: 0,
         elo: 1200,
         seasonCups: 0,
-        tournamentCups: 0
+        tournamentCups: 0,
+        loserCups: 0
       });
 
       if (inp) inp.value = '';
@@ -5121,6 +5123,10 @@
                 <label class="block text-slate-400 font-semibold mb-1">Handicap punten (+/-):</label>
                 <input type="number" id="editPlayerHandicapInput" value="${p.handicap || 0}" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
               </div>
+              <div>
+                <label class="block text-slate-400 font-semibold mb-1">Plaagtrofeeën (Houten Lepels):</label>
+                <input type="number" id="editPlayerLoserCupsInput" value="${p.loserCups || 0}" min="0" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-rose-300 font-bold" />
+              </div>
             </div>
             <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
               <button type="button" onclick="document.getElementById('editPlayerModal').remove()" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs btn-3d">Annuleren</button>
@@ -5137,8 +5143,10 @@
       if (!p) return;
       const name = document.getElementById('editPlayerNameInput')?.value.trim();
       const hc = Number(document.getElementById('editPlayerHandicapInput')?.value || 0);
+      const lc = Number(document.getElementById('editPlayerLoserCupsInput')?.value || 0);
       if (name) p.name = name;
       p.handicap = hc;
+      p.loserCups = lc;
       saveState();
       renderPlayersManager();
       renderScoreboard();
@@ -5435,472 +5443,201 @@
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
+       // =========================================================================
+    // 13. STATISTIEKEN, ELO, HALL OF FAME & PLAAGTROFEEËN
     // =========================================================================
-    // 13. DOBBELEN & WIE BEGINT (3 KEUZES: VINGERS, RANDOM & 31 CHALLENGES)
-    // =========================================================================
-
-    // --- VIRTUELE DOBBELSTENEN ---
-    let activeDiceCount = 2;
-
-    function openDiceRollerModal() {
-      let modal = document.getElementById('diceModal');
-      if (!modal) {
-        document.body.insertAdjacentHTML('beforeend', `
-          <div id="diceModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center">
-              <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                <div class="flex items-center gap-2">
-                  <span class="text-2xl">🎲</span>
-                  <h3 class="font-black text-sm text-white">Virtuele Dobbelstenen</h3>
-                </div>
-                <button type="button" onclick="document.getElementById('diceModal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
-              </div>
-
-              <div class="flex justify-center gap-2 text-xs">
-                <button type="button" onclick="rollDiceCount(1)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-white font-bold btn-3d">1 Steen</button>
-                <button type="button" onclick="rollDiceCount(2)" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold btn-3d">2 Stenen</button>
-                <button type="button" onclick="rollDiceCount(3)" class="px-3 py-1.5 rounded-xl bg-slate-800 text-white font-bold btn-3d">3 Stenen</button>
-              </div>
-
-              <div id="diceResultsBox" class="flex justify-center items-center gap-3 py-4 min-h-[90px]"></div>
-              <div class="text-lg font-black text-white font-mono">Totaal: <span id="diceSumNum" class="text-amber-400 text-2xl">0</span></div>
-
-              <button type="button" onclick="rollActiveDice()" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 transition btn-3d">
-                🎲 Gooi Opnieuw!
-              </button>
-            </div>
-          </div>
-        `);
-        modal = document.getElementById('diceModal');
-      }
-
-      modal.classList.remove('hidden');
-      rollDiceCount(2);
-    }
-
-    function rollDiceCount(count) {
-      activeDiceCount = count;
-      rollActiveDice();
-    }
-
-    function rollActiveDice() {
-      const box = document.getElementById('diceResultsBox');
-      const sumEl = document.getElementById('diceSumNum');
-      if (!box) return;
-
-      triggerHaptic(25);
-      SoundFX.click();
-
-      const results = [];
-      for (let i = 0; i < activeDiceCount; i++) {
-        results.push(Math.floor(Math.random() * 6) + 1);
-      }
-
-      box.innerHTML = results.map(r => `
-        <div class="transform scale-125 mx-1 transition-transform animate-bounce">
-          ${renderDieSvg(r)}
-        </div>
-      `).join('');
-
-      const total = results.reduce((a, b) => a + b, 0);
-      if (sumEl) sumEl.textContent = total;
-
-      showTvDiceOverlay(results, state.players.find(p => p.id === state.myPlayerId)?.name);
-    }
-
-    function renderDieSvg(num) {
-      const pips = {
-        1: [[50, 50]],
-        2: [[25, 25], [75, 75]],
-        3: [[25, 25], [50, 50], [75, 75]],
-        4: [[25, 25], [75, 25], [25, 75], [75, 75]],
-        5: [[25, 25], [75, 25], [50, 50], [25, 75], [75, 75]],
-        6: [[25, 25], [75, 25], [25, 50], [75, 50], [25, 75], [75, 75]]
-      }[num] || [[50, 50]];
-
-      return `
-        <svg class="w-12 h-12 inline-block rounded-xl bg-slate-950 border-2 border-indigo-400/60 shadow-lg" viewBox="0 0 100 100">
-          ${pips.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="8" fill="#f8fafc" />`).join('')}
-        </svg>
-      `;
-    }
-
-    // --- KEUZEMENU: ALTIJD 3 KEUZES TONEN ---
-    function openWhoStartsMenu() {
-      document.getElementById('startPlayerChoiceModal')?.remove();
-
-      const act = getActivePlayers();
-      if (!act || act.length < 2) {
-        showToast('⚠️ Er moeten minstens 2 actieve spelers aan tafel zitten!');
-        return;
-      }
-
-      const modalHtml = `
-        <div id="startPlayerChoiceModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="bg-slate-900 border border-amber-500/50 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center animate-fade-in">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-              <div class="flex items-center gap-2">
-                <span class="text-2xl">🎲</span>
-                <h3 class="font-black text-sm text-white">Wie begint?</h3>
-              </div>
-              <button type="button" onclick="document.getElementById('startPlayerChoiceModal').remove()" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-
-            <p class="text-xs text-slate-300">Kies hoe jullie de startspeler bepalen:</p>
-
-            <div class="space-y-2.5">
-              <button type="button" onclick="document.getElementById('startPlayerChoiceModal').remove(); openFingerPickerModal();" class="w-full p-3.5 rounded-2xl bg-indigo-600/25 hover:bg-indigo-600/40 border border-indigo-500/50 text-left flex items-center gap-3 transition btn-3d">
-                <span class="text-3xl">🖐️</span>
-                <div>
-                  <div class="font-black text-white text-xs sm:text-sm">Vinger-Kiezer (Chwazi)</div>
-                  <div class="text-[11px] text-slate-400">Iedereen legt een vinger op het scherm</div>
-                </div>
-              </button>
-
-              <button type="button" onclick="document.getElementById('startPlayerChoiceModal').remove(); executeRandomPlayerPick();" class="w-full p-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-left flex items-center gap-3 transition btn-3d">
-                <span class="text-3xl">⚡</span>
-                <div>
-                  <div class="font-black text-white text-xs sm:text-sm">Snelle Willekeurige Loting</div>
-                  <div class="text-[11px] text-slate-400">De app kiest direct een actieve speler</div>
-                </div>
-              </button>
-
-              <button type="button" onclick="document.getElementById('startPlayerChoiceModal').remove(); showTableChallengeModal();" class="w-full p-3.5 rounded-2xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-left flex items-center gap-3 transition btn-3d">
-                <span class="text-3xl">📜</span>
-                <div>
-                  <div class="font-black text-white text-xs sm:text-sm">Tafel Challenge</div>
-                  <div class="text-[11px] text-slate-400">Een grappige regel om te bepalen wie start</div>
-                </div>
-              </button>
-            </div>
-
-            <button type="button" onclick="document.getElementById('startPlayerChoiceModal').remove()" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">Annuleren</button>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-
-    function openStartPlayerModal() {
-      openWhoStartsMenu();
-    }
-
-    // --- OPTIE 2: SNELLE WILLEKEURIGE LOTING ---
-    function executeRandomPlayerPick() {
-      const act = getActivePlayers();
-      if (!act.length) return;
-      const winner = act[Math.floor(Math.random() * act.length)];
-
-      const gs = ensureGameState(state.activeGameId);
-      const winnerIdx = act.findIndex(p => p.id === winner.id);
-      if (winnerIdx !== -1) {
-        gs.manualStarterIdx = winnerIdx;
-        gs.activeTurnPlayerIdx = winnerIdx;
-        saveState();
-        renderScoreboard();
-      }
-
-      const modalHtml = `
-        <div id="randomPickResultModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="bg-slate-900 border border-amber-500/50 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
-            <div class="text-3xl">⚡</div>
-            <h3 class="font-black text-sm text-amber-400 uppercase tracking-widest">Startspeler Geloot:</h3>
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex items-center justify-center gap-2">
-              ${renderMeepleSvg(winner.color, 'w-6 h-6')}
-              <span class="text-xl font-black text-white">${winner.name}</span>
-            </div>
-            <button type="button" onclick="document.getElementById('randomPickResultModal').remove()" class="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs shadow btn-3d">
-              Top!
-            </button>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-      triggerConfetti();
-      SoundFX.fanfare();
-      SoundFX.speak(`${winner.name} mag beginnen!`);
-    }
-
-    // --- OPTIE 3: TAFEL CHALLENGE ---
-    function showTableChallengeModal() {
-      const challenge = START_CHALLENGES[Math.floor(Math.random() * START_CHALLENGES.length)];
-
-      const modalHtml = `
-        <div id="tableChallengeModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="bg-slate-900 border border-emerald-500/50 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
-            <div class="text-3xl">📜</div>
-            <h3 class="font-black text-sm text-emerald-400 uppercase tracking-widest">Tafel Challenge:</h3>
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
-              <div class="text-xs font-bold text-amber-300 italic">"${challenge}"</div>
-            </div>
-            <button type="button" onclick="document.getElementById('tableChallengeModal').remove()" class="w-full py-2.5 rounded-xl bg-emerald-600 text-white font-black text-xs shadow btn-3d">
-              Duidelijk!
-            </button>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-      SoundFX.point();
-    }
-
-    // --- OPTIE 1: INTERACTIEVE VINGER-KIEZER (CHWAZI) ---
-    let fingerCanvas = null;
-    let fingerCtx = null;
-    let activeTouchesMap = new Map();
-    let fingerCountdownTimer = null;
-    let fingerCountdownVal = 3;
-    let fingerChosenWinner = null;
-    let fingerAnimFrame = null;
-    let fingerPulseAngle = 0;
-
-    function openFingerPickerModal() {
-      const act = getActivePlayers();
-      if (act.length < 2) {
-        showToast('⚠️ Er moeten minstens 2 actieve spelers aan tafel zitten!');
-        return;
-      }
-
-      let modal = document.getElementById('fingerPickerModal');
-      if (!modal) {
-        document.body.insertAdjacentHTML('beforeend', `
-          <div id="fingerPickerModal" class="hidden fixed inset-0 z-50 bg-black/95 select-none overflow-hidden touch-none flex flex-col justify-between p-4 sm:p-6">
-            <div class="flex items-center justify-between z-20 pointer-events-auto">
-              <div class="flex items-center gap-3">
-                <span class="text-3xl sm:text-4xl">🖐️</span>
-                <div>
-                  <h3 class="font-black text-base sm:text-lg text-white">Wie begint? (Iedereen 1 vinger op het scherm)</h3>
-                  <p class="text-xs text-slate-400">Leg je vinger neer • Jouw naam en kleur lichten direct groot op</p>
-                </div>
-              </div>
-              <button type="button" onclick="closeFingerPickerModal()" class="px-4 py-2 rounded-2xl bg-slate-800 text-slate-300 hover:text-white font-extrabold text-xs sm:text-sm btn-3d">✕ Sluiten</button>
-            </div>
-
-            <canvas id="fingerCanvas" class="absolute inset-0 w-full h-full z-10"></canvas>
-
-            <div class="relative z-20 grid grid-cols-2 sm:grid-cols-4 gap-3 pointer-events-auto pb-3" id="fingerPlayerZones"></div>
-          </div>
-        `);
-        modal = document.getElementById('fingerPickerModal');
-      }
-
-      const zonesBox = document.getElementById('fingerPlayerZones');
-      fingerCanvas = document.getElementById('fingerCanvas');
-      if (!modal || !fingerCanvas || !zonesBox) return;
-
-      fingerCtx = fingerCanvas.getContext('2d');
-      fingerCanvas.width = window.innerWidth;
-      fingerCanvas.height = window.innerHeight;
-
-      zonesBox.innerHTML = act.map(p => `
-        <div id="fingerBtn_${p.id}" 
-             data-player-id="${p.id}"
-             data-color="${p.color || '#6366f1'}"
-             class="finger-target-zone bg-slate-900 border-2 rounded-2xl p-3.5 sm:p-4 flex items-center justify-center gap-2.5 transition active:scale-95 shadow-xl select-none"
-             style="border-color: ${p.color || '#6366f1'};">
-          ${renderMeepleSvg(p.color, 'w-6 h-6 sm:w-7 sm:h-7')}
-          <span class="font-black text-sm sm:text-base text-white truncate">${p.name}</span>
-        </div>
-      `).join('');
-
-      activeTouchesMap.clear();
-      fingerChosenWinner = null;
-      fingerCountdownVal = 3;
-      clearInterval(fingerCountdownTimer);
-      fingerCountdownTimer = null;
-
-      modal.classList.remove('hidden');
-
-      fingerCanvas.addEventListener('touchstart', handleFingerTouchStart, { passive: false });
-      fingerCanvas.addEventListener('touchmove', handleFingerTouchMove, { passive: false });
-      fingerCanvas.addEventListener('touchend', handleFingerTouchEnd, { passive: false });
-      fingerCanvas.addEventListener('touchcancel', handleFingerTouchEnd, { passive: false });
-
-      renderFingerCanvasLoop();
-    }
-
-    function closeFingerPickerModal() {
-      const modal = document.getElementById('fingerPickerModal');
-      if (modal) modal.classList.add('hidden');
-      if (fingerAnimFrame) cancelAnimationFrame(fingerAnimFrame);
-      clearInterval(fingerCountdownTimer);
-      fingerCountdownTimer = null;
-      activeTouchesMap.clear();
-
-      if (fingerCanvas) {
-        fingerCanvas.removeEventListener('touchstart', handleFingerTouchStart);
-        fingerCanvas.removeEventListener('touchmove', handleFingerTouchMove);
-        fingerCanvas.removeEventListener('touchend', handleFingerTouchEnd);
-        fingerCanvas.removeEventListener('touchcancel', handleFingerTouchEnd);
-      }
-    }
-
-    function handleFingerTouchStart(e) {
-      e.preventDefault();
-      if (fingerChosenWinner) return;
-
-      const act = getActivePlayers();
-      const rect = fingerCanvas.getBoundingClientRect();
-
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const t = e.changedTouches[i];
-        const tx = t.clientX - rect.left;
-        const ty = t.clientY - rect.top;
-
-        const assignedIds = Array.from(activeTouchesMap.values()).map(x => x.playerId);
-        const freePlayer = act.find(p => !assignedIds.includes(p.id));
-
-        if (freePlayer) {
-          activeTouchesMap.set(t.identifier, {
-            x: tx,
-            y: ty,
-            playerId: freePlayer.id,
-            name: freePlayer.name,
-            color: freePlayer.color || '#6366f1'
-          });
-          triggerHaptic(20);
-          SoundFX.click();
-
-          const btn = document.getElementById(`fingerBtn_${freePlayer.id}`);
-          if (btn) btn.classList.add('ring-4', 'ring-white', 'scale-105');
-        }
-      }
-
-      checkFingerStartTrigger();
-    }
-
-    function handleFingerTouchMove(e) {
-      e.preventDefault();
-      const rect = fingerCanvas.getBoundingClientRect();
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const t = e.changedTouches[i];
-        const data = activeTouchesMap.get(t.identifier);
-        if (data) {
-          data.x = t.clientX - rect.left;
-          data.y = t.clientY - rect.top;
-        }
-      }
-    }
-
-    function handleFingerTouchEnd(e) {
-      e.preventDefault();
-      if (fingerChosenWinner) return;
-
-      for (let i = 0; i < e.changedTouches.length; i++) {
-        const t = e.changedTouches[i];
-        const data = activeTouchesMap.get(t.identifier);
-        if (data) {
-          const btn = document.getElementById(`fingerBtn_${data.playerId}`);
-          if (btn) btn.classList.remove('ring-4', 'ring-white', 'scale-105');
-          activeTouchesMap.delete(t.identifier);
-        }
-      }
-
-      clearInterval(fingerCountdownTimer);
-      fingerCountdownTimer = null;
-      fingerCountdownVal = 3;
-    }
-
-    function checkFingerStartTrigger() {
-      const act = getActivePlayers();
-      if (activeTouchesMap.size >= Math.min(2, act.length) && !fingerCountdownTimer) {
-        fingerCountdownVal = 3;
-        fingerCountdownTimer = setInterval(() => {
-          triggerHaptic(35);
-          SoundFX.beep(650, 'triangle', 0.08, 0.2);
-
-          fingerCountdownVal--;
-          if (fingerCountdownVal <= 0) {
-            clearInterval(fingerCountdownTimer);
-            pickWinningFinger();
-          }
-        }, 900);
-      }
-    }
-
-    function pickWinningFinger() {
-      const touchesArray = Array.from(activeTouchesMap.values());
-      if (touchesArray.length === 0) return;
-
-      const winner = touchesArray[Math.floor(Math.random() * touchesArray.length)];
-      fingerChosenWinner = winner;
-
-      triggerHaptic(75);
-      triggerConfetti();
-      SoundFX.fanfare();
-      SoundFX.speak(`${winner.name} begint!`);
-
-      const gs = ensureGameState(state.activeGameId);
-      const act = getActivePlayers();
-      const winnerIdx = act.findIndex(p => p.id === winner.playerId);
-      if (winnerIdx !== -1) {
-        gs.manualStarterIdx = winnerIdx;
-        gs.activeTurnPlayerIdx = winnerIdx;
-        saveState();
-        renderScoreboard();
-      }
-
-      setTimeout(() => {
-        closeFingerPickerModal();
-        showToast(`🎲 ${winner.name} is de officiële startspeler!`);
-      }, 2800);
-    }
-
-    function renderFingerCanvasLoop() {
-      if (!fingerCtx) return;
-
-      fingerCtx.clearRect(0, 0, fingerCanvas.width, fingerCanvas.height);
-      fingerPulseAngle += 0.06;
-
-      activeTouchesMap.forEach(touch => {
-        const isWin = fingerChosenWinner && fingerChosenWinner.playerId === touch.playerId;
-        const pulse = Math.sin(fingerPulseAngle) * 8;
-        const radius = isWin ? 110 : (70 + pulse);
-
-        fingerCtx.save();
-        
-        fingerCtx.beginPath();
-        fingerCtx.arc(touch.x, touch.y, radius, 0, Math.PI * 2);
-        fingerCtx.fillStyle = touch.color + (isWin ? 'cc' : '33');
-        fingerCtx.fill();
-        fingerCtx.lineWidth = isWin ? 8 : 4;
-        fingerCtx.strokeStyle = isWin ? '#fbbf24' : touch.color;
-        fingerCtx.shadowColor = isWin ? '#fbbf24' : touch.color;
-        fingerCtx.shadowBlur = isWin ? 35 : 18;
-        fingerCtx.stroke();
-
-        fingerCtx.beginPath();
-        fingerCtx.arc(touch.x, touch.y, isWin ? 40 : 25, 0, Math.PI * 2);
-        fingerCtx.fillStyle = '#ffffff';
-        fingerCtx.fill();
-
-        fingerCtx.font = `black ${isWin ? '24px' : '18px'} -apple-system, sans-serif`;
-        fingerCtx.fillStyle = isWin ? '#fbbf24' : '#ffffff';
-        fingerCtx.textAlign = 'center';
-        fingerCtx.shadowColor = '#000000';
-        fingerCtx.shadowBlur = 8;
-        fingerCtx.fillText(isWin ? `👑 ${touch.name}` : touch.name, touch.x, touch.y - radius - 15);
-
-        fingerCtx.restore();
+    function getPlaagTrofeeData() {
+      const counts = {};
+      state.players.forEach(p => { 
+        counts[p.id] = { id: p.id, name: p.name, color: p.color, count: p.loserCups || 0, reasons: [] }; 
       });
 
-      if (fingerCountdownTimer && !fingerChosenWinner) {
-        fingerCtx.save();
-        fingerCtx.font = '900 110px monospace';
-        fingerCtx.fillStyle = '#fbbf24';
-        fingerCtx.shadowColor = 'rgba(251, 191, 36, 0.8)';
-        fingerCtx.shadowBlur = 25;
-        fingerCtx.textAlign = 'center';
-        fingerCtx.textBaseline = 'middle';
-        fingerCtx.fillText(fingerCountdownVal, fingerCanvas.width / 2, fingerCanvas.height / 2 - 20);
+      (state.history || []).forEach(match => {
+        if (match.scores && match.scores.length > 1) {
+          const sorted = [...match.scores].sort((a, b) => a.score - b.score);
+          const loser = sorted[0];
+          if (loser && counts[loser.playerId]) {
+            counts[loser.playerId].count++;
+            counts[loser.playerId].reasons.push(match.gameTitle || 'Bordspel');
+          }
+        }
+      });
 
-        fingerCtx.font = 'bold 16px sans-serif';
-        fingerCtx.fillStyle = '#cbd5e1';
-        fingerCtx.shadowBlur = 0;
-        fingerCtx.fillText('Vingers vasthouden...', fingerCanvas.width / 2, fingerCanvas.height / 2 + 60);
-        fingerCtx.restore();
+      return Object.values(counts).filter(c => c.count > 0).sort((a, b) => b.count - a.count);
+    }
+
+    function renderStatsScreen() {
+      const container = document.getElementById('statsScreenContainer');
+      if (!container) return;
+
+      // 1. Bereken overwinningen en statistieken
+      const playerStats = state.players.map(p => {
+        const matches = (state.history || []).filter(h => h.scores && h.scores.some(s => s.playerId === p.id));
+        const wins = (state.history || []).filter(h => {
+          if (!h.scores || h.scores.length < 2) return false;
+          const top = [...h.scores].sort((a, b) => b.score - a.score)[0];
+          return top && top.playerId === p.id;
+        }).length;
+
+        return {
+          ...p,
+          totalMatches: matches.length,
+          wins: wins,
+          winRate: matches.length > 0 ? Math.round((wins / matches.length) * 100) : 0
+        };
+      });
+
+      const sortedByElo = [...playerStats].sort((a, b) => (b.elo || 1200) - (a.elo || 1200));
+      const sortedByWins = [...playerStats].sort((a, b) => b.wins - a.wins);
+      const plaagList = getPlaagTrofeeData();
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <!-- ELO Ranglijst -->
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-xs font-black text-amber-400 flex items-center gap-1.5">
+                <span>⚡</span> Algemene Elo Ranglijst
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">Basis: 1200</span>
+            </div>
+            <div class="space-y-1.5">
+              ${sortedByElo.map((p, idx) => `
+                <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800/60">
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="font-mono text-xs font-bold ${idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-600' : 'text-slate-500'}">#${idx + 1}</span>
+                    ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                    <span class="font-bold text-xs text-white truncate">${p.name}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-slate-400">${p.wins}W / ${p.totalMatches}G</span>
+                    <span class="font-mono text-xs font-black text-amber-300 bg-slate-950 px-2 py-0.5 rounded-lg border border-slate-800">${p.elo || 1200}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Hall of Fame (Zeges & Bekers) -->
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-xs font-black text-emerald-400 flex items-center gap-1.5">
+                <span>🏆</span> Hall of Fame (Podiumplekken)
+              </span>
+              <span class="text-[10px] text-slate-500">Zeges & Bekers</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              ${sortedByWins.slice(0, 4).map(p => `
+                <div class="bg-slate-900 border border-slate-800 p-2.5 rounded-xl flex flex-col justify-between">
+                  <div class="flex items-center gap-1.5 min-w-0">
+                    ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                    <span class="font-bold text-xs text-slate-200 truncate">${p.name}</span>
+                  </div>
+                  <div class="mt-2 flex items-baseline justify-between">
+                    <span class="text-lg font-black text-emerald-400">${p.wins} <span class="text-[10px] font-normal text-slate-400">zeges</span></span>
+                    <span class="text-xs font-bold text-amber-400">${p.tournamentCups ? `🥇×${p.tournamentCups}` : ''}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- Plaagtrofeeën: De Houten Lepel -->
+          <div class="bg-slate-950 border border-rose-950/60 rounded-2xl p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <span class="text-xs font-black text-rose-400 flex items-center gap-1.5">
+                <span>🥄</span> De Houten Lepel (Plaagtrofeeën)
+              </span>
+              <span class="text-[10px] text-slate-500">Meeste keren laatste</span>
+            </div>
+
+            ${plaagList.length === 0 ? `
+              <div class="p-3 text-center text-xs text-slate-500 bg-slate-900/40 rounded-xl">
+                Nog geen plaagtrofeeën geregistreerd. Iedereen speelt nog te strak! 😇
+              </div>
+            ` : `
+              <div class="space-y-1.5">
+                ${plaagList.map((item, idx) => `
+                  <div class="flex items-center justify-between text-xs p-2 rounded-xl bg-slate-900/60 border border-slate-800/60">
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono text-xs ${idx === 0 ? 'text-rose-400 font-bold' : 'text-slate-500'}">#${idx + 1}</span>
+                      ${renderMeepleSvg(item.color, 'w-4 h-4')}
+                      <span class="font-bold text-slate-200">${item.name}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 font-black text-rose-400 bg-rose-950/30 px-2 py-0.5 rounded-lg border border-rose-900/40">
+                      <span>${item.count}×</span>
+                      <span>🥄</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            `}
+          </div>
+
+          <!-- Recent Gespeelde Potjes -->
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <span class="text-xs font-black text-indigo-400 flex items-center gap-1.5">
+                <span>📜</span> Recente Potjes Historie
+              </span>
+              <span class="text-[10px] text-slate-500">${(state.history || []).length} totaal</span>
+            </div>
+
+            <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+              ${(state.history || []).slice(-5).reverse().map(h => `
+                <div class="p-2 rounded-xl bg-slate-900 border border-slate-800/60 text-xs space-y-1">
+                  <div class="flex justify-between font-bold text-white">
+                    <span>${h.gameTitle || 'Bordspel'}</span>
+                    <span class="text-[10px] text-slate-400 font-normal">${h.date ? new Date(h.date).toLocaleDateString('nl-NL') : ''}</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400 flex gap-2 flex-wrap">
+                    ${(h.scores || []).map(s => {
+                      const pl = state.players.find(x => x.id === s.playerId);
+                      return `<span>${pl?.name || 'Speler'}: <b class="text-white">${s.score}</b></span>`;
+                    }).join(' • ')}
+                  </div>
+                </div>
+              `).join('') || '<div class="text-center text-xs text-slate-500 py-2">Nog geen potjes opgeslagen.</div>'}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Automatische toekenning van plaagbeker bij opslaan potje
+    function recordMatchFinish(gameId, scores) {
+      if (!scores || scores.length < 2) return;
+
+      const sorted = [...scores].sort((a, b) => b.score - a.score);
+      const winner = sorted[0];
+      const loser = sorted[sorted.length - 1];
+
+      // Winnaar krijgt toernooizege of Elo boost
+      const winPl = state.players.find(p => p.id === winner.playerId);
+      if (winPl) {
+        winPl.elo = (winPl.elo || 1200) + 16;
       }
 
-      fingerAnimFrame = requestAnimationFrame(renderFingerCanvasLoop);
+      // Verliezer krijgt aftrek en de Houten Lepel geturfd
+      const losePl = state.players.find(p => p.id === loser.playerId);
+      if (losePl) {
+        losePl.elo = Math.max(800, (losePl.elo || 1200) - 14);
+        losePl.loserCups = (losePl.loserCups || 0) + 1;
+      }
+
+      if (!Array.isArray(state.history)) state.history = [];
+      state.history.push({
+        id: 'hist_' + Date.now(),
+        date: new Date().toISOString(),
+        gameId: gameId,
+        gameTitle: state.games[gameId]?.title || gameId,
+        scores: scores
+      });
+
+      saveState();
+      renderScoreboard();
+      if (typeof renderStatsScreen === 'function') renderStatsScreen();
+      showToast(`🏆 Potje verwerkt! 🥄 Houten lepel voor ${losePl?.name || 'de hekkensluiter'}!`);
     }
 
     // =========================================================================
