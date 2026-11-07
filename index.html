@@ -795,24 +795,24 @@
       `;
     }
 
-    // =========================================================================
+        // =========================================================================
     // 2. VOLLEDIGE SPELLEN CATALOGUS
     // =========================================================================
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + patroonlijnen óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
-      { id: 'seasalt', name: 'Sea Salt & Paper', subtitle: 'Origami-setjes, vermenigvuldigers & zeemeerminnen', category: 'card', type: 'rounds', icon: 'seasalt', limit: 40, minP: 2, maxP: 4, dur: 'short', hasLastRoundKnock: true },
-      { id: 'harmonies', name: 'Harmonies', subtitle: 'Landschappen (bomen, bergen, water) & dierkaarten', category: 'board', type: 'categories', icon: 'harmonies', minP: 1, maxP: 4, dur: 'medium', categories: ['🌲 Bomen', '🏔️ Bergen & Gebouwen', '🌊 Water & Velden', '🐾 Dierkaarten', '🍃 Geheime doelen'] },
+      { id: 'seasalt', name: 'Sea Salt & Paper', subtitle: 'Duo-paren, collecties, zeemeerminnen & kleurbonussen', category: 'card', type: 'seasalt', icon: 'seasalt', limit: 40, minP: 2, maxP: 4, dur: 'short', hasLastRoundKnock: true },
+      { id: 'harmonies', name: 'Harmonies', subtitle: 'Landschappen (bomen, bergen, water) & dierkaarten', category: 'board', type: 'harmonies', icon: 'harmonies', minP: 1, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste voltooide dierkaarten' },
       { id: 'trio', name: 'Trio', subtitle: 'Eerste speler met 3 trio\'s of het gouden trio van 7', category: 'card', type: 'carcassonne', icon: 'trio', limit: 1, minP: 3, maxP: 6, dur: 'short' },
       { id: 'scout', name: 'Scout', subtitle: 'Circuskaarten uitspelen minus overgebleven handkaarten', category: 'card', type: 'rounds', icon: 'scout', minP: 3, maxP: 5, dur: 'short' },
       { id: 'forestshuffle', name: 'Forest Shuffle', subtitle: 'Bomen, bosrand, paddenstoelen & bosdieren', category: 'card', type: 'categories', icon: 'forestshuffle', minP: 2, maxP: 5, dur: 'medium', categories: ['🌲 Bomen (Basis)', '🦌 Boven/Onder dieren', '🦔 Zijkanten dieren', '🍄 Paddenstoelen', '🦋 Vlinders & Insecten'] },
-      { id: 'parijs', name: 'Parijs: De Lichtstad', subtitle: 'Verlichte gebouwen, grootste wijk, ansichtkaarten & schilder', category: 'board', type: 'categories', icon: 'parijs', minP: 2, maxP: 2, dur: 'short', categories: ['💡 Verlichte Gebouwen (Tegels × Lantaarns)', '🏘️ Grootste Gebouwen-groep (1p/vakje)', '🎨 Schilder & Ansichtkaart-bonussen', '🏚️ Strafpunten Ongebouwde tegels (-3p per stuk)'], tieBreakerDesc: 'Grootste aaneengesloten groep gebouwen' },
+      { id: 'parijs', name: 'Parijs: De Lichtstad', subtitle: 'Interactieve lantaarn-multiplier, ansichtkaarten & schilder', category: 'board', type: 'parijs', icon: 'parijs', minP: 2, maxP: 2, dur: 'short', tieBreakerDesc: 'Grootste aaneengesloten groep gebouwen' },
       { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, jokers & sterren', category: 'card', type: 'kok1', icon: 'keeropkeer', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'keeropkeer2', name: 'Keer op Keer 2', subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O', category: 'card', type: 'kok2', icon: 'keeropkeer2', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Stenen 11 & 13 + 7 Wormfiches)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Stenen 11 & 13 + 7 Wormfiches)'], tieBreakerDesc: 'Hoogste tegelnummer in bezit' },
       { id: 'carcassonne', name: 'Carcassonne', subtitle: 'Live teller met uitbreidings-snelknoppen & calculator', category: 'board', type: 'carcassonne', icon: 'carcassonne', minP: 2, maxP: 6, dur: 'medium', expansions: ['⛪ Kathedralen & Herbergen', '🍷 Kooplieden & Bouwmeesters'] },
       { id: 'cascadia', name: 'Cascadia', subtitle: 'Dieren, leefgebieden (+ automatische meerderheid) & appels', category: 'board', type: 'cascadia', icon: 'cascadia', minP: 1, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste dennenappels (natuurfiches)' },
-      { id: 'beverbende', name: 'Beverbende', subtitle: 'Rondeteller (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'beverbende', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
-      { id: 'beverclan', name: 'Beverclan', subtitle: 'Rondeteller met burchtkaarten & bonuspunten (Hoogste wint!)', category: 'card', type: 'rounds', icon: 'beverclan', lowestWins: false, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
+      { id: 'beverbende', name: 'Beverbende', subtitle: 'Snelle kaarten-selectie (0-9) + automatische klop-verdubbelaar', category: 'card', type: 'beverbende', icon: 'beverbende', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
+      { id: 'beverclan', name: 'Beverclan', subtitle: 'Kaartselectie + burchten (Hoogste wint!)', category: 'card', type: 'beverclan', icon: 'beverclan', lowestWins: false, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
       { id: 'rummikub', name: 'Rummikub', subtitle: 'Rondeteller voor gelegde stenen', category: 'board', type: 'rounds', icon: 'rummikub', minP: 2, maxP: 4, dur: 'medium' },
       { id: 'eldorado', name: 'De Zoektocht naar El Dorado', subtitle: 'Eindveld bereikt + Barrières als officiële tie-breaker', category: 'board', type: 'categories', icon: 'eldorado', minP: 2, maxP: 4, dur: 'medium', categories: ['🏁 Eindveld El Dorado bereikt (vul 100 in)', '🚧 Verzamelde Barrières (1p per stuk)', '🔢 Hoogste nummer op een barrière (bij gelijkspel)'], tieBreakerDesc: 'Meeste barrières, daarna hoogste barrière-nummer' },
       { id: 'take5', name: 'Take 5! (6 nimmt!)', subtitle: 'Rondeteller voor koeienkoppen tot 66 (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'take5', lowestWins: true, limit: 66, minP: 2, maxP: 10, dur: 'short' },
@@ -857,7 +857,7 @@
       { id: 'sushigo', name: 'Sushi Go!', subtitle: '3 rondes + pudding bonus (+6 / -6)', category: 'card', type: 'sushigo', icon: 'sushigo', minP: 2, maxP: 5, dur: 'short', tieBreakerDesc: 'Meeste pudding-punten' },
       { id: 'lostcities', name: 'Lost Cities', subtitle: '5 expedities met weddenschappen (×2, ×3, ×4) & +20 bonus', category: 'card', type: 'lostcities', icon: 'lostcities', minP: 2, maxP: 2, dur: 'short' },
       { id: 'koehandel', name: 'Koehandel', subtitle: 'Dierenkwartetten met automatische set-vermenigvuldiger', category: 'card', type: 'koehandel', icon: 'koehandel', minP: 3, maxP: 5, dur: 'medium' },
-      { id: 'machiavelli', name: 'Machiavelli', subtitle: 'Gebouwen, 5-kleurenbonus (+3) & eerste met 8 gebouwen (+4)', category: 'card', type: 'machiavelli', icon: 'machiavelli', minP: 2, maxP: 7, dur: 'medium' },
+      { id: 'machiavelli', name: 'Machiavelli', subtitle: 'Gebouwenwaarde, 8-gebouwen bonus & 5 kleuren bonus', category: 'card', type: 'machiavelli', icon: 'machiavelli', minP: 2, maxP: 7, dur: 'medium', tieBreakerDesc: 'Totale goudwaarde van gebouwen' },
       { id: 'themind', name: 'The Mind', subtitle: 'Coöperatieve level-, levens- en shuriken-tracker', category: 'card', type: 'themind', icon: 'themind', minP: 2, maxP: 4, dur: 'short' },
       { id: 'qwirkle', name: 'Qwirkle', subtitle: 'Live teller met Qwirkle (+12) snelknop', category: 'board', type: 'carcassonne', icon: 'free', minP: 2, maxP: 4, dur: 'medium' },
       { id: 'doolhof', name: 'Doolhof', subtitle: 'Eerste speler die alle schatten verzamelt en terugkeert naar start', category: 'board', type: 'doolhof', icon: 'doolhof', limit: 1, minP: 2, maxP: 4, dur: 'short' },
@@ -1135,8 +1135,8 @@
       saveState();
     }
 
-    // =========================================================================
-    // 4. GAME STATE INITIALIZATION
+        // =========================================================================
+    // 4. GAME STATE INITIALIZATION (INCLUSIEF NIEUWE DATASTRUCTUREN)
     // =========================================================================
     function createEmptyPlayerData() {
       const lostcities = {};
@@ -1184,9 +1184,14 @@
         sushigo: { r1: 0, r2: 0, r3: 0, pudding: 0 },
         lostcities,
         koehandel: { sets: {}, cashBonus: 0 },
-        machiavelli: { buildings: 0, allColors: false, first8: 0, extra: 0 },
         arknova: { appeal: 0, conservation: 0, endgame: 0 },
-        heat: { pos: 1, pts: 0 }
+        heat: { pos: 1, pts: 0 },
+        // Nieuwe datastructuren voor de 5 verbeterde spellen
+        parijs: { buildings: 0, lanterns: 0, cluster: 0, cardsBonus: 0, unbuiltPenalty: 0 },
+        beverbendeCards: [0, 0, 0, 0],
+        seasaltCurrent: { duos: 0, swimmers: 0, sharks: 0, shells: 0, octos: 0, penguins: 0, sailors: 0, mermaids: 0, colorCards: 0, colorMultis: 0 },
+        harmoniesData: { trees: 0, mountains: 0, water: 0, animals: 0, secretGoals: 0 },
+        machiavelliData: { goldVal: 0, first8: false, other8: false, allColors: false, extraBonus: 0 }
       };
     }
 
@@ -1232,10 +1237,17 @@
             ];
           }
           if (!pd.wingspanBoard) pd.wingspanBoard = createEmptyPlayerData().wingspanBoard;
+          // Zorg dat ontbrekende velden worden geïnitieerd
+          if (!pd.parijs) pd.parijs = { buildings: 0, lanterns: 0, cluster: 0, cardsBonus: 0, unbuiltPenalty: 0 };
+          if (!pd.beverbendeCards) pd.beverbendeCards = [0, 0, 0, 0];
+          if (!pd.seasaltCurrent) pd.seasaltCurrent = { duos: 0, swimmers: 0, sharks: 0, shells: 0, octos: 0, penguins: 0, sailors: 0, mermaids: 0, colorCards: 0, colorMultis: 0 };
+          if (!pd.harmoniesData) pd.harmoniesData = { trees: 0, mountains: 0, water: 0, animals: 0, secretGoals: 0 };
+          if (!pd.machiavelliData) pd.machiavelliData = { goldVal: 0, first8: false, other8: false, allColors: false, extraBonus: 0 };
         }
       });
       return gs;
     }
+
 
     // =========================================================================
     // 5. HELPER CALCULATIONS
@@ -1379,8 +1391,8 @@
       return 0;
     }
 
-    // =========================================================================
-    // 6. SCORE CALCULATIONS PER GAME
+        // =========================================================================
+    // 6. SCORE CALCULATIONS PER GAME (MET LOGICA VOOR ALLE NIEUWE SPELLEN)
     // =========================================================================
     function calculatePlayerTotal(gameId, playerId) {
       const def = getGameDef(gameId);
@@ -1433,8 +1445,23 @@
         } else {
           rawScore = colorSum + colSum + jokers + Number(pd.heartBonus || 0) + Number(pd.bonusRow || 0) + Number(pd.stars || 0);
         }
-      } else if (def.type === 'rounds' || def.type === 'flip7') {
+      } else if (def.type === 'rounds' || def.type === 'flip7' || def.type === 'beverbende' || def.type === 'beverclan' || def.type === 'seasalt') {
         (gs.rounds || []).forEach(r => { rawScore += Number(r[playerId] || 0); });
+      } else if (def.type === 'parijs') {
+        const pj = pd.parijs || {};
+        const lighted = Number(pj.buildings || 0) * Number(pj.lanterns || 0);
+        const cluster = Number(pj.cluster || 0);
+        const cards = Number(pj.cardsBonus || 0);
+        const penalty = Math.abs(Number(pj.unbuiltPenalty || 0)) * 3;
+        rawScore = lighted + cluster + cards - penalty;
+      } else if (def.type === 'harmonies') {
+        const hm = pd.harmoniesData || {};
+        rawScore = Number(hm.trees || 0) + Number(hm.mountains || 0) + Number(hm.water || 0) + Number(hm.animals || 0) + Number(hm.secretGoals || 0);
+      } else if (def.type === 'machiavelli') {
+        const mc = pd.machiavelliData || {};
+        const bonus8 = mc.first8 ? 4 : (mc.other8 ? 2 : 0);
+        const bonus5Col = mc.allColors ? 3 : 0;
+        rawScore = Number(mc.goldVal || 0) + bonus8 + bonus5Col + Number(mc.extraBonus || 0);
       } else if (def.type === 'qwixx') {
         const q = pd.qwixx || {};
         rawScore = (QWIXX_TABLE[q.red] || 0) + (QWIXX_TABLE[q.yellow] || 0) + (QWIXX_TABLE[q.green] || 0) + (QWIXX_TABLE[q.blue] || 0) - (Number(q.fails || 0) * 5);
@@ -1504,9 +1531,6 @@
           }
         });
         rawScore = baseSum * Math.max(1, setsCount);
-      } else if (def.type === 'machiavelli') {
-        const m = pd.machiavelli || {};
-        rawScore = Number(m.buildings || 0) + (m.allColors ? 3 : 0) + Number(m.first8 || 0) + Number(m.extra || 0);
       } else if (def.type === 'carcassonne') {
         rawScore = Number(pd.liveScore || 0);
       } else if (def.type === 'doolhof') {
@@ -1529,6 +1553,51 @@
       }
 
       return rawScore + handicap;
+    }
+
+    function getTieBreakerValue(gameId, playerId) {
+      try {
+        const gs = ensureGameState(gameId);
+        const pd = gs.playerData[playerId];
+        if (!pd) return 0;
+
+        if (gameId === 'azul' && gs.azulMode !== 'manual') {
+          return computeAzulEndBonuses(pd.azul?.wall || []).rows || 0;
+        }
+        if (gameId === 'cascadia') {
+          return Number(pd.cascadia?.cones || 0);
+        }
+        if (gameId === 'parijs') {
+          return Number(pd.parijs?.cluster || 0);
+        }
+        if (gameId === 'harmonies') {
+          return Number(pd.harmoniesData?.animals || 0);
+        }
+        if (gameId === 'machiavelli') {
+          return Number(pd.machiavelliData?.goldVal || 0);
+        }
+        if (gameId === 'eldorado') {
+          return Number(pd.categories?.['🚧 Barrières (aantal)'] || 0);
+        }
+        if (gameId === 'keeropkeer' || gameId === 'keeropkeer2') {
+          return Number(pd.exclamations || 0);
+        }
+        if (gameId === 'wonders7') {
+          return Number(pd.wonders?.coins || 0);
+        }
+        if (gameId === 'sushigo') {
+          return Number(pd.sushigo?.pudding || 0);
+        }
+        if (gameId === 'ttr') {
+          return pd.ttr?.longest ? 1 : 0;
+        }
+        if (gameId === 'regenwormen') {
+          const tMap = pd.regenwormen?.tiles || {};
+          const owned = Object.keys(tMap).filter(k => tMap[k]).map(Number);
+          return owned.length ? Math.max(...owned) : 0;
+        }
+      } catch (e) {}
+      return 0;
     }
 
     function getStandings(gameId = state.activeGameId) {
@@ -2276,7 +2345,7 @@
       }).join('');
     }
 
-    // =========================================================================
+        // =========================================================================
     // 9. SCOREBOARD RENDERING & LIVE STAND (INCLUSIEF NEON GLOW & COMMENTATOR)
     // =========================================================================
     function toggleLayoutOrientation() {
@@ -2389,7 +2458,7 @@
         }
       }
 
-      if (def.hasLastRoundKnock || def.type === 'rounds') {
+      if (def.hasLastRoundKnock || def.type === 'rounds' || def.type === 'beverbende' || def.type === 'beverclan' || def.type === 'seasalt') {
         banner.classList.remove('hidden');
         const knocker = activePlayers.find(p => p.id === gs.knockerPlayerId);
         const others = activePlayers.filter(p => p.id !== gs.knockerPlayerId).map(p => p.name).join(', ');
@@ -2501,7 +2570,7 @@
 
       const graphBtn = document.getElementById('roundGraphBtn');
       if (graphBtn) {
-        if (def.type === 'rounds' || def.type === 'flip7') {
+        if (def.type === 'rounds' || def.type === 'flip7' || def.type === 'beverbende' || def.type === 'beverclan' || def.type === 'seasalt') {
           graphBtn.classList.remove('hidden');
         } else {
           graphBtn.classList.add('hidden');
@@ -2532,13 +2601,14 @@
       }
 
       const starterP = computeCurrentStarterPlayer(def.id);
+      const isRoundGame = (def.type === 'rounds' || def.type === 'flip7' || def.type === 'beverbende' || def.type === 'beverclan' || def.type === 'seasalt');
       const roundNum = (gs.rounds || []).length + 1;
       const stBar = document.getElementById('starterTrackerBar');
       if (stBar && starterP) {
         stBar.innerHTML = `
           <div class="flex items-center gap-2 flex-wrap">
             <span class="px-2.5 py-1 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold flex items-center gap-1.5">
-              🃏 Delen / Start (${def.type === 'rounds' || def.type === 'flip7' ? 'Ronde ' + roundNum : 'Nu'}):
+              🃏 Delen / Start (${isRoundGame ? 'Ronde ' + roundNum : 'Nu'}):
               <span class="underline cursor-pointer" onclick="cycleManualStarter()" title="Tik om door te schuiven naar volgende speler" style="color:${starterP.color}">${starterP.name} ↻</span>
             </span>
           </div>
@@ -2562,7 +2632,12 @@
       if (!container) return;
 
       try {
-        if (def.id === 'doolhof' || def.type === 'doolhof') renderDoolhofSheet(container);
+        if (def.type === 'parijs') renderParijsSheet(container);
+        else if (def.type === 'beverbende' || def.type === 'beverclan') renderBeverbendeSheet(container, def);
+        else if (def.type === 'seasalt') renderSeaSaltSheet(container, def);
+        else if (def.type === 'harmonies') renderHarmoniesSheet(container);
+        else if (def.type === 'machiavelli') renderMachiavelliSheet(container);
+        else if (def.id === 'doolhof' || def.type === 'doolhof') renderDoolhofSheet(container);
         else if (def.id === 'wingspan') renderWingspanDashboard(container);
         else if (def.type === 'kok1' || def.type === 'kok2') renderKokSheet(container, def);
         else if (def.type === 'azul') renderAzulSheet(container, def);
@@ -2580,7 +2655,6 @@
         else if (def.type === 'sushigo') renderSushiGoSheet(container);
         else if (def.type === 'lostcities') renderLostCitiesSheet(container);
         else if (def.type === 'koehandel') renderKoehandelSheet(container);
-        else if (def.type === 'machiavelli') renderMachiavelliSheet(container);
         else if (def.type === 'arknova') renderArkNovaSheet(container);
         else if (def.type === 'heat') renderHeatSheet(container);
         else if (def.type === 'dorfromantik') renderDorfromantikSheet(container);
@@ -2642,6 +2716,7 @@
 
       checkLiveLeaderAnnounce(standings);
     }
+
 
     // =========================================================================
     // 10. SPELBLADEN (DEEL A: AZUL MET SLIMME VULLING & WINGSPAN)
@@ -4261,6 +4336,459 @@
         </div>
       `;
     }
+        // =========================================================================
+    // 10D. PARIJS: DE LICHTSTAD (INTERACTIEVE LANTAARN CALCULATOR)
+    // =========================================================================
+    function renderParijsSheet(container) {
+      const gs = ensureGameState('parijs');
+      container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">` + getActivePlayers().map(p => {
+        const pj = gs.playerData[p.id].parijs;
+        const lightedScore = Number(pj.buildings || 0) * Number(pj.lanterns || 0);
+        const penaltyScore = Number(pj.unbuiltPenalty || 0) * 3;
+        const total = calculatePlayerTotal('parijs', p.id);
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl player-card-glow" style="--card-glow-color: ${p.color || '#6366f1'}20; border-top: 5px solid ${p.color || '#6366f1'};">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-2 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-5 h-5')}
+                <span class="font-extrabold text-base text-white">${p.name}</span>
+              </button>
+              <div class="text-right">
+                <div class="text-2xl font-black text-amber-300 font-mono">${total} pnt</div>
+                <div class="text-[10px] text-slate-400 font-bold">Lichtstad Score</div>
+              </div>
+            </div>
+
+            <!-- Lantaarn vermenigvuldiger -->
+            <div class="bg-slate-950 border border-amber-500/30 rounded-2xl p-3 space-y-2">
+              <div class="flex items-center justify-between text-xs font-bold text-amber-300">
+                <span>💡 Verlichte Gebouwen</span>
+                <span class="font-mono text-white text-sm">= ${lightedScore} pnt</span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span class="text-[10px] text-slate-400 block mb-1">Vakjes gebouwen:</span>
+                  ${renderNumberStepper(`pj_b_${p.id}`, pj.buildings, `val => setParijsField('${p.id}', 'buildings', val)`)}
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 block mb-1">Schijnende Lantaarns:</span>
+                  ${renderNumberStepper(`pj_l_${p.id}`, pj.lanterns, `val => setParijsField('${p.id}', 'lanterns', val)`)}
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <span class="font-bold text-slate-300">🏘️ Grootste wijk (+1p/vak):</span>
+                ${renderNumberStepper(`pj_c_${p.id}`, pj.cluster, `val => setParijsField('${p.id}', 'cluster', val)`)}
+              </div>
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <span class="font-bold text-sky-400">🎨 Ansichtkaarten & Schilder:</span>
+                ${renderNumberStepper(`pj_cd_${p.id}`, pj.cardsBonus, `val => setParijsField('${p.id}', 'cardsBonus', val)`)}
+              </div>
+              <div class="bg-slate-950 border border-rose-500/30 rounded-xl p-2.5 flex items-center justify-between">
+                <div>
+                  <span class="font-bold text-rose-300 block">🏚️ Niet-gebouwd (-3p/st):</span>
+                  <span class="text-[10px] text-rose-400 font-mono">Boete: -${penaltyScore}p</span>
+                </div>
+                ${renderNumberStepper(`pj_pen_${p.id}`, pj.unbuiltPenalty, `val => setParijsField('${p.id}', 'unbuiltPenalty', val)`)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') + `</div>`;
+    }
+
+    function setParijsField(playerId, field, val) {
+      pushUndoSnapshot();
+      const gs = ensureGameState('parijs');
+      gs.playerData[playerId].parijs[field] = Math.max(0, Number(val || 0));
+      saveState();
+      broadcastLiveState();
+      renderScoreboard();
+    }
+
+
+    // =========================================================================
+    // 10E. BEVERBENDE & BEVERCLAN (SNELLE KAART-SELECTOR MET KLOP-VERDUBBELAAR)
+    // =========================================================================
+    function renderBeverbendeSheet(container, def) {
+      const gs = ensureGameState(def.id);
+      const activePlayers = getActivePlayers();
+      const roundNum = (gs.rounds || []).length + 1;
+
+      container.innerHTML = `
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <h3 class="font-black text-sm text-white">➕ Ronde ${roundNum} Invoeren: Tik de 4 kaarten per speler</h3>
+            <span class="text-xs text-amber-300 font-bold">${def.lowestWins ? 'Laagste score wint!' : 'Hoogste score wint!'}</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            ${activePlayers.map(p => {
+              const currentCards = gs.playerData[p.id].beverbendeCards || [0, 0, 0, 0];
+              const roundSum = currentCards.reduce((a, b) => a + b, 0);
+
+              return `
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-2.5 player-card-glow" style="--card-glow-color: ${p.color || '#6366f1'}20;">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-1.5 font-bold text-xs text-white">
+                      ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                      <span>${p.name}</span>
+                    </div>
+                    <span class="text-amber-300 font-mono font-black text-sm">= ${roundSum} pnt</span>
+                  </div>
+
+                  <div class="grid grid-cols-4 gap-1.5">
+                    ${[0, 1, 2, 3].map(slotIdx => `
+                      <button type="button" onclick="openBeverCardPicker('${def.id}', '${p.id}', ${slotIdx})" class="h-12 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 flex flex-col items-center justify-center btn-3d">
+                        <span class="text-base font-black font-mono text-white">${currentCards[slotIdx]}</span>
+                        <span class="text-[9px] text-slate-500 font-bold">Kaart ${slotIdx + 1}</span>
+                      </button>
+                    `).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="flex justify-end pt-2 border-t border-slate-800">
+            <button type="button" onclick="commitBeverbendeRound('${def.id}')" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 btn-3d">
+              ✓ Ronde ${roundNum} Definitief Opslaan
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-800">
+                <th class="py-2 text-left">Ronde</th>
+                ${activePlayers.map(p => `<th class="py-2 text-right">${p.name}</th>`).join('')}
+                <th class="py-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(gs.rounds || []).map((r, rIdx) => `
+                <tr class="border-b border-slate-800/60 font-mono font-bold">
+                  <td class="py-2 text-slate-400">Ronde ${rIdx + 1}</td>
+                  ${activePlayers.map(p => `<td class="py-2 text-right text-white">${r[p.id] || 0}</td>`).join('')}
+                  <td class="py-2 text-right">
+                    <button type="button" onclick="deleteRound(${rIdx})" class="text-rose-400 hover:text-rose-300 font-bold">✕</button>
+                  </td>
+                </tr>
+              `).join('') || `<tr><td colspan="${activePlayers.length + 2}" class="text-center py-4 text-slate-500">Nog geen rondes voltooid.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function openBeverCardPicker(gameId, playerId, slotIdx) {
+      const cards = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      const p = state.players.find(x => x.id === playerId);
+
+      const modalHtml = `
+        <div id="beverCardModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+            <h3 class="font-bold text-sm text-white">Kies Kaart ${slotIdx + 1} voor ${p?.name}</h3>
+            <div class="grid grid-cols-5 gap-2">
+              ${cards.map(c => `
+                <button type="button" onclick="setBeverSlotCard('${gameId}', '${playerId}', ${slotIdx}, ${c})" class="py-3 rounded-2xl bg-slate-800 hover:bg-amber-500 hover:text-slate-950 text-white font-black text-lg font-mono btn-3d shadow">
+                  ${c}
+                </button>
+              `).join('')}
+            </div>
+            <button type="button" onclick="document.getElementById('beverCardModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">Sluiten</button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function setBeverSlotCard(gameId, playerId, slotIdx, val) {
+      const gs = ensureGameState(gameId);
+      if (!gs.playerData[playerId].beverbendeCards) {
+        gs.playerData[playerId].beverbendeCards = [0, 0, 0, 0];
+      }
+      gs.playerData[playerId].beverbendeCards[slotIdx] = val;
+      triggerHaptic(15);
+      SoundFX.click();
+      saveState();
+      renderScoreboard();
+      document.getElementById('beverCardModal')?.remove();
+    }
+
+    function commitBeverbendeRound(gameId) {
+      pushUndoSnapshot();
+      const gs = ensureGameState(gameId);
+      const activePlayers = getActivePlayers();
+      const roundObj = {};
+
+      activePlayers.forEach(p => {
+        const cards = gs.playerData[p.id].beverbendeCards || [0, 0, 0, 0];
+        roundObj[p.id] = cards.reduce((a, b) => a + b, 0);
+      });
+
+      if (gs.knockerPlayerId && roundObj[gs.knockerPlayerId] !== undefined) {
+        const knockerScore = roundObj[gs.knockerPlayerId];
+        const isLowest = activePlayers.every(p => p.id === gs.knockerPlayerId || roundObj[p.id] >= knockerScore);
+        if (!isLowest) {
+          roundObj[gs.knockerPlayerId] += 10;
+          showToast(`⚠️ Klopper had niet de minste punten: +10 strafpunten!`);
+        }
+      }
+
+      gs.rounds.push(roundObj);
+
+      activePlayers.forEach(p => {
+        gs.playerData[p.id].beverbendeCards = [0, 0, 0, 0];
+      });
+      gs.knockerPlayerId = null;
+
+      triggerHaptic(30);
+      SoundFX.fanfare();
+      saveState();
+      renderScoreboard();
+    }
+
+
+    // =========================================================================
+    // 10F. SEA SALT & PAPER (DUO-SETS & ZEEMEERMIN CALCULATOR)
+    // =========================================================================
+    function renderSeaSaltSheet(container, def) {
+      const gs = ensureGameState('seasalt');
+      const activePlayers = getActivePlayers();
+      const roundNum = (gs.rounds || []).length + 1;
+
+      container.innerHTML = `
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <h3 class="font-black text-sm text-white">➕ Ronde ${roundNum} Kaarttelling</h3>
+            <span class="text-xs text-sky-400 font-bold">Doel: 40 pnt (of 4 Zeemeerminnen = Direct Winst)</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            ${activePlayers.map(p => {
+              const ss = gs.playerData[p.id].seasaltCurrent;
+              const duosPts = (Number(ss.duos || 0) + Number(ss.swimmers || 0) + Number(ss.sharks || 0)) * 1;
+              const shellTable = [0, 0, 2, 4, 6, 9];
+              const octoTable = [0, 0, 0, 3, 6, 9];
+              const penguinTable = [0, 1, 3, 5];
+              const sailorTable = [0, 0, 5];
+
+              const shellsPts = shellTable[Math.min(5, Number(ss.shells || 0))] || 0;
+              const octosPts = octoTable[Math.min(5, Number(ss.octos || 0))] || 0;
+              const penguinsPts = penguinTable[Math.min(3, Number(ss.penguins || 0))] || 0;
+              const sailorsPts = sailorTable[Math.min(2, Number(ss.sailors || 0))] || 0;
+
+              const roundTotal = duosPts + shellsPts + octosPts + penguinsPts + sailorsPts + (Number(ss.mermaids || 0) * 2) + Number(ss.colorMultis || 0);
+
+              return `
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3 player-card-glow" style="--card-glow-color: ${p.color || '#6366f1'}20;">
+                  <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <div class="flex items-center gap-1.5 font-bold text-sm text-white">
+                      ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                      <span>${p.name}</span>
+                    </div>
+                    <span class="text-lg font-black text-cyan-300 font-mono">${roundTotal} pnt</span>
+                  </div>
+
+                  <div class="space-y-2 text-xs">
+                    <div class="flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-slate-800">
+                      <span class="text-slate-300 font-bold">🦀 Duo-paren (Krab/Vis/Boot):</span>
+                      ${renderNumberStepper(`ss_duos_${p.id}`, ss.duos, `val => { ss.duos = Number(val); renderScoreboard(); }`)}
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-slate-800">
+                      <span class="text-slate-300 font-bold">🐚 Schelpen (Verzameling):</span>
+                      ${renderNumberStepper(`ss_shells_${p.id}`, ss.shells, `val => { ss.shells = Number(val); renderScoreboard(); }`)}
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-slate-800">
+                      <span class="text-slate-300 font-bold">🐙 Octopussen (Verzameling):</span>
+                      ${renderNumberStepper(`ss_octos_${p.id}`, ss.octos, `val => { ss.octos = Number(val); renderScoreboard(); }`)}
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-slate-800">
+                      <span class="text-cyan-300 font-bold">🧜‍♀️ Zeemeerminnen:</span>
+                      ${renderNumberStepper(`ss_mermaids_${p.id}`, ss.mermaids, `val => { ss.mermaids = Number(val); if(Number(val)>=4) showToast("🧜‍♀️ 4 ZEEMEERMINNEN! Directe overwinning!"); renderScoreboard(); }`)}
+                    </div>
+                    <div class="flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-slate-800">
+                      <span class="text-amber-300 font-bold">🎨 Kleur-vermenigvuldigers:</span>
+                      ${renderNumberStepper(`ss_color_${p.id}`, ss.colorMultis, `val => { ss.colorMultis = Number(val); renderScoreboard(); }`)}
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <div class="flex justify-end pt-2 border-t border-slate-800">
+            <button type="button" onclick="commitSeaSaltRound()" class="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xs shadow-lg btn-3d">
+              ✓ Ronde ${roundNum} Opslaan
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-800">
+                <th class="py-2 text-left">Ronde</th>
+                ${activePlayers.map(p => `<th class="py-2 text-right">${p.name}</th>`).join('')}
+                <th class="py-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${(gs.rounds || []).map((r, rIdx) => `
+                <tr class="border-b border-slate-800/60 font-mono font-bold">
+                  <td class="py-2 text-slate-400">Ronde ${rIdx + 1}</td>
+                  ${activePlayers.map(p => `<td class="py-2 text-right text-white">${r[p.id] || 0}</td>`).join('')}
+                  <td class="py-2 text-right"><button type="button" onclick="deleteRound(${rIdx})" class="text-rose-400 font-bold">✕</button></td>
+                </tr>
+              `).join('') || `<tr><td colspan="${activePlayers.length + 2}" class="text-center py-4 text-slate-500">Nog geen rondes voltooid.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function commitSeaSaltRound() {
+      pushUndoSnapshot();
+      const gs = ensureGameState('seasalt');
+      const activePlayers = getActivePlayers();
+      const roundObj = {};
+
+      activePlayers.forEach(p => {
+        const ss = gs.playerData[p.id].seasaltCurrent;
+        const shellTable = [0, 0, 2, 4, 6, 9];
+        const octoTable = [0, 0, 0, 3, 6, 9];
+        const penguinTable = [0, 1, 3, 5];
+        const sailorTable = [0, 0, 5];
+
+        const duosPts = (Number(ss.duos || 0) + Number(ss.swimmers || 0) + Number(ss.sharks || 0)) * 1;
+        const shellsPts = shellTable[Math.min(5, Number(ss.shells || 0))] || 0;
+        const octosPts = octoTable[Math.min(5, Number(ss.octos || 0))] || 0;
+        const penguinsPts = penguinTable[Math.min(3, Number(ss.penguins || 0))] || 0;
+        const sailorsPts = sailorTable[Math.min(2, Number(ss.sailors || 0))] || 0;
+
+        roundObj[p.id] = duosPts + shellsPts + octosPts + penguinsPts + sailorsPts + (Number(ss.mermaids || 0) * 2) + Number(ss.colorMultis || 0);
+
+        gs.playerData[p.id].seasaltCurrent = { duos: 0, swimmers: 0, sharks: 0, shells: 0, octos: 0, penguins: 0, sailors: 0, mermaids: 0, colorCards: 0, colorMultis: 0 };
+      });
+
+      gs.rounds.push(roundObj);
+      triggerHaptic(30);
+      SoundFX.fanfare();
+      saveState();
+      renderScoreboard();
+    }
+
+
+    // =========================================================================
+    // 10G. HARMONIES (LANDSCHAPPEN & DIEREN STRUCTUUR)
+    // =========================================================================
+    function renderHarmoniesSheet(container) {
+      const gs = ensureGameState('harmonies');
+      container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">` + getActivePlayers().map(p => {
+        const hm = gs.playerData[p.id].harmoniesData;
+        const total = calculatePlayerTotal('harmonies', p.id);
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl player-card-glow" style="--card-glow-color: ${p.color || '#6366f1'}20; border-top: 5px solid ${p.color || '#6366f1'};">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-2 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-5 h-5')}
+                <span class="font-extrabold text-base text-white">${p.name}</span>
+              </button>
+              <div class="text-right">
+                <div class="text-2xl font-black text-emerald-300 font-mono">${total} pnt</div>
+                <div class="text-[10px] text-slate-400 font-bold">Natuurscore</div>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <span class="font-bold text-emerald-400">🌲 Bomen (Hoogte 1, 2, 3):</span>
+                ${renderNumberStepper(`hm_t_${p.id}`, hm.trees, `val => { hm.trees = Number(val); renderScoreboard(); }`)}
+              </div>
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <span class="font-bold text-stone-300">🏔️ Bergen & Gebouwen:</span>
+                ${renderNumberStepper(`hm_m_${p.id}`, hm.mountains, `val => { hm.mountains = Number(val); renderScoreboard(); }`)}
+              </div>
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <span class="font-bold text-sky-400">🌊 Waterlopen & Eilanden:</span>
+                ${renderNumberStepper(`hm_w_${p.id}`, hm.water, `val => { hm.water = Number(val); renderScoreboard(); }`)}
+              </div>
+              <div class="bg-slate-950 border border-amber-500/30 rounded-xl p-2.5 flex items-center justify-between">
+                <span class="font-bold text-amber-300">🐾 Dierkaarten (Voltooide fiches):</span>
+                ${renderNumberStepper(`hm_a_${p.id}`, hm.animals, `val => { hm.animals = Number(val); renderScoreboard(); }`)}
+              </div>
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <span class="font-bold text-purple-400">🍃 Geheime Natuurdoelen:</span>
+                ${renderNumberStepper(`hm_g_${p.id}`, hm.secretGoals, `val => { hm.secretGoals = Number(val); renderScoreboard(); }`)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') + `</div>`;
+    }
+
+
+    // =========================================================================
+    // 10H. MACHIAVELLI (GEBOUWENWAARDE & BONUS-CHECKBOXES)
+    // =========================================================================
+    function renderMachiavelliSheet(container) {
+      const gs = ensureGameState('machiavelli');
+      container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">` + getActivePlayers().map(p => {
+        const mc = gs.playerData[p.id].machiavelliData;
+        const total = calculatePlayerTotal('machiavelli', p.id);
+
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4 shadow-xl player-card-glow" style="--card-glow-color: ${p.color || '#6366f1'}20; border-top: 5px solid ${p.color || '#6366f1'};">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-2 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-5 h-5')}
+                <span class="font-extrabold text-base text-white">${p.name}</span>
+              </button>
+              <div class="text-right">
+                <div class="text-2xl font-black text-amber-300 font-mono">${total} pnt</div>
+                <div class="text-[10px] text-slate-400 font-bold">Stadswaarde</div>
+              </div>
+            </div>
+
+            <div class="space-y-2.5 text-xs">
+              <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
+                <span class="font-bold text-amber-300">🪙 Totale Goudwaarde van Gebouwen:</span>
+                ${renderNumberStepper(`mc_g_${p.id}`, mc.goldVal, `val => { mc.goldVal = Number(val); renderScoreboard(); }`)}
+              </div>
+
+              <div class="space-y-1.5 pt-1">
+                <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer">
+                  <span class="font-bold text-emerald-400">🏰 Eerste speler met 8 gebouwen (+4p)</span>
+                  <input type="checkbox" ${mc.first8 ? 'checked' : ''} onchange="mc.first8 = this.checked; if(this.checked) mc.other8 = false; saveState(); renderScoreboard();" class="rounded text-indigo-600 focus:ring-0" />
+                </label>
+
+                <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer">
+                  <span class="font-bold text-slate-300">🏠 Ook 8 gebouwen voltooid (+2p)</span>
+                  <input type="checkbox" ${mc.other8 ? 'checked' : ''} onchange="mc.other8 = this.checked; if(this.checked) mc.first8 = false; saveState(); renderScoreboard();" class="rounded text-indigo-600 focus:ring-0" />
+                </label>
+
+                <label class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800 cursor-pointer">
+                  <span class="font-bold text-purple-400">🎨 Gebouwen in alle 5 de kleuren (+3p)</span>
+                  <input type="checkbox" ${mc.allColors ? 'checked' : ''} onchange="mc.allColors = this.checked; saveState(); renderScoreboard();" class="rounded text-indigo-600 focus:ring-0" />
+                </label>
+              </div>
+
+              <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
+                <span class="font-bold text-slate-400">📜 Paarse Gebouwen Effecten:</span>
+                ${renderNumberStepper(`mc_ex_${p.id}`, mc.extraBonus, `val => { mc.extraBonus = Number(val); renderScoreboard(); }`)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('') + `</div>`;
+    }
+
 
     // =========================================================================
     // 11. SPELERSBEHEER, TEAMS & GROEPEN
