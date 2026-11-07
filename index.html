@@ -5153,298 +5153,8 @@
       document.getElementById('editPlayerModal')?.remove();
     }
 
-    // =========================================================================
-    // 12. STATISTIEKEN & HISTORIE
-    // =========================================================================
-    function setStatsSortMode(mode) {
-      state.statsSortMode = mode;
-      saveState();
-      renderHistoryView();
-    }
-
-    function renderHistoryView() {
-      renderChampionCupWidget();
-      renderHallOfFame();
-      renderGameRecordsGrid();
-      renderHistoryMatchesList();
-      renderEloTimelineChart();
-    }
-
-    function renderChampionCupWidget() {
-      const box = document.getElementById('championCupWidget');
-      if (!box) return;
-
-      const curHolderId = state.championCup?.currentHolder;
-      const prevHolderId = state.championCup?.previousHolder;
-      const curP = state.players.find(p => p.id === curHolderId);
-      const prevP = state.players.find(p => p.id === prevHolderId);
-
-      box.innerHTML = `
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <div class="flex items-center gap-3">
-            <span class="text-4xl drop-shadow">🏆</span>
-            <div>
-              <div class="text-[10px] uppercase font-black tracking-widest text-amber-400">Officiële Wisseltrofee</div>
-              <h2 class="text-xl font-black text-white">${curP ? curP.name : 'Nog geen kampioen'}</h2>
-              <p class="text-xs text-slate-400">${prevP && prevP.id !== curP?.id ? `Onttroonde ${prevP.name} in de laatste match!` : 'Verdedig de titel aan tafel!'}</p>
-            </div>
-          </div>
-          ${curP ? `
-            <div class="flex items-center gap-2">
-              <span class="px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-extrabold text-xs">
-                Regerend Kampioen
-              </span>
-            </div>
-          ` : ''}
-        </div>
-      `;
-    }
-
-    function renderHallOfFame() {
-      const list = document.getElementById('hallOfFameList');
-      if (!list) return;
-
-      const pWins = {};
-      const pMatches = {};
-      state.players.forEach(p => { pWins[p.id] = 0; pMatches[p.id] = 0; });
-
-      (state.history || []).forEach(m => {
-        (m.players || []).forEach(pId => {
-          if (pMatches[pId] !== undefined) pMatches[pId]++;
-        });
-        (m.winners || []).forEach(wId => {
-          if (pWins[wId] !== undefined) pWins[wId]++;
-        });
-      });
-
-      const stats = state.players.map(p => {
-        const matches = pMatches[p.id] || 0;
-        const wins = pWins[p.id] || 0;
-        const pct = matches > 0 ? Math.round((wins / matches) * 100) : 0;
-        return { ...p, matches, wins, pct };
-      });
-
-      if (state.statsSortMode === 'pct') {
-        stats.sort((a, b) => b.pct - a.pct || b.wins - a.wins);
-        document.getElementById('sortBtnPct')?.classList.replace('text-slate-400', 'text-white');
-        document.getElementById('sortBtnPct')?.classList.add('bg-indigo-600');
-        document.getElementById('sortBtnWins')?.classList.remove('bg-indigo-600', 'text-white');
-        document.getElementById('sortBtnWins')?.classList.add('text-slate-400');
-      } else {
-        stats.sort((a, b) => b.wins - a.wins || b.pct - a.pct);
-        document.getElementById('sortBtnWins')?.classList.replace('text-slate-400', 'text-white');
-        document.getElementById('sortBtnWins')?.classList.add('bg-indigo-600');
-        document.getElementById('sortBtnPct')?.classList.remove('bg-indigo-600', 'text-white');
-        document.getElementById('sortBtnPct')?.classList.add('text-slate-400');
-      }
-
-      list.innerHTML = stats.map((p, idx) => `
-        <div onclick="openPlayerRivalsModal('${p.id}')" class="cursor-pointer bg-slate-950 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-sm transition btn-3d">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <span class="font-black text-sm ${idx === 0 ? 'text-amber-400' : 'text-slate-500'}">#${idx + 1}</span>
-            ${renderMeepleSvg(p.color, 'w-5 h-5')}
-            <div class="min-w-0">
-              <div class="font-bold text-sm text-white truncate flex items-center gap-1.5">
-                <span>${p.name}</span>
-                ${idx === 0 && p.wins > 0 ? '<span>👑</span>' : ''}
-              </div>
-              <div class="text-[10px] text-slate-400">Elo: <b>${p.elo || 1200}</b> • ${p.matches} potjes</div>
-            </div>
-          </div>
-          <div class="text-right">
-            <div class="font-black text-base text-amber-300 font-mono">${p.wins} wins</div>
-            <div class="text-[11px] font-bold text-slate-400">${p.pct}% winratio</div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderGameRecordsGrid() {
-      const grid = document.getElementById('gameRecordsGrid');
-      if (!grid) return;
-
-      const records = {};
-      (state.history || []).forEach(m => {
-        const lowWins = isLowestWins(m.gameId);
-        (m.results || []).forEach(res => {
-          const cur = records[m.gameId];
-          if (!cur || (lowWins && res.score < cur.score) || (!lowWins && res.score > cur.score)) {
-            records[m.gameId] = {
-              score: res.score,
-              playerId: res.playerId,
-              date: m.date
-            };
-          }
-        });
-      });
-
-      const entries = Object.entries(records);
-      if (!entries.length) {
-        grid.innerHTML = `<div class="col-span-full py-4 text-center text-xs text-slate-500">Nog geen opgeslagen wedstrijden.</div>`;
-        return;
-      }
-
-      grid.innerHTML = entries.map(([gId, rec]) => {
-        const gDef = getGameDef(gId);
-        const p = state.players.find(x => x.id === rec.playerId);
-        return `
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex items-center gap-2.5">
-            ${renderGameArtwork(gId, 'w-10 h-10')}
-            <div class="min-w-0">
-              <div class="font-bold text-xs text-white truncate">${gDef.name}</div>
-              <div class="text-[11px] text-amber-300 font-extrabold font-mono">${rec.score} pnt</div>
-              <div class="text-[10px] text-slate-400 truncate">Door: <b>${p?.name || 'Onbekend'}</b></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderHistoryMatchesList() {
-      const list = document.getElementById('historyMatchesList');
-      if (!list) return;
-
-      if (!state.history || state.history.length === 0) {
-        list.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">Nog geen potjes opgeslagen in de historie.</div>`;
-        return;
-      }
-
-      list.innerHTML = state.history.map(m => {
-        const gDef = getGameDef(m.gameId);
-        const winnerNames = (m.winners || []).map(id => state.players.find(x => x.id === id)?.name).filter(Boolean).join(', ');
-        const dateStr = new Date(m.date || m.timestamp).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-
-        return `
-          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2 shadow-sm">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2 min-w-0">
-                ${renderGameArtwork(m.gameId, 'w-6 h-6')}
-                <span class="font-black text-sm text-white truncate">${gDef.name}</span>
-                <span class="text-[10px] text-slate-500">${dateStr}</span>
-              </div>
-              <span class="text-xs font-black text-amber-300">🏆 ${winnerNames || 'Gelijkspel'}</span>
-            </div>
-            
-            <div class="flex flex-wrap gap-2 text-xs pt-1">
-              ${(m.results || []).map(r => {
-                const p = state.players.find(x => x.id === r.playerId);
-                return `
-                  <span class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-[11px] font-semibold flex items-center gap-1">
-                    ${p ? renderMeepleSvg(p.color, 'w-3 h-3') : ''}
-                    <span>${p?.name || 'Speler'}:</span>
-                    <b class="text-white font-mono">${r.score}p</b>
-                  </span>
-                `;
-              }).join('')}
-            </div>
-
-            ${m.note ? `<p class="text-[11px] text-slate-400 italic bg-slate-900/60 p-1.5 rounded-lg border border-slate-800">"${m.note}"</p>` : ''}
-          </div>
-        `;
-      }).join('');
-    }
-
-    let eloChartInstance = null;
-
-    function renderEloTimelineChart() {
-      const canvas = document.getElementById('eloTimelineCanvas');
-      if (!canvas) return;
-
-      const actPlayers = getActivePlayers();
-      if (!actPlayers.length) return;
-
-      const labels = ['Start', ...(state.history || []).slice(-10).map((_, i) => '#' + (i + 1))];
-      const datasets = actPlayers.map(p => ({
-        label: p.name,
-        data: [1200, ...(state.history || []).slice(-10).map(() => p.elo || 1200)],
-        borderColor: p.color || '#6366f1',
-        backgroundColor: p.color || '#6366f1',
-        tension: 0.25,
-        borderWidth: 2
-      }));
-
-      if (eloChartInstance) eloChartInstance.destroy();
-      eloChartInstance = new Chart(canvas, {
-        type: 'line',
-        data: { labels, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { size: 9 } } },
-            y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: { size: 9 } } }
-          }
-        }
-      });
-    }
-
-    function clearAllHistoryConfirm() {
-      if (confirm('Wil je écht de complete speelhistorie wissen?')) {
-        state.history = [];
-        saveState();
-        renderHistoryView();
-        showToast('🧹 Historie gewist.');
-      }
-    }
-
-    function openPlayerRivalsModal(playerId) {
-      const p = state.players.find(x => x.id === playerId);
-      if (!p) return;
-
-      const rivals = {};
-      (state.history || []).forEach(m => {
-        if ((m.players || []).includes(playerId)) {
-          m.players.forEach(oId => {
-            if (oId !== playerId) {
-              if (!rivals[oId]) rivals[oId] = { played: 0, wonAgainst: 0, lostAgainst: 0 };
-              rivals[oId].played++;
-              if ((m.winners || []).includes(playerId)) rivals[oId].wonAgainst++;
-              else if ((m.winners || []).includes(oId)) rivals[oId].lostAgainst++;
-            }
-          });
-        }
-      });
-
-      const rivalsHtml = Object.entries(rivals).map(([oId, stat]) => {
-        const opp = state.players.find(x => x.id === oId);
-        return `
-          <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between text-xs">
-            <div class="flex items-center gap-2">
-              ${opp ? renderMeepleSvg(opp.color, 'w-4 h-4') : ''}
-              <span class="font-bold text-white">${opp?.name || 'Speler'}</span>
-            </div>
-            <div class="text-right">
-              <span class="font-bold text-emerald-400">${stat.wonAgainst}W</span> - <span class="font-bold text-rose-400">${stat.lostAgainst}V</span>
-              <span class="text-[10px] text-slate-500 block">(${stat.played} samen)</span>
-            </div>
-          </div>
-        `;
-      }).join('') || `<div class="text-xs text-slate-500 py-3 text-center">Nog geen onderlinge duels gespeeld.</div>`;
-
-      const modalHtml = `
-        <div id="playerRivalsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-              <div class="flex items-center gap-2">
-                ${renderMeepleSvg(p.color, 'w-5 h-5')}
-                <h3 class="font-black text-sm text-white">${p.name} - Balans</h3>
-              </div>
-              <button type="button" onclick="document.getElementById('playerRivalsModal').remove()" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            <div class="space-y-2">
-              <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Onderlinge Duels:</div>
-              ${rivalsHtml}
-            </div>
-            <button type="button" onclick="document.getElementById('playerRivalsModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">Sluiten</button>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-
-       // =========================================================================
-    // 13. STATISTIEKEN, ELO, HALL OF FAME & PLAAGTROFEEËN
+        // =========================================================================
+    // 12. HISTORIE, STATISTIEKEN & PLAAGTROFEEËN
     // =========================================================================
     function getPlaagTrofeeData() {
       const counts = {};
@@ -5470,7 +5180,6 @@
       const container = document.getElementById('statsScreenContainer');
       if (!container) return;
 
-      // 1. Bereken overwinningen en statistieken
       const playerStats = state.players.map(p => {
         const matches = (state.history || []).filter(h => h.scores && h.scores.some(s => s.playerId === p.id));
         const wins = (state.history || []).filter(h => {
@@ -5604,7 +5313,6 @@
       `;
     }
 
-    // Automatische toekenning van plaagbeker bij opslaan potje
     function recordMatchFinish(gameId, scores) {
       if (!scores || scores.length < 2) return;
 
@@ -5612,13 +5320,11 @@
       const winner = sorted[0];
       const loser = sorted[sorted.length - 1];
 
-      // Winnaar krijgt toernooizege of Elo boost
       const winPl = state.players.find(p => p.id === winner.playerId);
       if (winPl) {
         winPl.elo = (winPl.elo || 1200) + 16;
       }
 
-      // Verliezer krijgt aftrek en de Houten Lepel geturfd
       const losePl = state.players.find(p => p.id === loser.playerId);
       if (losePl) {
         losePl.elo = Math.max(800, (losePl.elo || 1200) - 14);
@@ -5640,150 +5346,307 @@
       showToast(`🏆 Potje verwerkt! 🥄 Houten lepel voor ${losePl?.name || 'de hekkensluiter'}!`);
     }
 
+        // =========================================================================
+    // 13. WIE BEGINT? (FINGER-PICKER, RANDOM & TAFEL-CHALLENGES)
     // =========================================================================
-    // 14. EIGEN SPEL TOEVOEGEN & SNEL WINNAAR
-    // =========================================================================
-    function openCustomGameModal() {
-      const modalHtml = `
-        <div id="customGameModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-              <h3 class="font-bold text-sm text-white">Nieuw Spel Toevoegen</h3>
-              <button type="button" onclick="document.getElementById('customGameModal').remove()" class="text-slate-400 hover:text-white">✕</button>
-            </div>
-            
-            <div class="space-y-3 text-xs">
-              <div>
-                <label class="block text-slate-400 font-semibold mb-1">Spelnaam:</label>
-                <input type="text" id="custGameName" placeholder="bijv. Regenboog Duel" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
-              </div>
-              <div>
-                <label class="block text-slate-400 font-semibold mb-1">Ondertitel / Type:</label>
-                <input type="text" id="custGameSub" placeholder="bijv. Kaartspel met rondetelling" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
-              </div>
-              <div class="grid grid-cols-2 gap-2">
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1">Type Spel:</label>
-                  <select id="custGameType" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-white font-bold">
-                    <option value="rounds">Rondetelling</option>
-                    <option value="carcassonne">Live Score (+/-)</option>
-                    <option value="categories">Categorieën</option>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-slate-400 font-semibold mb-1">Winregel:</label>
-                  <select id="custGameWinRule" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-white font-bold">
-                    <option value="high">Hoogste wint</option>
-                    <option value="low">Laagste wint</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+    const START_CHALLENGES = [
+      // Spelnaam, doos & letter-uitdagingen
+      "Wie iets aan heeft dat begint met de eerste letter van het spel dat jullie nu spelen!",
+      "Wie als eerste een kledingstuk of accessoire aanwijst met dezelfde kleur als de speldoos!",
+      "Degene die als eerste een voorwerp in de kamer noemt dat rijmt op de titel van het spel!",
+      "Degene die het eerst een woord van 5 letters kan spellen met alleen de letters uit de naam van het spel!",
+      "Degene die als eerste een voorwerp aanwijst dat begint met de tweede letter van het spel!",
+      "Wie als eerste een ander bordspel noemt dat begint met dezelfde letter als dit spel!",
+      "Wie het snelst een zin van 3 woorden maakt waarbij elk woord begint met de beginletter van het spel!",
+      "Wie als eerste een etenswaar noemt dat begint met de eerste letter van het spel!",
+      "Degene die als eerste een dier noemt dat begint met de laatste letter van het spel!",
+      "Wie het snelst een meisjesnaam én een jongensnaam noemt die beide beginnen met de beginletter van het spel!",
+      "Degene die als eerste een land of stad noemt die begint met de beginletter van het spel!",
+      "Wie als eerste een woord van minstens 4 letters vormt met letters die fysiek op de voorkant van de doos staan!",
+      "Degene die als eerste drie voorwerpen in de kamer aanwijst die allemaal beginnen met dezelfde letter als het spel!",
+      "Wie het snelst een beroemd persoon of stripfiguur noemt met dezelfde initialen als het spel!",
+      "Degene die als eerste een automerk noemt dat begint met de eerste letter van het spel!",
+      "Degene die als eerste een muziekinstrument noemt dat begint met de laatste letter van het spel!",
 
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-              <button type="button" onclick="document.getElementById('customGameModal').remove()" class="px-3 py-1.5 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs btn-3d">Annuleren</button>
-              <button type="button" onclick="saveNewCustomGame()" class="px-4 py-1.5 rounded-xl bg-indigo-600 text-white font-extrabold text-xs shadow btn-3d">Toevoegen</button>
+      // Fysieke reflexen & tafel-gekte
+      "Wie als eerste met beide ellebogen tegelijk de tafel aanraakt!",
+      "Wie als eerste met zijn wijsvinger het puntje van zijn neus aanraakt!",
+      "Degene die als eerste met beide handen tegelijk zijn linkerknie vastpakt!",
+      "Wie het snelst een 'duim omhoog' geeft met zijn niet-dominante hand!",
+      "Degene die als eerste met beide wijsvingers tegelijk zijn eigen wangen induwt!",
+      "Degene die als eerste met één vinger een rondje draait op de tafel!",
+      "Degene die als eerste met de knokkels van beide handen op de tafel klopt!",
+      "Wie als eerste met zijn duim en pink van dezelfde hand de tafel raakt!",
+      "Degene die als eerste met beide handen tegelijk zijn eigen oren vastpakt!",
+      "Wie als eerste met de vingertoppen van beide handen tegelijk de rand van de tafel trommelt!",
+      "Degene die als eerste een denkbeeldige bril maakt met zijn vingers voor zijn ogen!",
+      "Wie het snelst met zijn vlakke hand zachtjes op zijn borst klopt (gorilla-stijl)!",
+      "Degene die als eerste zijn tong uitsteekt naar het midden van de tafel!",
+      "Wie als eerste met zijn kin zijn borst aanraakt en 'bingo' roept!",
+      "Degene die als eerste met beide handen tegelijk zijn eigen schouders kruislings vastpakt!",
+      "Wie het snelst een vuist maakt met zijn ene hand en een 'open hand' toont met de andere!",
+      "Degene die als eerste met zijn wijsvingers tegelijk zijn wenkbrauwen aanraakt!",
+      "Wie als eerste met beide duimen tegelijk naar beneden wijst op tafel!",
+      "Wie als eerste een 'high five' geeft aan de spelers links én rechts van zich!",
+      "Degene die als eerste een denkbeeldige theekop vasthoudt met de pink deftig omhoog!",
+      "Wie het snelst met platte lippen (zonder tanden te laten zien) 'ik ga winnen' kan zeggen!",
+      "Degene die als eerste met beide handen een hartje vormt naar het midden van het speelbord!",
+      "Wie als eerste een denkbeeldige cowboy-hoed van zijn hoofd tilt en knikt naar de overkant!",
+      "Degene die als eerste een seconde doodstil 'bevriest' als een standbeeld!",
+      "Degene die als eerste stilstaat op één been met zijn ogen dicht!",
+      "Degene die het langst zijn ogen kan dichthouden zonder te knipperen!",
+      "Wie de langste adem heeft (tegelijk 'aaaah' zeggen, wie stopt als laatste)!",
+
+      // Duels & snelle spelletjes
+      "Wie het snelst een 'steen-papier-schaar' duel wint van zijn buurman!",
+      "Wie het snelst een duimworstel-gevecht wint van de speler tegenover zich!",
+      "Degene die als eerste een rijmwoord bedenkt op de naam van de speler links van hem!",
+
+      // Behendigheid & spelmateriaal
+      "Wie als eerste een voorwerp aanraakt in de kleur van zijn/haar meeple!",
+      "Wie als eerste een dobbelsteen of fiche op zijn neus kan laten balanceren!",
+      "Wie als eerste met één hand een torentje van 3 meeples of fiches bouwt!",
+      "Wie als eerste een denkbeeldige dobbelsteen gooit, vangt en doet alsof hij een 6 gooit!",
+
+      // Observaties & kleding aan tafel
+      "Degene met de meeste ritsen of knopen op zijn/haar kleding!",
+      "Degene met het laagste batterijpercentage op zijn telefoon!",
+      "Degene wiens glas of beker op dit moment het leegst is!",
+      "Wie de meeste sleutels aan zijn sleutelbos heeft hangen!",
+      "Wie de kleinste handomtrek heeft (handen tegen elkaar houden om te meten)!"
+    ];
+
+    let activeTouches = new Map();
+    let fingerPickerTimer = null;
+    let fingerPickerResolved = false;
+
+    function openWhoStartsMenu() {
+      let modal = document.getElementById('whoStartsMenuModal');
+      if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+          <div id="whoStartsMenuModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-amber-500/40 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h3 class="font-bold text-sm text-white">🎲 Wie Begint?</h3>
+                <button type="button" onclick="closeWhoStartsMenu()" class="text-slate-400 hover:text-white">✕</button>
+              </div>
+
+              <div class="space-y-2.5">
+                <button type="button" onclick="closeWhoStartsMenu(); openFingerPickerModal();" class="w-full p-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow btn-3d">
+                  <span>🖐️</span>
+                  <span>Vinger-Kiezer (Chwazi)</span>
+                </button>
+
+                <button type="button" onclick="closeWhoStartsMenu(); runQuickRandomStarter();" class="w-full p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-extrabold text-xs flex items-center justify-center gap-2 shadow btn-3d">
+                  <span>⚡</span>
+                  <span>Snelle Willekeurige Loting</span>
+                </button>
+
+                <button type="button" onclick="closeWhoStartsMenu(); showTableChallenge();" class="w-full p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-emerald-300 font-extrabold text-xs flex items-center justify-center gap-2 shadow btn-3d">
+                  <span>📜</span>
+                  <span>Tafel Challenge (55x)</span>
+                </button>
+              </div>
+
+              <button type="button" onclick="closeWhoStartsMenu()" class="w-full py-2 rounded-xl bg-slate-950 text-slate-400 text-xs font-bold btn-3d">Annuleren</button>
             </div>
           </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHtml);
+        `);
+      } else {
+        modal.classList.remove('hidden');
+      }
     }
 
-    function saveNewCustomGame() {
-      const name = document.getElementById('custGameName')?.value.trim();
-      const sub = document.getElementById('custGameSub')?.value.trim();
-      const type = document.getElementById('custGameType')?.value || 'rounds';
-      const lowWins = document.getElementById('custGameWinRule')?.value === 'low';
+    function closeWhoStartsMenu() {
+      const modal = document.getElementById('whoStartsMenuModal');
+      if (modal) modal.remove();
+    }
 
-      if (!name) {
-        showToast('⚠️ Vul een spelnaam in!');
+    function runQuickRandomStarter() {
+      const act = getActivePlayers();
+      if (!act.length) {
+        showToast('⚠️ Geen actieve spelers aan tafel.');
         return;
       }
-
-      const id = 'custom_' + Date.now();
-      const newGame = {
-        id,
-        name,
-        subtitle: sub || 'Eigen toegevoegd spel',
-        category: 'board',
-        type,
-        lowestWins: lowWins,
-        isCustom: true,
-        minP: 2,
-        maxP: 8
-      };
-
-      if (!Array.isArray(state.customGames)) state.customGames = [];
-      state.customGames.push(newGame);
-      saveState();
-      document.getElementById('customGameModal')?.remove();
-      renderGamePicker();
-      showToast(`🎮 Spel "${name}" toegevoegd!`);
-    }
-
-    function deleteCustomGame(gameId, ev) {
-      if (ev) ev.stopPropagation();
-      const g = (state.customGames || []).find(x => x.id === gameId);
-      if (!confirm(`Wil je het spel "${g?.name}" definitief verwijderen?`)) return;
-      state.customGames = (state.customGames || []).filter(x => x.id !== gameId);
-      saveState();
-      renderGamePicker();
-    }
-
-    function openQuickWinModal(preselectedGameId = null) {
-      const act = getActivePlayers();
-      const game = getGameDef(preselectedGameId || state.activeGameId);
-
+      triggerHaptic(30);
+      SoundFX.dice();
+      const chosen = act[Math.floor(Math.random() * act.length)];
+      
       const modalHtml = `
-        <div id="quickWinModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="bg-slate-900 border border-amber-500/50 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
-            <h3 class="font-black text-sm text-white">⚡ Snelle Winnaar Registreren</h3>
-            <p class="text-xs text-slate-400">Kies wie "${game.name}" zojuist heeft gewonnen:</p>
-            
-            <div class="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto pr-1">
-              ${act.map(p => `
-                <button type="button" onclick="recordQuickWinner('${game.id}', '${p.id}')" class="p-2.5 rounded-xl bg-slate-950 hover:bg-amber-500/20 border border-slate-800 hover:border-amber-400 text-left flex items-center justify-between transition btn-3d">
-                  <div class="flex items-center gap-2">
-                    ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                    <span class="font-bold text-xs text-white">${p.name}</span>
-                  </div>
-                  <span class="text-xs text-amber-400">👑 Wint!</span>
-                </button>
-              `).join('')}
-            </div>
-
-            <button type="button" onclick="document.getElementById('quickWinModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">Sluiten</button>
+        <div id="quickStarterModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-amber-500/50 rounded-3xl max-w-xs w-full p-6 text-center space-y-4 shadow-2xl animate-bounce">
+            <span class="text-4xl">👑</span>
+            <div class="text-xs text-amber-400 font-bold uppercase tracking-wider">Startspeler is:</div>
+            <div class="text-2xl font-black text-white" style="color: ${chosen.color || '#fff'}">${chosen.name}</div>
+            <p class="text-[11px] text-slate-400">Jij mag de eerste zet of worp doen!</p>
+            <button type="button" onclick="document.getElementById('quickStarterModal').remove()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow btn-3d">Start het spel!</button>
           </div>
         </div>
       `;
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-    function recordQuickWinner(gameId, winnerPlayerId) {
-      const act = getActivePlayers();
-      const match = {
-        id: 'm_' + Date.now(),
-        gameId,
-        date: new Date().toISOString(),
-        timestamp: Date.now(),
-        players: act.map(p => p.id),
-        winners: [winnerPlayerId],
-        results: act.map(p => ({ playerId: p.id, score: p.id === winnerPlayerId ? 1 : 0 }))
-      };
+    function showTableChallenge() {
+      triggerHaptic(20);
+      SoundFX.click();
+      const challenge = START_CHALLENGES[Math.floor(Math.random() * START_CHALLENGES.length)];
 
-      if (!Array.isArray(state.history)) state.history = [];
-      state.history.unshift(match);
+      const modalHtml = `
+        <div id="tableChallengeModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-emerald-500/50 rounded-3xl max-w-xs w-full p-6 text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-2xl mx-auto">
+              📜
+            </div>
+            <div class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Start Challenge</div>
+            <div class="p-3.5 bg-slate-950 border border-slate-800 rounded-2xl text-sm font-black text-white leading-relaxed">
+              "${challenge}"
+            </div>
+            <div class="flex gap-2">
+              <button type="button" onclick="document.getElementById('tableChallengeModal').remove(); showTableChallenge();" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-200 font-bold text-xs btn-3d">Andere</button>
+              <button type="button" onclick="document.getElementById('tableChallengeModal').remove();" class="flex-1 py-2 rounded-xl bg-emerald-600 text-white font-extrabold text-xs shadow btn-3d">Begrepen!</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
 
-      updateEloRatingsForMatch(act.map(p => p.id), [winnerPlayerId]);
-      saveState();
+    function openFingerPickerModal() {
+      activeTouches.clear();
+      fingerPickerResolved = false;
 
-      document.getElementById('quickWinModal')?.remove();
-      triggerConfetti();
+      const modalHtml = `
+        <div id="fingerPickerCanvasModal" class="fixed inset-0 z-50 bg-slate-950 select-none overflow-hidden touch-none flex flex-col justify-between p-6">
+          <div class="text-center pointer-events-none mt-2">
+            <h2 class="text-lg font-black text-white tracking-wide">Plaats elk een vinger op het scherm</h2>
+            <p id="fingerPickerSubtext" class="text-xs text-slate-400 mt-1">Houd minimaal 2 vingers vast...</p>
+          </div>
+
+          <div id="fingerCirclesContainer" class="absolute inset-0 pointer-events-none"></div>
+
+          <div class="flex justify-center pointer-events-auto mb-2">
+            <button type="button" onclick="closeFingerPickerModal()" class="px-5 py-2.5 rounded-2xl bg-slate-900/90 border border-slate-800 text-slate-300 font-bold text-xs btn-3d">Sluiten</button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+      const modal = document.getElementById('fingerPickerCanvasModal');
+      modal.addEventListener('touchstart', handleFingerTouchStart, { passive: false });
+      modal.addEventListener('touchmove', handleFingerTouchMove, { passive: false });
+      modal.addEventListener('touchend', handleFingerTouchEnd, { passive: false });
+      modal.addEventListener('touchcancel', handleFingerTouchEnd, { passive: false });
+    }
+
+    function closeFingerPickerModal() {
+      if (fingerPickerTimer) clearTimeout(fingerPickerTimer);
+      activeTouches.clear();
+      document.getElementById('fingerPickerCanvasModal')?.remove();
+    }
+
+    function handleFingerTouchStart(e) {
+      e.preventDefault();
+      if (fingerPickerResolved) return;
+
+      const colors = ['#ec4899', '#6366f1', '#10b981', '#f59e0b', '#06b6d4', '#8b5cf6', '#ef4444'];
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (!activeTouches.has(t.identifier)) {
+          const color = colors[activeTouches.size % colors.length];
+          activeTouches.set(t.identifier, { x: t.clientX, y: t.clientY, color: color });
+          triggerHaptic(15);
+        }
+      }
+      renderFingerCircles();
+      evaluateFingerCount();
+    }
+
+    function handleFingerTouchMove(e) {
+      e.preventDefault();
+      if (fingerPickerResolved) return;
+
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        const t = e.changedTouches[i];
+        if (activeTouches.has(t.identifier)) {
+          const item = activeTouches.get(t.identifier);
+          item.x = t.clientX;
+          item.y = t.clientY;
+        }
+      }
+      renderFingerCircles();
+    }
+
+    function handleFingerTouchEnd(e) {
+      e.preventDefault();
+      for (let i = 0; i < e.changedTouches.length; i++) {
+        activeTouches.delete(e.changedTouches[i].identifier);
+      }
+      if (fingerPickerResolved) {
+        if (activeTouches.size === 0) {
+          setTimeout(closeFingerPickerModal, 400);
+        }
+        return;
+      }
+      renderFingerCircles();
+      evaluateFingerCount();
+    }
+
+    function renderFingerCircles() {
+      const container = document.getElementById('fingerCirclesContainer');
+      if (!container) return;
+
+      let html = '';
+      activeTouches.forEach((val, id) => {
+        html += `
+          <div class="absolute w-24 h-24 -ml-12 -mt-12 rounded-full border-4 shadow-2xl flex items-center justify-center animate-pulse" 
+               style="left: ${val.x}px; top: ${val.y}px; border-color: ${val.color}; background-color: ${val.color}33;">
+            <div class="w-10 h-10 rounded-full" style="background-color: ${val.color};"></div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function evaluateFingerCount() {
+      const sub = document.getElementById('fingerPickerSubtext');
+      if (fingerPickerTimer) {
+        clearTimeout(fingerPickerTimer);
+        fingerPickerTimer = null;
+      }
+
+      if (activeTouches.size >= 2) {
+        if (sub) sub.textContent = 'Even vasthouden... Kiezen over 2 seconden!';
+        fingerPickerTimer = setTimeout(() => {
+          resolveFingerPicker();
+        }, 2000);
+      } else {
+        if (sub) sub.textContent = activeTouches.size === 1 ? 'Nog 1 vinger erbij...' : 'Houd minimaal 2 vingers vast...';
+      }
+    }
+
+    function resolveFingerPicker() {
+      if (activeTouches.size < 2) return;
+      fingerPickerResolved = true;
+
+      const touchIds = Array.from(activeTouches.keys());
+      const winnerId = touchIds[Math.floor(Math.random() * touchIds.length)];
+      const winner = activeTouches.get(winnerId);
+
+      triggerHaptic(60);
       SoundFX.fanfare();
-      const p = state.players.find(x => x.id === winnerPlayerId);
-      showToast(`🏆 Overwinning voor ${p?.name || 'Speler'} opgeslagen!`);
-      switchMainView('history');
+
+      const container = document.getElementById('fingerCirclesContainer');
+      const sub = document.getElementById('fingerPickerSubtext');
+      if (sub) sub.textContent = '🎉 We hebben een startspeler!';
+
+      if (container) {
+        container.innerHTML = `
+          <div class="absolute w-36 h-36 -ml-18 -mt-18 rounded-full border-8 border-white shadow-[0_0_50px_rgba(255,255,255,0.9)] flex items-center justify-center animate-bounce" 
+               style="left: ${winner.x}px; top: ${winner.y}px; background-color: ${winner.color};">
+            <span class="text-4xl">👑</span>
+          </div>
+        `;
+      }
     }
 
     // =========================================================================
