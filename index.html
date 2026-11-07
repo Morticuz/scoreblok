@@ -6050,6 +6050,7 @@
     }
 
     // =========================================================================
+        // =========================================================================
     // 15. LIVE WEBRTC SYNC ENGINE (HOST & GAST)
     // =========================================================================
     let peerInstance = null;
@@ -6102,6 +6103,9 @@
 
     function startHostPeerSession() {
       try {
+        if (peerInstance) {
+          try { peerInstance.destroy(); } catch(e) {}
+        }
         peerInstance = new Peer();
         peerInstance.on('open', id => {
           const qrBox = document.getElementById('liveHostQrDisplay');
@@ -6122,27 +6126,37 @@
           broadcastLiveState();
           showToast('👋 Medespeler verbonden!');
         });
+
+        peerInstance.on('error', err => {
+          showToast('⚠️ Host fout: ' + err.type);
+        });
       } catch (e) {
         showToast('⚠️ Kon live verbinding niet starten.');
       }
     }
 
-    function connectToHostPeer() {
-      const code = document.getElementById('joinPeerCodeInput')?.value.trim();
-      if (!code) return;
+    function connectToHostPeer(directCode = null) {
+      const code = (directCode || document.getElementById('joinPeerCodeInput')?.value || '').trim();
+      if (!code) {
+        showToast('⚠️ Geen geldige tafelcode ingevoerd.');
+        return;
+      }
 
-      if (peerInstance) peerInstance.destroy();
+      if (peerInstance) {
+        try { peerInstance.destroy(); } catch(e) {}
+      }
       peerInstance = new Peer();
 
       peerInstance.on('open', () => {
+        showToast('🔄 Verbinden met tafel...');
         const conn = peerInstance.connect(code, { reliable: true });
         conn.on('open', () => {
           peerConnections = [conn];
-          showToast('✅ Verbonden met de tafel!');
+          showToast('✅ Verbonden met de live tafel!');
           document.getElementById('liveRoomModal')?.classList.add('hidden');
         });
         conn.on('data', data => handleIncomingPeerData(data, conn));
-        conn.on('error', err => showToast('⚠️ Verbinding mislukt: ' + err));
+        conn.on('error', err => showToast('⚠️ Verbindingsfout: ' + err));
       });
 
       peerInstance.on('error', err => {
@@ -6202,6 +6216,7 @@
         renderScoreboard();
       }
     }
+
     // =========================================================================
     // 16. PODIUM MODAL, DEEL EINDSTAND ALS PLAATJE & SPELAVOND ENGINE
     // =========================================================================
@@ -7275,6 +7290,7 @@
     }
 
     // =========================================================================
+        // =========================================================================
     // 20. INITIALISATIE BIJ OPSTARTEN (DOMContentLoaded & OFFLINE PWA REGISTRATIE)
     // =========================================================================
     window.addEventListener('DOMContentLoaded', () => {
@@ -7293,7 +7309,7 @@
       loadState();
       applyAppTheme();
 
-      // 3. QR Data Import check
+      // 3. QR Data Import check (#data=...)
       if (window.location.hash.startsWith('#data=')) {
         try {
           const raw = window.location.hash.substring(6);
@@ -7310,21 +7326,19 @@
         } catch (e) {}
       }
 
-      // 4. P2P Host join check
+      // 4. P2P Host join check via gescande QR-code (?join=...)
       const urlParams = new URLSearchParams(window.location.search);
       const joinCode = urlParams.get('join');
       if (joinCode) {
         setTimeout(() => {
-          const inp = document.getElementById('joinPeerCodeInput');
-          if (inp) inp.value = joinCode;
-          connectToHostPeer();
-        }, 500);
+          connectToHostPeer(joinCode);
+        }, 600);
       }
 
       // 5. Startscherm renderen
       renderGamePicker();
     });
-  </script>
+
 
   <!-- MODALS CONTAINER EN NUMPAD PLACEHOLDER -->
   <div id="podiumModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
