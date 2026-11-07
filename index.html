@@ -2359,9 +2359,7 @@
       document.body.classList.remove('layout-landscape');
 
       const orientBtn = document.getElementById('layoutOrientBtn');
-      if (orientBtn) {
-        orientBtn.style.display = 'none';
-      }
+      if (orientBtn) orientBtn.style.display = 'none';
 
       const tBtn = document.getElementById('teamModeToggleBtn');
       if (tBtn) {
@@ -2478,12 +2476,12 @@
       banner.classList.add('hidden');
     }
 
-    // --- GROTE DUIDELIJKE INDICATOR: WAT HEB IK NODIG OM TE WINNEN? ---
+    // --- GROTE INDICATOR: WAT HEB IK NODIG OM TE WINNEN? ---
     function renderWinMarginBanner(def, standings) {
       const banner = document.getElementById('winMarginBanner');
       if (!banner) return;
 
-      if (!standings || standings.length < 2) {
+      if (!standings || standings.length < 2 || standings.every(p => p.score === 0)) {
         banner.classList.add('hidden');
         return;
       }
@@ -2492,12 +2490,6 @@
       const p2 = standings[1];
       const lowWins = isLowestWins(def.id);
       const limit = def.limit;
-
-      if (standings.every(p => p.score === 0)) {
-        banner.classList.add('hidden');
-        return;
-      }
-
       let html = '';
 
       if (limit && limit > 0) {
@@ -5550,10 +5542,15 @@
       `;
     }
 
-    // --- HOOFDMENU: KIES HOE JE DE STARTSPELERS BEPAALT ---
-    function openStartPlayerModal() {
+    // --- KEUZEMENU: 3 MANIEREN OM TE STARTEN ---
+    function openWhoStartsMenu() {
+      document.getElementById('startPlayerChoiceModal')?.remove();
+
       const act = getActivePlayers();
-      if (!act.length) return;
+      if (!act || act.length < 2) {
+        showToast('⚠️ Er moeten minstens 2 actieve spelers aan tafel zitten!');
+        return;
+      }
 
       const modalHtml = `
         <div id="startPlayerChoiceModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
@@ -5566,7 +5563,7 @@
               <button type="button" onclick="document.getElementById('startPlayerChoiceModal').remove()" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
 
-            <p class="text-xs text-slate-300">Kies een methode om de startspeler aan te wijzen:</p>
+            <p class="text-xs text-slate-300">Kies hoe jullie de startspeler bepalen:</p>
 
             <div class="space-y-2.5">
               <button type="button" onclick="document.getElementById('startPlayerChoiceModal').remove(); openFingerPickerModal();" class="w-full p-3.5 rounded-2xl bg-indigo-600/25 hover:bg-indigo-600/40 border border-indigo-500/50 text-left flex items-center gap-3 transition btn-3d">
@@ -5599,6 +5596,11 @@
         </div>
       `;
       document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    // Alias zodat ook eventuele oude code altijd dit menu opent
+    function openStartPlayerModal() {
+      openWhoStartsMenu();
     }
 
     // --- OPTIE 2: SNELLE WILLEKEURIGE LOTING ---
@@ -5637,7 +5639,7 @@
       SoundFX.speak(`${winner.name} mag beginnen!`);
     }
 
-    // --- OPTIE 3: SPELUITDAGING / TAFEL CHALLENGE ---
+    // --- OPTIE 3: TAFEL CHALLENGE ---
     function showTableChallengeModal() {
       const challenge = START_CHALLENGES[Math.floor(Math.random() * START_CHALLENGES.length)];
 
@@ -5659,7 +5661,7 @@
       SoundFX.point();
     }
 
-    // --- OPTIE 1: INTERACTIEVE VINGER-KIEZER (CHWAZI) ---
+    // --- OPTIE 1: INTERACTIEVE VINGER-KIEZER (CHWAZI MET ROYALE TOUCH-CIRKELS) ---
     let fingerCanvas = null;
     let fingerCtx = null;
     let activeTouchesMap = new Map();
