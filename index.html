@@ -2764,7 +2764,7 @@
     // MODULE 10 (DEEL A): SPELBLADEN (AZUL, WINGSPAN, KEER OP KEER, ROUNDS)
     // =========================================================================
 
-        // =========================================================================
+          // =========================================================================
     // MODULE 10 – SPEL 1: AZUL
     // =========================================================================
     let activeAzulTabPlayerId = null;
@@ -2934,6 +2934,8 @@
     }
 
     function openPatternLineColorPicker(playerId, lineIdx) {
+      document.getElementById('azulLineModal')?.remove();
+
       const colors = [
         { id: 'blue', name: 'Blauw' },
         { id: 'yellow', name: 'Geel' },
@@ -3055,7 +3057,7 @@
       showToast(`✅ Ronde ${gs.azulRound - 1} berekend & tegels doorgeschoven!`);
     }
 
-    // =========================================================================
+        // =========================================================================
     // MODULE 10 – SPEL 2: WINGSPAN
     // =========================================================================
     let activeWingspanTabPlayerId = null;
@@ -3143,6 +3145,7 @@
     }
 
     function openBirdSlotEditor(playerId, habId, slotIdx) {
+      document.getElementById('birdEditorModal')?.remove();
       const gs = ensureGameState('wingspan');
       const slot = gs.playerData[playerId].wingspanBoard[habId][slotIdx];
 
@@ -3157,19 +3160,19 @@
             <div class="space-y-3 text-xs">
               <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
                 <span class="text-amber-300 font-bold">Overwinningspunten:</span>
-                ${renderNumberStepper('birdPtsInp', slot.pts, `val => { slot.pts = Number(val); }`)}
+                ${renderNumberStepper('birdPtsInp', slot.pts, "val => updateModalStepperVal('birdPtsInp', val)")}
               </div>
               <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
                 <span class="text-slate-200 font-bold">🥚 Eieren op kaart:</span>
-                ${renderNumberStepper('birdEggsInp', slot.eggs, `val => { slot.eggs = Number(val); }`)}
+                ${renderNumberStepper('birdEggsInp', slot.eggs, "val => updateModalStepperVal('birdEggsInp', val)")}
               </div>
               <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
                 <span class="text-slate-200 font-bold">🃏 Weggestopte kaarten:</span>
-                ${renderNumberStepper('birdTuckedInp', slot.tucked, `val => { slot.tucked = Number(val); }`)}
+                ${renderNumberStepper('birdTuckedInp', slot.tucked, "val => updateModalStepperVal('birdTuckedInp', val)")}
               </div>
               <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
                 <span class="text-slate-200 font-bold">🍒 Opgeslagen voedsel:</span>
-                ${renderNumberStepper('birdFoodInp', slot.food, `val => { slot.food = Number(val); }`)}
+                ${renderNumberStepper('birdFoodInp', slot.food, "val => updateModalStepperVal('birdFoodInp', val)")}
               </div>
             </div>
 
@@ -3186,6 +3189,10 @@
     function saveBirdSlot(playerId, habId, slotIdx) {
       const gs = ensureGameState('wingspan');
       const slot = gs.playerData[playerId].wingspanBoard[habId][slotIdx];
+      slot.pts = Number(document.getElementById('birdPtsInp')?.value || 0);
+      slot.eggs = Number(document.getElementById('birdEggsInp')?.value || 0);
+      slot.tucked = Number(document.getElementById('birdTuckedInp')?.value || 0);
+      slot.food = Number(document.getElementById('birdFoodInp')?.value || 0);
       slot.active = true;
       triggerHaptic(20);
       SoundFX.point();
@@ -3204,7 +3211,7 @@
     }
 
 
-        // =========================================================================
+         // =========================================================================
     // MODULE 10 – SPEL 3: KEER OP KEER 1 & 2
     // =========================================================================
     function renderKokSheet(container, def) {
@@ -3325,8 +3332,8 @@
     }
 
 
-        // =========================================================================
-    // MODULE 10 – SPEL 4: ROUNDS & FLIP 7
+         // =========================================================================
+    // MODULE 10 – SPEL 4: ROUNDS & FLIP 7 (INCL. SCOREVERLOOPGRAFIEK)
     // =========================================================================
     function renderRoundsSheet(container, def) {
       const gs = ensureGameState(def.id);
@@ -3381,7 +3388,9 @@
         </div>`;
     }
 
-    function renderFlip7Sheet(container, def) { renderRoundsSheet(container, def); }
+    function renderFlip7Sheet(container, def) { 
+      renderRoundsSheet(container, def); 
+    }
 
     function addRoundNow() {
       pushUndoSnapshot();
@@ -3495,7 +3504,8 @@
       document.getElementById('roundGraphModal')?.classList.add('hidden');
     }
 
-        // =========================================================================
+
+         // =========================================================================
     // MODULE 10 – SPEL 5: QWIXX
     // =========================================================================
     function renderQwixxSheet(container) {
@@ -3547,7 +3557,7 @@
       renderScoreboard();
     }
 
-        // =========================================================================
+          // =========================================================================
     // MODULE 10 – SPEL 6: CLEVER
     // =========================================================================
     function renderCleverSheet(container) {
@@ -3605,7 +3615,7 @@
       if (key === 'greenCount') renderScoreboard();
     }
 
-    // =========================================================================
+        // =========================================================================
     // MODULE 10 – SPEL 7: CASCADIA
     // =========================================================================
     const CASCADIA_RULES = {
@@ -3673,6 +3683,8 @@
       const player = state.players.find(p => p.id === playerId);
       if (!player) return;
 
+      document.getElementById('cascCardModal')?.remove();
+
       const helperHtml = `
         <div id="cascCardModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
@@ -3692,7 +3704,7 @@
     function applyCascadiaPreset(playerId, animalKey, cardType) {
       const gs = ensureGameState('cascadia');
       const count = prompt(`Hoeveel ${animalKey}-sets of formaties heeft ${state.players.find(p => p.id === playerId)?.name}?`, '1');
-      if (count === null) return;
+      if (count === null || count.trim() === '') return;
       const num = Number(count || 0);
       const ruleTable = CASCADIA_RULES[animalKey]?.[cardType] || [];
       const score = ruleTable[Math.min(num, ruleTable.length - 1)] || (num * 3);
@@ -3704,9 +3716,8 @@
       showToast(`🌲 +${score} punten berekend!`);
     }
 
-
-        // =========================================================================
-    // MODULE 10 – SPEL 8: REGENWORMEN
+         // =========================================================================
+    // MODULE 10 – SPEL 8: REGENWORMEN (1 & DEEL 2 UITBREIDING)
     // =========================================================================
     function isRegenwormenExpActive(gs) {
       if (!gs || !gs.activeExpansions) return false;
@@ -3820,7 +3831,6 @@
       renderScoreboard();
     }
 
-
         // =========================================================================
     // MODULE 10 – SPEL 9: CATEGORIESPELLEN & 7 WONDERS (INCL. HITSTER)
     // =========================================================================
@@ -3916,7 +3926,10 @@
       renderCategoriesSheet(container, getGameDef('wonders7')); 
     }
 
-    // --- TICKET TO RIDE ---
+
+        // =========================================================================
+    // MODULE 10 – SPEL 10: TICKET TO RIDE
+    // =========================================================================
     function renderTtrSheet(container) {
       const gs = ensureGameState('ttr');
       const routeBtns = [
@@ -3982,7 +3995,8 @@
       renderScoreboard();
     }
 
-        // =========================================================================
+
+          // =========================================================================
     // MODULE 10 – SPEL 11: YAHTZEE
     // =========================================================================
     function renderYahtzeeSheet(container) {
@@ -4074,22 +4088,22 @@
               <div class="space-y-2 text-xs">
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
                   <span class="text-slate-300 font-bold flex items-center gap-1">🏠 Dorpen (1p, max 5)</span>
-                  ${renderNumberStepper(`catan_v_${p.id}`, ct.villages, `setCatanProp.bind(null, '${p.id}', 'villages')`)}
+                  ${renderNumberStepper(`catan_v_${p.id}`, ct.villages, `val => setCatanProp('${p.id}', 'villages', val)`)}
                 </div>
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
                   <span class="text-slate-300 font-bold flex items-center gap-1">🏰 Steden (2p, max 4)</span>
-                  ${renderNumberStepper(`catan_c_${p.id}`, ct.cities, `setCatanProp.bind(null, '${p.id}', 'cities')`)}
+                  ${renderNumberStepper(`catan_c_${p.id}`, ct.cities, `val => setCatanProp('${p.id}', 'cities', val)`)}
                 </div>
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
                   <span class="text-slate-300 font-bold flex items-center gap-1">📜 OP-Kaarten (1p)</span>
-                  ${renderNumberStepper(`catan_d_${p.id}`, ct.dev, `setCatanProp.bind(null, '${p.id}', 'dev')`)}
+                  ${renderNumberStepper(`catan_d_${p.id}`, ct.dev, `val => setCatanProp('${p.id}', 'dev', val)`)}
                 </div>
 
                 <div class="grid grid-cols-2 gap-1.5 pt-1">
-                  <button type="button" onclick="toggleCatanAward('${p.id}', 'longestRoad')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition btn-3d ${ct.longestRoad ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
+                  <button type="button" onclick="toggleCatanAward('${p.id}', 'longestRoad')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition btn-3d ${ct.longestRoad ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
                     🛣️ Route (+2)
                   </button>
-                  <button type="button" onclick="toggleCatanAward('${p.id}', 'largestArmy')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition btn-3d ${ct.largestArmy ? 'bg-rose-500/20 border-rose-400 text-rose-300' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
+                  <button type="button" onclick="toggleCatanAward('${p.id}', 'largestArmy')" class="p-2 rounded-xl border text-center font-bold text-[11px] transition btn-3d ${ct.largestArmy ? 'bg-rose-500/20 border-rose-400 text-rose-300 shadow' : 'bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700'}">
                     ⚔️ Ridder (+2)
                   </button>
                 </div>
@@ -4198,27 +4212,57 @@
     // =========================================================================
     function renderKoehandelSheet(container) {
       const gs = ensureGameState('koehandel');
-      container.innerHTML = getActivePlayers().map(p => {
+      const activePlayers = getActivePlayers();
+
+      const owners = {};
+      activePlayers.forEach(p => {
+        const sets = gs.playerData[p.id]?.koehandel?.sets || {};
+        Object.keys(sets).forEach(aId => {
+          if (sets[aId]) owners[aId] = p.name;
+        });
+      });
+
+      container.innerHTML = activePlayers.map(p => {
         const kh = gs.playerData[p.id].koehandel;
-        let setsCnt = 0;
-        KOEHANDEL_ANIMALS.forEach(a => { if (kh.sets[a.id]) setsCnt++; });
+        let setsCount = 0;
+        let baseSum = 0;
+        KOEHANDEL_ANIMALS.forEach(an => {
+          if (kh.sets && kh.sets[an.id]) {
+            setsCount++;
+            baseSum += an.val;
+          }
+        });
+        const totalScore = baseSum * Math.max(1, setsCount);
+
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-sm text-white">${p.name}</span>
-              <span class="text-xs font-extrabold text-emerald-400">${setsCnt} kwartetten • Totaal: ${calculatePlayerTotal('koehandel', p.id)}</span>
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2">
+              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-2 hover:opacity-80">
+                ${renderMeepleSvg(p.color, 'w-4 h-4')}
+                <span class="font-bold text-sm text-white">${p.name}</span>
+              </button>
+              <div class="text-right">
+                <span class="text-xs text-slate-400 mr-2">${setsCount} kwartet${setsCount === 1 ? '' : 'ten'} (${baseSum} × ${Math.max(1, setsCount)})</span>
+                <span class="text-sm font-black text-amber-300 font-mono">${totalScore} pnt</span>
+              </div>
             </div>
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
+
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
               ${KOEHANDEL_ANIMALS.map(an => {
-                const owned = !!kh.sets[an.id];
+                const on = !!(kh.sets && kh.sets[an.id]);
+                const takenByOther = !on && owners[an.id];
                 return `
-                  <button type="button" onclick="toggleKoehandelSet('${p.id}','${an.id}')" class="p-2 rounded-xl border text-left transition btn-3d ${owned ? 'bg-emerald-600 border-emerald-400 text-white shadow' : 'bg-slate-950 border-slate-800 text-slate-300'}">
-                    <div class="text-xs font-bold">${an.name}</div>
-                    <div class="text-[10px] opacity-80">${an.val} pnt</div>
-                  </button>`;
+                  <button type="button" onclick="toggleKoehandelSet('${p.id}', '${an.id}')"
+                    class="p-2 rounded-xl border text-center transition btn-3d ${on ? 'bg-amber-500 text-slate-950 border-amber-300 font-black shadow' : (takenByOther ? 'bg-slate-950/40 border-slate-900 text-slate-600 line-through opacity-60' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700')}">
+                    <div class="text-base">${an.icon}</div>
+                    <div class="text-xs font-bold truncate">${an.name}</div>
+                    <div class="text-[10px] font-mono opacity-90">${an.val} pnt</div>
+                  </button>
+                `;
               }).join('')}
             </div>
-          </div>`;
+          </div>
+        `;
       }).join('');
     }
 
@@ -4227,9 +4271,13 @@
       triggerHaptic(15);
       const gs = ensureGameState('koehandel');
       const cur = !!gs.playerData[playerId].koehandel.sets[animalId];
+
       state.players.forEach(p => {
-        if (gs.playerData[p.id]?.koehandel?.sets) gs.playerData[p.id].koehandel.sets[animalId] = false;
+        if (gs.playerData[p.id]?.koehandel?.sets) {
+          gs.playerData[p.id].koehandel.sets[animalId] = false;
+        }
       });
+
       gs.playerData[playerId].koehandel.sets[animalId] = !cur;
       SoundFX.click();
       saveState();
@@ -4237,176 +4285,146 @@
     }
 
         // =========================================================================
-    // MODULE 10 – SPEL 15: CARCASSONNE (INCL. TEGELTELLER & CALCULATOR)
+    // MODULE 10 – SPEL 15: CARCASSONNE
     // =========================================================================
-    function renderCarcaTileCounter(gs) {
-      if (gs.tilesLeft === undefined) {
-        let startTiles = 72;
-        if (gs.activeExpansions?.['⛪ Kathedralen & Herbergen']) startTiles += 18;
-        if (gs.activeExpansions?.['🍷 Kooplieden & Bouwmeesters']) startTiles += 24;
-        gs.tilesLeft = startTiles;
-      }
+    function renderCarcassonneSheet(container, def) {
+      const gs = ensureGameState('carcassonne');
+      const activePlayers = getActivePlayers();
 
-      return `
-        <div class="bg-slate-900 border border-amber-500/30 rounded-2xl p-3 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <span class="text-xl">🎴</span>
-            <div>
-              <div class="text-xs font-bold text-white">Tegels in Zak</div>
-              <div class="text-[10px] text-slate-400">Aftellen naar het eindspel</div>
-            </div>
-          </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="adjCarcaTiles(-1)" class="w-8 h-8 rounded-xl bg-slate-800 text-white font-black text-sm hover:bg-slate-700 btn-3d">-</button>
-            <span class="font-mono font-black text-base ${gs.tilesLeft <= 5 ? 'text-rose-400 animate-pulse' : 'text-amber-300'} w-10 text-center">${gs.tilesLeft}</span>
-            <button type="button" onclick="adjCarcaTiles(1)" class="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black text-sm hover:bg-indigo-500 btn-3d">+</button>
-          </div>
+      container.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          ${activePlayers.map(p => {
+            const curScore = Number(gs.playerData[p.id]?.liveScore || 0);
+            return `
+              <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3.5 shadow-md flex flex-col justify-between" style="border-top: 5px solid ${p.color || '#6366f1'};">
+                <div>
+                  <div class="flex items-center justify-between pb-2.5 border-b border-slate-800">
+                    <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-2 hover:opacity-80 transition">
+                      ${renderMeepleSvg(p.color, 'w-5 h-5')}
+                      <span class="font-black text-sm text-white">${p.name}</span>
+                    </button>
+                    <span class="text-2xl font-black font-mono text-amber-300">${curScore} <span class="text-xs font-bold text-slate-400">pnt</span></span>
+                  </div>
+
+                  <div class="pt-2 space-y-2">
+                    <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Snelle Punten Invoer:</div>
+                    <div class="grid grid-cols-2 gap-1.5 text-xs">
+                      <button type="button" onclick="addCarcassonneScore('${p.id}', 1, 'Wegtegel (+1)')" class="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold transition btn-3d">
+                        🛣️ Weg (+1)
+                      </button>
+                      <button type="button" onclick="addCarcassonneScore('${p.id}', 2, 'Stadstegel (+2)')" class="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-slate-200 font-bold transition btn-3d">
+                        🏰 Stad (+2)
+                      </button>
+                      <button type="button" onclick="addCarcassonneScore('${p.id}', 2, 'Schild (+2)')" class="p-2 rounded-xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-sky-300 font-bold transition btn-3d">
+                        🛡️ Schild (+2)
+                      </button>
+                      <button type="button" onclick="addCarcassonneScore('${p.id}', 9, 'Klooster compleet (+9)')" class="p-2 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-black transition btn-3d">
+                        ⛪ Klooster (+9)
+                      </button>
+                    </div>
+
+                    <div class="pt-1">
+                      <button type="button" onclick="openCarcassonneCustomAddModal('${p.id}')" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md transition btn-3d">
+                        📐 Projectberekening / Weide
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-xl p-2 mt-2">
+                  <span class="text-xs text-slate-400 font-semibold">Handmatige correctie:</span>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" onclick="addCarcassonneScore('${p.id}', -1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-sm btn-3d">-1</button>
+                    <button type="button" onclick="openScorePad('Totaalscore', '${p.name.replace(/'/g, "\\'")}', ${curScore}, val => setCarcassonneTotal('${p.id}', val))" class="px-2 py-1 rounded-lg bg-slate-800 text-indigo-300 text-xs font-bold btn-3d" title="Open Numpad">🔢</button>
+                    <button type="button" onclick="addCarcassonneScore('${p.id}', 1)" class="w-7 h-7 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-black text-sm btn-3d">+1</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       `;
     }
 
-    function adjCarcaTiles(delta) {
-      const gs = ensureGameState('carcassonne');
-      gs.tilesLeft = Math.max(0, (gs.tilesLeft || 72) + delta);
+    function addCarcassonneScore(playerId, delta, reason = '') {
+      pushUndoSnapshot();
       triggerHaptic(15);
+      const gs = ensureGameState('carcassonne');
+      const cur = Number(gs.playerData[playerId]?.liveScore || 0);
+      gs.playerData[playerId].liveScore = Math.max(0, cur + delta);
+      if (delta > 0) SoundFX.point();
+      else SoundFX.click();
+      saveState();
+      renderScoreboard();
+      if (reason) showToast(`🏰 ${reason}`);
+    }
+
+    function setCarcassonneTotal(playerId, totalVal) {
+      pushUndoSnapshot();
+      triggerHaptic(20);
+      const gs = ensureGameState('carcassonne');
+      gs.playerData[playerId].liveScore = Math.max(0, Number(totalVal || 0));
       SoundFX.click();
       saveState();
       renderScoreboard();
     }
 
-    function renderCarcassonneSheet(container, def) {
-      const gs = ensureGameState(def.id);
-      const isCarc = def.id === 'carcassonne';
-      const btns = [1, 2, 3, 5, 9, 10, -1];
-      const tileBar = isCarc ? renderCarcaTileCounter(gs) : '';
+    function openCarcassonneCustomAddModal(playerId) {
+      const p = state.players.find(x => x.id === playerId);
+      if (!p) return;
 
-      container.innerHTML = tileBar + `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">` + getActivePlayers().map(p => {
-        const pd = gs.playerData[p.id];
-        return `
-          <div id="carcaCard_${p.id}" class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 relative overflow-hidden player-card-glow" style="--card-glow-color: ${p.color || '#6366f1'}20;">
-            <div class="flex items-center justify-between">
-              <button type="button" onclick="openQuickColorModal('${p.id}')" class="flex items-center gap-1.5 hover:opacity-80">
-                ${renderMeepleSvg(p.color, 'w-4 h-4')}
-                <span class="font-bold text-sm text-white">${p.name}</span>
-              </button>
-              <div class="flex items-center gap-2">
-                ${isCarc ? `
-                  <button type="button" onclick="openCarcassonneCalcModal('${p.id}')" class="px-2.5 py-1 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition btn-3d">
-                    🏰 Calculator
-                  </button>
-                ` : ''}
-                <span id="carcaLiveScore_${p.id}" class="text-xl font-black text-indigo-400 font-mono transition-transform duration-200">${pd.liveScore || 0} pnt</span>
-              </div>
-            </div>
-            <div class="grid grid-cols-4 sm:grid-cols-7 gap-1.5">
-              ${btns.map(b => `
-                <button type="button" onclick="addLivePoints('${p.id}',${b}, event)" class="py-2.5 rounded-xl font-extrabold text-xs transition active:scale-95 btn-3d ${b < 0 ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30' : 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/30'}">${b > 0 ? '+' + b : b}</button>
-              `).join('')}
-            </div>
-            <div class="flex gap-2 pt-1">
-              <input type="number" id="customLive_${p.id}" placeholder="Vrije punten (+/-)" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs font-bold text-white placeholder-slate-600" />
-              <button type="button" onclick="openScorePad('Vrije Punten', '${p.name.replace(/'/g, "\\'")}', 0, val => addLivePoints('${p.id}', val))" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-indigo-300 text-xs font-bold btn-3d" title="Open Numpad">🔢</button>
-              <button type="button" onclick="addCustomLivePoints('${p.id}')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 btn-3d">+ Tel bij</button>
-            </div>
-          </div>`;
-      }).join('') + `</div>`;
-    }
-
-    function addLivePoints(playerId, delta, ev = null) {
-      sendActionToHost('add_live_points', {
-        gameId: state.activeGameId,
-        playerId: playerId,
-        delta: delta
-      });
-      triggerHaptic(20);
-      SoundFX.point();
-
-      const card = document.getElementById(`carcaCard_${playerId}`) || document.getElementById(`cardLeader_${playerId}`);
-      if (card) {
-        const badge = document.createElement('div');
-        badge.className = `floating-score-badge ${delta >= 0 ? 'text-emerald-400 text-xl' : 'text-rose-400 text-xl'}`;
-        badge.textContent = delta > 0 ? `+${delta}` : delta;
-        card.appendChild(badge);
-        setTimeout(() => badge.remove(), 750);
-      }
-
-      const numEl = document.getElementById(`carcaLiveScore_${playerId}`) || document.getElementById(`leaderScoreNum_${playerId}`);
-      if (numEl) {
-        numEl.classList.remove('animate-score-pop');
-        void numEl.offsetWidth;
-        numEl.classList.add('animate-score-pop');
-      }
-    }
-
-    function addCustomLivePoints(playerId) {
-      const inp = document.getElementById(`customLive_${playerId}`);
-      const val = Number(inp?.value || 0);
-      if (val !== 0) {
-        addLivePoints(playerId, val);
-        inp.value = '';
-      }
-    }
-
-    function openCarcassonneCalcModal(playerId) {
-      const player = state.players.find(p => p.id === playerId);
-      if (!player) return;
+      document.getElementById('carcCalcModal')?.remove();
 
       const modalHtml = `
-        <div id="carcaModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-              <div class="flex items-center gap-2">
-                ${renderMeepleSvg(player.color, 'w-4 h-4')}
-                <h3 class="font-black text-sm text-white">Carcassonne Calculator - ${player.name}</h3>
-              </div>
-              <button type="button" onclick="document.getElementById('carcaModal').remove()" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            
-            <div class="space-y-3 text-xs">
-              <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <span class="text-slate-300 font-bold">Stadstegels (× 2 pt):</span>
-                ${renderNumberStepper('cCityTiles', 0, 'val => { document.getElementById("cCityTiles").value = valOrEmpty(val); }')}
-              </div>
-              <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <span class="text-slate-300 font-bold">Schilden (× 2 pt):</span>
-                ${renderNumberStepper('cShields', 0, 'val => { document.getElementById("cShields").value = valOrEmpty(val); }')}
-              </div>
-              <div class="flex items-center justify-between bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                <span class="text-slate-300 font-bold">Boeren / Weides (× 3 pt):</span>
-                ${renderNumberStepper('cFarmland', 0, 'val => { document.getElementById("cFarmland").value = valOrEmpty(val); }')}
-              </div>
+        <div id="carcCalcModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <h3 class="font-black text-sm text-white">Project afronden: ${p.name}</h3>
+              <button type="button" onclick="document.getElementById('carcCalcModal').remove()" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
 
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-              <button type="button" onclick="document.getElementById('carcaModal').remove()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs btn-3d">Annuleren</button>
-              <button type="button" onclick="applyCarcaCalculation('${playerId}')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/30 btn-3d">+ Punten Toevoegen</button>
+            <div class="space-y-2 text-xs text-left">
+              <button type="button" onclick="promptCarcassonneCalc('${playerId}', 'city')" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500 text-slate-200 font-bold flex items-center justify-between btn-3d">
+                <span>🏰 Afgebouwde Stad</span>
+                <span class="text-[11px] text-slate-400">(Tegels × 2 + Schild × 2)</span>
+              </button>
+              <button type="button" onclick="promptCarcassonneCalc('${playerId}', 'road')" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500 text-slate-200 font-bold flex items-center justify-between btn-3d">
+                <span>🛣️ Afgebouwde Weg</span>
+                <span class="text-[11px] text-slate-400">(Tegels × 1)</span>
+              </button>
+              <button type="button" onclick="promptCarcassonneCalc('${playerId}', 'farm')" class="w-full p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-500/40 hover:bg-emerald-950/60 text-emerald-300 font-bold flex items-center justify-between btn-3d">
+                <span>🌾 Boeren / Weide</span>
+                <span class="text-[11px] text-emerald-400">(Steden × 3)</span>
+              </button>
             </div>
+            <button type="button" onclick="document.getElementById('carcCalcModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">Sluiten</button>
           </div>
         </div>
       `;
       document.body.insertAdjacentHTML('beforeend', modalHtml);
     }
 
-    function applyCarcaCalculation(playerId) {
-      const city = Number(document.getElementById('cCityTiles')?.value || 0);
-      const shields = Number(document.getElementById('cShields')?.value || 0);
-      const farms = Number(document.getElementById('cFarmland')?.value || 0);
-
-      const totalBonus = (city * 2) + (shields * 2) + (farms * 3);
-      if (totalBonus > 0) {
-        addLivePoints(playerId, totalBonus);
-        triggerHaptic(30);
-        SoundFX.fanfare();
-        showToast(`🏰 +${totalBonus} punten berekend!`);
+    function promptCarcassonneCalc(playerId, type) {
+      document.getElementById('carcCalcModal')?.remove();
+      if (type === 'city') {
+        const tiles = Number(prompt('Hoeveel tegels telt de stad?', '3') || 0);
+        const shields = Number(prompt('Hoeveel schilden in de stad?', '0') || 0);
+        const pts = (tiles * 2) + (shields * 2);
+        if (pts > 0) addCarcassonneScore(playerId, pts, `Stad compleet (+${pts}p)`);
+      } else if (type === 'road') {
+        const tiles = Number(prompt('Hoeveel tegels telt de weg?', '4') || 0);
+        if (tiles > 0) addCarcassonneScore(playerId, tiles, `Weg compleet (+${tiles}p)`);
+      } else if (type === 'farm') {
+        const cities = Number(prompt('Hoeveel afgebouwde steden grenzen aan deze weide?', '2') || 0);
+        const pts = cities * 3;
+        if (pts > 0) addCarcassonneScore(playerId, pts, `Weide gescoord (+${pts}p)`);
       }
-      document.getElementById('carcaModal')?.remove();
     }
 
-        // =========================================================================
-    // MODULE 10 – SPEL 16: DOOLHOF & PARIJS: DE LICHTSTAD
-    // =========================================================================
 
-    // --- DOOLHOF ---
+    // =========================================================================
+    // MODULE 10 – SPEL 16: DOOLHOF
+    // =========================================================================
     function renderDoolhofSheet(container) {
       const act = getActivePlayers();
       const gs = ensureGameState('doolhof');
@@ -4433,7 +4451,9 @@
       `;
     }
 
-    // --- PARIJS: DE LICHTSTAD (DYNAMISCHE GEBOUWENLIJST) ---
+    // =========================================================================
+    // MODULE 10 – SPEL 17: PARIJS: DE LICHTSTAD
+    // =========================================================================
     function renderParijsSheet(container) {
       const gs = ensureGameState('parijs');
 
@@ -4556,9 +4576,8 @@
       renderScoreboard();
     }
 
-
-        // =========================================================================
-    // MODULE 10 – SPEL 17: BEVERBENDE & BEVERCLAN
+    // =========================================================================
+    // MODULE 10 – SPEL 18: BEVERBENDE & BEVERCLAN
     // =========================================================================
     function renderBeverbendeSheet(container, def) {
       const gs = ensureGameState(def.id);
@@ -4687,7 +4706,6 @@
         roundObj[p.id] = sum;
       });
 
-      // Validatie afklopper: als iemand klopte maar niet strikt het minst heeft, krijgt diegene strafpunten conform spelregels
       if (gs.knockerPlayerId) {
         const knockerScore = roundObj[gs.knockerPlayerId];
         const hadStrictLowest = act.every(p => p.id === gs.knockerPlayerId || roundObj[p.id] > knockerScore);
@@ -4698,7 +4716,6 @@
 
       gs.rounds.push(roundObj);
 
-      // Reset kaarten voor de volgende ronde
       act.forEach(p => {
         gs.playerData[p.id].beverbendeCards = [0, 0, 0, 0];
       });
@@ -4711,9 +4728,8 @@
       showToast(`✅ Ronde ${gs.rounds.length} opgeslagen!`);
     }
 
-
-        // =========================================================================
-    // MODULE 10 – SPEL 18: SEA SALT & PAPER
+    // =========================================================================
+    // MODULE 10 – SPEL 19: SEA SALT & PAPER
     // =========================================================================
     function renderSeaSaltSheet(container, def) {
       const gs = ensureGameState(def.id);
@@ -4848,7 +4864,6 @@
 
       gs.rounds.push(roundObj);
 
-      // Reset huidige ronde-invoer
       act.forEach(p => {
         gs.playerData[p.id].seasaltCurrent = {
           duos: 0, shells: 0, octos: 0, penguins: 0, sailors: 0, mermaids: 0, colorCards: 0
@@ -4863,9 +4878,8 @@
       showToast(`✅ Ronde ${gs.rounds.length} opgeslagen!`);
     }
 
-
-        // =========================================================================
-    // MODULE 10 – SPEL 19: HARMONIES & MACHIAVELLI
+    // =========================================================================
+    // MODULE 10 – SPEL 20: HARMONIES, MACHIAVELLI & OVERIGE FINISHERS
     // =========================================================================
 
     // --- HARMONIES ---
@@ -4988,10 +5002,6 @@
       saveState();
       renderScoreboard();
     }
-
-        // =========================================================================
-    // MODULE 10 – SPEL 20: DORFROMANTIK, ARK NOVA & HEAT
-    // =========================================================================
 
     // --- DORFROMANTIK (COÖPERATIEF) ---
     function renderDorfromantikSheet(container) {
@@ -5171,7 +5181,6 @@
       if (!gs.playerData[playerId].heat) gs.playerData[playerId].heat = { pos: 1, pts: 0 };
       gs.playerData[playerId].heat.pos = p;
 
-      // Standaard Heat race-kampioenschapsscore per finishpositie
       const heatDefaultPoints = { 1: 9, 2: 6, 3: 4, 4: 3, 5: 2, 6: 1 };
       gs.playerData[playerId].heat.pts = heatDefaultPoints[p] || 0;
 
