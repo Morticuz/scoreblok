@@ -576,8 +576,8 @@
 
 
    <script>
-    // =========================================================================
-    // MODULE 1: AUDIO, HAPTICS & STATISCHE CONSTANTEN
+        // =========================================================================
+    // MODULE 1: AUDIO, HAPTICS, DOBBELSTEEN SOUNDS & STATISCHE CONSTANTEN
     // =========================================================================
     const SoundFX = {
       ctx: null,
@@ -612,6 +612,17 @@
       point() { this.beep(880, 'sine', 0.08, 0.12); },
       plus() { this.beep(750, 'sine', 0.06, 0.1); },
       minus() { this.beep(350, 'sine', 0.06, 0.1); },
+      diceRattle() {
+        [300, 450, 250, 400, 350].forEach((f, idx) => {
+          setTimeout(() => this.beep(f, 'square', 0.04, 0.06), idx * 45);
+        });
+      },
+      diceDrop() { this.beep(523.25, 'triangle', 0.12, 0.15); },
+      jackpot() {
+        [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((freq, idx) => {
+          setTimeout(() => this.beep(freq, 'triangle', 0.15, 0.18), idx * 80);
+        });
+      },
       fanfare() {
         [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
           setTimeout(() => this.beep(freq, 'triangle', 0.15, 0.15), idx * 90);
@@ -704,6 +715,7 @@
         </svg>
       `;
     }
+
 
        // =========================================================================
     // MODULE 2: SPELLEN CATALOGUS, ARTWORK & ICONS (INCL. REGEL CHEAT SHEETS)
@@ -8168,8 +8180,8 @@
       renderHistoryView();
     }
 
-    // =========================================================================
-    // MODULE 17: SNELLE ACTIES, DOBBELSTEEN & WINNAAR MODALS
+        // =========================================================================
+    // MODULE 17: SNELLE ACTIES, GEAVANCEERDE DOBBELSTEEN & WINNAAR MODALS
     // =========================================================================
     function openDiceRollerModal() {
       let modal = document.getElementById('diceRollerModal');
@@ -8181,28 +8193,69 @@
                 <h3 class="font-black text-sm text-white">🎲 Dobbelstenen Gooien</h3>
                 <button type="button" onclick="document.getElementById('diceRollerModal').remove()" class="text-slate-400 hover:text-white">✕</button>
               </div>
-              <div id="diceBox" class="flex justify-center gap-3 py-3">
+              <div id="diceBox" class="flex justify-center items-center gap-3 py-6 min-h-[90px]">
                 ${renderDieSvg(Math.floor(Math.random() * 6) + 1)}
                 ${renderDieSvg(Math.floor(Math.random() * 6) + 1)}
               </div>
-              <button type="button" onclick="rollTableDice()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs btn-3d shadow">
-                Gooi Opnieuw!
+              <div id="diceMsgBox" class="text-xs font-extrabold text-amber-300 h-5"></div>
+              <button type="button" onclick="rollTableDice()" id="rollDiceBtn" class="w-full py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs btn-3d shadow-lg shadow-indigo-600/30">
+                🎲 Gooi Dobbelstenen!
               </button>
             </div>
           </div>
         `);
       }
+      document.getElementById('diceRollerModal').classList.remove('hidden');
     }
 
     function rollTableDice() {
-      const d1 = Math.floor(Math.random() * 6) + 1;
-      const d2 = Math.floor(Math.random() * 6) + 1;
       const box = document.getElementById('diceBox');
-      if (box) {
-        box.innerHTML = `${renderDieSvg(d1)} ${renderDieSvg(d2)}`;
-        SoundFX.click();
-        triggerHaptic(20);
-      }
+      const msgBox = document.getElementById('diceMsgBox');
+      const btn = document.getElementById('rollDiceBtn');
+      if (!box) return;
+
+      if (btn) btn.disabled = true;
+      if (msgBox) msgBox.textContent = 'Rammelen in de beker...';
+      
+      SoundFX.diceRattle();
+      triggerHaptic([40, 60, 40, 80]);
+
+      let shakes = 0;
+      const rattleInterval = setInterval(() => {
+        shakes++;
+        const r1 = Math.floor(Math.random() * 6) + 1;
+        const r2 = Math.floor(Math.random() * 6) + 1;
+        box.innerHTML = `
+          <div class="transform -rotate-6 scale-95 transition-transform duration-75">${renderDieSvg(r1)}</div>
+          <div class="transform rotate-6 scale-95 transition-transform duration-75">${renderDieSvg(r2)}</div>
+        `;
+
+        if (shakes >= 8) {
+          clearInterval(rattleInterval);
+          const final1 = Math.floor(Math.random() * 6) + 1;
+          const final2 = Math.floor(Math.random() * 6) + 1;
+
+          box.innerHTML = `
+            <div class="transform scale-110 transition-transform duration-150">${renderDieSvg(final1)}</div>
+            <div class="transform scale-110 transition-transform duration-150">${renderDieSvg(final2)}</div>
+          `;
+
+          SoundFX.diceDrop();
+          triggerHaptic(50);
+          if (btn) btn.disabled = false;
+
+          const total = final1 + final2;
+          if (final1 === 6 && final2 === 6) {
+            if (msgBox) msgBox.textContent = '🎉 DUBBELE 6! JACKPOT! 🎉';
+            SoundFX.jackpot();
+            triggerConfetti();
+          } else if (final1 === final2) {
+            if (msgBox) msgBox.textContent = `🎯 Slag! Dubbele ${final1} (${total})!`;
+          } else {
+            if (msgBox) msgBox.textContent = `Totaal aantal ogen: ${total}`;
+          }
+        }
+      }, 90);
     }
 
     function openQuickWinModal(gameId = state.activeGameId) {
@@ -8239,6 +8292,7 @@
         openPodiumModal();
       }
     }
+
 
        // =========================================================================
     // MODULE 18: GROEPRECORDS, UNDO ACTIES & WAKE-LOCK
