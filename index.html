@@ -5123,17 +5123,33 @@
       document.getElementById('editPlayerModal')?.remove();
     }
 
-         // =========================================================================
-    // 12. HISTORIE, STATISTIEKEN & HALL OF FAME
+       // =========================================================================
+    // 12. HISTORIE, STATISTIEKEN & GRAFIEKEN
     // =========================================================================
+    let eloChartInstance = null;
+
     function renderHistoryView() {
+      populateHistoryFilter();
       renderChampionCupWidget();
       renderHallOfFame();
       renderGameRecords();
       renderHistoryMatchesList();
-      if (typeof renderEloTimelineChart === 'function') {
-        renderEloTimelineChart();
-      }
+      setTimeout(renderEloTimelineChart, 50);
+    }
+
+    function populateHistoryFilter() {
+      const select = document.getElementById('historyGameFilter');
+      if (!select) return;
+
+      const currentVal = select.value || 'all';
+      const playedGameIds = Array.from(new Set((state.history || []).map(m => m.gameId)));
+      
+      let html = '<option value="all">🎮 Alle Spellen</option>';
+      playedGameIds.forEach(id => {
+        const def = getGameDef(id);
+        html += `<option value="${id}" ${currentVal === id ? 'selected' : ''}>${def.name}</option>`;
+      });
+      select.innerHTML = html;
     }
 
     function renderChampionCupWidget() {
@@ -5149,7 +5165,7 @@
             <span class="text-3xl">🏆</span>
             <div>
               <div class="text-xs font-black text-amber-300 uppercase tracking-wider">Wisselbeker van de Tafel</div>
-              <div class="text-xs text-slate-400">Nog geen bekerhouder. Speel een potje om de trofee te claimen!</div>
+              <div class="text-xs text-slate-400">Speel een potje en sla hem op om de trofee te claimen!</div>
             </div>
           </div>
         `;
@@ -5159,7 +5175,7 @@
       widget.innerHTML = `
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-2xl shrink-0">
+            <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-2xl shrink-0">
               🏆
             </div>
             <div class="min-w-0">
@@ -5175,6 +5191,25 @@
           </span>
         </div>
       `;
+    }
+
+    function getPlaagTrofeeData() {
+      const counts = {};
+      state.players.forEach(p => { 
+        counts[p.id] = { id: p.id, name: p.name, color: p.color, count: p.loserCups || 0 }; 
+      });
+
+      (state.history || []).forEach(match => {
+        if (match.results && match.results.length > 1) {
+          const sorted = [...match.results].sort((a, b) => a.score - b.score);
+          const loser = sorted[0];
+          if (loser && counts[loser.playerId]) {
+            counts[loser.playerId].count++;
+          }
+        }
+      });
+
+      return Object.values(counts).filter(c => c.count > 0).sort((a, b) => b.count - a.count);
     }
 
     function renderHallOfFame() {
@@ -5200,7 +5235,6 @@
       const plaagList = getPlaagTrofeeData();
 
       list.innerHTML = `
-        <!-- Spelers Ranglijst -->
         <div class="space-y-1.5">
           ${stats.map((p, idx) => `
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex items-center justify-between gap-2 shadow-sm btn-3d">
@@ -5218,12 +5252,11 @@
           `).join('')}
         </div>
 
-        <!-- Houten Lepels / Plaagtrofeeën Widget -->
         ${plaagList.length > 0 ? `
-          <div class="mt-3 p-3 bg-rose-950/30 border border-rose-900/40 rounded-2xl space-y-2">
+          <div class="mt-3 p-3 bg-rose-950/25 border border-rose-900/40 rounded-2xl space-y-2">
             <div class="flex items-center justify-between text-xs font-black text-rose-400">
               <span class="flex items-center gap-1.5"><span>🥄</span> De Houten Lepel (Vaakst Laatste)</span>
-              <span class="text-[10px] text-slate-500 font-normal">Plaagklassement</span>
+              <span class="text-[10px] text-slate-500 font-normal">Plaagtrofeeën</span>
             </div>
             <div class="grid grid-cols-2 gap-1.5">
               ${plaagList.map(item => `
@@ -5241,51 +5274,106 @@
       `;
     }
 
+    function renderEloTimelineChart() {
+      const canvas = document.getElementById('eloTimelineCanvas');
+      if (!canvas || typeof Chart === 'undefined') return;
+
+      const matches = [...(state.history || [])].reverse();
+      const labels = ['Start', ...matches.map((_, i) => `#${i + 1}`)];
+
+      const datasets = state.players.map(p => {
+        let runningElo = 1200;
+        const data = [1200];
+
+        matches.forEach(m => {
+          if ((m.players || []).includes(p.id)) {
+            const isWinner = (m.winners || []).includes(p.id);
+            runningElo += isWinner ? 16 : -12;
+            if (runningElo < 800) runningElo = 800;
+          }
+          data.push(runningElo);
+        });
+
+        return {
+          label: p.name,
+          data: data,
+          borderColor: p.color || '#6366f1',
+          backgroundColor: (p.color || '#6366f1') + '20',
+          borderWidth: 2,
+          tension: 0.25,
+          pointRadius: 2.5
+        };
+      });
+
+      if (eloChartInstance) {
+        eloChartInstance.destroy();
+      }
+
+      eloChartInstance = new Chart(canvas, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, boxWidth: 10 }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(51, 65, 85, 0.2)' },
+              ticks: { color: '#64748b', font: { size: 9 } }
+            },
+            y: {
+              grid: { color: 'rgba(51, 65, 85, 0.2)' },
+              ticks: { color: '#64748b', font: { size: 9 } }
+            }
+          }
+        }
+      });
+    }
+
     function renderGameRecords() {
       const grid = document.getElementById('gameRecordsGrid');
       if (!grid) return;
 
-      const games = getAllGames();
       const records = {};
-
       (state.history || []).forEach(m => {
         (m.results || []).forEach(r => {
           if (!records[m.gameId] || r.score > records[m.gameId].score) {
             const p = state.players.find(x => x.id === r.playerId);
             records[m.gameId] = {
               score: r.score,
-              playerName: p ? p.name : 'Onbekend',
-              playerColor: p ? p.color : '#6366f1',
-              date: m.date
+              playerName: p ? p.name : 'Speler',
+              playerColor: p ? p.color : '#6366f1'
             };
           }
         });
       });
 
-      const playedGamesWithRecords = Object.keys(records);
-      if (!playedGamesWithRecords.length) {
-        grid.innerHTML = `<div class="col-span-full text-center py-4 text-xs text-slate-500">Nog geen all-time records geregistreerd.</div>`;
+      const keys = Object.keys(records);
+      if (!keys.length) {
+        grid.innerHTML = `<div class="col-span-full text-center py-3 text-xs text-slate-500">Nog geen spelrecords behaald.</div>`;
         return;
       }
 
-      grid.innerHTML = playedGamesWithRecords.map(gId => {
-        const gDef = getGameDef(gId);
-        const rec = records[gId];
+      grid.innerHTML = keys.map(gId => {
+        const def = getGameDef(gId);
+        const r = records[gId];
         return `
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
               ${renderGameArtwork(gId, 'w-8 h-8')}
               <div class="min-w-0">
-                <div class="font-bold text-xs text-white truncate">${gDef.name}</div>
+                <div class="font-bold text-xs text-white truncate">${def.name}</div>
                 <div class="text-[10px] text-slate-400 flex items-center gap-1 truncate">
-                  ${renderMeepleSvg(rec.playerColor, 'w-2.5 h-2.5')}
-                  <span>${rec.playerName}</span>
+                  ${renderMeepleSvg(r.playerColor, 'w-2.5 h-2.5')}
+                  <span>${r.playerName}</span>
                 </div>
               </div>
             </div>
-            <div class="text-right shrink-0">
-              <span class="text-sm font-black font-mono text-amber-300">${rec.score}p</span>
-            </div>
+            <span class="text-sm font-black font-mono text-amber-300 shrink-0">${r.score}p</span>
           </div>
         `;
       }).join('');
@@ -5297,12 +5385,12 @@
 
       const history = state.history || [];
       if (history.length === 0) {
-        container.innerHTML = `<div class="text-center py-6 text-xs text-slate-500">Nog geen potjes gespeeld en opgeslagen.</div>`;
+        container.innerHTML = `<div class="text-center py-5 text-xs text-slate-500">Nog geen potjes opgeslagen.</div>`;
         return;
       }
 
-      container.innerHTML = history.slice(0, 15).map((m, mIdx) => {
-        const gDef = getGameDef(m.gameId);
+      container.innerHTML = history.slice(0, 15).map((m, idx) => {
+        const def = getGameDef(m.gameId);
         const dateStr = m.date ? new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }) : '';
         const winnerNames = (m.winners || []).map(id => state.players.find(x => x.id === id)?.name).filter(Boolean).join(' & ');
 
@@ -5311,12 +5399,12 @@
             <div class="flex items-center justify-between text-xs">
               <div class="flex items-center gap-2 min-w-0">
                 ${renderGameArtwork(m.gameId, 'w-6 h-6')}
-                <span class="font-bold text-white truncate">${gDef.name}</span>
+                <span class="font-bold text-white truncate">${def.name}</span>
                 <span class="text-[10px] text-slate-500 font-mono">${dateStr}</span>
               </div>
               <div class="flex items-center gap-2">
-                <span class="text-amber-300 font-extrabold text-xs">🏆 ${winnerNames || 'Geen'}</span>
-                <button type="button" onclick="deleteHistoryMatch(${mIdx})" class="text-slate-600 hover:text-rose-400 text-xs px-1">✕</button>
+                <span class="text-amber-300 font-extrabold text-xs">🏆 ${winnerNames || 'Gelijkspel'}</span>
+                <button type="button" onclick="deleteHistoryMatch(${idx})" class="text-slate-600 hover:text-rose-400 text-xs px-1">✕</button>
               </div>
             </div>
             <div class="text-[11px] text-slate-400 flex gap-2 flex-wrap pt-1 border-t border-slate-900">
@@ -5350,9 +5438,21 @@
 
     function setStatsSortMode(mode) {
       state.statsSortMode = mode;
+      const bWins = document.getElementById('sortBtnWins');
+      const bPct = document.getElementById('sortBtnPct');
+      if (bWins && bPct) {
+        if (mode === 'wins') {
+          bWins.className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition btn-3d';
+          bPct.className = 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition btn-3d';
+        } else {
+          bPct.className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition btn-3d';
+          bWins.className = 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition btn-3d';
+        }
+      }
       saveState();
-      renderHistoryView();
+      renderHallOfFame();
     }
+
 
         // =========================================================================
     // 13. WIE BEGINT? (FINGER-PICKER, RANDOM & TAFEL-CHALLENGES)
