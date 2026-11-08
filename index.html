@@ -13,13 +13,12 @@
   <link rel="apple-touch-icon" href="./icon.png" />
   <link rel="manifest" href="./manifest.json" />
 
-  <!-- Tailwind CSS & Externe Libraries -->
+  <!-- Tailwind CSS & Externe CDN Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- Google Cast Web SDK voor Chromecast -->
+  <!-- Google Cast Web SDK -->
   <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
   <style>
@@ -75,7 +74,6 @@
       background-size: 24px 24px !important;
     }
 
-    /* TV & Spectator Mode Effecten */
     #viewSpectator {
       user-select: none;
     }
@@ -95,7 +93,6 @@
       }
     }
 
-    /* Zorgt dat horizontale lijstjes vrij kunnen swipen */
     .no-scrollbar {
       touch-action: pan-x pan-y;
       -webkit-overflow-scrolling: touch;
@@ -111,6 +108,7 @@
       cursor: pointer;
     }
 
+    /* Azul Tegel Styling */
     .azul-blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); border-color: #93c5fd; }
     .azul-yellow { background: linear-gradient(135deg, #eab308, #ca8a04); border-color: #fef08a; }
     .azul-red { background: linear-gradient(135deg, #dc2626, #b91c1c); border-color: #fca5a5; }
@@ -157,7 +155,6 @@
       pointer-events: none !important;
     }
 
-    /* --- 3D TACTIELE BORDSPEL KNOPPEN --- */
     .btn-3d {
       border-bottom-width: 3px !important;
       border-color: rgba(2, 6, 23, 0.7) !important;
@@ -168,14 +165,12 @@
       border-bottom-width: 1px !important;
     }
 
-    /* --- DYNAMISCHE NEON GLOW VOOR SPELERSKAARTEN --- */
     .player-card-glow {
       background: radial-gradient(circle at 10% 15%, var(--card-glow-color, rgba(99, 102, 241, 0.12)) 0%, rgba(15, 23, 42, 0.92) 70%) !important;
       box-shadow: 0 10px 25px -5px var(--card-glow-color, rgba(0, 0, 0, 0.4)) !important;
       border-color: rgba(51, 65, 85, 0.6) !important;
     }
 
-    /* --- MICRO-ANIMATIE: ZWEVENDE SCORE POPUP (+2, +5) --- */
     @keyframes floatScoreUp {
       0% {
         opacity: 0;
@@ -202,7 +197,6 @@
       animation: floatScoreUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
-    /* --- SCORE NUMBER POP PULSE --- */
     @keyframes scorePop {
       0% { transform: scale(1); }
       50% { transform: scale(1.22); filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6)); }
@@ -212,7 +206,6 @@
       animation: scorePop 0.35s ease-out forwards;
     }
 
-    /* --- TV GROOT WATERMERK ACHTERGROND --- */
     .tv-watermark-bg {
       position: absolute;
       right: -30px;
@@ -361,7 +354,6 @@
         </div>
         <div class="flex flex-wrap items-center gap-1.5 ml-auto">
           <button type="button" id="teamModeToggleBtn" onclick="toggleTeamMode()" class="px-2.5 py-2 rounded-xl text-xs font-black border transition bg-slate-800 text-slate-300 btn-3d" title="Wissel Solo / Teams">👤 Solo</button>
-          <button type="button" id="layoutOrientBtn" onclick="toggleLayoutOrientation()" class="px-2.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition btn-3d">💻 Horizontaal</button>
           <button type="button" onclick="openSettingsModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-3d" title="Instellingen">⚙️</button>
           <button type="button" onclick="openShareQrModal('table')" class="px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition flex items-center gap-1 btn-3d" title="Deel huidige tussenstand via QR">📱 Deel</button>
           <button type="button" id="roundGraphBtn" onclick="showRoundGraph()" class="hidden px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition btn-3d">📈 Verloop</button>
@@ -493,10 +485,8 @@
 
     <!-- VIEW 5: TV & SPECTATOR MODE (GROOT SCHERM) -->
     <section id="viewSpectator" class="hidden space-y-4 max-w-7xl mx-auto py-1">
-      <!-- TV Bovenbalk -->
       <div class="bg-slate-900/90 border border-slate-800 rounded-3xl p-3.5 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xl backdrop-blur">
         
-        <!-- Spel info links -->
         <div class="flex items-center gap-3 min-w-0">
           <div id="tvGameIcon" class="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center shrink-0"></div>
           <div class="min-w-0">
@@ -508,7 +498,6 @@
           </div>
         </div>
 
-        <!-- TV Beurt & Knoppen -->
         <div class="flex items-center justify-between md:justify-end gap-2 flex-wrap border-t border-slate-800/80 md:border-t-0 pt-2.5 md:pt-0">
           <div id="tvActiveTurnBanner" class="hidden px-3 py-1.5 rounded-xl bg-indigo-950/80 border border-indigo-500/40 flex items-center gap-2 shadow-lg shrink-0">
             <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping inline-block"></span>
@@ -530,10 +519,8 @@
         </div>
       </div>
 
-      <!-- TV Live Stand Grid (Grote Kaarten) -->
       <div id="tvStandingsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5"></div>
 
-      <!-- TV Groot Feestelijk Eindpodium (Overlay) -->
       <div id="tvPodiumOverlay" class="hidden bg-slate-950/95 border-2 border-amber-500/60 rounded-3xl p-6 sm:p-10 text-center space-y-6 shadow-2xl backdrop-blur-md">
         <div class="space-y-1">
           <div class="text-xs sm:text-sm font-black uppercase tracking-widest text-amber-400">🏆 EINDSTAND & PODIUM 🏆</div>
@@ -545,7 +532,6 @@
         </button>
       </div>
 
-      <!-- TV Grote Dobbelsteen Pop-up Overlay (als iemand rolt) -->
       <div id="tvDiceOverlay" class="hidden bg-slate-950/95 border-2 border-indigo-500/60 rounded-3xl p-5 text-center space-y-3 shadow-2xl animate-bounce">
         <div class="text-xs sm:text-sm font-black uppercase tracking-widest text-indigo-400 flex items-center justify-center gap-2">
           <span>🎲</span>
@@ -559,9 +545,8 @@
   </main>
 
   <script>
-
-        // =========================================================================
-    // 1. GAME ARTWORK, SCHONE VECTOR BADGES, MEEPLE & GELUIDEN
+    // =========================================================================
+    // MODULE 1: AUDIO, HAPTICS & STATISCHE CONSTANTEN
     // =========================================================================
     const SoundFX = {
       ctx: null,
@@ -689,6 +674,9 @@
       `;
     }
 
+    // =========================================================================
+    // MODULE 2: SPELLEN CATALOGUS & VECTOR BADGES
+    // =========================================================================
     const GAME_BADGES = {
       azul: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-950 flex flex-col items-center justify-center border border-sky-300/40 shadow-lg p-1.5"><div class="grid grid-cols-2 gap-1 w-6 h-6"><div class="bg-amber-400 rounded-sm"></div><div class="bg-sky-200 rounded-sm"></div><div class="bg-rose-500 rounded-sm"></div><div class="bg-slate-900 rounded-sm"></div></div></div>`,
       parijs: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-blue-950 to-slate-950 flex items-center justify-center border border-amber-300/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🗼</span></div>`,
@@ -792,9 +780,6 @@
       `;
     }
 
-    // =========================================================================
-    // 2. VOLLEDIGE SPELLEN CATALOGUS
-    // =========================================================================
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + patroonlijnen óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
       { id: 'seasalt', name: 'Sea Salt & Paper', subtitle: 'Duo-paren, collecties, zeemeerminnen & kleurbonussen', category: 'card', type: 'seasalt', icon: 'seasalt', limit: 40, minP: 2, maxP: 4, dur: 'short', hasLastRoundKnock: true },
@@ -803,7 +788,7 @@
       { id: 'scout', name: 'Scout', subtitle: 'Circuskaarten uitspelen minus overgebleven handkaarten', category: 'card', type: 'rounds', icon: 'scout', minP: 3, maxP: 5, dur: 'short' },
       { id: 'forestshuffle', name: 'Forest Shuffle', subtitle: 'Bomen, bosrand, paddenstoelen & bosdieren', category: 'card', type: 'categories', icon: 'forestshuffle', minP: 2, maxP: 5, dur: 'medium', categories: ['🌲 Bomen (Basis)', '🦌 Boven/Onder dieren', '🦔 Zijkanten dieren', '🍄 Paddenstoelen', '🦋 Vlinders & Insecten'] },
       { id: 'parijs', name: 'Parijs: De Lichtstad', subtitle: 'Interactieve lantaarn-multiplier, ansichtkaarten & schilder', category: 'board', type: 'parijs', icon: 'parijs', minP: 2, maxP: 2, dur: 'short', tieBreakerDesc: 'Grootste aaneengesloten groep gebouwen' },
-      { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, jokers & sterren', category: 'card', type: 'kok1', icon: 'keeropkeer', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
+      { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, ongebruikte jokers & sterren', category: 'card', type: 'kok1', icon: 'keeropkeer', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'keeropkeer2', name: 'Keer op Keer 2', subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O', category: 'card', type: 'kok2', icon: 'keeropkeer2', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Stenen 11 & 13 + 7 Wormfiches)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Stenen 11 & 13 + 7 Wormfiches)'], tieBreakerDesc: 'Hoogste tegelnummer in bezit' },
       { id: 'carcassonne', name: 'Carcassonne', subtitle: 'Live teller met uitbreidings-snelknoppen & calculator', category: 'board', type: 'carcassonne', icon: 'carcassonne', minP: 2, maxP: 6, dur: 'medium', expansions: ['⛪ Kathedralen & Herbergen', '🍷 Kooplieden & Bouwmeesters'] },
@@ -881,9 +866,8 @@
       { id: 'kingen', name: 'Kingen / Brikken', subtitle: 'Rondeteller voor min-contracten en plus-contracten per beurt', category: 'card', type: 'rounds', icon: 'kingen', lowestWins: false, minP: 4, maxP: 4, dur: 'medium' },
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
-
     // =========================================================================
-    // 3. STATE MANAGEMENT, LOCAL STORAGE & INITIALISATIE (INCL. DRAFT AUTO-SAVE)
+    // MODULE 3: STATE MANAGEMENT, LOCAL STORAGE & NOODHERSTEL
     // =========================================================================
     const STORAGE_KEY = 'scoreblok_pro_v5';
     const SNAPSHOT_KEY = 'scoreblok_pro_autosave_emergency';
@@ -891,8 +875,8 @@
 
     let state = {
       players: [
-        { id: 'p1', name: 'Speler 1', color: '#6366f1', active: true, handicap: 0, elo: 1200, seasonCups: 0, tournamentCups: 0 },
-        { id: 'p2', name: 'Speler 2', color: '#ec4899', active: true, handicap: 0, elo: 1200, seasonCups: 0, tournamentCups: 0 }
+        { id: 'p1', name: 'Speler 1', color: '#6366f1', active: true, handicap: 0, elo: 1200, seasonCups: 0, tournamentCups: 0, loserCups: 0 },
+        { id: 'p2', name: 'Speler 2', color: '#ec4899', active: true, handicap: 0, elo: 1200, seasonCups: 0, tournamentCups: 0, loserCups: 0 }
       ],
       teams: [
         { id: 't1', name: 'Team Rood', color: '#ef4444', playerIds: ['p1'] },
@@ -954,6 +938,7 @@
             if (p.elo === undefined) p.elo = 1200;
             if (p.seasonCups === undefined) p.seasonCups = 0;
             if (p.tournamentCups === undefined) p.tournamentCups = 0;
+            if (p.loserCups === undefined) p.loserCups = 0;
           });
         } else {
           state.pickerTab = 'all';
@@ -974,7 +959,6 @@
       }
     }
 
-    // --- ONVOLTOOID POTJE / DRAFT SYSTEEM ---
     function updateDraftSession() {
       try {
         const activeDef = getGameDef(state.activeGameId);
@@ -1132,8 +1116,12 @@
       saveState();
     }
 
+    function dismissCrashBanner() {
+      document.getElementById('crashRecoveryBanner')?.classList.add('hidden');
+    }
+
     // =========================================================================
-    // 4. GAME STATE INITIALIZATION
+    // MODULE 4: SPELSTATUS INITIALISATIE & DATAMODELLEN
     // =========================================================================
     function createEmptyPlayerData() {
       const lostcities = {};
@@ -1246,7 +1234,7 @@
     }
 
     // =========================================================================
-    // 5. HELPER CALCULATIONS
+    // MODULE 5: GEAVANCEERDE SPELREGEL-BEREKENINGEN & TIE-BREAKERS
     // =========================================================================
     function scoreSingleAzulPlacement(wall, r, c) {
       let horiz = 1;
@@ -1336,7 +1324,9 @@
             if (remaining.length > 0) {
               const secV = remaining[0].v;
               const tiedSec = remaining.filter(x => x.v === secV);
-              if (tiedSec.length === 1) bonuses[tiedSec[0].id] += 1;
+              if (tiedSec.length === 1) {
+                bonuses[tiedSec[0].id] += 1;
+              }
             }
           }
         }
@@ -1373,7 +1363,7 @@
           return Number(pd.machiavelliData?.goldVal || 0);
         }
         if (gameId === 'eldorado') {
-          return Number(pd.categories?.['🚧 Barrières (aantal)'] || 0);
+          return Number(pd.categories?.['🚧 Verzamelde Barrières (1p per stuk)'] || 0);
         }
         if (gameId === 'keeropkeer' || gameId === 'keeropkeer2') {
           return Number(pd.exclamations || 0);
@@ -1397,7 +1387,7 @@
     }
 
     // =========================================================================
-    // 6. SCORE CALCULATIONS PER GAME
+    // MODULE 6: CENTRALE SCOREBEREKENING & RANGLIJST ENGINE
     // =========================================================================
     function calculatePlayerTotal(gameId, playerId) {
       const def = getGameDef(gameId);
@@ -1489,8 +1479,7 @@
         let worms = 0;
         tileList.forEach(item => {
           if (r.tiles && r.tiles[item.t]) {
-            if (item.t === 11) worms += 1;
-            else if (item.t === 13) worms += 1;
+            if (item.t === 11 || item.t === 13) worms += 1;
             else worms += item.w;
           }
         });
@@ -1540,9 +1529,7 @@
           }
         });
         rawScore = baseSum * Math.max(1, setsCount);
-      } else if (def.type === 'carcassonne') {
-        rawScore = Number(pd.liveScore || 0);
-      } else if (def.type === 'doolhof') {
+      } else if (def.type === 'carcassonne' || def.type === 'doolhof') {
         rawScore = Number(pd.liveScore || 0);
       } else if (def.type === 'arknova') {
         const an = pd.arknova || {};
@@ -1609,7 +1596,7 @@
     }
 
     // =========================================================================
-    // 7. VIEWS & NAVIGATION
+    // MODULE 7: NAVIGATIE, SCHERMBEHEER & TV / SPECTATOR ENGINE
     // =========================================================================
     let lastKnownLeaderId = null;
 
@@ -1672,11 +1659,8 @@
         if (btn) btn.className = 'px-3 py-1.5 rounded-xl text-xs font-black bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition text-center btn-3d';
         renderSpectatorView();
       }
-
-      applyLayoutOrientation();
     }
 
-    // --- TV & SPECTATOR ENGINE LOGICA ---
     let tvDiceHideTimeout = null;
 
     function renderSpectatorView() {
@@ -1775,7 +1759,6 @@
 
       box.innerHTML = `
         <div class="flex items-end justify-center gap-3 sm:gap-6 max-w-2xl mx-auto pt-6 pb-2">
-          <!-- Plek 2 -->
           <div class="flex-1 flex flex-col items-center">
             ${p2 ? `
               <div class="text-sm sm:text-lg font-black text-slate-300 truncate mb-1">${p2.name}</div>
@@ -1787,7 +1770,6 @@
             ` : ''}
           </div>
 
-          <!-- Plek 1 (Goud) -->
           <div class="flex-1 flex flex-col items-center">
             <div class="text-base sm:text-2xl font-black text-amber-300 truncate mb-1 flex items-center gap-1">
               <span>👑</span><span>${p1.name}</span>
@@ -1799,7 +1781,6 @@
             </div>
           </div>
 
-          <!-- Plek 3 -->
           <div class="flex-1 flex flex-col items-center">
             ${p3 ? `
               <div class="text-sm sm:text-lg font-black text-amber-700 truncate mb-1">${p3.name}</div>
@@ -1873,7 +1854,7 @@
       }
     }
 
-    // --- SLIMME SCORE PAD (NUMPAD) CONTROLLER ---
+    // --- SCORE PAD (NUMPAD CONTROLLER) ---
     let currentScorePadTarget = {
       callback: null,
       currentValue: '0',
@@ -1961,9 +1942,8 @@
       }
       closeScorePad();
     }
-
     // =========================================================================
-    // 8. GAME PICKER & FAVORITES
+    // MODULE 8: GAME PICKER, FILTERS, FAVORIETEN & SPELENRAD
     // =========================================================================
     function setPickerTab(tab) {
       state.pickerTab = tab;
@@ -2014,9 +1994,6 @@
       ensureGameState(gameId);
       saveState();
       switchMainView('scoreboard');
-      if (typeof checkShowPreMatchRivalry === 'function') {
-        checkShowPreMatchRivalry(gameId);
-      }
     }
 
     let pickerWheelInterval = null;
@@ -2308,31 +2285,10 @@
           </div>`;
       }).join('');
     }
+
     // =========================================================================
-    // 9. SCOREBOARD RENDERING & LIVE STAND
+    // MODULE 9: SCOREBOARD RENDERING, BEURTWISSELS & LIVE BANNERS
     // =========================================================================
-    function toggleLayoutOrientation() {
-      document.body.classList.remove('layout-landscape');
-      state.layoutOrientation = 'portrait';
-      saveState();
-      applyLayoutOrientation();
-    }
-
-    function applyLayoutOrientation() {
-      document.body.classList.remove('layout-landscape');
-
-      const orientBtn = document.getElementById('layoutOrientBtn');
-      if (orientBtn) {
-        orientBtn.style.display = 'none';
-      }
-
-      const tBtn = document.getElementById('teamModeToggleBtn');
-      if (tBtn) {
-        tBtn.className = `px-2.5 py-2 rounded-xl text-xs font-black border transition btn-3d ${state.isTeamMode ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-800 text-slate-300'}`;
-        tBtn.textContent = state.isTeamMode ? '👥 Teams' : '👤 Solo';
-      }
-    }
-
     function toggleTeamMode() {
       state.isTeamMode = !state.isTeamMode;
       triggerHaptic(30);
@@ -2351,10 +2307,6 @@
       gs.activeTurnPlayerIdx = (curIdx + delta + active.length) % active.length;
       triggerHaptic(20);
       SoundFX.click();
-
-      if (state.apTimerEnabled && typeof startTableTimer === 'function') {
-        startTableTimer(45);
-      }
 
       saveState();
       renderLiveLeaderboard();
@@ -2441,7 +2393,6 @@
       banner.classList.add('hidden');
     }
 
-    // --- GROTE INDICATOR: WAT HEB IK NODIG OM TE WINNEN? ---
     function renderWinMarginBanner(def, standings) {
       const banner = document.getElementById('winMarginBanner');
       if (!banner) return;
@@ -2494,7 +2445,6 @@
           }
         } else {
           const marginP1 = Math.max(0, limit - p1.score);
-          const marginP2 = Math.max(0, limit - p2.score);
           const gap = p2.score - p1.score;
 
           html = `
@@ -2624,26 +2574,14 @@
       const titleEl = document.getElementById('activeGameTitle');
       if (titleEl) titleEl.textContent = def.name;
 
-      let myPlayerBannerHtml = '';
-      if (state.myPlayerId) {
-        const me = state.players.find(p => p.id === state.myPlayerId);
-        if (me) {
-          myPlayerBannerHtml = `
-            <div class="mb-3 px-3.5 py-2.5 rounded-2xl bg-indigo-950/60 border border-indigo-500/40 flex items-center justify-between text-xs sm:text-sm">
-              <div class="flex items-center gap-2">
-                ${renderMeepleSvg(me.color, 'w-5 h-5')}
-                <span class="text-slate-300">Jij scoort als: <strong class="text-white">${me.name}</strong></span>
-              </div>
-              <button type="button" onclick="openLiveWhoAmIModal()" class="text-xs text-indigo-300 hover:text-white font-bold underline">
-                Wissel
-              </button>
-            </div>
-          `;
-        }
-      }
-
       updateActiveFavStar();
       updateUndoButtonUI();
+
+      const tBtn = document.getElementById('teamModeToggleBtn');
+      if (tBtn) {
+        tBtn.className = `px-2.5 py-2 rounded-xl text-xs font-black border transition btn-3d ${state.isTeamMode ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-800 text-slate-300'}`;
+        tBtn.textContent = state.isTeamMode ? '👥 Teams' : '👤 Solo';
+      }
 
       const graphBtn = document.getElementById('roundGraphBtn');
       if (graphBtn) {
@@ -2703,7 +2641,6 @@
         `;
       }
 
-      applyLayoutOrientation();
       renderLiveLeaderboard();
 
       const container = document.getElementById('gameSheetContainer');
@@ -2740,10 +2677,6 @@
         else if (def.type === 'codenames') renderCodenamesSheet(container);
         else if (def.type === 'themind') renderTheMindSheet(container);
         else if (def.type === 'carcassonne') renderCarcassonneSheet(container, def);
-
-        if (myPlayerBannerHtml) {
-          container.insertAdjacentHTML('afterbegin', myPlayerBannerHtml);
-        }
       } catch (err) {
         console.error("Fout bij renderen spelblad:", err);
         container.innerHTML = `<div class="p-4 bg-rose-950/40 border border-rose-500/40 rounded-2xl text-rose-300 text-xs font-bold">Fout bij inladen: ${err.message}</div>`;
@@ -2796,7 +2729,7 @@
     }
 
     // =========================================================================
-    // 10. SPELBLADEN (DEEL A: AZUL, WINGSPAN, KEER OP KEER, ROUNDS)
+    // MODULE 10 (DEEL A): SPELBLADEN (AZUL, WINGSPAN, KEER OP KEER, ROUNDS)
     // =========================================================================
 
     // --- AZUL ---
@@ -2871,7 +2804,6 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center justify-center">
-            <!-- Patroonlijnen links -->
             <div class="md:col-span-6 bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3.5 space-y-2">
               <div class="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
                 <span>Patroonlijnen</span>
@@ -2906,7 +2838,6 @@
               }).join('')}
             </div>
 
-            <!-- Muur rechts -->
             <div class="md:col-span-6 flex flex-col items-center">
               <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">5x5 Mozaïek Muur</div>
               <div class="grid grid-cols-5 gap-1.5 max-w-[240px]">
@@ -2924,7 +2855,6 @@
             </div>
           </div>
 
-          <!-- Vloerlijn -->
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-2">
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-300 font-bold">Vloerlijn (Strafpunten):</span>
@@ -3519,6 +3449,10 @@
     function closeRoundGraph() {
       document.getElementById('roundGraphModal')?.classList.add('hidden');
     }
+    // =========================================================================
+    // MODULE 10 (DEEL B): SPELBLADEN (QWIXX, CASCADIA, REGENWORMEN, TTR, CATAN, ETC.)
+    // =========================================================================
+
     // --- QWIXX ---
     function renderQwixxSheet(container) {
       const gs = ensureGameState('qwixx');
@@ -3925,7 +3859,7 @@
 
     function renderWonders7Sheet(container) { renderCategoriesSheet(container, getGameDef('wonders7')); }
 
-    // --- TTR ---
+    // --- TICKET TO RIDE ---
     function renderTtrSheet(container) {
       const gs = ensureGameState('ttr');
       const routeBtns = [
@@ -4650,7 +4584,7 @@
               const penguinsPts = penguinTable[Math.min(3, Number(ss.penguins || 0))] || 0;
               const sailorsPts = sailorTable[Math.min(2, Number(ss.sailors || 0))] || 0;
 
-              const roundTotal = duosPts + shellsPts + octosPts + penguinsPts + sailorsPts + (Number(ss.mermaids || 0) * 2) + Number(ss.colorMultis || 0);
+              const roundTotal = duosPts + shellsPts + octosPts + penguinsPts + sailorsPts + Number(ss.mermaids || 0) + Number(ss.colorMultis || 0);
 
               return `
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3 player-card-glow" style="--card-glow-color: ${p.color || '#6366f1'}20;">
@@ -4676,8 +4610,11 @@
                       ${renderNumberStepper(`ss_octos_${p.id}`, ss.octos, `val => { ss.octos = Number(val); renderScoreboard(); }`)}
                     </div>
                     <div class="flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-slate-800">
-                      <span class="text-cyan-300 font-bold">🧜‍♀️ Zeemeerminnen:</span>
-                      ${renderNumberStepper(`ss_mermaids_${p.id}`, ss.mermaids, `val => { ss.mermaids = Number(val); if(Number(val)>=4) showToast("🧜‍♀️ 4 ZEEMEERMINNEN! Directe overwinning!"); renderScoreboard(); }`)}
+                      <div>
+                        <span class="text-cyan-300 font-bold block">🧜‍♀️ Zeemeerminnen:</span>
+                        <span class="text-[10px] text-slate-400">1p per kaart in grootste kleur</span>
+                      </div>
+                      ${renderNumberStepper(`ss_mermaids_${p.id}`, ss.mermaids, `val => { ss.mermaids = Number(val); renderScoreboard(); }`)}
                     </div>
                     <div class="flex items-center justify-between bg-slate-900 p-2 rounded-xl border border-slate-800">
                       <span class="text-amber-300 font-bold">🎨 Kleur-vermenigvuldigers:</span>
@@ -4738,7 +4675,7 @@
         const penguinsPts = penguinTable[Math.min(3, Number(ss.penguins || 0))] || 0;
         const sailorsPts = sailorTable[Math.min(2, Number(ss.sailors || 0))] || 0;
 
-        roundObj[p.id] = duosPts + shellsPts + octosPts + penguinsPts + sailorsPts + (Number(ss.mermaids || 0) * 2) + Number(ss.colorMultis || 0);
+        roundObj[p.id] = duosPts + shellsPts + octosPts + penguinsPts + sailorsPts + Number(ss.mermaids || 0) + Number(ss.colorMultis || 0);
 
         gs.playerData[p.id].seasaltCurrent = { duos: 0, swimmers: 0, sharks: 0, shells: 0, octos: 0, penguins: 0, sailors: 0, mermaids: 0, colorCards: 0, colorMultis: 0 };
       });
@@ -4849,8 +4786,8 @@
         `;
       }).join('') + `</div>`;
     }
-            // =========================================================================
-    // 11. SPELERSBEHEER, TEAMS & GROEPEN
+    // =========================================================================
+    // MODULE 11: SPELERSBEHEER, TEAMS, TAFELVOLGORDE & GROEPEN
     // =========================================================================
     const MEEPLE_COLORS = [
       '#6366f1', '#ec4899', '#10b981', '#f59e0b', '#ef4444', 
@@ -4869,8 +4806,6 @@
 
       list.innerHTML = state.players.map((p, idx) => `
         <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 flex flex-col gap-2.5 shadow-sm btn-3d">
-          
-          <!-- Bovenste rij: Volgorde + Meeple + Volledige Naam -->
           <div class="flex items-center gap-2.5 w-full">
             <div class="flex gap-1 shrink-0">
               <button type="button" onclick="movePlayerOrder(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 disabled:opacity-25 text-xs text-slate-300 font-bold">▲</button>
@@ -4886,7 +4821,6 @@
             </div>
           </div>
 
-          <!-- Onderste rij: Badges (Elo/HC/Bekers) links + Knoppen rechts -->
           <div class="flex items-center justify-between gap-2 pt-2 border-t border-slate-900 w-full">
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="px-2 py-0.5 rounded-md bg-slate-900 text-amber-300 font-mono text-[11px] font-bold border border-slate-800">Elo ${p.elo || 1200}</span>
@@ -4903,7 +4837,6 @@
               <button type="button" onclick="deletePlayer('${p.id}')" class="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold btn-3d" title="Verwijderen">🗑️</button>
             </div>
           </div>
-
         </div>
       `).join('');
     }
@@ -5123,7 +5056,7 @@
     }
 
     // =========================================================================
-    // 12. HISTORIE, STATISTIEKEN & GRAFIEKEN
+    // MODULE 12: HISTORIE, STATISTIEKEN & ELO-TIJDLINIE
     // =========================================================================
     function renderDieSvg(val) {
       const pips = {
@@ -5161,7 +5094,7 @@
 
       let html = '<option value="all">🎮 Alle Spellen</option>';
       playedGameIds.forEach(id => {
-        const def = (typeof getGameDef === 'function' ? getGameDef(id) : null) || { name: id };
+        const def = getGameDef(id) || { name: id };
         html += `<option value="${id}" ${currentVal === id ? 'selected' : ''}>${def.name || id}</option>`;
       });
       select.innerHTML = html;
@@ -5398,12 +5331,12 @@
       }
 
       grid.innerHTML = keys.map(gId => {
-        const def = (typeof getGameDef === 'function' ? getGameDef(gId) : null) || { name: gId };
+        const def = getGameDef(gId) || { name: gId };
         const r = records[gId];
         return `
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              ${typeof renderGameArtwork === 'function' ? renderGameArtwork(gId, 'w-8 h-8') : ''}
+              ${renderGameArtwork(gId, 'w-8 h-8')}
               <div class="min-w-0">
                 <div class="font-bold text-xs text-white truncate">${def.name || gId}</div>
                 <div class="text-[10px] text-slate-400 flex items-center gap-1 truncate">
@@ -5429,7 +5362,7 @@
       }
 
       container.innerHTML = history.slice(0, 15).map((m, idx) => {
-        const def = (typeof getGameDef === 'function' ? getGameDef(m.gameId) : null) || { name: m.gameId };
+        const def = getGameDef(m.gameId) || { name: m.gameId };
         const dateStr = m.date ? new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }) : '';
         const winnerNames = (m.winners || []).map(id => (state.players || []).find(x => x.id === id)?.name).filter(Boolean).join(' & ');
         const scores = m.results || m.scores || [];
@@ -5438,7 +5371,7 @@
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5">
             <div class="flex items-center justify-between text-xs">
               <div class="flex items-center gap-2 min-w-0">
-                ${typeof renderGameArtwork === 'function' ? renderGameArtwork(m.gameId, 'w-6 h-6') : ''}
+                ${renderGameArtwork(m.gameId, 'w-6 h-6')}
                 <span class="font-bold text-white truncate">${def.name || m.gameId}</span>
                 <span class="text-[10px] text-slate-500 font-mono">${dateStr}</span>
               </div>
@@ -5493,11 +5426,10 @@
       renderHallOfFame();
     }
 
-        // =========================================================================
-    // 13. WIE BEGINT? (FINGER-PICKER, RANDOM & TAFEL-CHALLENGES)
+    // =========================================================================
+    // MODULE 13: WIE BEGINT? (FINGER-PICKER, RANDOM & TAFEL-CHALLENGES)
     // =========================================================================
     const START_CHALLENGES = [
-      // Spelnaam, doos & letter-uitdagingen
       "Wie iets aan heeft dat begint met de eerste letter van het spel dat jullie nu spelen!",
       "Wie als eerste een kledingstuk of accessoire aanwijst met dezelfde kleur als de speldoos!",
       "Degene die als eerste een voorwerp in de kamer noemt dat rijmt op de titel van het spel!",
@@ -5514,8 +5446,6 @@
       "Wie het snelst een beroemd persoon of stripfiguur noemt met dezelfde initialen als het spel!",
       "Degene die als eerste een automerk noemt dat begint met de eerste letter van het spel!",
       "Degene die als eerste een muziekinstrument noemt dat begint met de laatste letter van het spel!",
-
-      // Fysieke reflexen & tafel-gekte
       "Wie als eerste met beide ellebogen tegelijk de tafel aanraakt!",
       "Wie als eerste met zijn wijsvinger het puntje van zijn neus aanraakt!",
       "Degene die als eerste met beide handen tegelijk zijn linkerknie vastpakt!",
@@ -5543,19 +5473,13 @@
       "Degene die als eerste stilstaat op één been met zijn ogen dicht!",
       "Degene die het langst zijn ogen kan dichthouden zonder te knipperen!",
       "Wie de langste adem heeft (tegelijk 'aaaah' zeggen, wie stopt als laatste)!",
-
-      // Duels & snelle spelletjes
       "Wie het snelst een 'steen-papier-schaar' duel wint van zijn buurman!",
       "Wie het snelst een duimworstel-gevecht wint van de speler tegenover zich!",
       "Degene die als eerste een rijmwoord bedenkt op de naam van de speler links van hem!",
-
-      // Behendigheid & spelmateriaal
       "Wie als eerste een voorwerp aanraakt in de kleur van zijn/haar meeple!",
       "Wie als eerste een dobbelsteen of fiche op zijn neus kan laten balanceren!",
       "Wie als eerste met één hand een torentje van 3 meeples of fiches bouwt!",
       "Wie als eerste een denkbeeldige dobbelsteen gooit, vangt en doet alsof hij een 6 gooit!",
-
-      // Observaties & kleding aan tafel
       "Degene met de meeste ritsen of knopen op zijn/haar kleding!",
       "Degene met het laagste batterijpercentage op zijn telefoon!",
       "Degene wiens glas of beker op dit moment het leegst is!",
@@ -5616,7 +5540,7 @@
         return;
       }
       triggerHaptic(30);
-      SoundFX.dice();
+      SoundFX.click();
       const chosen = act[Math.floor(Math.random() * act.length)];
       
       const modalHtml = `
@@ -5743,7 +5667,7 @@
       if (!container) return;
 
       let html = '';
-      activeTouches.forEach((val, id) => {
+      activeTouches.forEach((val) => {
         html += `
           <div class="absolute w-24 h-24 -ml-12 -mt-12 rounded-full border-4 shadow-2xl flex items-center justify-center animate-pulse" 
                style="left: ${val.x}px; top: ${val.y}px; border-color: ${val.color}; background-color: ${val.color}33;">
@@ -5795,9 +5719,133 @@
         `;
       }
     }
+    // =========================================================================
+    // MODULE 14: EIGEN SPEL TOEVOEGEN & BEHEREN
+    // =========================================================================
+    function openCustomGameModal() {
+      let modal = document.getElementById('customGameModal');
+      if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+          <div id="customGameModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h3 class="font-black text-sm text-white">✨ Eigen Spel Toevoegen</h3>
+                <button type="button" onclick="closeCustomGameModal()" class="text-slate-400 hover:text-white">✕</button>
+              </div>
 
-       // =========================================================================
-    // 15. LIVE WEBRTC SYNC ENGINE (HOST & GAST)
+              <div class="space-y-3 text-xs">
+                <div>
+                  <label class="block text-slate-400 font-semibold mb-1">Spelnaam:</label>
+                  <input type="text" id="customGameNameInput" placeholder="bijv. Everdell, Beverbende..." class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
+                </div>
+
+                <div>
+                  <label class="block text-slate-400 font-semibold mb-1">Type telling:</label>
+                  <select id="customGameTypeSelect" onchange="toggleCustomCategoriesField()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white font-bold">
+                    <option value="carcassonne">⚡ Live Punten (+1, +2, +5...)</option>
+                    <option value="rounds">🔢 Rondes / Slagen (per ronde invoeren)</option>
+                    <option value="categories">📋 Categorieën / Eindtelling (losse posten)</option>
+                  </select>
+                </div>
+
+                <div id="customCatsGroup" class="hidden">
+                  <label class="block text-slate-400 font-semibold mb-1">Categorieën (kommagescheiden):</label>
+                  <input type="text" id="customGameCatsInput" placeholder="bijv. Kaarten, Munten, Wonder, Bonus" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Winconditie:</label>
+                    <select id="customGameWinSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-2 text-white font-bold">
+                      <option value="high">Hoogste wint 🏆</option>
+                      <option value="low">Laagste wint 🛡️</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-slate-400 font-semibold mb-1">Doel/Limiet (opt.):</label>
+                    <input type="number" id="customGameLimitInput" placeholder="bijv. 100" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-slate-400 font-semibold mb-1">⚖️ Officiële Tie-breaker regel (optioneel):</label>
+                  <input type="text" id="customGameTieInput" placeholder="bijv. Meeste resterend geld" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-white font-bold" />
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+                <button type="button" onclick="closeCustomGameModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs btn-3d">Annuleren</button>
+                <button type="button" onclick="saveCustomGameAction()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg btn-3d">+ Opslaan</button>
+              </div>
+            </div>
+          </div>
+        `);
+      } else {
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function toggleCustomCategoriesField() {
+      const type = document.getElementById('customGameTypeSelect')?.value;
+      const grp = document.getElementById('customCatsGroup');
+      if (grp) grp.classList.toggle('hidden', type !== 'categories');
+    }
+
+    function closeCustomGameModal() {
+      document.getElementById('customGameModal')?.classList.add('hidden');
+    }
+
+    function saveCustomGameAction() {
+      const name = document.getElementById('customGameNameInput')?.value.trim();
+      if (!name) return;
+
+      const type = document.getElementById('customGameTypeSelect')?.value || 'carcassonne';
+      const win = document.getElementById('customGameWinSelect')?.value || 'high';
+      const limit = Number(document.getElementById('customGameLimitInput')?.value || 0);
+      const tieDesc = document.getElementById('customGameTieInput')?.value.trim();
+      const rawCats = document.getElementById('customGameCatsInput')?.value || '';
+
+      const categories = type === 'categories'
+        ? rawCats.split(',').map(s => s.trim()).filter(Boolean)
+        : undefined;
+
+      const newId = 'custom_' + Date.now();
+      const customGame = {
+        id: newId,
+        name,
+        subtitle: 'Eigen toegevoegd spel',
+        category: 'board',
+        type,
+        icon: 'free',
+        lowestWins: win === 'low',
+        limit: limit > 0 ? limit : undefined,
+        tieBreakerDesc: tieDesc || undefined,
+        categories: categories && categories.length ? categories : undefined,
+        isCustom: true
+      };
+
+      if (!Array.isArray(state.customGames)) state.customGames = [];
+      state.customGames.push(customGame);
+      saveState();
+      closeCustomGameModal();
+      renderGamePicker();
+      showToast(`✨ ${name} toegevoegd aan je spellen!`);
+    }
+
+    function deleteCustomGame(gameId, ev) {
+      if (ev) ev.stopPropagation();
+      const g = (state.customGames || []).find(x => x.id === gameId);
+      if (!g || !confirm(`Wil je "${g.name}" permanent verwijderen?`)) return;
+
+      state.customGames = state.customGames.filter(x => x.id !== gameId);
+      state.favorites = (state.favorites || []).filter(id => id !== gameId);
+      saveState();
+      renderGamePicker();
+      showToast(`🗑️ ${g.name} verwijderd.`);
+    }
+
+    // =========================================================================
+    // MODULE 15: LIVE WEBRTC SYNC ENGINE (HOST & GAST)
     // =========================================================================
     let peerInstance = null;
     let peerConnections = [];
@@ -5921,7 +5969,7 @@
       });
     }
 
-    function handleIncomingPeerData(data, conn) {
+    function handleIncomingPeerData(data) {
       if (data.type === 'state_sync') {
         state = { ...state, ...data.state };
         renderScoreboard();
@@ -5963,9 +6011,8 @@
       }
     }
 
-
     // =========================================================================
-    // 16. PODIUM MODAL, DEEL EINDSTAND ALS PLAATJE & SPELAVOND ENGINE
+    // MODULE 16: PODIUM MODAL, RESULTAAT GENERATOR & SPELAVOND ENGINE
     // =========================================================================
     let tieBreakOverruledShared = false;
 
@@ -6086,7 +6133,6 @@
       document.getElementById('podiumModal')?.classList.add('hidden');
     }
 
-    // --- DEEL EINDSTAND ALS AFBEELDING ---
     async function shareMatchResultCard() {
       const def = getGameDef(state.activeGameId);
       const standings = getStandings();
@@ -6841,7 +6887,79 @@
     }
 
     // =========================================================================
-    // 17. STATISTIEK HELPERS & GROEPRECORDS
+    // MODULE 17: SNELLE ACTIES, DOBBELSTEEN & WINNAAR MODALS
+    // =========================================================================
+    function openDiceRollerModal() {
+      let modal = document.getElementById('diceRollerModal');
+      if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+          <div id="diceRollerModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-xs w-full p-5 space-y-4 shadow-2xl text-center">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h3 class="font-black text-sm text-white">🎲 Dobbelstenen Gooien</h3>
+                <button type="button" onclick="document.getElementById('diceRollerModal').remove()" class="text-slate-400 hover:text-white">✕</button>
+              </div>
+              <div id="diceBox" class="flex justify-center gap-3 py-3">
+                ${renderDieSvg(Math.floor(Math.random() * 6) + 1)}
+                ${renderDieSvg(Math.floor(Math.random() * 6) + 1)}
+              </div>
+              <button type="button" onclick="rollTableDice()" class="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs btn-3d shadow">
+                Gooi Opnieuw!
+              </button>
+            </div>
+          </div>
+        `);
+      }
+    }
+
+    function rollTableDice() {
+      const d1 = Math.floor(Math.random() * 6) + 1;
+      const d2 = Math.floor(Math.random() * 6) + 1;
+      const box = document.getElementById('diceBox');
+      if (box) {
+        box.innerHTML = `${renderDieSvg(d1)} ${renderDieSvg(d2)}`;
+        SoundFX.click();
+        triggerHaptic(20);
+      }
+    }
+
+    function openQuickWinModal(gameId = state.activeGameId) {
+      const act = getActivePlayers();
+      const def = getGameDef(gameId);
+      const modalHtml = `
+        <div id="quickWinModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-amber-500/50 rounded-3xl max-w-xs w-full p-5 space-y-3 shadow-2xl text-center">
+            <h3 class="font-black text-sm text-white">👑 Snel Winnaar Registreren</h3>
+            <p class="text-xs text-slate-400">Wie heeft ${def.name} gewonnen?</p>
+            <div class="space-y-1.5 pt-1">
+              ${act.map(p => `
+                <button type="button" onclick="awardQuickWin('${p.id}', '${def.id}')" class="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-amber-400 text-left text-xs font-bold text-white flex items-center justify-between btn-3d">
+                  <span class="flex items-center gap-2">${renderMeepleSvg(p.color, 'w-4 h-4')} ${p.name}</span>
+                  <span>🏆 Wint</span>
+                </button>
+              `).join('')}
+            </div>
+            <button type="button" onclick="document.getElementById('quickWinModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-400 text-xs font-bold btn-3d mt-2">Annuleren</button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function awardQuickWin(playerId, gameId) {
+      const gs = ensureGameState(gameId);
+      const p = state.players.find(x => x.id === playerId);
+      if (gs && p) {
+        if (gs.playerData[playerId]) {
+          gs.playerData[playerId].liveScore = 1;
+        }
+        document.getElementById('quickWinModal')?.remove();
+        openPodiumModal();
+      }
+    }
+
+    // =========================================================================
+    // MODULE 18: GROEPRECORDS, UNDO STACK & WAKE-LOCK
     // =========================================================================
     function checkLiveGroepRecord(gameId, playerId, currentScore) {
       if (!currentScore || currentScore <= 0) return;
@@ -6862,9 +6980,6 @@
       }
     }
 
-    // =========================================================================
-    // 18. UNDO STACK & WAKE-LOCK
-    // =========================================================================
     let undoStack = [];
 
     function pushUndoSnapshot() {
@@ -6921,7 +7036,7 @@
     }
 
     // =========================================================================
-    // 19. BACK-UP IMPORT / EXPORT & TOASTS
+    // MODULE 19: BACK-UP IMPORT / EXPORT & TOASTS
     // =========================================================================
     function exportBackupJson() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
@@ -7036,8 +7151,8 @@
       setTimeout(() => { container.innerHTML = ''; }, 3200);
     }
 
-        // =========================================================================
-    // 20. INITIALISATIE BIJ OPSTARTEN (DOMContentLoaded & OFFLINE PWA REGISTRATIE)
+    // =========================================================================
+    // MODULE 20: INITIALISATIE BIJ OPSTARTEN (DOMContentLoaded & PWA)
     // =========================================================================
     function showUpdateAvailableBanner() {
       const bannerId = 'swUpdateBanner';
@@ -7054,7 +7169,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      // 1. Service Worker registreren & update-check
+      // 1. Service Worker registreren
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
           .then((reg) => {
@@ -7074,7 +7189,7 @@
             const dot = document.getElementById('pwaOfflineDot');
             if (dot) dot.title = 'Offline gereed';
           })
-          .catch((err) => console.log('Service Worker registratie overgeslagen:', err));
+          .catch((err) => console.log('Service Worker overgeslagen:', err));
       }
 
       // 2. State & Thema inladen
@@ -7112,7 +7227,7 @@
     });
   </script>
 
-  <!-- MODALS CONTAINER EN NUMPAD PLACEHOLDER -->
+  <!-- MODALS CONTAINER EN NUMPAD -->
   <div id="podiumModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
     <div class="bg-slate-900 border-2 border-amber-500/60 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl animate-fade-in">
       <div class="flex items-center justify-between border-b border-slate-800 pb-2">
