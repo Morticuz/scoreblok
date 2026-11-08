@@ -5123,18 +5123,49 @@
       document.getElementById('editPlayerModal')?.remove();
     }
 
-       // =========================================================================
-    // 12. HISTORIE, STATISTIEKEN & GRAFIEKEN
+        // =========================================================================
+    // 12. HISTORIE, STATISTIEKEN & GRAFIEKEN (CRASH-PROOF)
     // =========================================================================
     let eloChartInstance = null;
 
     function renderHistoryView() {
-      populateHistoryFilter();
-      renderChampionCupWidget();
-      renderHallOfFame();
-      renderGameRecords();
-      renderHistoryMatchesList();
-      setTimeout(renderEloTimelineChart, 50);
+      try {
+        renderChampionCupWidget();
+      } catch (e) {
+        console.error("Fout in ChampionCup:", e);
+      }
+
+      try {
+        populateHistoryFilter();
+      } catch (e) {
+        console.error("Fout in HistoryFilter:", e);
+      }
+
+      try {
+        renderHallOfFame();
+      } catch (e) {
+        console.error("Fout in HallOfFame:", e);
+      }
+
+      try {
+        renderGameRecords();
+      } catch (e) {
+        console.error("Fout in GameRecords:", e);
+      }
+
+      try {
+        renderHistoryMatchesList();
+      } catch (e) {
+        console.error("Fout in MatchesList:", e);
+      }
+
+      setTimeout(() => {
+        try {
+          renderEloTimelineChart();
+        } catch (e) {
+          console.error("Fout in EloChart:", e);
+        }
+      }, 100);
     }
 
     function populateHistoryFilter() {
@@ -5142,12 +5173,13 @@
       if (!select) return;
 
       const currentVal = select.value || 'all';
-      const playedGameIds = Array.from(new Set((state.history || []).map(m => m.gameId)));
+      const historyList = Array.isArray(state.history) ? state.history : [];
+      const playedGameIds = Array.from(new Set(historyList.map(m => m.gameId).filter(Boolean)));
       
       let html = '<option value="all">🎮 Alle Spellen</option>';
       playedGameIds.forEach(id => {
-        const def = getGameDef(id);
-        html += `<option value="${id}" ${currentVal === id ? 'selected' : ''}>${def.name}</option>`;
+        const def = (typeof getGameDef === 'function' ? getGameDef(id) : null) || { name: id };
+        html += `<option value="${id}" ${currentVal === id ? 'selected' : ''}>${def.name || id}</option>`;
       });
       select.innerHTML = html;
     }
@@ -5157,7 +5189,7 @@
       if (!widget) return;
 
       const holderId = state.championCup?.currentHolder;
-      const holder = state.players.find(p => p.id === holderId);
+      const holder = (state.players || []).find(p => p.id === holderId);
 
       if (!holder) {
         widget.innerHTML = `
@@ -5195,13 +5227,14 @@
 
     function getPlaagTrofeeData() {
       const counts = {};
-      state.players.forEach(p => { 
+      (state.players || []).forEach(p => { 
         counts[p.id] = { id: p.id, name: p.name, color: p.color, count: p.loserCups || 0 }; 
       });
 
       (state.history || []).forEach(match => {
-        if (match.results && match.results.length > 1) {
-          const sorted = [...match.results].sort((a, b) => a.score - b.score);
+        const scores = match.results || match.scores;
+        if (scores && scores.length > 1) {
+          const sorted = [...scores].sort((a, b) => a.score - b.score);
           const loser = sorted[0];
           if (loser && counts[loser.playerId]) {
             counts[loser.playerId].count++;
@@ -5219,9 +5252,13 @@
       const filterGame = document.getElementById('historyGameFilter')?.value || 'all';
       const historyMatches = (state.history || []).filter(m => filterGame === 'all' || m.gameId === filterGame);
 
-      const stats = state.players.map(p => {
-        const played = historyMatches.filter(m => (m.players || []).includes(p.id) || (m.results && m.results.some(r => r.playerId === p.id))).length;
-        const wins = historyMatches.filter(m => (m.winners || []).includes(p.id)).length;
+      const stats = (state.players || []).map(p => {
+        const played = historyMatches.filter(m => 
+          (m.players && m.players.includes(p.id)) || 
+          (m.results && m.results.some(r => r.playerId === p.id)) ||
+          (m.scores && m.scores.some(r => r.playerId === p.id))
+        ).length;
+        const wins = historyMatches.filter(m => m.winners && m.winners.includes(p.id)).length;
         const winPct = played > 0 ? Math.round((wins / played) * 100) : 0;
         return { ...p, played, wins, winPct };
       });
@@ -5278,16 +5315,25 @@
       const canvas = document.getElementById('eloTimelineCanvas');
       if (!canvas || typeof Chart === 'undefined') return;
 
-      const matches = [...(state.history || [])].reverse();
-      const labels = ['Start', ...matches.map((_, i) => `#${i + 1}`)];
+      const historyMatches = Array.isArray(state.history) ? [...state.history].reverse() : [];
+      if (historyMatches.length === 0) {
+        if (eloChartInstance) {
+          eloChartInstance.destroy();
+          eloChartInstance = null;
+        }
+        return;
+      }
 
-      const datasets = state.players.map(p => {
+      const labels = ['Start', ...historyMatches.map((_, i) => `#${i + 1}`)];
+      const datasets = (state.players || []).map(p => {
         let runningElo = 1200;
         const data = [1200];
 
-        matches.forEach(m => {
-          if ((m.players || []).includes(p.id)) {
-            const isWinner = (m.winners || []).includes(p.id);
+        historyMatches.forEach(m => {
+          const inMatch = (m.players && m.players.includes(p.id)) || 
+                          (m.results && m.results.some(r => r.playerId === p.id));
+          if (inMatch) {
+            const isWinner = m.winners && m.winners.includes(p.id);
             runningElo += isWinner ? 16 : -12;
             if (runningElo < 800) runningElo = 800;
           }
@@ -5340,9 +5386,10 @@
 
       const records = {};
       (state.history || []).forEach(m => {
-        (m.results || []).forEach(r => {
+        const scores = m.results || m.scores || [];
+        scores.forEach(r => {
           if (!records[m.gameId] || r.score > records[m.gameId].score) {
-            const p = state.players.find(x => x.id === r.playerId);
+            const p = (state.players || []).find(x => x.id === r.playerId);
             records[m.gameId] = {
               score: r.score,
               playerName: p ? p.name : 'Speler',
@@ -5359,14 +5406,14 @@
       }
 
       grid.innerHTML = keys.map(gId => {
-        const def = getGameDef(gId);
+        const def = (typeof getGameDef === 'function' ? getGameDef(gId) : null) || { name: gId };
         const r = records[gId];
         return `
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
             <div class="flex items-center gap-2 min-w-0">
-              ${renderGameArtwork(gId, 'w-8 h-8')}
+              ${typeof renderGameArtwork === 'function' ? renderGameArtwork(gId, 'w-8 h-8') : ''}
               <div class="min-w-0">
-                <div class="font-bold text-xs text-white truncate">${def.name}</div>
+                <div class="font-bold text-xs text-white truncate">${def.name || gId}</div>
                 <div class="text-[10px] text-slate-400 flex items-center gap-1 truncate">
                   ${renderMeepleSvg(r.playerColor, 'w-2.5 h-2.5')}
                   <span>${r.playerName}</span>
@@ -5390,16 +5437,17 @@
       }
 
       container.innerHTML = history.slice(0, 15).map((m, idx) => {
-        const def = getGameDef(m.gameId);
+        const def = (typeof getGameDef === 'function' ? getGameDef(m.gameId) : null) || { name: m.gameId };
         const dateStr = m.date ? new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }) : '';
-        const winnerNames = (m.winners || []).map(id => state.players.find(x => x.id === id)?.name).filter(Boolean).join(' & ');
+        const winnerNames = (m.winners || []).map(id => (state.players || []).find(x => x.id === id)?.name).filter(Boolean).join(' & ');
+        const scores = m.results || m.scores || [];
 
         return `
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5">
             <div class="flex items-center justify-between text-xs">
               <div class="flex items-center gap-2 min-w-0">
-                ${renderGameArtwork(m.gameId, 'w-6 h-6')}
-                <span class="font-bold text-white truncate">${def.name}</span>
+                ${typeof renderGameArtwork === 'function' ? renderGameArtwork(m.gameId, 'w-6 h-6') : ''}
+                <span class="font-bold text-white truncate">${def.name || m.gameId}</span>
                 <span class="text-[10px] text-slate-500 font-mono">${dateStr}</span>
               </div>
               <div class="flex items-center gap-2">
@@ -5408,8 +5456,8 @@
               </div>
             </div>
             <div class="text-[11px] text-slate-400 flex gap-2 flex-wrap pt-1 border-t border-slate-900">
-              ${(m.results || []).map(r => {
-                const p = state.players.find(x => x.id === r.playerId);
+              ${scores.map(r => {
+                const p = (state.players || []).find(x => x.id === r.playerId);
                 return `<span>${p ? p.name : 'Speler'}: <strong class="text-white font-mono">${r.score}p</strong></span>`;
               }).join(' • ')}
             </div>
