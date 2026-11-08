@@ -365,6 +365,23 @@
         </div>
       </div>
 
+      <!-- TURN TIMER BALK (45 SEC) -->
+      <div id="turnTimerContainer" class="hidden bg-slate-900 border border-indigo-500/40 rounded-2xl p-3 flex items-center justify-between gap-3 shadow-lg">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="text-xl">⏱️</span>
+          <div class="min-w-0">
+            <div class="text-[10px] uppercase font-bold text-slate-400">Aan de beurt:</div>
+            <div id="timerPlayerLabel" class="text-xs sm:text-sm font-black truncate">Speler</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 flex-1 max-w-xs">
+          <div class="w-full bg-slate-950 h-2.5 rounded-full overflow-hidden border border-slate-800">
+            <div id="turnTimerProgressBar" class="h-full bg-indigo-500 transition-all duration-1000 ease-linear" style="width: 100%;"></div>
+          </div>
+          <span id="turnTimerCountdown" class="font-mono font-black text-xs sm:text-sm text-amber-300 w-10 text-right">45s</span>
+        </div>
+      </div>
+
       <div id="endgameAlertBanner" class="hidden bg-amber-500/15 border border-amber-500/40 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-2 text-xs text-amber-200"></div>
       <div id="expansionsBar" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-3 flex flex-wrap items-center gap-2"></div>
       
@@ -674,10 +691,37 @@
       `;
     }
 
-        // =========================================================================
-    // MODULE 2: SPELLEN CATALOGUS (AANGEPAST VOOR HITSTER & PARIJS)
     // =========================================================================
-    // ... (GAME_BADGES en renderGameArtwork blijven ongewijzigd) ...
+    // MODULE 2: SPELLEN CATALOGUS, ARTWORK & ICONS
+    // =========================================================================
+    const GAME_ART_ICONS = {
+      azul: '🧱', seasalt: '🌊', harmonies: '🌲', trio: '7️⃣', scout: '🎪',
+      forestshuffle: '🍂', parijs: '🗼', keeropkeer: '🎲', keeropkeer2: '🎲',
+      regenwormen: '🐛', carcassonne: '🏰', cascadia: '🐻', beverbende: '🦫',
+      beverclan: '🏰', rummikub: '🔢', eldorado: '🗿', take5: '🐂',
+      boonanza: '🌱', pointsalad: '🥗', saboteur: '⛏️', qwinto: '🎲',
+      hitster: '🎵', uno: '🃏', schottentotten: '🪨', loveletter: '💌',
+      explodingkittens: '💣', mars: '🚀', dune: '🪐', everdell: '🌳',
+      wondersduel: '🏛️', splendor: '💎', patchwork: '🧵', kwakzalvers: '🍲',
+      elgrande: '👑', dixit: '🐰', rozenkoning: '🌹', burgundy: '🍇',
+      agricola: '🚜', wingspan: '🪶', wyrmspan: '🐉', arknova: '🦁',
+      brass: '🏭', heat: '🏎️', dorfromantik: '🌾', skyteam: '✈️',
+      decrew: '🚀', codenames: '🕵️', flip7: '7️⃣', catan: '🐑',
+      qwixx: '🎲', clever: '🦊', ttr: '🚂', wonders7: '🏛️',
+      yahtzee: '🎲', skyjo: '🃏', sushigo: '🍣', lostcities: '🧭',
+      koehandel: '🐄', machiavelli: '👑', themind: '🧠', qwirkle: '🔷',
+      doolhof: '🧩', arschmellows: '🔥', gameoftrains: '🚃', snackmatch: '🍿',
+      moddervarkens: '🐷', monopoly: '🎩', risk: '🗺️', cluedo: '🔍',
+      stratego: '🚩', levensweg: '🚗', ganzenbord: '🪿', mensergerjeniet: '🔴',
+      zeeslag: '🚢', trivial: '🥧', scrabble: '🔤', boggle: '🎲',
+      thirtysec: '⏱️', pictionary: '✏️', pesten: '🃏', klaverjas: '🃏',
+      hartenjagen: '♥️', kingen: '👑', free: '🎯'
+    };
+
+    function renderGameArtwork(gameId, sizeClass = 'w-10 h-10') {
+      const icon = GAME_ART_ICONS[gameId] || '🎲';
+      return `<div class="${sizeClass} rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center text-xl shadow-inner select-none shrink-0">${icon}</div>`;
+    }
 
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + patroonlijnen óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
@@ -1019,6 +1063,7 @@
     function dismissCrashBanner() {
       document.getElementById('crashRecoveryBanner')?.classList.add('hidden');
     }
+
 
        // =========================================================================
     // MODULE 4: SPELSTATUS INITIALISATIE & DATAMODELLEN (AANGEPAST)
