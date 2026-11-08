@@ -576,7 +576,7 @@
 
 
   <script>
-    // =========================================================================
+        // =========================================================================
     // MODULE 1: AUDIO, HAPTICS & STATISCHE CONSTANTEN
     // =========================================================================
     const SoundFX = {
@@ -824,12 +824,16 @@
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
 
-    // =========================================================================
+        // =========================================================================
     // MODULE 3: STATE MANAGEMENT, LOCAL STORAGE & NOODHERSTEL
     // =========================================================================
     const STORAGE_KEY = 'scoreblok_pro_v5';
     const SNAPSHOT_KEY = 'scoreblok_pro_autosave_emergency';
     const DRAFT_MATCH_KEY = 'scoreblok_pro_active_draft';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomCodeParam = urlParams.get('room') || Math.random().toString(36).substring(2, 6).toUpperCase();
+    const isSpectatorMode = urlParams.get('mode') === 'tv';
 
     let state = {
       players: [
@@ -857,10 +861,15 @@
       apTimerEnabled: false,
       layoutOrientation: 'portrait',
       appTheme: 'indigo',
+      roomCode: roomCodeParam,
+      isHost: !urlParams.has('room') || urlParams.get('role') !== 'client',
       championCup: { currentHolder: null, previousHolder: null },
       gamesState: {},
       history: []
     };
+
+    // Hier één keer gedefinieerd
+    let undoStack = [];
 
     function loadState() {
       try {
@@ -912,8 +921,17 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         updateDraftSession();
+        if (typeof SyncEngine !== 'undefined') {
+          SyncEngine.broadcastFullState();
+        }
       } catch (e) {
         console.error('Kon state niet opslaan:', e);
+      }
+    }
+
+    function broadcastLiveState() {
+      if (typeof SyncEngine !== 'undefined') {
+        SyncEngine.broadcastFullState();
       }
     }
 
@@ -1078,17 +1096,6 @@
       document.getElementById('crashRecoveryBanner')?.classList.add('hidden');
     }
 
-
-           // =========================================================================
-    // MODAL STEPPER HELPER (VOORKOMT ATTRIBUTE-BREAKING INLINES)
-    // =========================================================================
-    function updateModalStepperVal(inputId, nextVal) {
-      const el = document.getElementById(inputId);
-      if (el) {
-        el.value = Math.max(0, Number(nextVal || 0));
-        triggerHaptic(10);
-      }
-    }
 
     // =========================================================================
     // MODULE 4: SPELSTATUS INITIALISATIE & DATAMODELLEN
@@ -6319,181 +6326,222 @@
       showToast(`🗑️ ${g.name} verwijderd.`);
     }
 
-       // =========================================================================
-    // MODULE 15: LIVE WEBRTC SYNC ENGINE (HOST & GAST)
+         // =========================================================================
+    // MODULE 15: HYBRIDE SYNC ENGINE (BROADCASTCHANNEL & PEERJS)
     // =========================================================================
-    let peerInstance = null;
-    let peerConnections = [];
+    const SyncEngine = {
+      broadcastChan: null,
+      peer: null,
+      conns: [],
+      hostConn: null,
 
-    function openLiveRoomModal() {
-      let modal = document.getElementById('liveRoomModal');
-      if (!modal) {
-        document.body.insertAdjacentHTML('beforeend', `
-          <div id="liveRoomModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-emerald-500/40 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center">
-              <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                <div class="flex items-center gap-2">
-                  <span class="text-2xl">📡</span>
-                  <h3 class="font-black text-sm text-white">Live Tafel Synchronisatie</h3>
-                </div>
-                <button type="button" onclick="document.getElementById('liveRoomModal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
-              </div>
+      init() {
+        const room = state.roomCode;
 
-              <div class="space-y-3 text-xs text-left">
-                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
-                  <div class="font-bold text-emerald-400">1. Start als Tafel-Host:</div>
-                  <p class="text-[11px] text-slate-400">Laat medespelers meekijken of scoren via hun eigen telefoon.</p>
-                  <button type="button" onclick="startHostPeerSession()" class="w-full py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs btn-3d">
-                    📡 Tafel Openen & QR Tonen
-                  </button>
-                </div>
-
-                <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
-                  <div class="font-bold text-indigo-400">2. Aanschuiven bij Tafel:</div>
-                  <div class="flex gap-2">
-                    <input type="text" id="joinPeerCodeInput" placeholder="Code van host..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
-                    <button type="button" onclick="connectToHostPeer()" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs btn-3d">Verbind</button>
-                  </div>
-                </div>
-              </div>
-
-              <div id="liveHostQrDisplay" class="hidden bg-white p-3 rounded-2xl inline-block mx-auto shadow-inner"></div>
-              <div id="liveHostCodeText" class="hidden text-xs font-mono font-bold text-emerald-300"></div>
-
-              <button type="button" onclick="document.getElementById('liveRoomModal').classList.add('hidden')" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">Sluiten</button>
-            </div>
-          </div>
-        `);
-        modal = document.getElementById('liveRoomModal');
-      }
-
-      modal.classList.remove('hidden');
-    }
-
-    function startHostPeerSession() {
-      try {
-        if (peerInstance) {
-          try { peerInstance.destroy(); } catch(e) {}
+        // 1. Lokale tabbladen (0ms vertraging, 100% offline)
+        try {
+          this.broadcastChan = new BroadcastChannel('bordspel_room_' + room);
+          this.broadcastChan.onmessage = (ev) => this.handleIncomingMessage(ev.data);
+        } catch (e) {
+          console.warn('BroadcastChannel niet beschikbaar:', e);
         }
-        peerInstance = new Peer();
-        peerInstance.on('open', id => {
-          const qrBox = document.getElementById('liveHostQrDisplay');
-          const codeTxt = document.getElementById('liveHostCodeText');
-          if (qrBox && codeTxt) {
-            qrBox.innerHTML = '';
-            new QRCode(qrBox, { 
-              text: window.location.origin + window.location.pathname + '?join=' + id, 
-              width: 140, 
-              height: 140,
-              colorDark: "#020617",
-              colorLight: "#ffffff",
-              correctLevel: QRCode.CorrectLevel.M
+
+        // 2. WebRTC PeerJS
+        if (typeof Peer !== 'undefined') {
+          const peerId = state.isHost ? `bsp-host-${room}` : `bsp-cli-${room}-${Math.random().toString(36).substr(2, 5)}`;
+          this.peer = new Peer(peerId);
+
+          this.peer.on('open', () => {
+            this.updateSyncBadge(true);
+            if (!state.isHost) {
+              this.connectToHost(`bsp-host-${room}`);
+            }
+          });
+
+          this.peer.on('connection', (conn) => {
+            this.conns.push(conn);
+            this.updatePeerCount();
+
+            conn.on('data', (data) => this.handleIncomingMessage(data));
+            conn.on('open', () => {
+              conn.send({ type: 'SYNC_FULL_STATE', state: state });
             });
-            qrBox.classList.remove('hidden');
-            codeTxt.textContent = 'Kamer code: ' + id;
-            codeTxt.classList.remove('hidden');
+            conn.on('close', () => {
+              this.conns = this.conns.filter(c => c !== conn);
+              this.updatePeerCount();
+            });
+          });
+
+          this.peer.on('error', (err) => {
+            console.warn('PeerJS notice:', err);
+            this.updateSyncBadge(false);
+          });
+        }
+      },
+
+      connectToHost(hostPeerId) {
+        if (!this.peer) return;
+        this.hostConn = this.peer.connect(hostPeerId);
+        this.hostConn.on('data', (data) => this.handleIncomingMessage(data));
+        this.hostConn.on('open', () => {
+          showToast('🔗 Verbonden met speeltafel!');
+          this.updateSyncBadge(true);
+        });
+      },
+
+      broadcastFullState() {
+        const msg = {
+          type: 'SYNC_FULL_STATE',
+          state: state,
+          timestamp: Date.now()
+        };
+
+        if (this.broadcastChan) {
+          this.broadcastChan.postMessage(msg);
+        }
+
+        this.conns.forEach(c => {
+          if (c.open) c.send(msg);
+        });
+      },
+
+      sendAction(action, payload) {
+        if (state.isHost) {
+          executeHostAction(action, payload);
+          saveState();
+          return;
+        }
+
+        const msg = { type: 'PLAYER_MUTATION', action, payload, timestamp: Date.now() };
+        if (this.hostConn && this.hostConn.open) {
+          this.hostConn.send(msg);
+        } else if (this.broadcastChan) {
+          this.broadcastChan.postMessage(msg);
+        }
+      },
+
+      handleIncomingMessage(msg) {
+        if (!msg || !msg.type) return;
+
+        if (msg.type === 'SYNC_FULL_STATE') {
+          Object.assign(state, msg.state);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          renderScoreboard();
+          if (isSpectatorMode && typeof updateTvDisplay === 'function') {
+            updateTvDisplay();
           }
-          showToast('📡 Tafel is geopend voor verbindingen!');
-        });
-
-        peerInstance.on('connection', conn => {
-          peerConnections.push(conn);
-          conn.on('data', data => handleIncomingPeerData(data, conn));
-          broadcastLiveState();
-          showToast('👋 Medespeler verbonden!');
-        });
-
-        peerInstance.on('error', err => {
-          showToast('⚠️ Host fout: ' + err.type);
-        });
-      } catch (e) {
-        showToast('⚠️ Kon live verbinding niet starten.');
-      }
-    }
-
-    function connectToHostPeer(directCode = null) {
-      const code = (directCode || document.getElementById('joinPeerCodeInput')?.value || '').trim();
-      if (!code) {
-        showToast('⚠️ Geen geldige tafelcode ingevoerd.');
-        return;
-      }
-
-      if (peerInstance) {
-        try { peerInstance.destroy(); } catch(e) {}
-      }
-      peerInstance = new Peer();
-
-      peerInstance.on('open', () => {
-        showToast('🔄 Verbinden met tafel...');
-        const conn = peerInstance.connect(code, { reliable: true });
-        conn.on('open', () => {
-          peerConnections = [conn];
-          showToast('✅ Verbonden met de live tafel!');
-          document.getElementById('liveRoomModal')?.classList.add('hidden');
-        });
-        conn.on('data', data => handleIncomingPeerData(data, conn));
-        conn.on('error', err => showToast('⚠️ Verbindingsfout: ' + err));
-      });
-
-      peerInstance.on('error', err => {
-        showToast('⚠️ PeerJS serverfout: ' + err.type);
-      });
-    }
-
-    function broadcastLiveState() {
-      if (!peerConnections.length) return;
-      const payload = {
-        type: 'state_sync',
-        state: state
-      };
-      peerConnections.forEach(c => {
-        if (c.open) c.send(payload);
-      });
-    }
-
-    function handleIncomingPeerData(data) {
-      if (!data) return;
-
-      if (data.type === 'state_sync') {
-        state = { ...state, ...data.state };
-        renderScoreboard();
-      } else if (data.type === 'action') {
-        if (data.action === 'add_live_points') {
-          const gs = ensureGameState(data.gameId);
-          gs.playerData[data.playerId].liveScore = Number(gs.playerData[data.playerId].liveScore || 0) + data.delta;
+        } else if (msg.type === 'PLAYER_MUTATION' && state.isHost) {
+          executeHostAction(msg.action, msg.payload);
           saveState();
-          broadcastLiveState();
-          renderScoreboard();
-        } else if (data.action === 'set_category_val') {
-          const gs = ensureGameState(data.gameId);
-          if (!gs.playerData[data.playerId].categories) gs.playerData[data.playerId].categories = {};
-          gs.playerData[data.playerId].categories[data.category] = Number(data.val || 0);
-          saveState();
-          broadcastLiveState();
-          renderScoreboard();
+        }
+      },
+
+      updateSyncBadge(connected) {
+        const textEl = document.getElementById('syncStatusText');
+        const dotEl = document.getElementById('syncStatusDot');
+        if (textEl && dotEl) {
+          if (connected) {
+            dotEl.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+            textEl.textContent = state.isHost ? 'Tafel Live' : 'Verbonden';
+          } else {
+            dotEl.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+            textEl.textContent = 'Lokaal';
+          }
+        }
+      },
+
+      updatePeerCount() {
+        const el = document.getElementById('connectedPeersCount');
+        if (el) {
+          el.textContent = `Verbonden apparaten: ${this.conns.length + 1} (${state.isHost ? 'Host + Telefoons' : 'Cliënt'})`;
         }
       }
+    };
+
+    function executeHostAction(action, payload) {
+      const gs = ensureGameState(payload.gameId || state.activeGameId);
+
+      switch (action) {
+        case 'set_category_val': {
+          const { playerId, category, val } = payload;
+          if (gs.playerData[playerId]?.categories) {
+            gs.playerData[playerId].categories[category] = Number(val || 0);
+          }
+          break;
+        }
+        case 'add_live_points': {
+          const { playerId, delta } = payload;
+          const cur = Number(gs.playerData[playerId]?.liveScore || 0);
+          gs.playerData[playerId].liveScore = Math.max(0, cur + Number(delta));
+          break;
+        }
+        case 'toggle_catan_award': {
+          const { playerId, awardKey } = payload;
+          const cur = !!gs.playerData[playerId]?.catan?.[awardKey];
+          state.players.forEach(p => {
+            if (gs.playerData[p.id]?.catan) gs.playerData[p.id].catan[awardKey] = false;
+          });
+          gs.playerData[playerId].catan[awardKey] = !cur;
+          break;
+        }
+        case 'cycle_turn': {
+          cycleActiveTurn(payload.delta || 1);
+          break;
+        }
+        default:
+          console.warn('Onbekende actie ontvangen:', action, payload);
+      }
+      renderLiveLeaderboard();
     }
 
-    function sendActionToHost(actionName, payload) {
-      if (peerConnections.length) {
-        peerConnections.forEach(c => {
-          if (c.open) c.send({ type: 'action', action: actionName, ...payload });
+    function sendActionToHost(action, payload) {
+      SyncEngine.sendAction(action, payload);
+    }
+
+    function openLiveTafelModal() {
+      const modal = document.getElementById('liveTafelModal');
+      const codeDisplay = document.getElementById('syncRoomCodeDisplay');
+      const qrBox = document.getElementById('syncQrCodeContainer');
+      if (!modal || !codeDisplay) return;
+
+      codeDisplay.textContent = state.roomCode;
+      modal.classList.remove('hidden');
+
+      if (qrBox && typeof QRCode !== 'undefined') {
+        qrBox.innerHTML = '';
+        const joinUrl = `${window.location.origin}${window.location.pathname}?room=${state.roomCode}&role=client`;
+        new QRCode(qrBox, {
+          text: joinUrl,
+          width: 140,
+          height: 140,
+          colorDark: "#020617",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
         });
       }
-      if (actionName === 'add_live_points') {
-        const gs = ensureGameState(payload.gameId);
-        gs.playerData[payload.playerId].liveScore = Number(gs.playerData[payload.playerId].liveScore || 0) + payload.delta;
-        saveState();
-        renderScoreboard();
-      } else if (actionName === 'set_category_val') {
-        const gs = ensureGameState(payload.gameId);
-        if (!gs.playerData[payload.playerId].categories) gs.playerData[payload.playerId].categories = {};
-        gs.playerData[payload.playerId].categories[payload.category] = Number(payload.val || 0);
-        saveState();
-        renderScoreboard();
-      }
     }
+
+    function closeLiveTafelModal() {
+      document.getElementById('liveTafelModal')?.classList.add('hidden');
+    }
+
+    function copySessionLink() {
+      const joinUrl = `${window.location.origin}${window.location.pathname}?room=${state.roomCode}&role=client`;
+      navigator.clipboard.writeText(joinUrl).then(() => {
+        showToast('📋 Deelbare link gekopieerd!');
+      });
+    }
+
+    function openTvSpectatorWindow() {
+      const tvUrl = `${window.location.origin}${window.location.pathname}?room=${state.roomCode}&mode=tv`;
+      window.open(tvUrl, '_blank', 'noopener,noreferrer');
+    }
+
+    function updateTvDisplay() {
+      if (!isSpectatorMode) return;
+      switchMainView('spectator');
+    }
+
     // =========================================================================
     // MODULE 16: PODIUM MODAL, RESULTAAT GENERATOR & SPELAVOND ENGINE
     // =========================================================================
@@ -7441,8 +7489,8 @@
       }
     }
 
-    // =========================================================================
-    // MODULE 18: GROEPRECORDS, UNDO STACK & WAKE-LOCK
+        // =========================================================================
+    // MODULE 18: GROEPRECORDS, UNDO ACTIES & WAKE-LOCK
     // =========================================================================
     function checkLiveGroepRecord(gameId, playerId, currentScore) {
       if (!currentScore || currentScore <= 0) return;
@@ -7462,8 +7510,6 @@
         showToast(`🎉 NIEUW GROEPRECORD! ${currentScore} punten!`);
       }
     }
-
-    let undoStack = [];
 
     function pushUndoSnapshot() {
       try {
