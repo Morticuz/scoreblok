@@ -575,8 +575,8 @@
   </div>
 
 
-  <script>
-        // =========================================================================
+   <script>
+    // =========================================================================
     // MODULE 1: AUDIO, HAPTICS & STATISCHE CONSTANTEN
     // =========================================================================
     const SoundFX = {
@@ -868,8 +868,186 @@
       history: []
     };
 
-    // Hier één keer gedefinieerd
     let undoStack = [];
+
+    // --- HYBRIDE ENGINE (MOET HIER STAAN VOOR SAVESTATE) ---
+    const SyncEngine = {
+      broadcastChan: null,
+      peer: null,
+      conns: [],
+      hostConn: null,
+
+      init() {
+        const room = state.roomCode;
+        try {
+          this.broadcastChan = new BroadcastChannel('bordspel_room_' + room);
+          this.broadcastChan.onmessage = (ev) => this.handleIncomingMessage(ev.data);
+        } catch (e) {
+          console.warn('BroadcastChannel niet beschikbaar:', e);
+        }
+
+        if (typeof Peer !== 'undefined') {
+          const peerId = state.isHost ? `bsp-host-${room}` : `bsp-cli-${room}-${Math.random().toString(36).substr(2, 5)}`;
+          this.peer = new Peer(peerId);
+
+          this.peer.on('open', () => {
+            this.updateSyncBadge(true);
+            if (!state.isHost) {
+              this.connectToHost(`bsp-host-${room}`);
+            }
+          });
+
+          this.peer.on('connection', (conn) => {
+            this.conns.push(conn);
+            this.updatePeerCount();
+
+            conn.on('data', (data) => this.handleIncomingMessage(data));
+            conn.on('open', () => {
+              conn.send({ type: 'SYNC_FULL_STATE', state: state });
+            });
+            conn.on('close', () => {
+              this.conns = this.conns.filter(c => c !== conn);
+              this.updatePeerCount();
+            });
+          });
+
+          this.peer.on('error', (err) => {
+            console.warn('PeerJS notice:', err);
+            this.updateSyncBadge(false);
+          });
+        }
+      },
+
+      connectToHost(hostPeerId) {
+        if (!this.peer) return;
+        this.hostConn = this.peer.connect(hostPeerId);
+        this.hostConn.on('data', (data) => this.handleIncomingMessage(data));
+        this.hostConn.on('open', () => {
+          showToast('🔗 Verbonden met speeltafel!');
+          this.updateSyncBadge(true);
+        });
+      },
+
+      broadcastFullState() {
+        const msg = {
+          type: 'SYNC_FULL_STATE',
+          state: state,
+          timestamp: Date.now()
+        };
+        if (this.broadcastChan) {
+          this.broadcastChan.postMessage(msg);
+        }
+        this.conns.forEach(c => {
+          if (c.open) c.send(msg);
+        });
+      },
+
+      sendAction(action, payload) {
+        if (state.isHost) {
+          executeHostAction(action, payload);
+          saveState();
+          return;
+        }
+
+        const msg = { type: 'PLAYER_MUTATION', action, payload, timestamp: Date.now() };
+        if (this.hostConn && this.hostConn.open) {
+          this.hostConn.send(msg);
+        } else if (this.broadcastChan) {
+          this.broadcastChan.postMessage(msg);
+        }
+      },
+
+      handleIncomingMessage(msg) {
+        if (!msg || !msg.type) return;
+
+        if (msg.type === 'SYNC_FULL_STATE') {
+          Object.assign(state, msg.state);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          renderScoreboard();
+          if (isSpectatorMode && typeof updateTvDisplay === 'function') {
+            updateTvDisplay();
+          }
+        } else if (msg.type === 'PLAYER_MUTATION' && state.isHost) {
+          executeHostAction(msg.action, msg.payload);
+          saveState();
+        }
+      },
+
+      updateSyncBadge(connected) {
+        const textEl = document.getElementById('syncStatusText');
+        const dotEl = document.getElementById('syncStatusDot');
+        if (textEl && dotEl) {
+          if (connected) {
+            dotEl.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
+            textEl.textContent = state.isHost ? 'Tafel Live' : 'Verbonden';
+          } else {
+            dotEl.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
+            textEl.textContent = 'Lokaal';
+          }
+        }
+      },
+
+      updatePeerCount() {
+        const el = document.getElementById('connectedPeersCount');
+        if (el) {
+          el.textContent = `Verbonden apparaten: ${this.conns.length + 1} (${state.isHost ? 'Host + Telefoons' : 'Cliënt'})`;
+        }
+      }
+    };
+
+    function executeHostAction(action, payload) {
+      const gs = ensureGameState(payload.gameId || state.activeGameId);
+
+      switch (action) {
+        case 'set_category_val': {
+          const { playerId, category, val } = payload;
+          if (gs.playerData[playerId]?.categories) {
+            gs.playerData[playerId].categories[category] = Number(val || 0);
+          }
+          break;
+        }
+        case 'add_live_points': {
+          const { playerId, delta } = payload;
+          const cur = Number(gs.playerData[playerId]?.liveScore || 0);
+          gs.playerData[playerId].liveScore = Math.max(0, cur + Number(delta));
+          break;
+        }
+        case 'toggle_catan_award': {
+          const { playerId, awardKey } = payload;
+          const cur = !!gs.playerData[playerId]?.catan?.[awardKey];
+          state.players.forEach(p => {
+            if (gs.playerData[p.id]?.catan) gs.playerData[p.id].catan[awardKey] = false;
+          });
+          gs.playerData[playerId].catan[awardKey] = !cur;
+          break;
+        }
+        case 'cycle_turn': {
+          cycleActiveTurn(payload.delta || 1);
+          break;
+        }
+        default:
+          console.warn('Onbekende actie ontvangen:', action, payload);
+      }
+      renderLiveLeaderboard();
+    }
+
+    function sendActionToHost(action, payload) {
+      SyncEngine.sendAction(action, payload);
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        updateDraftSession();
+        SyncEngine.broadcastFullState();
+      } catch (e) {
+        console.error('Kon state niet opslaan:', e);
+      }
+    }
+
+    function broadcastLiveState() {
+      SyncEngine.broadcastFullState();
+    }
 
     function loadState() {
       try {
@@ -907,31 +1085,10 @@
             if (p.tournamentCups === undefined) p.tournamentCups = 0;
             if (p.loserCups === undefined) p.loserCups = 0;
           });
-        } else {
-          state.pickerTab = 'all';
         }
-
         checkUnfinishedDraftBanner();
       } catch (e) {
         console.error('Kon state niet laden:', e);
-      }
-    }
-
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-        updateDraftSession();
-        if (typeof SyncEngine !== 'undefined') {
-          SyncEngine.broadcastFullState();
-        }
-      } catch (e) {
-        console.error('Kon state niet opslaan:', e);
-      }
-    }
-
-    function broadcastLiveState() {
-      if (typeof SyncEngine !== 'undefined') {
-        SyncEngine.broadcastFullState();
       }
     }
 
@@ -997,104 +1154,6 @@
       showToast('🗑️ Conceptpotje verwijderd.');
     }
 
-    function getAllGames() {
-      return [...BUILTIN_GAMES, ...(state.customGames || [])];
-    }
-
-    function getGameDef(gameId = state.activeGameId) {
-      return getAllGames().find(g => g.id === gameId) || BUILTIN_GAMES[0];
-    }
-
-    function getActivePlayers() {
-      return (state.players || []).filter(p => p.active !== false);
-    }
-
-    function isLowestWins(gameId = state.activeGameId) {
-      const def = getGameDef(gameId);
-      const gs = state.gamesState?.[gameId];
-      if (gs && typeof gs.lowestWinsOverride === 'boolean') return gs.lowestWinsOverride;
-      return !!def.lowestWins;
-    }
-
-    function valOrEmpty(v) {
-      return (v !== undefined && v !== null && Number(v) !== 0) ? v : '';
-    }
-
-    function renderNumberStepper(id, value, changeHandlerJs, step = 1, min = 0) {
-      const val = Number(value || 0);
-      const safeCall = (targetVal) => `(${changeHandlerJs})(${targetVal})`;
-      return `
-        <div class="inline-flex items-center bg-slate-950 border border-slate-700/80 rounded-xl p-0.5 shadow-inner shrink-0">
-          <button type="button" onclick="SoundFX.minus(); ${safeCall(`Math.max(${min}, ${val - step})`)}" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 font-black text-sm flex items-center justify-center transition shrink-0 btn-3d">-</button>
-          <input type="number" inputmode="numeric" pattern="[0-9]*" id="${id}" value="${valOrEmpty(val)}" placeholder="0" oninput="${safeCall('this.value')}" class="w-12 bg-transparent text-center font-mono font-black text-sm text-white focus:outline-none placeholder-slate-600" />
-          <button type="button" onclick="SoundFX.plus(); ${safeCall(`${val + step}`)}" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black text-sm flex items-center justify-center transition shrink-0 btn-3d">+</button>
-        </div>
-      `;
-    }
-
-    function openSettingsModal() {
-      const hCheck = document.getElementById('settingHapticCheck');
-      const aCheck = document.getElementById('settingAudioCheck');
-      const apCheck = document.getElementById('settingApTimerCheck');
-      if (hCheck) hCheck.checked = (state.hapticFeedback !== false);
-      if (aCheck) aCheck.checked = (!state.audioMuted);
-      if (apCheck) apCheck.checked = !!state.apTimerEnabled;
-      
-      updateThemeButtonsUI();
-      document.getElementById('settingsModal')?.classList.remove('hidden');
-    }
-
-    function closeSettingsModal() {
-      document.getElementById('settingsModal')?.classList.add('hidden');
-    }
-
-    function setAppTheme(themeKey) {
-      state.appTheme = themeKey;
-      applyAppTheme();
-      updateThemeButtonsUI();
-      triggerHaptic(20);
-      SoundFX.click();
-      saveState();
-    }
-
-    function applyAppTheme() {
-      const theme = state.appTheme || 'indigo';
-      document.body.classList.remove('theme-indigo', 'theme-felt', 'theme-wood', 'theme-midnight');
-      document.body.classList.add(`theme-${theme}`);
-    }
-
-    function updateThemeButtonsUI() {
-      const current = state.appTheme || 'indigo';
-      ['indigo', 'felt', 'wood', 'midnight'].forEach(key => {
-        const btn = document.getElementById(`themeBtn_${key}`);
-        if (!btn) return;
-        if (key === current) {
-          btn.className = "p-2 rounded-xl border border-indigo-400 bg-indigo-600 text-white font-extrabold text-[11px] shadow-sm btn-3d";
-        } else {
-          btn.className = "p-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:text-white font-bold text-[11px] btn-3d";
-        }
-      });
-    }
-
-    function toggleHapticSetting(val) {
-      state.hapticFeedback = val;
-      if (val) triggerHaptic(40);
-      saveState();
-    }
-
-    function toggleAudioSetting(val) {
-      state.audioMuted = !val;
-      saveState();
-    }
-
-    function toggleApTimerSetting(val) {
-      state.apTimerEnabled = val;
-      saveState();
-    }
-
-    function dismissCrashBanner() {
-      document.getElementById('crashRecoveryBanner')?.classList.add('hidden');
-    }
 
 
     // =========================================================================
@@ -6327,177 +6386,8 @@
     }
 
          // =========================================================================
-    // MODULE 15: HYBRIDE SYNC ENGINE (BROADCASTCHANNEL & PEERJS)
+    // MODULE 15: LIVE TAFEL MODAL & TV SPECTATOR ROUTER
     // =========================================================================
-    const SyncEngine = {
-      broadcastChan: null,
-      peer: null,
-      conns: [],
-      hostConn: null,
-
-      init() {
-        const room = state.roomCode;
-
-        // 1. Lokale tabbladen (0ms vertraging, 100% offline)
-        try {
-          this.broadcastChan = new BroadcastChannel('bordspel_room_' + room);
-          this.broadcastChan.onmessage = (ev) => this.handleIncomingMessage(ev.data);
-        } catch (e) {
-          console.warn('BroadcastChannel niet beschikbaar:', e);
-        }
-
-        // 2. WebRTC PeerJS
-        if (typeof Peer !== 'undefined') {
-          const peerId = state.isHost ? `bsp-host-${room}` : `bsp-cli-${room}-${Math.random().toString(36).substr(2, 5)}`;
-          this.peer = new Peer(peerId);
-
-          this.peer.on('open', () => {
-            this.updateSyncBadge(true);
-            if (!state.isHost) {
-              this.connectToHost(`bsp-host-${room}`);
-            }
-          });
-
-          this.peer.on('connection', (conn) => {
-            this.conns.push(conn);
-            this.updatePeerCount();
-
-            conn.on('data', (data) => this.handleIncomingMessage(data));
-            conn.on('open', () => {
-              conn.send({ type: 'SYNC_FULL_STATE', state: state });
-            });
-            conn.on('close', () => {
-              this.conns = this.conns.filter(c => c !== conn);
-              this.updatePeerCount();
-            });
-          });
-
-          this.peer.on('error', (err) => {
-            console.warn('PeerJS notice:', err);
-            this.updateSyncBadge(false);
-          });
-        }
-      },
-
-      connectToHost(hostPeerId) {
-        if (!this.peer) return;
-        this.hostConn = this.peer.connect(hostPeerId);
-        this.hostConn.on('data', (data) => this.handleIncomingMessage(data));
-        this.hostConn.on('open', () => {
-          showToast('🔗 Verbonden met speeltafel!');
-          this.updateSyncBadge(true);
-        });
-      },
-
-      broadcastFullState() {
-        const msg = {
-          type: 'SYNC_FULL_STATE',
-          state: state,
-          timestamp: Date.now()
-        };
-
-        if (this.broadcastChan) {
-          this.broadcastChan.postMessage(msg);
-        }
-
-        this.conns.forEach(c => {
-          if (c.open) c.send(msg);
-        });
-      },
-
-      sendAction(action, payload) {
-        if (state.isHost) {
-          executeHostAction(action, payload);
-          saveState();
-          return;
-        }
-
-        const msg = { type: 'PLAYER_MUTATION', action, payload, timestamp: Date.now() };
-        if (this.hostConn && this.hostConn.open) {
-          this.hostConn.send(msg);
-        } else if (this.broadcastChan) {
-          this.broadcastChan.postMessage(msg);
-        }
-      },
-
-      handleIncomingMessage(msg) {
-        if (!msg || !msg.type) return;
-
-        if (msg.type === 'SYNC_FULL_STATE') {
-          Object.assign(state, msg.state);
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          renderScoreboard();
-          if (isSpectatorMode && typeof updateTvDisplay === 'function') {
-            updateTvDisplay();
-          }
-        } else if (msg.type === 'PLAYER_MUTATION' && state.isHost) {
-          executeHostAction(msg.action, msg.payload);
-          saveState();
-        }
-      },
-
-      updateSyncBadge(connected) {
-        const textEl = document.getElementById('syncStatusText');
-        const dotEl = document.getElementById('syncStatusDot');
-        if (textEl && dotEl) {
-          if (connected) {
-            dotEl.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse';
-            textEl.textContent = state.isHost ? 'Tafel Live' : 'Verbonden';
-          } else {
-            dotEl.className = 'w-1.5 h-1.5 rounded-full bg-slate-500';
-            textEl.textContent = 'Lokaal';
-          }
-        }
-      },
-
-      updatePeerCount() {
-        const el = document.getElementById('connectedPeersCount');
-        if (el) {
-          el.textContent = `Verbonden apparaten: ${this.conns.length + 1} (${state.isHost ? 'Host + Telefoons' : 'Cliënt'})`;
-        }
-      }
-    };
-
-    function executeHostAction(action, payload) {
-      const gs = ensureGameState(payload.gameId || state.activeGameId);
-
-      switch (action) {
-        case 'set_category_val': {
-          const { playerId, category, val } = payload;
-          if (gs.playerData[playerId]?.categories) {
-            gs.playerData[playerId].categories[category] = Number(val || 0);
-          }
-          break;
-        }
-        case 'add_live_points': {
-          const { playerId, delta } = payload;
-          const cur = Number(gs.playerData[playerId]?.liveScore || 0);
-          gs.playerData[playerId].liveScore = Math.max(0, cur + Number(delta));
-          break;
-        }
-        case 'toggle_catan_award': {
-          const { playerId, awardKey } = payload;
-          const cur = !!gs.playerData[playerId]?.catan?.[awardKey];
-          state.players.forEach(p => {
-            if (gs.playerData[p.id]?.catan) gs.playerData[p.id].catan[awardKey] = false;
-          });
-          gs.playerData[playerId].catan[awardKey] = !cur;
-          break;
-        }
-        case 'cycle_turn': {
-          cycleActiveTurn(payload.delta || 1);
-          break;
-        }
-        default:
-          console.warn('Onbekende actie ontvangen:', action, payload);
-      }
-      renderLiveLeaderboard();
-    }
-
-    function sendActionToHost(action, payload) {
-      SyncEngine.sendAction(action, payload);
-    }
-
     function openLiveTafelModal() {
       const modal = document.getElementById('liveTafelModal');
       const codeDisplay = document.getElementById('syncRoomCodeDisplay');
@@ -6541,6 +6431,7 @@
       if (!isSpectatorMode) return;
       switchMainView('spectator');
     }
+
 
     // =========================================================================
     // MODULE 16: PODIUM MODAL, RESULTAAT GENERATOR & SPELAVOND ENGINE
