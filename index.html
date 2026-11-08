@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Scoreblok Pro</title>
+  <title>Scoreblok Pro - Live Tafel</title>
   <meta name="theme-color" content="#020617" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -15,7 +15,7 @@
 
   <!-- Tailwind CSS & Externe CDN Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Google Cast Web SDK -->
@@ -171,41 +171,6 @@
       border-color: rgba(51, 65, 85, 0.6) !important;
     }
 
-    @keyframes floatScoreUp {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, 0) scale(0.6);
-      }
-      25% {
-        opacity: 1;
-        transform: translate(-50%, -15px) scale(1.15);
-      }
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -45px) scale(0.9);
-      }
-    }
-    .floating-score-badge {
-      position: absolute;
-      left: 50%;
-      top: 20%;
-      transform: translateX(-50%);
-      pointer-events: none;
-      z-index: 40;
-      font-weight: 900;
-      font-family: monospace;
-      animation: floatScoreUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes scorePop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.22); filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.6)); }
-      100% { transform: scale(1); }
-    }
-    .animate-score-pop {
-      animation: scorePop 0.35s ease-out forwards;
-    }
-
     .tv-watermark-bg {
       position: absolute;
       right: -30px;
@@ -248,7 +213,10 @@
           <button type="button" onclick="openDiceRollerModal()" class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">🎲 Dobbelen</button>
           <button type="button" onclick="openStartTournamentModal()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">🏆 Competitie</button>
           <button type="button" onclick="openWhoStartsMenu()" class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">🎲 Wie begint?</button>
-          <button type="button" onclick="openLiveRoomModal()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d">📡 Live Tafel</button>
+          <button type="button" onclick="openLiveTafelModal()" id="btnLiveTafelHeader" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold whitespace-nowrap shadow-sm btn-3d flex items-center gap-1">
+            <span id="syncStatusDot" class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            <span id="syncStatusText">📡 Live Tafel</span>
+          </button>
         </div>
       </div>
 
@@ -355,7 +323,7 @@
         <div class="flex flex-wrap items-center gap-1.5 ml-auto">
           <button type="button" id="teamModeToggleBtn" onclick="toggleTeamMode()" class="px-2.5 py-2 rounded-xl text-xs font-black border transition bg-slate-800 text-slate-300 btn-3d" title="Wissel Solo / Teams">👤 Solo</button>
           <button type="button" onclick="openSettingsModal()" class="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-3d" title="Instellingen">⚙️</button>
-          <button type="button" onclick="openShareQrModal('table')" class="px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition flex items-center gap-1 btn-3d" title="Deel huidige tussenstand via QR">📱 Deel</button>
+          <button type="button" onclick="openLiveTafelModal()" class="px-3 py-2 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold transition flex items-center gap-1 btn-3d" title="Open Live Tafel Synchronisatie">📡 Tafel</button>
           <button type="button" id="roundGraphBtn" onclick="showRoundGraph()" class="hidden px-3 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 text-xs font-extrabold transition btn-3d">📈 Verloop</button>
           <button type="button" id="undoActionBtn" onclick="undoLastScoreAction()" disabled class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-35 text-amber-300 text-xs font-extrabold transition btn-3d" title="Maak laatste actie ongedaan">↩️ Oeps</button>
           <button type="button" onclick="switchMainView('players')" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold btn-3d" title="Wijzig tafelvolgorde">🪑 Tafel</button>
@@ -560,6 +528,52 @@
     </section>
 
   </main>
+
+  <!-- LIVE TAFEL MODAL (HYBRIDE WEBRTC & QR) -->
+  <div id="liveTafelModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-emerald-500/40 rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl text-center">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <h3 class="font-black text-sm sm:text-base text-white flex items-center gap-2">
+          <span>📡 Live Tafel Synchronisatie</span>
+        </h3>
+        <button type="button" onclick="closeLiveTafelModal()" class="text-slate-400 hover:text-white font-bold">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <p class="text-slate-300">
+          Laat medespelers met hun eigen smartphone meedoen of open een tv-scorebord.
+        </p>
+
+        <!-- Roomcode weergave -->
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5">
+          <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Kamer Code</span>
+          <div id="syncRoomCodeDisplay" class="text-2xl font-black font-mono tracking-widest text-indigo-400">----</div>
+          <p class="text-[10px] text-slate-500">Iedereen met deze link zit direct in dezelfde speelsessie.</p>
+        </div>
+
+        <!-- Dynamische QR-code box -->
+        <div class="bg-white p-3 rounded-2xl inline-block shadow-inner mx-auto" id="syncQrCodeContainer"></div>
+
+        <div class="grid grid-cols-2 gap-2 pt-1">
+          <button type="button" onclick="copySessionLink()" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold btn-3d">
+            📋 Kopieer Link
+          </button>
+          <button type="button" onclick="openTvSpectatorWindow()" class="p-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold btn-3d">
+            📺 TV Weergave
+          </button>
+        </div>
+
+        <div id="connectedPeersCount" class="text-[11px] text-emerald-400 font-bold pt-1">
+          Verbonden apparaten: 1 (deze host)
+        </div>
+      </div>
+
+      <button type="button" onclick="closeLiveTafelModal()" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">
+        Sluiten
+      </button>
+    </div>
+  </div>
+
 
   <script>
     // =========================================================================
