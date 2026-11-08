@@ -5124,48 +5124,20 @@
     }
 
         // =========================================================================
-    // 12. HISTORIE, STATISTIEKEN & GRAFIEKEN (CRASH-PROOF)
+    // 12. HISTORIE, STATISTIEKEN & GRAFIEKEN (VOLLEDIG HERSTELD)
     // =========================================================================
     let eloChartInstance = null;
 
     function renderHistoryView() {
-      try {
-        renderChampionCupWidget();
-      } catch (e) {
-        console.error("Fout in ChampionCup:", e);
-      }
-
-      try {
-        populateHistoryFilter();
-      } catch (e) {
-        console.error("Fout in HistoryFilter:", e);
-      }
-
-      try {
-        renderHallOfFame();
-      } catch (e) {
-        console.error("Fout in HallOfFame:", e);
-      }
-
-      try {
-        renderGameRecords();
-      } catch (e) {
-        console.error("Fout in GameRecords:", e);
-      }
-
-      try {
-        renderHistoryMatchesList();
-      } catch (e) {
-        console.error("Fout in MatchesList:", e);
-      }
-
+      try { renderChampionCupWidget(); } catch (e) { console.error(e); }
+      try { populateHistoryFilter(); } catch (e) { console.error(e); }
+      try { renderHallOfFame(); } catch (e) { console.error(e); }
+      try { renderGameRecords(); } catch (e) { console.error(e); }
+      try { renderHistoryMatchesList(); } catch (e) { console.error(e); }
+      
       setTimeout(() => {
-        try {
-          renderEloTimelineChart();
-        } catch (e) {
-          console.error("Fout in EloChart:", e);
-        }
-      }, 100);
+        try { renderEloTimelineChart(); } catch (e) { console.error(e); }
+      }, 60);
     }
 
     function populateHistoryFilter() {
@@ -5175,7 +5147,7 @@
       const currentVal = select.value || 'all';
       const historyList = Array.isArray(state.history) ? state.history : [];
       const playedGameIds = Array.from(new Set(historyList.map(m => m.gameId).filter(Boolean)));
-      
+
       let html = '<option value="all">🎮 Alle Spellen</option>';
       playedGameIds.forEach(id => {
         const def = (typeof getGameDef === 'function' ? getGameDef(id) : null) || { name: id };
@@ -5197,7 +5169,7 @@
             <span class="text-3xl">🏆</span>
             <div>
               <div class="text-xs font-black text-amber-300 uppercase tracking-wider">Wisselbeker van de Tafel</div>
-              <div class="text-xs text-slate-400">Speel een potje en sla hem op om de trofee te claimen!</div>
+              <div class="text-[11px] text-slate-400">Nog geen bekerhouder. Rond een spel af en sla hem op!</div>
             </div>
           </div>
         `;
@@ -5276,7 +5248,7 @@
           ${stats.map((p, idx) => `
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex items-center justify-between gap-2 shadow-sm btn-3d">
               <div class="flex items-center gap-2 min-w-0">
-                <span class="font-mono text-xs font-black ${idx === 0 ? 'text-amber-400' : idx === 1 ? 'text-slate-300' : idx === 2 ? 'text-amber-600' : 'text-slate-500'}">#${idx + 1}</span>
+                <span class="font-mono text-xs font-black ${idx === 0 && p.wins > 0 ? 'text-amber-400' : 'text-slate-500'}">#${idx + 1}</span>
                 ${renderMeepleSvg(p.color, 'w-5 h-5')}
                 <span class="font-bold text-xs sm:text-sm text-white truncate">${p.name}</span>
                 ${idx === 0 && p.wins > 0 ? '<span class="text-xs">👑</span>' : ''}
@@ -5316,29 +5288,26 @@
       if (!canvas || typeof Chart === 'undefined') return;
 
       const historyMatches = Array.isArray(state.history) ? [...state.history].reverse() : [];
-      if (historyMatches.length === 0) {
-        if (eloChartInstance) {
-          eloChartInstance.destroy();
-          eloChartInstance = null;
-        }
-        return;
-      }
-
-      const labels = ['Start', ...historyMatches.map((_, i) => `#${i + 1}`)];
+      
+      // Als er nog geen potjes zijn, tonen we een beginpunt (Start) voor alle spelers
+      const labels = historyMatches.length === 0 ? ['Start'] : ['Start', ...historyMatches.map((_, i) => `#${i + 1}`)];
+      
       const datasets = (state.players || []).map(p => {
-        let runningElo = 1200;
+        let runningElo = p.elo || 1200;
         const data = [1200];
 
-        historyMatches.forEach(m => {
-          const inMatch = (m.players && m.players.includes(p.id)) || 
-                          (m.results && m.results.some(r => r.playerId === p.id));
-          if (inMatch) {
-            const isWinner = m.winners && m.winners.includes(p.id);
-            runningElo += isWinner ? 16 : -12;
-            if (runningElo < 800) runningElo = 800;
-          }
-          data.push(runningElo);
-        });
+        if (historyMatches.length > 0) {
+          historyMatches.forEach(m => {
+            const inMatch = (m.players && m.players.includes(p.id)) || 
+                            (m.results && m.results.some(r => r.playerId === p.id));
+            if (inMatch) {
+              const isWinner = m.winners && m.winners.includes(p.id);
+              runningElo += isWinner ? 16 : -12;
+              if (runningElo < 800) runningElo = 800;
+            }
+            data.push(runningElo);
+          });
+        }
 
         return {
           label: p.name,
@@ -5372,6 +5341,8 @@
               ticks: { color: '#64748b', font: { size: 9 } }
             },
             y: {
+              suggestedMin: 1100,
+              suggestedMax: 1300,
               grid: { color: 'rgba(51, 65, 85, 0.2)' },
               ticks: { color: '#64748b', font: { size: 9 } }
             }
@@ -5401,7 +5372,7 @@
 
       const keys = Object.keys(records);
       if (!keys.length) {
-        grid.innerHTML = `<div class="col-span-full text-center py-3 text-xs text-slate-500">Nog geen spelrecords behaald.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center py-4 text-xs text-slate-500 bg-slate-950/60 rounded-xl border border-slate-800/60">Nog geen spelrecords behaald. Sla een potje op om records te vestigen!</div>`;
         return;
       }
 
@@ -5432,7 +5403,7 @@
 
       const history = state.history || [];
       if (history.length === 0) {
-        container.innerHTML = `<div class="text-center py-5 text-xs text-slate-500">Nog geen potjes opgeslagen.</div>`;
+        container.innerHTML = `<div class="text-center py-5 text-xs text-slate-500 bg-slate-950/60 rounded-xl border border-slate-800/60">Nog geen potjes opgeslagen.</div>`;
         return;
       }
 
