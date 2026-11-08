@@ -1,4 +1,4 @@
-const CACHE_NAME = 'scoreblok-pro-v2.1';
+const CACHE_NAME = 'scoreblok-pro-v2.2';
 
 const ASSETS_TO_CACHE = [
   './',
