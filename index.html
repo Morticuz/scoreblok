@@ -705,8 +705,8 @@
       `;
     }
 
-    // =========================================================================
-    // MODULE 2: SPELLEN CATALOGUS, ARTWORK & ICONS
+       // =========================================================================
+    // MODULE 2: SPELLEN CATALOGUS, ARTWORK & ICONS (INCL. REGEL CHEAT SHEETS)
     // =========================================================================
     const GAME_ART_ICONS = {
       azul: '🧱', seasalt: '🌊', harmonies: '🌲', trio: '7️⃣', scout: '🎪',
@@ -738,90 +738,478 @@
     }
 
     const BUILTIN_GAMES = [
-      { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + patroonlijnen óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
-      { id: 'seasalt', name: 'Sea Salt & Paper', subtitle: 'Duo-paren, collecties, zeemeerminnen & kleurbonussen', category: 'card', type: 'seasalt', icon: 'seasalt', limit: 40, minP: 2, maxP: 4, dur: 'short', hasLastRoundKnock: true },
-      { id: 'harmonies', name: 'Harmonies', subtitle: 'Landschappen (bomen, bergen, water) & dierkaarten', category: 'board', type: 'harmonies', icon: 'harmonies', minP: 1, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste voltooide dierkaarten' },
-      { id: 'trio', name: 'Trio', subtitle: 'Eerste speler met 3 trio\'s of het gouden trio van 7', category: 'card', type: 'carcassonne', icon: 'trio', limit: 1, minP: 3, maxP: 6, dur: 'short' },
-      { id: 'scout', name: 'Scout', subtitle: 'Circuskaarten uitspelen minus overgebleven handkaarten', category: 'card', type: 'rounds', icon: 'scout', minP: 3, maxP: 5, dur: 'short' },
-      { id: 'forestshuffle', name: 'Forest Shuffle', subtitle: 'Bomen, bosrand, paddenstoelen & bosdieren', category: 'card', type: 'categories', icon: 'forestshuffle', minP: 2, maxP: 5, dur: 'medium', categories: ['🌲 Bomen (Basis)', '🦌 Boven/Onder dieren', '🦔 Zijkanten dieren', '🍄 Paddenstoelen', '🦋 Vlinders & Insecten'] },
-      { id: 'parijs', name: 'Parijs: De Lichtstad', subtitle: 'Gebouwenlijst met lantaarn-multiplier, ansichtkaarten & schilder', category: 'board', type: 'parijs', icon: 'parijs', minP: 2, maxP: 2, dur: 'short', tieBreakerDesc: 'Grootste aaneengesloten groep gebouwen' },
-      { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, ongebruikte jokers & sterren', category: 'card', type: 'kok1', icon: 'keeropkeer', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
-      { id: 'keeropkeer2', name: 'Keer op Keer 2', subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O', category: 'card', type: 'kok2', icon: 'keeropkeer2', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
-      { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Stenen 11 & 13 + 7 Wormfiches)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Stenen 11 & 13 + 7 Wormfiches)'], tieBreakerDesc: 'Hoogste tegelnummer in bezit' },
-      { id: 'carcassonne', name: 'Carcassonne', subtitle: 'Live teller met uitbreidings-snelknoppen & calculator', category: 'board', type: 'carcassonne', icon: 'carcassonne', minP: 2, maxP: 6, dur: 'medium', expansions: ['⛪ Kathedralen & Herbergen', '🍷 Kooplieden & Bouwmeesters'] },
-      { id: 'cascadia', name: 'Cascadia', subtitle: 'Dieren, leefgebieden (+ automatische meerderheid) & appels', category: 'board', type: 'cascadia', icon: 'cascadia', minP: 1, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste dennenappels (natuurfiches)' },
-      { id: 'beverbende', name: 'Beverbende', subtitle: 'Snelle kaarten-selectie (0-9) + automatische klop-verdubbelaar', category: 'card', type: 'beverbende', icon: 'beverbende', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
-      { id: 'beverclan', name: 'Beverclan', subtitle: 'Kaartselectie + burchten (Hoogste wint!)', category: 'card', type: 'beverclan', icon: 'beverclan', lowestWins: false, minP: 2, maxP: 6, dur: 'short', hasLastRoundKnock: true },
-      { id: 'rummikub', name: 'Rummikub', subtitle: 'Rondeteller voor gelegde stenen', category: 'board', type: 'rounds', icon: 'rummikub', minP: 2, maxP: 4, dur: 'medium' },
-      { id: 'eldorado', name: 'De Zoektocht naar El Dorado', subtitle: 'Eindveld bereikt + Barrières als officiële tie-breaker', category: 'board', type: 'categories', icon: 'eldorado', minP: 2, maxP: 4, dur: 'medium', categories: ['🏁 Eindveld El Dorado bereikt (vul 100 in)', '🚧 Verzamelde Barrières (1p per stuk)', '🔢 Hoogste nummer op een barrière (bij gelijkspel)'], tieBreakerDesc: 'Meeste barrières, daarna hoogste barrière-nummer' },
-      { id: 'take5', name: 'Take 5! (6 nimmt!)', subtitle: 'Rondeteller voor koeienkoppen tot 66 (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'take5', lowestWins: true, limit: 66, minP: 2, maxP: 10, dur: 'short' },
-      { id: 'boonanza', name: 'Boonanza', subtitle: 'Geoogste bonenvelden & gouden munten per ronde', category: 'card', type: 'categories', icon: 'boonanza', minP: 2, maxP: 7, dur: 'medium', categories: ['🪙 Ronde 1 Munten', '🪙 Ronde 2 Munten', '🪙 Ronde 3 Munten', '🌱 Bonus / Uitbreiding'] },
-      { id: 'pointsalad', name: 'Point Salad', subtitle: 'Doelkaarten & groente-combinaties (Tomaat, Sla, Wortel, etc.)', category: 'card', type: 'categories', icon: 'pointsalad', minP: 2, maxP: 6, dur: 'short', categories: ['🎯 Doelkaart 1', '🎯 Doelkaart 2', '🎯 Doelkaart 3', '🎯 Overige Doelkaarten'] },
-      { id: 'saboteur', name: 'Saboteur', subtitle: 'Rondeteller voor verzamelde goudklompjes (3 rondes)', category: 'card', type: 'rounds', icon: 'saboteur', minP: 3, maxP: 10, dur: 'short' },
-      { id: 'qwinto', name: 'Qwinto', subtitle: 'Oranje, Gele en Paarse rijen + Vijfhoek-bonussen & Mislukte worpen', category: 'card', type: 'categories', icon: 'qwinto', minP: 2, maxP: 6, dur: 'short', categories: ['🟧 Oranje rij', '🟨 Gele rij', '🟪 Paarse rij', '⬠ Vijfhoek-bonussen', '❌ Mislukte worpen (-5p per stuk)'] },
-      { id: 'hitster', name: 'Hitster', subtitle: 'Muziekkaarten (10 voor winst) & Hitster-fiches', category: 'card', type: 'categories', icon: 'hitster', limit: 10, minP: 2, maxP: 10, dur: 'medium', categories: ['🎵 Muziekkaarten op tijdlijn', '🪙 Hitster Fiches'] },
-      { id: 'uno', name: 'UNO', subtitle: 'Rondeteller tot 500 punten (of strafpunten per ronde)', category: 'card', type: 'rounds', icon: 'uno', limit: 500, minP: 2, maxP: 10, dur: 'short' },
-      { id: 'schottentotten', name: 'Schotten Totten', subtitle: 'Grensstenen (5 stuks of 3 naast elkaar)', category: 'card', type: 'categories', icon: 'schottentotten', minP: 2, maxP: 2, dur: 'short', categories: ['🪨 Veroverde Grensstenen', '🏆 Bonus Ronden'] },
-      { id: 'loveletter', name: 'Love Letter', subtitle: 'Live teller voor gewonnen hartjes / gunstfiches', category: 'card', type: 'carcassonne', icon: 'loveletter', minP: 2, maxP: 6, dur: 'short' },
-      { id: 'explodingkittens', name: 'Exploding Kittens', subtitle: 'Rondeteller voor overwinningen per potje', category: 'card', type: 'carcassonne', icon: 'explodingkittens', minP: 2, maxP: 5, dur: 'short' },
-      { id: 'mars', name: 'Terraforming Mars', subtitle: 'TR-spoor, Onderscheidingen, Mijlpalen, Bord (Groen/Stad) & Kaarten', category: 'board', type: 'categories', icon: 'mars', minP: 1, maxP: 5, dur: 'long', categories: ['🌍 Terraforming Rating (TR)', '🏅 Mijlpalen (5p per stuk)', '🏆 Onderscheidingen (5p / 2p)', '🌲 Bos-tegels op bord', '🏙️ Steden op bord', '🃏 Punten op Kaarten'], tieBreakerDesc: 'Meeste MegaCredits (M€)' },
-      { id: 'dune', name: 'Dune: Imperium', subtitle: 'Overwinningspunten (tot 10+), Allianties, Intrige & Spice', category: 'board', type: 'categories', icon: 'dune', limit: 10, minP: 1, maxP: 4, dur: 'long', categories: ['🚩 Overwinningspunten op spoor', '🤝 Alliantie-fiches (2p)', '🗡️ Intrige-kaarten (Eindspel)', '🌶️ Spice / Solari tie-breaker'], tieBreakerDesc: 'Meeste Spice, daarna Solari' },
-      { id: 'everdell', name: 'Everdell', subtitle: 'Kaarten in stad, Gebeurtenissen, Reis, Welvaart & Bessen/Fiches', category: 'board', type: 'categories', icon: 'everdell', minP: 1, maxP: 4, dur: 'medium', categories: ['🏘️ Gebouwen & Wezens (Basis)', '🟣 Paarse Welvaart-bonussen', '🚩 Gebeurtenissen', '🍂 Herfst-reis punten', '🪙 Puntfiches'], tieBreakerDesc: 'Meeste behaalde gebeurtenissen' },
-      { id: 'wondersduel', name: '7 Wonders Duel', subtitle: 'Blauw, Groen, Geel, Paars, Wonderen, Munten & Militair', category: 'board', type: 'categories', icon: 'wondersduel', minP: 2, maxP: 2, dur: 'short', categories: ['🟦 Burgerlijke gebouwen', '🟩 Wetenschap & Vooruitgang', '🟨 Commerciële kaarten', '🟪 Gilden', '🏛️ Wonderen', '⚔️ Militair spoor', '🪙 Munten (1p per 3)'], tieBreakerDesc: 'Meeste punten uit Blauwe gebouwen' },
-      { id: 'splendor', name: 'Splendor', subtitle: 'Live Prestige-punten teller tot 15 punten + Edelen (+3)', category: 'board', type: 'carcassonne', icon: 'splendor', limit: 15, minP: 2, maxP: 4, dur: 'short' },
-      { id: 'patchwork', name: 'Patchwork', subtitle: 'Knopen in bezit + 7x7 Bonus (+7) minus lege vakjes (× -2)', category: 'board', type: 'categories', icon: 'patchwork', minP: 2, maxP: 2, dur: 'short', categories: ['🔘 Aantal Knopen in bezit (+)', '🟩 7x7 Tegel Bonus (7p)', '🏚️ Strafpunten Lege vakjes (-2p per stuk)'], tieBreakerDesc: 'Meeste knopen' },
-      { id: 'kwakzalvers', name: 'De Kwakzalvers van Kakelenburg', subtitle: 'Ketel-score, Robijnen & Overgebleven geld/ingrediënten', category: 'board', type: 'categories', icon: 'kwakzalvers', minP: 2, maxP: 4, dur: 'medium', categories: ['🍲 Score op het Ketelspoor', '💎 Robijnen (1p per 2)', '🧪 Eindronde Ketel-bonus'] },
-      { id: 'elgrande', name: 'El Grande', subtitle: 'Regio-tellingen (Ronde 3, 6 & 9), Castillo & Koningsbonus', category: 'board', type: 'rounds', icon: 'elgrande', minP: 2, maxP: 5, dur: 'long' },
-      { id: 'dixit', name: 'Dixit', subtitle: 'Live teller voor konijntjes op het scorespoor (tot 30 punten)', category: 'board', type: 'carcassonne', icon: 'dixit', limit: 30, minP: 3, maxP: 8, dur: 'short' },
-      { id: 'rozenkoning', name: 'De Rozenkoning', subtitle: 'Aaneengesloten gebieden (Vakjes × Kroontjes)', category: 'board', type: 'categories', icon: 'rozenkoning', minP: 2, maxP: 2, dur: 'short', categories: ['🌹 Gebied 1 (Vakjes × Kronen)', '🌹 Gebied 2', '🌹 Gebied 3', '🌹 Overige gebieden'] },
-      { id: 'burgundy', name: 'Castles of Burgundy', subtitle: 'Spoor, goederen, zilverlingen, werkers & gele tegels', category: 'board', type: 'categories', icon: 'burgundy', minP: 1, maxP: 4, dur: 'long', categories: ['🚩 Score op spoor', '📦 Onverkochte goederen (1p)', '🪙 Zilverlingen (1p)', '👷 Werkers (1p per 2)', '🟨 Gele Kennis-tegels'] },
-      { id: 'agricola', name: 'Agricola', subtitle: 'Akkers, weides, graan, vee, kamers & familieleden', category: 'board', type: 'categories', icon: 'agricola', minP: 1, maxP: 5, dur: 'long', categories: ['🌾 Akkers & Oogst', '🐑 Weides & Vee', '🏚️ Strafpunten Ongebruikte velden (-1p)', '🏠 Stallen & Kamers', '👨‍👩‍👧‍👦 Familieleden (3p)', '🃏 Kaarten & Bonus', '🥣 Strafpunten Bedelkaarten (-3p)'], tieBreakerDesc: 'Meeste voorraden/dieren' },
-      { id: 'wingspan', name: 'Wingspan', subtitle: 'Vogels, bonuskaarten, rondedoelen, eieren & voedsel', category: 'board', type: 'categories', icon: 'wingspan', minP: 1, maxP: 5, dur: 'medium', expansions: ['🌺 Oceanië (Nectar)'], categories: ['🐦 Vogels', '📜 Bonuskaarten', '🎯 Rondedoelen', '🥚 Eieren (1p)', '🍒 Voedsel op kaarten (1p)', '🃏 Weggestopte kaarten (1p)'], tieBreakerDesc: 'Meeste ongebruikte voedselfiches' },
-      { id: 'wyrmspan', name: 'Wyrmspan', subtitle: 'Draken, drakengilde, doelen, eieren & schatten', category: 'board', type: 'categories', icon: 'wyrmspan', minP: 1, maxP: 5, dur: 'long', categories: ['🐉 Draken', '🛡️ Drakengilde', '🎯 Doeltegels', '⏳ Eindspel-krachten', '🥚 Eieren (1p)', '💎 Opgeslagen grondstoffen (1p)', '🃏 Weggestopte kaarten (1p)', '🪙 Munten & Items'] },
-      { id: 'arknova', name: 'Ark Nova', subtitle: 'Aantrekkingskracht, Natuurbehoud (×2/×3) & Eindkaarten', category: 'board', type: 'arknova', icon: 'arknova', minP: 1, maxP: 4, dur: 'long', tieBreakerDesc: 'Meeste ondersteunde natuurbehoudsprojecten' },
-      { id: 'brass', name: 'Brass: Birmingham', subtitle: 'Kanaaltijdperk, Spoorwegtijdperk & Industrie-tegels', category: 'board', type: 'categories', icon: 'brass', minP: 2, maxP: 4, dur: 'long', categories: ['⛵ Kanaal-verbindingen (R1)', '🏭 Industrie-tegels (R1)', '🚂 Spoor-verbindingen (R2)', '🏭 Industrie-tegels (R2)', '💷 Bonus VP'] },
-      { id: 'heat', name: 'Heat: Pedal to the Metal', subtitle: 'Finishpositie (P1-P6) & Kampioenschapspunten', category: 'board', type: 'heat', icon: 'heat', minP: 1, maxP: 6, dur: 'medium' },
-      { id: 'dorfromantik', name: 'Dorfromantik', subtitle: 'Coöperatief campagne-scoreblad (bos, graan, dorp, vlaggen)', category: 'board', type: 'dorfromantik', icon: 'dorfromantik', minP: 1, maxP: 6, dur: 'medium' },
-      { id: 'skyteam', name: 'Sky Team', subtitle: '2-Speler coöperatief vluchtlogboek', category: 'board', type: 'coop', icon: 'skyteam', minP: 2, maxP: 2, dur: 'short' },
-      { id: 'decrew', name: 'De Crew', subtitle: 'Coöperatief missielogboek & aantal pogingen', category: 'card', type: 'coop', icon: 'decrew', minP: 2, maxP: 5, dur: 'short' },
-      { id: 'codenames', name: 'Codenames', subtitle: 'Team Rood vs Team Blauw scorebord', category: 'card', type: 'codenames', icon: 'codenames', minP: 4, maxP: 8, dur: 'short' },
-      { id: 'flip7', name: 'Flip 7', subtitle: 'Rondeteller tot 200p met +15 Flip 7 bonusknop', category: 'card', type: 'flip7', icon: 'flip7', limit: 200, minP: 3, maxP: 8, dur: 'short' },
-      { id: 'catan', name: 'Catan', subtitle: 'Dorpen, steden, handelsroute & riddermacht met automatische upgrade', category: 'board', type: 'catan', icon: 'catan', limit: 10, minP: 3, maxP: 6, dur: 'medium', expansions: ['⛵ Zeevaarders (12p)', '⚔️ Steden & Ridders (13p)'] },
-      { id: 'qwixx', name: 'Qwixx', subtitle: 'Automatische kruisjestabel & mislukte worpen (-5)', category: 'card', type: 'qwixx', icon: 'qwixx', minP: 2, maxP: 5, dur: 'short' },
-      { id: 'clever', name: 'Clever', subtitle: 'Kleuren + automatische vossen-vermenigvuldiger', category: 'card', type: 'clever', icon: 'clever', minP: 1, maxP: 4, dur: 'medium' },
-      { id: 'ttr', name: 'Ticket to Ride', subtitle: 'Routes, bestemmingskaarten, stations & langste route', category: 'board', type: 'ttr', icon: 'ttr', minP: 2, maxP: 5, dur: 'medium', tieBreakerDesc: 'Langste route bonus' },
-      { id: 'wonders7', name: '7 Wonders', subtitle: 'Militair, wonder, gilden & automatische wetenschap-formule', category: 'board', type: 'wonders7', icon: 'wonders7', minP: 2, maxP: 7, dur: 'medium', tieBreakerDesc: 'Meeste munten in de schatkist' },
-      { id: 'yahtzee', name: 'Yahtzee', subtitle: 'Volledig scoreblok met automatische +35 bovenbonus', category: 'card', type: 'yahtzee', icon: 'yahtzee', minP: 1, maxP: 6, dur: 'short' },
-      { id: 'skyjo', name: 'Skyjo', subtitle: 'Rondeteller tot 100 punten (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'skyjo', lowestWins: true, limit: 100, minP: 2, maxP: 8, dur: 'short', hasLastRoundKnock: true },
-      { id: 'sushigo', name: 'Sushi Go!', subtitle: '3 rondes + pudding bonus (+6 / -6)', category: 'card', type: 'sushigo', icon: 'sushigo', minP: 2, maxP: 5, dur: 'short', tieBreakerDesc: 'Meeste pudding-punten' },
-      { id: 'lostcities', name: 'Lost Cities', subtitle: '5 expedities met weddenschappen (×2, ×3, ×4) & +20 bonus', category: 'card', type: 'lostcities', icon: 'lostcities', minP: 2, maxP: 2, dur: 'short' },
-      { id: 'koehandel', name: 'Koehandel', subtitle: 'Dierenkwartetten met automatische set-vermenigvuldiger', category: 'card', type: 'koehandel', icon: 'koehandel', minP: 3, maxP: 5, dur: 'medium' },
-      { id: 'machiavelli', name: 'Machiavelli', subtitle: 'Gebouwenwaarde, 8-gebouwen bonus & 5 kleuren bonus', category: 'card', type: 'machiavelli', icon: 'machiavelli', minP: 2, maxP: 7, dur: 'medium', tieBreakerDesc: 'Totale goudwaarde van gebouwen' },
-      { id: 'themind', name: 'The Mind', subtitle: 'Coöperatieve level-, levens- en shuriken-tracker', category: 'card', type: 'themind', icon: 'themind', minP: 2, maxP: 4, dur: 'short' },
-      { id: 'qwirkle', name: 'Qwirkle', subtitle: 'Live teller met Qwirkle (+12) snelknop', category: 'board', type: 'carcassonne', icon: 'free', minP: 2, maxP: 4, dur: 'medium' },
-      { id: 'doolhof', name: 'Doolhof', subtitle: 'Eerste speler die alle schatten verzamelt en terugkeert naar start', category: 'board', type: 'doolhof', icon: 'doolhof', limit: 1, minP: 2, maxP: 4, dur: 'short' },
-      { id: 'arschmellows', name: 'Arschmellows', subtitle: 'Snel registreren wie het potje heeft gewonnen', category: 'card', type: 'carcassonne', icon: 'arschmellows', limit: 1, minP: 2, maxP: 5, dur: 'short' },
-      { id: 'gameoftrains', name: 'Game of Trains', subtitle: 'Eerste speler met trein in oplopende volgorde', category: 'card', type: 'carcassonne', icon: 'gameoftrains', limit: 1, minP: 2, maxP: 4, dur: 'short' },
-      { id: 'snackmatch', name: 'Snackmatch', subtitle: 'Snel registreren wie de snacks compleet heeft', category: 'card', type: 'carcassonne', icon: 'snackmatch', limit: 1, minP: 2, maxP: 6, dur: 'short' },
-      { id: 'moddervarkens', name: 'Moddervarkens', subtitle: 'Eerste speler met alle varkens in de modder', category: 'card', type: 'carcassonne', icon: 'moddervarkens', limit: 1, minP: 2, maxP: 4, dur: 'short' },
-      { id: 'monopoly', name: 'Monopoly', subtitle: 'Eindsaldo in contanten + waarde van straten en huizen (of 1 overlever)', category: 'board', type: 'categories', icon: 'monopoly', minP: 2, maxP: 8, dur: 'long', categories: ['💵 Contant geld', '🏠 Waarde van straten, huizen & hotels', '🚂 Stations & Nutsbedrijven'] },
-      { id: 'risk', name: 'Risk', subtitle: 'Veroverde continenten of geheime missie voltooid', category: 'board', type: 'carcassonne', icon: 'risk', limit: 1, minP: 2, maxP: 6, dur: 'long' },
-      { id: 'cluedo', name: 'Cluedo', subtitle: 'Eerste die verdachte, wapen en kamer correct ontrafelt', category: 'board', type: 'carcassonne', icon: 'cluedo', limit: 1, minP: 2, maxP: 6, dur: 'medium' },
-      { id: 'stratego', name: 'Stratego', subtitle: 'Eerste die de vijandelijke vlag verovert', category: 'board', type: 'carcassonne', icon: 'stratego', limit: 1, minP: 2, maxP: 2, dur: 'medium' },
-      { id: 'levensweg', name: 'Levensweg', subtitle: 'Totaal vermogen bij pensioen (contanten, levensloop-certificaten & pensioenbonus)', category: 'board', type: 'categories', icon: 'levensweg', minP: 2, maxP: 6, dur: 'medium', categories: ['💵 Eindbedrag pensioen', '📜 Waarde Levensloopkaarten', '🏡 Waarde Woning'] },
-      { id: 'ganzenbord', name: 'Ganzenbord', subtitle: 'Eerste speler die precies op vakje 63 eindigt', category: 'board', type: 'carcassonne', icon: 'ganzenbord', limit: 1, minP: 2, maxP: 6, dur: 'short' },
-      { id: 'mensergerjeniet', name: 'Mens Erger Je Niet!', subtitle: 'Eerste die al zijn pionnen veilig in de thuisbasis heeft', category: 'board', type: 'carcassonne', icon: 'mensergerjeniet', limit: 1, minP: 2, maxP: 6, dur: 'short' },
-      { id: 'zeeslag', name: 'Zeeslag', subtitle: 'Eerste die de complete vloot van de tegenstander laat zinken', category: 'board', type: 'carcassonne', icon: 'zeeslag', limit: 1, minP: 2, maxP: 2, dur: 'short' },
-      { id: 'trivial', name: 'Trivial Pursuit', subtitle: 'Eerste met alle 6 partjes en de winnende centrumvraag', category: 'board', type: 'carcassonne', icon: 'trivial', limit: 1, minP: 2, maxP: 6, dur: 'medium' },
-      { id: 'scrabble', name: 'Scrabble', subtitle: 'Rondeteller voor woordwaardes, dubbele/driedubbele letters en bonussen', category: 'board', type: 'rounds', icon: 'scrabble', minP: 2, maxP: 4, dur: 'medium' },
-      { id: 'boggle', name: 'Boggle', subtitle: 'Rondeteller voor gevonden unieke woorden binnen 3 minuten', category: 'board', type: 'rounds', icon: 'boggle', minP: 2, maxP: 8, dur: 'short' },
-      { id: 'thirtysec', name: '30 Seconds', subtitle: 'Live rondeteller voor geraden begrippen tot het finishvakje', category: 'board', type: 'rounds', icon: 'thirtysec', limit: 30, minP: 4, maxP: 12, dur: 'short' },
-      { id: 'pictionary', name: 'Pictionary', subtitle: 'Rondeteller voor getekende en geraden opdrachten per beurt', category: 'board', type: 'rounds', icon: 'pictionary', minP: 4, maxP: 12, dur: 'short' },
-      { id: 'pesten', name: 'Pesten / Duizenden', subtitle: 'Rondeteller voor strafpunten van kaarten in hand (Laagste score wint!)', category: 'card', type: 'rounds', icon: 'pesten', lowestWins: true, limit: 100, minP: 2, maxP: 6, dur: 'short' },
-      { id: 'klaverjas', name: 'Klaverjassen', subtitle: 'Rondeteller voor slagenpunten en behaalde roem per spel tot 1500', category: 'card', type: 'rounds', icon: 'klaverjas', limit: 1500, minP: 4, maxP: 4, dur: 'medium' },
-      { id: 'hartenjagen', name: 'Hartenjagen', subtitle: 'Harten (+1) en Schoppenvrouw (+13) tot 100 punten (Laagste wint!)', category: 'card', type: 'rounds', icon: 'hartenjagen', lowestWins: true, limit: 100, minP: 4, maxP: 4, dur: 'medium' },
-      { id: 'kingen', name: 'Kingen / Brikken', subtitle: 'Rondeteller voor min-contracten en plus-contracten per beurt', category: 'card', type: 'rounds', icon: 'kingen', lowestWins: false, minP: 4, maxP: 4, dur: 'medium' },
-      { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
+      {
+        id: 'azul',
+        name: 'Azul',
+        subtitle: 'Automatische 5x5 muur + patroonlijnen óf handmatig',
+        category: 'board',
+        type: 'azul',
+        icon: 'azul',
+        minP: 2,
+        maxP: 4,
+        dur: 'medium',
+        tieBreakerDesc: 'Meeste voltooide horizontale rijen op de muur',
+        rules: [
+          'Einde spel: zodra minstens 1 speler een complete horizontale rij van 5 tegels heeft voltooid.',
+          'Ronde telling: aangrenzende horizontale én verticale stenen tellen mee voor de score van de geplaatste tegel.',
+          'Eindbonus: +2 per volle horizontale rij, +7 per volle verticale kolom, +10 per volle set van 5 dezelfde kleuren.',
+          'Vloerlijn: minpunten worden afgetrokken van je rondetotaal (score zakt nooit onder 0).'
+        ]
+      },
+      {
+        id: 'seasalt',
+        name: 'Sea Salt & Paper',
+        subtitle: "Duo-paren, collecties, zeemeerminnen & kleurbonussen",
+        category: 'card',
+        type: 'seasalt',
+        icon: 'seasalt',
+        limit: 40,
+        minP: 2,
+        maxP: 4,
+        dur: 'short',
+        hasLastRoundKnock: true,
+        rules: [
+          'Einde ronde: speler met 7+ punten mag zeggen "Stop" (iedereen scoort) of "Laatste Kans" (ronde voor iedereen, gokker moet strikt winnen voor bonus).',
+          'Vier zeemeerminnen in hand = directe automatische winst!',
+          'Collecties: schelpen, octopussen, pinguïns en zeelieden scoren progressief op aantal kaarten.',
+          'Duo-paren leveren 1 punt op en activeren een speciale actie bij uitspelen.'
+        ]
+      },
+      {
+        id: 'harmonies',
+        name: 'Harmonies',
+        subtitle: 'Landschappen (bomen, bergen, water) & dierkaarten',
+        category: 'board',
+        type: 'harmonies',
+        minP: 1,
+        maxP: 4,
+        dur: 'medium',
+        tieBreakerDesc: 'Meeste voltooide dierkaarten',
+        rules: [
+          'Einde spel: als een speler nog maar 2 of minder lege velden over heeft op het bord, of als de zak leeg is.',
+          'Bomen: scoren op basis van hoogte (1 t/m 3 stammen) met loof erop.',
+          'Bergen: scoren per groep mits minstens 2 hoog.',
+          'Dieren: plaats een dierblokje zodra het landschapspatroon op je bord matcht met de kaart.'
+        ]
+      },
+      {
+        id: 'trio',
+        name: 'Trio',
+        subtitle: "Eerste speler met 3 trio's of het gouden trio van 7",
+        category: 'card',
+        type: 'carcassonne',
+        icon: 'trio',
+        limit: 1,
+        minP: 3,
+        maxP: 6,
+        dur: 'short',
+        rules: [
+          'Vraag altijd naar de laagste of hoogste kaart van een medespeler of kies een gedekte kaart uit het midden.',
+          'Zodra 2 niet-gelijke kaarten opengaan eindigt je beurt direct.',
+          'Winst: verzamel als eerste 3 willekeurige trio\'s, of win direct met het trio van 7 (pittige modus: 2 gekoppelde trio\'s).'
+        ]
+      },
+      {
+        id: 'scout',
+        name: 'Scout',
+        subtitle: 'Circuskaarten uitspelen minus overgebleven handkaarten',
+        category: 'card',
+        type: 'rounds',
+        icon: 'scout',
+        minP: 3,
+        maxP: 5,
+        dur: 'short',
+        rules: [
+          'Je mag kaarten in je hand NOOIT van volgorde veranderen.',
+          'Tijdens je beurt: Speel een sterkere combinatie (Show), neem een kaart van de actieve set (Scout), of gebruik je fiche voor Scout & Show (1x per ronde).',
+          'Ronde-einde: zodra iemand leeg is of niemand de actieve set meer kan verslaan.'
+        ]
+      },
+      {
+        id: 'forestshuffle',
+        name: 'Forest Shuffle',
+        subtitle: 'Bomen, bosrand, paddenstoelen & bosdieren',
+        category: 'card',
+        type: 'categories',
+        icon: 'forestshuffle',
+        minP: 2,
+        maxP: 5,
+        dur: 'medium',
+        categories: ['🌲 Bomen (Basis)', '🦌 Boven/Onder dieren', '🦔 Zijkanten dieren', '🍄 Paddenstoelen', '🦋 Vlinders & Insecten'],
+        rules: [
+          'Einde spel: direct zodra de 3e winterkaart uit de trekstapel verschijnt.',
+          'Open plek: zodra er 10 of meer kaarten op de open plek liggen, worden deze direct afgelegd.',
+          'Kaartkosten: betaal de kosten door kaarten uit je hand open naar de open plek te spelen.'
+        ]
+      },
+      {
+        id: 'parijs',
+        name: 'Parijs: De Lichtstad',
+        subtitle: 'Gebouwenlijst met lantaarn-multiplier, ansichtkaarten & schilder',
+        category: 'board',
+        type: 'parijs',
+        minP: 2,
+        maxP: 2,
+        dur: 'short',
+        tieBreakerDesc: 'Grootste aaneengesloten groep gebouwen',
+        rules: [
+          'Fase 1: Kasseitegels leggen of gebouwen reserveren.',
+          'Fase 2: Gebouwen plaatsen op eigen/neutrale kasseien of actiekaarten activeren.',
+          'Score: Elk gebouw scoort (Vakjes × Aangrenzende brandende lantaarns).',
+          'Niet-gebouwde gereserveerde gebouwen kosten -3 punten per stuk.'
+        ]
+      },
+      {
+        id: 'keeropkeer',
+        name: 'Keer op Keer',
+        subtitle: 'Kleuren, kolommen A-O, ongebruikte jokers & sterren',
+        category: 'card',
+        type: 'kok1',
+        icon: 'keeropkeer',
+        minP: 1,
+        maxP: 6,
+        dur: 'short',
+        tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)',
+        rules: [
+          'Start altijd in kolom H. Kruisjes moeten grenzen aan eerder gezette kruisjes.',
+          'Eerste speler die een kolom of kleur volmaakt krijgt de hoogste punten; anderen omcirkelen de lagere score.',
+          'Open sterren kosten -2 punten per stuk aan het einde.',
+          'Einde spel zodra iemand 2 complete kleuren heeft volgemaakt.'
+        ]
+      },
+      {
+        id: 'keeropkeer2',
+        name: 'Keer op Keer 2',
+        subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O',
+        category: 'card',
+        type: 'kok2',
+        icon: 'keeropkeer2',
+        minP: 1,
+        maxP: 6,
+        dur: 'short',
+        tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)',
+        rules: [
+          'Speciale dobbelsteen introduceert bommen, harten en speciale kleuren.',
+          'Hartjesbonus levert extra punten op per kolom waarin het hartje is aangekruist.',
+          'Bonusrijen geven direct jokers of extra kruisjes.'
+        ]
+      },
+      {
+        id: 'regenwormen',
+        name: 'Regenwormen (1 & 2)',
+        subtitle: 'Tegel-tracker + Deel 2 schakelaar (Stenen 11 & 13 + 7 Wormfiches)',
+        category: 'card',
+        type: 'regenwormen',
+        icon: 'regenwormen',
+        minP: 2,
+        maxP: 7,
+        dur: 'short',
+        expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Stenen 11 & 13 + 7 Wormfiches)'],
+        tieBreakerDesc: 'Hoogste tegelnummer in bezit',
+        rules: [
+          'Je moet minstens 1 worm gooien om een tegel te mogen pakken.',
+          'Exacte waarde op de stapel van een tegenstander? Je mag de bovenste tegel roven!',
+          'Mislukte beurt: leg je bovenste tegel terug en draai de hoogste tegel van de grill om.',
+          'Met uitbreiding: stenen 11 en 13 kunnen gepakt worden; wormfiches uit de pot leveren +1 worm per stuk op.'
+        ]
+      },
+      {
+        id: 'carcassonne',
+        name: 'Carcassonne',
+        subtitle: 'Live teller met uitbreidings-snelknoppen & calculator',
+        category: 'board',
+        type: 'carcassonne',
+        icon: 'carcassonne',
+        minP: 2,
+        maxP: 6,
+        dur: 'medium',
+        expansions: ['⛪ Kathedralen & Herbergen', '🍷 Kooplieden & Bouwmeesters'],
+        rules: [
+          'Weg: 1 punt per tegel bij afronding.',
+          'Stad: 2 punten per tegel + 2 punten per schild. (Onafgemaakt aan einde: 1 punt per tegel/schild).',
+          'Klooster: 9 punten zodra het veld en de 8 omliggende tegels compleet zijn.',
+          'Weide / Boeren: 3 punten per afgebouwde stad die aan de weide grenst.'
+        ]
+      },
+      {
+        id: 'cascadia',
+        name: 'Cascadia',
+        subtitle: 'Dieren, leefgebieden (+ automatische meerderheid) & appels',
+        category: 'board',
+        type: 'cascadia',
+        icon: 'cascadia',
+        minP: 1,
+        maxP: 4,
+        dur: 'medium',
+        tieBreakerDesc: 'Meeste dennenappels (natuurfiches)',
+        rules: [
+          'Dieren scoren volgens de actieve scorekaarten (beren, herten, zalmen, buizerds, vossen).',
+          'Grootste leefgebied per type levert de tegelsom op.',
+          'Meerderheidsbonus: speler met het grootste gebied per terrein krijgt bonuspunten (+3/+2/+1 afhankelijk van spelersaantal).',
+          'Overgebleven dennenappels leveren elk 1 punt op.'
+        ]
+      },
+      {
+        id: 'beverbende',
+        name: 'Beverbende',
+        subtitle: 'Snelle kaarten-selectie (0-9) + automatische klop-verdubbelaar',
+        category: 'card',
+        type: 'beverbende',
+        icon: 'beverbende',
+        lowestWins: true,
+        limit: 100,
+        minP: 2,
+        maxP: 6,
+        dur: 'short',
+        hasLastRoundKnock: true,
+        rules: [
+          'Doel: Zo min mogelijk strafpunten overhouden aan het einde van de ronde.',
+          'Afkloppen: Als iemand klopt, heeft iedereen daarna nog exact 1 beurt.',
+          'Strikte afklopregel: Heeft de afklopper NIET strikt de minste punten? Dan verdubbelt de score van de afklopper als straf (of +10 bonus voor de winnaar bij gelijke stand).'
+        ]
+      },
+      {
+        id: 'beverclan',
+        name: 'Beverclan',
+        subtitle: 'Kaartselectie + burchten (Hoogste wint!)',
+        category: 'card',
+        type: 'beverclan',
+        icon: 'beverclan',
+        lowestWins: false,
+        minP: 2,
+        maxP: 6,
+        dur: 'short',
+        hasLastRoundKnock: true,
+        rules: [
+          'In tegenstelling tot Beverbende wint hier de HOOGSTE score!',
+          'Spelers bouwen met 5 kaarten in hun burcht.',
+          'Kaarten met cijfer 0 t/m 9 en speciale zilveren/gouden beverkaarten.'
+        ]
+      },
+      {
+        id: 'catan',
+        name: 'Catan',
+        subtitle: 'Dorpen, steden, handelsroute & riddermacht met automatische upgrade',
+        category: 'board',
+        type: 'catan',
+        icon: 'catan',
+        limit: 10,
+        minP: 3,
+        maxP: 6,
+        dur: 'medium',
+        expansions: ['⛵ Zeevaarders (12p)', '⚔️ Steden & Ridders (13p)'],
+        rules: [
+          'Dorp = 1 punt. Stad = 2 punten. Overwinningspuntkaart = 1 punt.',
+          'Langste Handelsroute (minstens 5 aaneengesloten straten) = 2 punten.',
+          'Grootste Riddermacht (minstens 3 gespeelde ridders) = 2 punten.',
+          'Direct gewonnen zodra een speler tijdens zijn eigen beurt 10 punten aantikt.'
+        ]
+      },
+      {
+        id: 'qwixx',
+        name: 'Qwixx',
+        subtitle: 'Automatische kruisjestabel & mislukte worpen (-5)',
+        category: 'card',
+        type: 'qwixx',
+        icon: 'qwixx',
+        minP: 2,
+        maxP: 5,
+        dur: 'short',
+        rules: [
+          'Rood en Geel lopen van 2 naar 12; Groen en Blauw van 12 naar 2.',
+          'Getallen die je overslaat mogen later NOOIT meer worden aangekruist.',
+          'Rij sluiten: vereist minimaal 5 kruisjes in die rij én het laatste getal (12 of 2).',
+          'Einde spel: zodra 2 rijen gesloten zijn of iemand 4 mislukte worpen heeft.'
+        ]
+      },
+      {
+        id: 'clever',
+        name: 'Clever',
+        subtitle: 'Kleuren + automatische vossen-vermenigvuldiger',
+        category: 'card',
+        type: 'clever',
+        icon: 'clever',
+        minP: 1,
+        maxP: 4,
+        dur: 'medium',
+        rules: [
+          'Gekozen dobbelstenen met een lagere waarde gaan naar het zilveren dienblad voor medespelers.',
+          'Vossen vermenigvuldigen je laagste categorie-score (zorg voor evenwicht!).',
+          'Bonussen in kettingreacties moeten direct worden ingevuld.'
+        ]
+      },
+      {
+        id: 'ttr',
+        name: 'Ticket to Ride',
+        subtitle: 'Routes, bestemmingskaarten, stations & langste route',
+        category: 'board',
+        type: 'ttr',
+        icon: 'ttr',
+        minP: 2,
+        maxP: 5,
+        dur: 'medium',
+        tieBreakerDesc: 'Langste route bonus',
+        rules: [
+          'Voltooide bestemmingskaarten tellen op; niet-voltooide kaarten worden integraal afgetrokken.',
+          'Stations overhouden levert +4 punten per station op.',
+          'Einde spel: zodra een speler nog maar 2 of minder treintjes in voorraad heeft (iedereen nog 1 beurt).'
+        ]
+      },
+      {
+        id: 'wonders7',
+        name: '7 Wonders',
+        subtitle: 'Militair, wonder, gilden & automatische wetenschap-formule',
+        category: 'board',
+        type: 'wonders7',
+        icon: 'wonders7',
+        minP: 2,
+        maxP: 7,
+        dur: 'medium',
+        tieBreakerDesc: 'Meeste munten in de schatkist',
+        rules: [
+          'Wetenschapsscore: som van de kwadraten per symbool ($a^2 + b^2 + c^2$) plus 7 bonuspunten per complete set van 3 verschillende symbolen.',
+          'Militair: per tijdperk levert winst +1, +3 of +5 punten op; elk verlies kost -1 punt.',
+          'Munten: 3 munten in de schatkist = 1 punt.'
+        ]
+      },
+      {
+        id: 'yahtzee',
+        name: 'Yahtzee',
+        subtitle: 'Volledig scoreblok met automatische +35 bovenbonus',
+        category: 'card',
+        type: 'yahtzee',
+        icon: 'yahtzee',
+        minP: 1,
+        maxP: 6,
+        dur: 'short',
+        rules: [
+          'Bovenste helft: haal minstens 63 punten voor de +35 bonus.',
+          'Kleine Straat = 30 punten (4 opeenvolgende stenen).',
+          'Grote Straat = 40 punten (5 opeenvolgende stenen).',
+          'Full House = 25 punten (3 gelijke + 2 gelijke).',
+          'Yahtzee = 50 punten (5 gelijke).'
+        ]
+      },
+      {
+        id: 'skyjo',
+        name: 'Skyjo',
+        subtitle: 'Rondeteller tot 100 punten (Laagste score wint!)',
+        category: 'card',
+        type: 'rounds',
+        icon: 'skyjo',
+        lowestWins: true,
+        limit: 100,
+        minP: 2,
+        maxP: 8,
+        dur: 'short',
+        hasLastRoundKnock: true,
+        rules: [
+          'Raster van 12 kaarten (3x4).',
+          'Kolom met 3 identieke getallen mag direct worden afgelegd.',
+          'Klopper moet strikt de minste punten hebben in de ronde, anders verdubbelen zijn/haar punten!',
+          'Spel stopt zodra iemand 100 of meer punten bereikt.'
+        ]
+      },
+      {
+        id: 'sushigo',
+        name: 'Sushi Go!',
+        subtitle: '3 rondes + pudding bonus (+6 / -6)',
+        category: 'card',
+        type: 'sushigo',
+        icon: 'sushigo',
+        minP: 2,
+        maxP: 5,
+        dur: 'short',
+        tieBreakerDesc: 'Meeste pudding-kaarten',
+        rules: [
+          'Kies gelijktijdig 1 kaart en geef de rest door (draften).',
+          'Puddingkaarten blijven liggen over alle 3 rondes.',
+          'Aan einde spel: meeste pudding = +6 punten; minste pudding = -6 punten (geen minpunten bij 2 spelers).'
+        ]
+      },
+      {
+        id: 'lostcities',
+        name: 'Lost Cities',
+        subtitle: '5 expedities met weddenschappen (×2, ×3, ×4) & +20 bonus',
+        category: 'card',
+        type: 'lostcities',
+        icon: 'lostcities',
+        minP: 2,
+        maxP: 2,
+        dur: 'short',
+        rules: [
+          'Elke gestarte expeditie begint direct op -20 kosten.',
+          'Kaarten moeten altijd in strikt oplopende volgorde worden neergelegd.',
+          'Weddenschap-handdrukken moeten ALTIJD vóór de cijferkaarten van die kleur gespeeld worden.',
+          'Expedities met 8 of meer kaarten ontvangen een extra bonus van +20 punten.'
+        ]
+      },
+      {
+        id: 'koehandel',
+        name: 'Koehandel',
+        subtitle: 'Dierenkwartetten met automatische set-vermenigvuldiger',
+        category: 'card',
+        type: 'koehandel',
+        icon: 'koehandel',
+        minP: 3,
+        maxP: 5,
+        dur: 'medium',
+        rules: [
+          'Voltooide kwartetten: tel de waarden bij elkaar op en vermenigvuldig met het AANTAL voltooide kwartetten.',
+          'Bluffen bij de koehandel: de tegenstander mag het bod accepteren of een tegenbod doen.',
+          'Waarde 0 geldkaarten zijn cruciaal om tegenstanders mee te foppen.'
+        ]
+      },
+      {
+        id: 'machiavelli',
+        name: 'Machiavelli',
+        subtitle: 'Gebouwenwaarde, 8-gebouwen bonus & 5 kleuren bonus',
+        category: 'card',
+        type: 'machiavelli',
+        icon: 'machiavelli',
+        minP: 2,
+        maxP: 7,
+        dur: 'medium',
+        tieBreakerDesc: 'Totale goudwaarde van gebouwen',
+        rules: [
+          'Eerste speler die zijn 8e gebouw bouwt krijgt +4 bonuspunten.',
+          'Andere spelers die in dezelfde ronde hun 8e gebouw afronden krijgen +2 punten.',
+          'Alle 5 verschillende kleuren gebouwen in je stad = +3 bonuspunten.',
+          'Karaktervolgorde: 1 Moordenaar, 2 Dief, 3 Magiër, 4 Koning, 5 Prediker, 6 Koopman, 7 Bouwmeester, 8 Condottiere.'
+        ]
+      },
+      {
+        id: 'themind',
+        name: 'The Mind',
+        subtitle: 'Coöperatieve level-, levens- en shuriken-tracker',
+        category: 'card',
+        type: 'themind',
+        icon: 'themind',
+        minP: 2,
+        maxP: 4,
+        dur: 'short',
+        rules: [
+          'Er mag absoluut NIET gesproken worden over getallen of signalen gegeven worden.',
+          'Leg kaarten af in oplopende volgorde (1 t/m 100) puur op tijdsgevoel en concentratie.',
+          'Werpster (Shuriken): Iedereen legt gelijktijdig zijn laagste kaart open af.'
+        ]
+      },
+      {
+        id: 'free',
+        name: 'Vrij Scorebord',
+        subtitle: 'Universeel scorebord voor elk ander spel',
+        category: 'board',
+        type: 'carcassonne',
+        icon: 'free',
+        minP: 1,
+        maxP: 10,
+        dur: 'medium',
+        hasLastRoundKnock: true,
+        rules: [
+          'Gebruik dit flexibele scorebord voor elk spel dat niet standaard in de lijst staat.',
+          'Handmatige puntenoptelling met directe live stand.'
+        ]
+      }
     ];
 
        // =========================================================================
@@ -2422,8 +2810,8 @@
       }).join('');
     }
 
-         // =========================================================================
-    // MODULE 9: SCOREBOARD RENDERING, BEURTWISSELS, TIMER & BANNERS
+       // =========================================================================
+    // MODULE 9: SCOREBOARD RENDERING, BEURTWISSELS, TIMER, BANNERS & CHEAT SHEETS
     // =========================================================================
     let turnTimerInterval = null;
     let turnTimeRemaining = 45;
@@ -2777,6 +3165,58 @@
       renderScoreboard();
     }
 
+    function openGameRulesModal(gameId = state.activeGameId) {
+      const def = getGameDef(gameId);
+      document.getElementById('gameRulesModal')?.remove();
+
+      const rulesList = (def.rules && def.rules.length > 0) 
+        ? def.rules.map(r => `
+            <li class="flex items-start gap-2 text-slate-200">
+              <span class="text-indigo-400 font-bold shrink-0 mt-0.5">▸</span>
+              <span>${r}</span>
+            </li>
+          `).join('')
+        : `<li class="text-slate-400 italic">Geen specifieke spiekbrief voor dit spel beschikbaar. Raadpleeg het spelregelboekje.</li>`;
+
+      const tieDesc = def.tieBreakerDesc 
+        ? `<div class="bg-amber-950/40 border border-amber-500/30 rounded-2xl p-3 text-xs">
+             <span class="text-amber-300 font-bold block mb-1">⚖️ Officiële Tie-Breaker:</span>
+             <span class="text-slate-200">${def.tieBreakerDesc}</span>
+           </div>`
+        : '';
+
+      const modalHtml = `
+        <div id="gameRulesModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-sm sm:max-w-md w-full p-5 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <div class="flex items-center gap-2 min-w-0">
+                ${renderGameArtwork(def.id, 'w-8 h-8')}
+                <div>
+                  <h3 class="font-black text-sm sm:text-base text-white truncate">${def.name} • Spelregels</h3>
+                  <span class="text-[10px] text-indigo-400 font-bold">Spiekbrief & Uitzonderingen</span>
+                </div>
+              </div>
+              <button type="button" onclick="document.getElementById('gameRulesModal').remove()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+            </div>
+
+            <div class="space-y-3 text-xs max-h-[60vh] overflow-y-auto pr-1">
+              <ul class="space-y-2 leading-relaxed bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
+                ${rulesList}
+              </ul>
+              ${tieDesc}
+            </div>
+
+            <button type="button" onclick="document.getElementById('gameRulesModal').remove()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-3d">
+              Sluiten
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      triggerHaptic(15);
+      SoundFX.click();
+    }
+
     function renderScoreboard() {
       const def = getGameDef(state.activeGameId);
       const gs = ensureGameState(def.id);
@@ -2794,6 +3234,21 @@
       if (tBtn) {
         tBtn.className = `px-2.5 py-2 rounded-xl text-xs font-black border transition btn-3d ${state.isTeamMode ? 'bg-indigo-600 border-indigo-400 text-white' : 'bg-slate-800 text-slate-300'}`;
         tBtn.textContent = state.isTeamMode ? '👥 Teams' : '👤 Solo';
+      }
+
+      // Injecteer de Spelregels-knop dynamisch in de actiebalk als deze er nog niet staat
+      let rulesBtn = document.getElementById('gameRulesBtn');
+      if (!rulesBtn) {
+        const teamBtn = document.getElementById('teamModeToggleBtn');
+        if (teamBtn && teamBtn.parentNode) {
+          rulesBtn = document.createElement('button');
+          rulesBtn.id = 'gameRulesBtn';
+          rulesBtn.type = 'button';
+          rulesBtn.className = 'px-2.5 py-2 rounded-xl text-xs font-black border transition bg-slate-800 hover:bg-indigo-600/30 text-indigo-300 border-indigo-500/30 btn-3d flex items-center gap-1';
+          rulesBtn.innerHTML = '<span>📖</span> <span class="hidden sm:inline">Regels</span>';
+          rulesBtn.onclick = () => openGameRulesModal(state.activeGameId);
+          teamBtn.parentNode.insertBefore(rulesBtn, teamBtn.nextSibling);
+        }
       }
 
       const graphBtn = document.getElementById('roundGraphBtn');
@@ -5693,8 +6148,8 @@
       document.getElementById('editPlayerModal')?.remove();
     }
 
-    // =========================================================================
-    // MODULE 12: HISTORIE, STATISTIEKEN & ELO-TIJDLINIE
+       // =========================================================================
+    // MODULE 12: HISTORIE, STATISTIEKEN, ELO & HEAD-TO-HEAD RIVALS
     // =========================================================================
     function renderDieSvg(val) {
       const pips = {
@@ -5799,6 +6254,186 @@
       return Object.values(counts).filter(c => c.count > 0).sort((a, b) => b.count - a.count);
     }
 
+    function computePlayerBadges(playerId) {
+      const badges = [];
+      const matches = state.history || [];
+      const myMatches = matches.filter(m => (m.players && m.players.includes(playerId)) || (m.results && m.results.some(r => r.playerId === playerId)));
+      const myWins = matches.filter(m => m.winners && m.winners.includes(playerId));
+
+      let maxWinMargin = 0;
+      myWins.forEach(m => {
+        const scores = (m.results || []).map(r => r.score).sort((a, b) => b - a);
+        if (scores.length > 1) {
+          const diff = scores[0] - scores[1];
+          if (diff > maxWinMargin) maxWinMargin = diff;
+        }
+      });
+
+      if (maxWinMargin >= 25) {
+        badges.push({ icon: '💥', label: 'De Sloper', desc: `Won ooit met +${maxWinMargin} punten verschil!` });
+      }
+
+      if (myWins.length >= 10) {
+        badges.push({ icon: '🎖️', label: 'Veteraan', desc: '10+ geregistreerde overwinningen' });
+      }
+
+      const p = (state.players || []).find(x => x.id === playerId);
+      if ((p?.loserCups || 0) >= 3) {
+        badges.push({ icon: '🥄', label: 'Houtsnijder', desc: '3+ houten lepels verzameld' });
+      }
+
+      if ((p?.elo || 1200) >= 1300) {
+        badges.push({ icon: '⚡', label: 'Grootmeester', desc: 'Elo rating boven 1300' });
+      }
+
+      return badges;
+    }
+
+    function openRivalsModal(p1Id, p2Id = null) {
+      document.getElementById('rivalsMatrixModal')?.remove();
+      const p1 = (state.players || []).find(x => x.id === p1Id);
+      if (!p1) return;
+
+      const otherPlayers = (state.players || []).filter(x => x.id !== p1Id);
+      const selectedP2Id = p2Id || otherPlayers[0]?.id || null;
+      const p2 = (state.players || []).find(x => x.id === selectedP2Id);
+
+      const matches = state.history || [];
+      let headToHeadMatches = [];
+      let p1Wins = 0;
+      let p2Wins = 0;
+      let draws = 0;
+      const gameWinMap = {};
+
+      if (p2) {
+        headToHeadMatches = matches.filter(m => {
+          const hasP1 = (m.players && m.players.includes(p1.id)) || (m.results && m.results.some(r => r.playerId === p1.id));
+          const hasP2 = (m.players && m.players.includes(p2.id)) || (m.results && m.results.some(r => r.playerId === p2.id));
+          return hasP1 && hasP2;
+        });
+
+        headToHeadMatches.forEach(m => {
+          const p1ScoreObj = (m.results || []).find(r => r.playerId === p1.id);
+          const p2ScoreObj = (m.results || []).find(r => r.playerId === p2.id);
+          if (!p1ScoreObj || !p2ScoreObj) return;
+
+          const def = getGameDef(m.gameId);
+          const lowWins = !!def.lowestWins;
+          const p1Better = lowWins ? (p1ScoreObj.score < p2ScoreObj.score) : (p1ScoreObj.score > p2ScoreObj.score);
+          const p2Better = lowWins ? (p2ScoreObj.score < p1ScoreObj.score) : (p2ScoreObj.score > p1ScoreObj.score);
+
+          if (!gameWinMap[m.gameId]) gameWinMap[m.gameId] = { p1: 0, p2: 0 };
+
+          if (p1Better) {
+            p1Wins++;
+            gameWinMap[m.gameId].p1++;
+          } else if (p2Better) {
+            p2Wins++;
+            gameWinMap[m.gameId].p2++;
+          } else {
+            draws++;
+          }
+        });
+      }
+
+      const totalH2H = headToHeadMatches.length;
+      const p1Pct = totalH2H > 0 ? Math.round((p1Wins / totalH2H) * 100) : 0;
+      const p2Pct = totalH2H > 0 ? Math.round((p2Wins / totalH2H) * 100) : 0;
+      const p1Badges = computePlayerBadges(p1.id);
+
+      const modalHtml = `
+        <div id="rivalsMatrixModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
+          <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-sm sm:max-w-md w-full p-5 space-y-4 shadow-2xl text-center">
+            
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">⚔️</span>
+                <div class="text-left">
+                  <h3 class="font-black text-sm sm:text-base text-white">Rivals & Onderling Rapport</h3>
+                  <span class="text-[10px] text-indigo-400 font-bold">${p1.name} versus de tafel</span>
+                </div>
+              </div>
+              <button type="button" onclick="document.getElementById('rivalsMatrixModal').remove()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+            </div>
+
+            <!-- Badges van Speler 1 -->
+            ${p1Badges.length > 0 ? `
+              <div class="flex flex-wrap items-center justify-center gap-1.5 bg-slate-950 p-2.5 rounded-2xl border border-slate-800">
+                ${p1Badges.map(b => `
+                  <span class="px-2 py-1 rounded-xl bg-slate-900 border border-slate-700/80 text-[10px] font-black text-amber-300 flex items-center gap-1 shadow-sm" title="${b.desc}">
+                    <span>${b.icon}</span><span>${b.label}</span>
+                  </span>
+                `).join('')}
+              </div>
+            ` : ''}
+
+            <!-- Tegenstander Kiezen -->
+            <div class="text-left space-y-1">
+              <label class="text-[11px] font-bold text-slate-400">Vergelijk direct met medespeler:</label>
+              <select onchange="openRivalsModal('${p1.id}', this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs font-bold text-white focus:outline-none focus:border-indigo-500">
+                ${otherPlayers.map(op => `
+                  <option value="${op.id}" ${op.id === selectedP2Id ? 'selected' : ''}>⚔️ Tegen ${op.name}</option>
+                `).join('')}
+              </select>
+            </div>
+
+            ${p2 ? `
+              <!-- Duel Kaart -->
+              <div class="bg-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-inner">
+                <div class="flex items-center justify-between">
+                  <div class="flex flex-col items-center flex-1">
+                    ${renderMeepleSvg(p1.color, 'w-8 h-8')}
+                    <span class="font-black text-xs sm:text-sm text-white mt-1 truncate max-w-[100px]">${p1.name}</span>
+                    <span class="text-2xl font-black font-mono text-amber-400 mt-0.5">${p1Wins}</span>
+                    <span class="text-[10px] text-slate-400 font-bold">${p1Pct}% winst</span>
+                  </div>
+
+                  <div class="px-3 text-center">
+                    <span class="text-slate-600 font-black text-lg block">VS</span>
+                    <span class="text-[10px] text-slate-500 font-mono block">${totalH2H} duels</span>
+                    ${draws > 0 ? `<span class="text-[9px] text-slate-500 font-bold block">${draws} gelijk</span>` : ''}
+                  </div>
+
+                  <div class="flex flex-col items-center flex-1">
+                    ${renderMeepleSvg(p2.color, 'w-8 h-8')}
+                    <span class="font-black text-xs sm:text-sm text-white mt-1 truncate max-w-[100px]">${p2.name}</span>
+                    <span class="text-2xl font-black font-mono text-indigo-400 mt-0.5">${p2Wins}</span>
+                    <span class="text-[10px] text-slate-400 font-bold">${p2Pct}% winst</span>
+                  </div>
+                </div>
+
+                <!-- Krachtsverhouding Balk -->
+                <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden flex border border-slate-800">
+                  <div class="h-full bg-amber-400 transition-all duration-500" style="width: ${totalH2H ? p1Pct : 50}%;"></div>
+                  <div class="h-full bg-indigo-500 transition-all duration-500" style="width: ${totalH2H ? p2Pct : 50}%;"></div>
+                </div>
+
+                <!-- Wie domineert welk spel -->
+                <div class="space-y-1 pt-1 text-left max-h-36 overflow-y-auto pr-1">
+                  ${Object.keys(gameWinMap).length > 0 ? Object.entries(gameWinMap).map(([gId, res]) => {
+                    const gDef = getGameDef(gId);
+                    return `
+                      <div class="flex items-center justify-between text-[11px] p-1.5 bg-slate-900/60 rounded-xl border border-slate-800/80">
+                        <span class="font-bold text-slate-300 truncate max-w-[140px]">${gDef.name}</span>
+                        <span class="font-mono font-black text-slate-400">${res.p1} - ${res.p2}</span>
+                      </div>
+                    `;
+                  }).join('') : '<div class="text-[11px] text-slate-500 text-center py-1">Nog geen gezamenlijke potjes gespeeld.</div>'}
+                </div>
+              </div>
+            ` : '<div class="text-xs text-slate-500 py-3">Voeg minstens 2 spelers toe om onderlinge duels te analyseren.</div>'}
+
+            <button type="button" onclick="document.getElementById('rivalsMatrixModal').remove()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-3d">
+              Sluiten
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHtml);
+      triggerHaptic(20);
+      SoundFX.click();
+    }
+
     function renderHallOfFame() {
       const list = document.getElementById('hallOfFameList');
       if (!list) return;
@@ -5834,7 +6469,8 @@
       list.innerHTML = `
         <div class="space-y-1.5">
           ${stats.map((p, idx) => `
-            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex items-center justify-between gap-2 shadow-sm btn-3d ${p.active === false ? 'opacity-70' : ''}">
+            <div onclick="openRivalsModal('${p.id}')" title="Tik om onderlinge rivalen & badges te bekijken"
+                 class="cursor-pointer bg-slate-950 hover:bg-slate-900 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-2.5 sm:p-3 flex items-center justify-between gap-2 shadow-sm transition btn-3d ${p.active === false ? 'opacity-70' : ''}">
               <div class="flex items-center gap-2 min-w-0">
                 <span class="font-mono text-xs font-black ${idx === 0 && p.wins > 0 ? 'text-amber-400' : 'text-slate-500'}">#${idx + 1}</span>
                 ${renderMeepleSvg(p.color, 'w-5 h-5')}
@@ -5847,6 +6483,7 @@
               <div class="flex items-center gap-2 font-mono text-xs shrink-0">
                 <span class="text-slate-400 text-[11px]">${p.wins}W / ${p.played}G (${p.winPct}%)</span>
                 <span class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-amber-300 font-black">Elo ${p.elo || 1200}</span>
+                <span class="text-slate-600 text-xs">➔</span>
               </div>
             </div>
           `).join('')}
@@ -6483,7 +7120,7 @@
     }
 
          // =========================================================================
-    // MODULE 15: LIVE TAFEL MODAL & TV SPECTATOR ROUTER
+    // MODULE 15: LIVE TAFEL MODAL, TV SPECTATOR ROUTER & WEBRTC SOUNDBOARD
     // =========================================================================
     function openLiveTafelModal() {
       const modal = document.getElementById('liveTafelModal');
@@ -6529,25 +7166,92 @@
       switchMainView('spectator');
     }
 
+    // --- REMOTE TV SOUNDBOARD DISPATCHERS ---
+    function broadcastTvSound(soundType) {
+      if (typeof SyncEngine !== 'undefined') {
+        const msg = { type: 'REMOTE_SOUND_TRIGGER', sound: soundType, timestamp: Date.now() };
+        if (SyncEngine.broadcastChan) SyncEngine.broadcastChan.postMessage(msg);
+        SyncEngine.conns.forEach(c => { if (c.open) c.send(msg); });
+      }
+    }
 
-    // =========================================================================
-    // MODULE 16: PODIUM MODAL, RESULTAAT GENERATOR & SPELAVOND ENGINE
+    function broadcastTvSpeech(textToSpeak) {
+      if (typeof SyncEngine !== 'undefined') {
+        const msg = { type: 'REMOTE_SPEECH_TRIGGER', text: textToSpeak, timestamp: Date.now() };
+        if (SyncEngine.broadcastChan) SyncEngine.broadcastChan.postMessage(msg);
+        SyncEngine.conns.forEach(c => { if (c.open) c.send(msg); });
+      }
+    }
+
+    // Luisteraar uitbreiden voor TV-ontvangst van geluidseffecten
+    if (typeof SyncEngine !== 'undefined') {
+      const originalHandler = SyncEngine.handleIncomingMessage.bind(SyncEngine);
+      SyncEngine.handleIncomingMessage = function(msg) {
+        originalHandler(msg);
+        if (!msg || !msg.type) return;
+
+        if (msg.type === 'REMOTE_SOUND_TRIGGER') {
+          if (msg.sound === 'fanfare') SoundFX.fanfare();
+          else if (msg.sound === 'alarm') SoundFX.alarm();
+          else if (msg.sound === 'point') SoundFX.point();
+          else if (msg.sound === 'record') SoundFX.record();
+        } else if (msg.type === 'REMOTE_SPEECH_TRIGGER' && msg.text) {
+          SoundFX.speak(msg.text);
+        }
+      };
+    }
+
+
+
+        // =========================================================================
+    // MODULE 16: PODIUM MODAL, RESULTAAT GENERATOR & FOTO-OVERLAY
     // =========================================================================
     let tieBreakOverruledShared = false;
+    let matchWinnerPhotoDataUrl = null;
 
     function openPodiumModal() {
       tieBreakOverruledShared = false;
+      matchWinnerPhotoDataUrl = null;
       renderPodiumModalContent();
       document.getElementById('podiumModal')?.classList.remove('hidden');
       triggerConfetti();
       triggerHaptic(40);
       SoundFX.fanfare();
+      if (typeof broadcastTvSound === 'function') broadcastTvSound('fanfare');
     }
 
     function toggleTieBreakOverrule() {
       tieBreakOverruledShared = !tieBreakOverruledShared;
       triggerHaptic(25);
       renderPodiumModalContent();
+    }
+
+    function handleWinnerPhotoUpload(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        matchWinnerPhotoDataUrl = e.target.result;
+        const preview = document.getElementById('winnerPhotoPreview');
+        const previewImg = document.getElementById('winnerPhotoImg');
+        if (preview && previewImg) {
+          previewImg.src = matchWinnerPhotoDataUrl;
+          preview.classList.remove('hidden');
+        }
+        showToast('📸 Foto succesvol toegevoegd aan de eindkaart!');
+        triggerHaptic(20);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function removeWinnerPhoto() {
+      matchWinnerPhotoDataUrl = null;
+      const preview = document.getElementById('winnerPhotoPreview');
+      if (preview) preview.classList.add('hidden');
+      const input = document.getElementById('winnerPhotoInput');
+      if (input) input.value = '';
+      showToast('Foto verwijderd.');
     }
 
     function renderPodiumModalContent() {
@@ -6641,8 +7345,28 @@
         `;
       }
 
+      // Camera / Foto Upload veld in de Modal
+      const photoWidgetHtml = `
+        <div class="pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between gap-2">
+            <label class="flex-1 py-2 px-3 rounded-xl bg-slate-950 border border-slate-800 hover:border-indigo-500/50 text-indigo-300 text-xs font-bold cursor-pointer text-center transition btn-3d flex items-center justify-center gap-1.5">
+              <span>📷</span>
+              <span>${matchWinnerPhotoDataUrl ? 'Foto vervangen' : '+ Foto van Winnaar / Bord toevoegen'}</span>
+              <input type="file" id="winnerPhotoInput" accept="image/*" capture="environment" onchange="handleWinnerPhotoUpload(event)" class="hidden" />
+            </label>
+          </div>
+          <div id="winnerPhotoPreview" class="${matchWinnerPhotoDataUrl ? '' : 'hidden'} mt-2 flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800">
+            <div class="flex items-center gap-2 min-w-0">
+              <img id="winnerPhotoImg" src="${matchWinnerPhotoDataUrl || ''}" class="w-10 h-10 object-cover rounded-lg border border-slate-700 shrink-0" alt="Foto" />
+              <span class="text-[11px] text-slate-300 truncate font-semibold">Foto toegevoegd aan poster</span>
+            </div>
+            <button type="button" onclick="removeWinnerPhoto()" class="text-rose-400 hover:text-rose-300 text-xs font-bold px-2 py-1">✕</button>
+          </div>
+        </div>
+      `;
+
       const listEl = document.getElementById('podiumStandingsList');
-      if (listEl) listEl.innerHTML = podiumHtml + remainingHtml;
+      if (listEl) listEl.innerHTML = podiumHtml + remainingHtml + photoWidgetHtml;
 
       const noteInp = document.getElementById('matchNoteInput');
       if (noteInp) noteInp.value = '';
@@ -6665,18 +7389,49 @@
       canvas.height = 1350;
       const ctx = canvas.getContext('2d');
 
-      const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1350);
-      bgGrad.addColorStop(0, '#020617');
-      bgGrad.addColorStop(0.5, '#0f172a');
-      bgGrad.addColorStop(1, '#020617');
-      ctx.fillStyle = bgGrad;
-      ctx.fillRect(0, 0, 1080, 1350);
+      // 1. Achtergrond tekenen (Foto of Donkere Sport-Gradient)
+      if (matchWinnerPhotoDataUrl) {
+        try {
+          const img = new Image();
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = matchWinnerPhotoDataUrl;
+          });
 
-      const glowGrad = ctx.createRadialGradient(540, 400, 50, 540, 400, 600);
-      glowGrad.addColorStop(0, 'rgba(99, 102, 241, 0.18)');
-      glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = glowGrad;
-      ctx.fillRect(0, 0, 1080, 1350);
+          // Schaal de foto zodat deze beeldvullend gecentreerd is
+          const hRatio = canvas.width / img.width;
+          const vRatio = canvas.height / img.height;
+          const ratio = Math.max(hRatio, vRatio);
+          const centerShiftX = (canvas.width - img.width * ratio) / 2;
+          const centerShiftY = (canvas.height - img.height * ratio) / 2;
+          ctx.drawImage(img, 0, 0, img.width, img.height, centerShiftX, centerShiftY, img.width * ratio, img.height * ratio);
+
+          // Donkere overlay over foto voor uitstekende tekst-leesbaarheid
+          const darkOverlay = ctx.createLinearGradient(0, 0, 0, 1350);
+          darkOverlay.addColorStop(0, 'rgba(2, 6, 23, 0.82)');
+          darkOverlay.addColorStop(0.35, 'rgba(2, 6, 23, 0.65)');
+          darkOverlay.addColorStop(0.7, 'rgba(2, 6, 23, 0.85)');
+          darkOverlay.addColorStop(1, 'rgba(2, 6, 23, 0.96)');
+          ctx.fillStyle = darkOverlay;
+          ctx.fillRect(0, 0, 1080, 1350);
+        } catch (e) {
+          console.warn('Kon foto niet renderen, fallback naar gradient:', e);
+        }
+      } else {
+        const bgGrad = ctx.createLinearGradient(0, 0, 1080, 1350);
+        bgGrad.addColorStop(0, '#020617');
+        bgGrad.addColorStop(0.5, '#0f172a');
+        bgGrad.addColorStop(1, '#020617');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, 1080, 1350);
+
+        const glowGrad = ctx.createRadialGradient(540, 400, 50, 540, 400, 600);
+        glowGrad.addColorStop(0, 'rgba(99, 102, 241, 0.18)');
+        glowGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = glowGrad;
+        ctx.fillRect(0, 0, 1080, 1350);
+      }
 
       ctx.strokeStyle = 'rgba(99, 102, 241, 0.4)';
       ctx.lineWidth = 12;
@@ -6697,7 +7452,7 @@
       ctx.fillText(dateStr, 540, 255);
 
       const winner = standings[0];
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
       ctx.strokeStyle = '#f59e0b';
       ctx.lineWidth = 6;
       ctx.beginPath();
@@ -6724,7 +7479,7 @@
         if (idx === 0) return;
         if (idx > 5) return;
 
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
         ctx.strokeStyle = 'rgba(51, 65, 85, 0.6)';
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -6755,7 +7510,7 @@
       });
 
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#475569';
+      ctx.fillStyle = '#94a3b8';
       ctx.font = '700 24px sans-serif';
       ctx.fillText('Gespeeld met Scoreblok Pro', 540, 1260);
 
@@ -6839,6 +7594,9 @@
         if (prevP && newP) {
           showToast(`⚔️ Wissel van de wacht! ${newP.name} pakt de trofee van ${prevP.name}!`);
           SoundFX.speak(`Wissel van de wacht! ${newP.name} ontkroont ${prevP.name}!`);
+          if (typeof broadcastTvSpeech === 'function') {
+            broadcastTvSpeech(`Wissel van de wacht! ${newP.name} ontkroont ${prevP.name}!`);
+          }
         }
       }
       state.championCup.previousHolder = previousCupHolder;
@@ -6874,6 +7632,7 @@
       state.history.unshift(match);
       state.gamesState[def.id] = null;
       state.activeGameStartTime = null;
+      matchWinnerPhotoDataUrl = null;
       saveState();
       broadcastLiveState();
 
@@ -7317,6 +8076,7 @@
 
       triggerHaptic(30);
       SoundFX.fanfare();
+      if (typeof broadcastTvSound === 'function') broadcastTvSound('fanfare');
       saveState();
       renderTournamentModalContent();
       showToast(`🏆 Competitie "${name}" gestart!`);
@@ -7392,18 +8152,21 @@
           winP.tournamentCups = (winP.tournamentCups || 0) + 1;
           showToast(`🏆 ${winP.name} wint de competitie! Beker toegekend.`);
           SoundFX.speak(`Gefeliciteerd ${winP.name}, jij bent de kampioen van de competitie!`);
+          if (typeof broadcastTvSpeech === 'function') {
+            broadcastTvSpeech(`Gefeliciteerd ${winP.name}, jij bent de kampioen van de competitie!`);
+          }
         }
       }
 
       triggerHaptic(40);
       SoundFX.fanfare();
+      if (typeof broadcastTvSound === 'function') broadcastTvSound('fanfare');
       triggerConfetti();
       state.tournament.active = false;
       saveState();
       closeTournamentModal();
       renderHistoryView();
     }
-
 
     // =========================================================================
     // MODULE 17: SNELLE ACTIES, DOBBELSTEEN & WINNAAR MODALS
