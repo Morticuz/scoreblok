@@ -182,7 +182,37 @@
       z-index: 0;
       transform: rotate(-12deg);
     }
+
+    /* NIEUW: Vloeiende score-pop animatie (Idee 1) */
+    @keyframes scorePop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.22); color: #fbbf24; }
+      100% { transform: scale(1); }
+    }
+    .score-updated {
+      animation: scorePop 0.3s ease-in-out;
+    }
+
+    /* NIEUW: Pulserende koploper glow (Idee 2) */
+    @keyframes leaderGlowPulse {
+      0%, 100% { box-shadow: 0 0 15px -2px var(--card-glow-color, rgba(99, 102, 241, 0.25)); }
+      50% { box-shadow: 0 0 25px 4px var(--card-glow-color, rgba(251, 191, 36, 0.45)); }
+    }
+    .player-card-leader {
+      animation: leaderGlowPulse 2.5s infinite ease-in-out;
+      border-color: rgba(251, 191, 36, 0.6) !important;
+    }
+
+    /* NIEUW: Subtiele schermrand-flits bij beurtwissel (Idee 3) */
+    @keyframes screenTurnFlash {
+      0% { box-shadow: inset 0 0 0 3px var(--turn-flash-color, rgba(99, 102, 241, 0.6)); }
+      100% { box-shadow: inset 0 0 0 0px transparent; }
+    }
+    .screen-turn-flash {
+      animation: screenTurnFlash 0.6s ease-out;
+    }
   </style>
+
 </head>
 
 <body class="min-h-screen pb-20">
@@ -2920,12 +2950,18 @@
       SoundFX.click();
 
       startTableTimer();
-
       saveState();
       renderLiveLeaderboard();
       
       const p = active[gs.activeTurnPlayerIdx];
-      if (p) showToast(`👉 Aan de beurt: ${p.name}`);
+      if (p) {
+        // Activeer de sfeervolle schermrand-flits in de meeple-kleur
+        document.body.style.setProperty('--turn-flash-color', p.color || '#6366f1');
+        document.body.classList.add('screen-turn-flash');
+        setTimeout(() => document.body.classList.remove('screen-turn-flash'), 600);
+
+        showToast(`👉 Aan de beurt: ${p.name}`);
+      }
     }
 
     function updateActiveFavStar() {
@@ -3072,7 +3108,7 @@
                   </div>
                 </div>
               </div>
-              <div class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-right shrink-0">
+              <div class="bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-1.5 text-right shrink-0">
                 <span class="text-[10px] text-slate-400 block font-bold">Voorsprong op ${p2.name}:</span>
                 <span class="text-sm sm:text-base font-mono font-black text-emerald-300">+${gap}p</span>
               </div>
@@ -3248,7 +3284,6 @@
         tBtn.textContent = state.isTeamMode ? '👥 Teams' : '👤 Solo';
       }
 
-      // Injecteer de Spelregels-knop dynamisch in de actiebalk als deze er nog niet staat
       let rulesBtn = document.getElementById('gameRulesBtn');
       if (!rulesBtn) {
         const teamBtn = document.getElementById('teamModeToggleBtn');
@@ -3363,6 +3398,8 @@
       }
     }
 
+    let previousLeaderboardScores = {};
+
     function renderLiveLeaderboard() {
       const def = getGameDef(state.activeGameId);
       const standings = getStandings();
@@ -3377,14 +3414,22 @@
         const isTurn = (!state.isTeamMode && idx === (ensureGameState().activeTurnPlayerIdx || 0));
         const pColor = item.color || '#6366f1';
 
+        const oldScore = previousLeaderboardScores[item.id];
+        const scoreChanged = oldScore !== undefined && oldScore !== item.score;
+        previousLeaderboardScores[item.id] = item.score;
+
         if (!item.isTeam && typeof checkLiveGroepRecord === 'function') {
           checkLiveGroepRecord(def.id, item.id, item.score);
         }
 
+        let cardClass = 'player-card-glow';
+        if (isTurn) cardClass = 'player-active-turn';
+        else if (isLeader) cardClass = 'player-card-leader';
+
         return `
           <div id="cardLeader_${item.id}" onclick="${!state.isTeamMode ? 'cycleActiveTurn(1)' : ''}" title="${!state.isTeamMode ? 'Tik om de beurt door te schuiven' : ''}"
-            class="relative overflow-hidden cursor-pointer rounded-2xl p-3.5 border transition btn-3d player-card-glow ${isTurn ? 'player-active-turn' : ''}"
-            style="border-left: 5px solid ${pColor}; --player-turn-color: ${pColor}; --card-glow-color: ${pColor}20;">
+            class="relative overflow-hidden cursor-pointer rounded-2xl p-3.5 border transition btn-3d ${cardClass}"
+            style="border-left: 5px solid ${pColor}; --player-turn-color: ${pColor}; --card-glow-color: ${isLeader ? '#fbbf24' : pColor}35;">
             
             <div class="flex items-center justify-between text-xs text-slate-400">
               <span class="player-title font-bold truncate flex items-center gap-1.5 text-slate-100">
@@ -3398,7 +3443,7 @@
               </span>
             </div>
             
-            <div id="leaderScoreNum_${item.id}" class="score-number text-2xl sm:text-3xl font-black mt-1 font-mono ${isLeader ? 'text-indigo-300' : 'text-white'}">${item.score}</div>
+            <div id="leaderScoreNum_${item.id}" class="score-number text-2xl sm:text-3xl font-black mt-1 font-mono ${scoreChanged ? 'score-updated' : ''} ${isLeader ? 'text-amber-300' : 'text-white'}">${item.score}</div>
             ${item.isTeam ? `<div class="text-[10px] text-slate-400 truncate mt-0.5">Leden: ${item.members.join(', ')}</div>` : ''}
             ${isLeader && hasTieBreak ? `<div class="text-[10px] text-emerald-300 font-bold">⚖️ Tie-val: ${item.tieVal}</div>` : ''}
             ${item.handicap ? `<div class="text-[10px] text-slate-400">Handicap: ${item.handicap > 0 ? '+' : ''}${item.handicap}</div>` : ''}
