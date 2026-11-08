@@ -4849,8 +4849,7 @@
         `;
       }).join('') + `</div>`;
     }
-        // =========================================================================
-        // =========================================================================
+            // =========================================================================
     // 11. SPELERSBEHEER, TEAMS & GROEPEN
     // =========================================================================
     const MEEPLE_COLORS = [
@@ -5126,6 +5125,23 @@
     // =========================================================================
     // 12. HISTORIE, STATISTIEKEN & GRAFIEKEN
     // =========================================================================
+    function renderDieSvg(val) {
+      const pips = {
+        1: ['col-start-2 row-start-2'],
+        2: ['col-start-1 row-start-1', 'col-start-3 row-start-3'],
+        3: ['col-start-1 row-start-1', 'col-start-2 row-start-2', 'col-start-3 row-start-3'],
+        4: ['col-start-1 row-start-1', 'col-start-3 row-start-1', 'col-start-1 row-start-3', 'col-start-3 row-start-3'],
+        5: ['col-start-1 row-start-1', 'col-start-3 row-start-1', 'col-start-2 row-start-2', 'col-start-1 row-start-3', 'col-start-3 row-start-3'],
+        6: ['col-start-1 row-start-1', 'col-start-3 row-start-1', 'col-start-1 row-start-2', 'col-start-3 row-start-2', 'col-start-1 row-start-3', 'col-start-3 row-start-3']
+      };
+      const dots = pips[val] || pips[1];
+      return `
+        <div class="w-10 h-10 bg-white rounded-xl p-1.5 grid grid-cols-3 grid-rows-3 gap-0.5 shadow-md border border-slate-300">
+          ${dots.map(pos => `<div class="w-2 h-2 bg-slate-900 rounded-full mx-auto my-auto ${pos}"></div>`).join('')}
+        </div>
+      `;
+    }
+
     function renderHistoryView() {
       renderChampionCupWidget();
       populateHistoryFilter();
@@ -5476,7 +5492,6 @@
       saveState();
       renderHallOfFame();
     }
-
 
         // =========================================================================
     // 13. WIE BEGINT? (FINGER-PICKER, RANDOM & TAFEL-CHALLENGES)
