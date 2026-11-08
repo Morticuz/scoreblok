@@ -21,7 +21,7 @@
   <!-- Google Cast Web SDK -->
   <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 
-  <style>
+    <style>
     html {
       background-color: #020617 !important;
       height: 100%;
@@ -165,10 +165,13 @@
       border-bottom-width: 1px !important;
     }
 
+    /* IDEE 5: Glazen Tafel (Glassmorphism) Stijlpakket met Diepte-Laagjes */
     .player-card-glow {
-      background: radial-gradient(circle at 10% 15%, var(--card-glow-color, rgba(99, 102, 241, 0.12)) 0%, rgba(15, 23, 42, 0.92) 70%) !important;
-      box-shadow: 0 10px 25px -5px var(--card-glow-color, rgba(0, 0, 0, 0.4)) !important;
-      border-color: rgba(51, 65, 85, 0.6) !important;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.88) 100%) !important;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
 
     .tv-watermark-bg {
@@ -183,7 +186,7 @@
       transform: rotate(-12deg);
     }
 
-    /* NIEUW: Vloeiende score-pop animatie (Idee 1) */
+    /* Vloeiende score-pop animatie */
     @keyframes scorePop {
       0% { transform: scale(1); }
       50% { transform: scale(1.22); color: #fbbf24; }
@@ -193,7 +196,21 @@
       animation: scorePop 0.3s ease-in-out;
     }
 
-    /* NIEUW: Pulserende koploper glow (Idee 2) */
+    /* IDEE 1: Holografische Winnaar & Goudglans Podium-Kaart */
+    @keyframes holoGleam {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .podium-winner-holo {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.25), rgba(99, 102, 241, 0.2), rgba(236, 72, 153, 0.25));
+      background-size: 200% 200%;
+      animation: holoGleam 4s ease infinite;
+      border: 2px solid rgba(251, 191, 36, 0.8) !important;
+      box-shadow: 0 0 30px rgba(251, 191, 36, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* Pulserende koploper glow */
     @keyframes leaderGlowPulse {
       0%, 100% { box-shadow: 0 0 15px -2px var(--card-glow-color, rgba(99, 102, 241, 0.25)); }
       50% { box-shadow: 0 0 25px 4px var(--card-glow-color, rgba(251, 191, 36, 0.45)); }
@@ -203,7 +220,7 @@
       border-color: rgba(251, 191, 36, 0.6) !important;
     }
 
-    /* NIEUW: Subtiele schermrand-flits bij beurtwissel (Idee 3) */
+    /* Subtiele schermrand-flits bij beurtwissel */
     @keyframes screenTurnFlash {
       0% { box-shadow: inset 0 0 0 3px var(--turn-flash-color, rgba(99, 102, 241, 0.6)); }
       100% { box-shadow: inset 0 0 0 0px transparent; }
@@ -212,6 +229,7 @@
       animation: screenTurnFlash 0.6s ease-out;
     }
   </style>
+
 
 </head>
 
@@ -2852,8 +2870,8 @@
       }).join('');
     }
 
-       // =========================================================================
-    // MODULE 9: SCOREBOARD RENDERING, BEURTWISSELS, TIMER, BANNERS & CHEAT SHEETS
+        // =========================================================================
+    // MODULE 9: SCOREBOARD RENDERING, BEURTWISSELS, TIMER, BANNERS & VISUALS
     // =========================================================================
     let turnTimerInterval = null;
     let turnTimeRemaining = 45;
@@ -2955,11 +2973,9 @@
       
       const p = active[gs.activeTurnPlayerIdx];
       if (p) {
-        // Activeer de sfeervolle schermrand-flits in de meeple-kleur
         document.body.style.setProperty('--turn-flash-color', p.color || '#6366f1');
         document.body.classList.add('screen-turn-flash');
         setTimeout(() => document.body.classList.remove('screen-turn-flash'), 600);
-
         showToast(`👉 Aan de beurt: ${p.name}`);
       }
     }
@@ -2974,15 +2990,6 @@
       pushUndoSnapshot();
       const gs = ensureGameState(state.activeGameId);
       gs.activeExpansions[expName] = !gs.activeExpansions[expName];
-      if (state.activeGameId === 'regenwormen' && !isRegenwormenExpActive(gs)) {
-        state.players.forEach(p => {
-          const rw = gs.playerData[p.id]?.regenwormen;
-          if (rw) {
-            if (rw.tiles) { delete rw.tiles[11]; delete rw.tiles[13]; }
-            rw.bonus = 0;
-          }
-        });
-      }
       saveState();
       renderScoreboard();
     }
@@ -3017,15 +3024,13 @@
         });
         if (completedBy.length > 0) {
           banner.classList.remove('hidden');
-          banner.innerHTML = `<span>🏁 <b>Einde spel bereikt!</b> ${completedBy.map(p => p.name).join(', ')} heeft een horizontale rij compleet! Dit is de laatste ronde.</span>`;
+          banner.innerHTML = `<span>🏁 <b>Einde spel bereikt!</b> ${completedBy.map(p => p.name).join(', ')} heeft een horizontale rij compleet!</span>`;
           return;
         }
       }
 
       if (def.hasLastRoundKnock || def.type === 'rounds' || def.type === 'beverbende' || def.type === 'beverclan' || def.type === 'seasalt') {
         banner.classList.remove('hidden');
-        const knocker = activePlayers.find(p => p.id === gs.knockerPlayerId);
-        const others = activePlayers.filter(p => p.id !== gs.knockerPlayerId).map(p => p.name).join(', ');
         banner.innerHTML = `
           <div class="flex items-center gap-2 flex-wrap">
             <span>🔔 <b>Laatste ronde geklopt:</b></span>
@@ -3035,7 +3040,6 @@
               </button>
             `).join('')}
           </div>
-          ${knocker ? `<div class="text-xs text-amber-300 font-bold mt-1">👉 ${knocker.name} klopte! Nog 1 beurt voor: <b>${others || '-'}</b></div>` : `<div class="text-[11px] text-slate-400">Tik op een naam zodra iemand klopt / laatste ronde inzet.</div>`}
         `;
         return;
       }
@@ -3053,101 +3057,44 @@
 
       const p1 = standings[0];
       const p2 = standings[1];
-      const lowWins = isLowestWins(def.id);
       const limit = def.limit;
       let html = '';
 
       if (limit && limit > 0) {
-        if (!lowWins) {
-          const ptsNeededP1 = Math.max(0, limit - p1.score);
-          const gapP2 = p1.score - p2.score;
-
-          if (ptsNeededP1 === 0) {
-            html = `
-              <div class="flex items-center gap-3">
-                <span class="text-3xl sm:text-4xl">🏁</span>
-                <div>
-                  <div class="text-xs sm:text-sm uppercase font-black tracking-widest text-amber-400">Matchpoint bereikt!</div>
-                  <div class="text-sm sm:text-base font-extrabold text-white"><b>${p1.name}</b> heeft de limiet van ${limit} punten bereikt en kan uitmaken!</div>
+        const ptsNeededP1 = Math.max(0, limit - p1.score);
+        html = `
+          <div class="flex items-center justify-between gap-3 flex-wrap w-full">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-2xl sm:text-3xl">🎯</span>
+              <div class="min-w-0">
+                <div class="text-[11px] uppercase tracking-wider font-extrabold text-indigo-400">Race naar de ${limit} punten</div>
+                <div class="text-xs sm:text-sm font-bold text-slate-200">
+                  <strong class="text-amber-300 font-extrabold">${p1.name}</strong> leidt en heeft nog 
+                  <strong class="text-white font-mono underline decoration-amber-400">${ptsNeededP1}p</strong> nodig.
                 </div>
-              </div>
-            `;
-          } else {
-            html = `
-              <div class="flex items-center justify-between gap-3 flex-wrap w-full">
-                <div class="flex items-center gap-3 min-w-0">
-                  <span class="text-2xl sm:text-3xl">🎯</span>
-                  <div class="min-w-0">
-                    <div class="text-[11px] uppercase tracking-wider font-extrabold text-indigo-400">Race naar de ${limit} punten</div>
-                    <div class="text-xs sm:text-sm font-bold text-slate-200">
-                      <strong class="text-amber-300 font-extrabold text-sm sm:text-base">${p1.name}</strong> leidt en heeft nog 
-                      <strong class="text-white font-mono text-base sm:text-lg underline underline-offset-4 decoration-amber-400">${ptsNeededP1}p</strong> nodig voor de winst.
-                    </div>
-                  </div>
-                </div>
-                <div class="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-1.5 text-right shrink-0">
-                  <span class="text-[10px] text-slate-400 block font-bold">Achterstand ${p2.name}:</span>
-                  <span class="text-sm sm:text-base font-mono font-black text-rose-400">-${gapP2}p</span>
-                </div>
-              </div>
-            `;
-          }
-        } else {
-          const marginP1 = Math.max(0, limit - p1.score);
-          const gap = p2.score - p1.score;
-
-          html = `
-            <div class="flex items-center justify-between gap-3 flex-wrap w-full">
-              <div class="flex items-center gap-3 min-w-0">
-                <span class="text-2xl sm:text-3xl">🛡️</span>
-                <div class="min-w-0">
-                  <div class="text-[11px] uppercase tracking-wider font-extrabold text-emerald-400">Afvalrace (limiet: ${limit}p straf)</div>
-                  <div class="text-xs sm:text-sm font-bold text-slate-200">
-                    <strong class="text-emerald-400 font-extrabold text-sm sm:text-base">${p1.name}</strong> leidt (${p1.score}p) met 
-                    <strong class="text-white font-mono text-base sm:text-lg underline underline-offset-4 decoration-emerald-400">${marginP1}p</strong> veilige marge.
-                  </div>
-                </div>
-              </div>
-              <div class="bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-1.5 text-right shrink-0">
-                <span class="text-[10px] text-slate-400 block font-bold">Voorsprong op ${p2.name}:</span>
-                <span class="text-sm sm:text-base font-mono font-black text-emerald-300">+${gap}p</span>
               </div>
             </div>
-          `;
-        }
+          </div>
+        `;
       } else {
         const gap = Math.abs(p1.score - p2.score);
-        if (gap === 0) {
-          html = `
-            <div class="flex items-center gap-3">
-              <span class="text-2xl sm:text-3xl">⚖️</span>
-              <div>
-                <div class="text-xs font-black uppercase tracking-wider text-amber-400">Gelijke Stand Aan Kop!</div>
-                <div class="text-xs sm:text-sm font-bold text-white"><b>${p1.name}</b> en <b>${p2.name}</b> staan exact gelijk op <b class="font-mono text-amber-300 text-sm sm:text-base">${p1.score}p</b>!</div>
-              </div>
-            </div>
-          `;
-        } else {
-          const leader = lowWins ? (p1.score < p2.score ? p1 : p2) : p1;
-          const chaser = lowWins ? (p1.score < p2.score ? p2 : p1) : p2;
-          html = `
-            <div class="flex items-center justify-between gap-3 flex-wrap w-full">
-              <div class="flex items-center gap-3 min-w-0">
-                <span class="text-2xl sm:text-3xl">📊</span>
-                <div class="min-w-0">
-                  <div class="text-[11px] uppercase tracking-wider font-extrabold text-indigo-400">Live Tussenstand</div>
-                  <div class="text-xs sm:text-sm font-bold text-slate-200">
-                    <strong class="text-amber-300 font-extrabold text-sm sm:text-base">${leader.name}</strong> staat virtueel op #1.
-                  </div>
+        html = `
+          <div class="flex items-center justify-between gap-3 flex-wrap w-full">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-2xl sm:text-3xl">📊</span>
+              <div class="min-w-0">
+                <div class="text-[11px] uppercase tracking-wider font-extrabold text-indigo-400">Live Tussenstand</div>
+                <div class="text-xs sm:text-sm font-bold text-slate-200">
+                  <strong class="text-amber-300 font-extrabold">${p1.name}</strong> staat virtueel op #1.
                 </div>
               </div>
-              <div class="bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-1.5 text-right shrink-0">
-                <span class="text-[10px] text-slate-400 block font-bold">Gat naar ${chaser.name}:</span>
-                <span class="text-base sm:text-lg font-mono font-black text-amber-300">${gap} punt${gap === 1 ? '' : 'en'}</span>
-              </div>
             </div>
-          `;
-        }
+            <div class="bg-slate-950/80 border border-slate-800 rounded-xl px-3.5 py-1.5 text-right shrink-0">
+              <span class="text-[10px] text-slate-400 block font-bold">Gat naar #2:</span>
+              <span class="text-base sm:text-lg font-mono font-black text-amber-300">${gap} pt</span>
+            </div>
+          </div>
+        `;
       }
 
       banner.innerHTML = html;
@@ -3166,33 +3113,6 @@
       }
       if (gs.dealerRule === 'clockwise') {
         return active[(baseIdx + rounds.length) % active.length];
-      }
-      const lastRound = rounds[rounds.length - 1];
-      if (gs.dealerRule === 'highest_round' || gs.dealerRule === 'lowest_round' || gs.dealerRule === 'winner_round') {
-        const wantLow = gs.dealerRule === 'lowest_round' || (gs.dealerRule === 'winner_round' && isLowestWins(gameId));
-        let bestP = active[0];
-        let bestVal = Number(lastRound[bestP.id] || 0);
-        active.forEach(p => {
-          const v = Number(lastRound[p.id] || 0);
-          if ((wantLow && v < bestVal) || (!wantLow && v > bestVal)) {
-            bestVal = v;
-            bestP = p;
-          }
-        });
-        return bestP;
-      }
-      if (gs.dealerRule === 'highest_total' || gs.dealerRule === 'lowest_total') {
-        const wantLow = gs.dealerRule === 'lowest_total';
-        let bestP = active[0];
-        let bestVal = calculatePlayerTotal(gameId, bestP.id);
-        active.forEach(p => {
-          const v = calculatePlayerTotal(gameId, p.id);
-          if ((wantLow && v < bestVal) || (!wantLow && v > bestVal)) {
-            bestVal = v;
-            bestP = p;
-          }
-        });
-        return bestP;
       }
       return active[baseIdx];
     }
@@ -3218,51 +3138,25 @@
       document.getElementById('gameRulesModal')?.remove();
 
       const rulesList = (def.rules && def.rules.length > 0) 
-        ? def.rules.map(r => `
-            <li class="flex items-start gap-2 text-slate-200">
-              <span class="text-indigo-400 font-bold shrink-0 mt-0.5">▸</span>
-              <span>${r}</span>
-            </li>
-          `).join('')
-        : `<li class="text-slate-400 italic">Geen specifieke spiekbrief voor dit spel beschikbaar. Raadpleeg het spelregelboekje.</li>`;
-
-      const tieDesc = def.tieBreakerDesc 
-        ? `<div class="bg-amber-950/40 border border-amber-500/30 rounded-2xl p-3 text-xs">
-             <span class="text-amber-300 font-bold block mb-1">⚖️ Officiële Tie-Breaker:</span>
-             <span class="text-slate-200">${def.tieBreakerDesc}</span>
-           </div>`
-        : '';
+        ? def.rules.map(r => `<li class="flex items-start gap-2 text-slate-200"><span class="text-indigo-400 font-bold">▸</span><span>${r}</span></li>`).join('')
+        : `<li class="text-slate-400 italic">Geen regels beschikbaar.</li>`;
 
       const modalHtml = `
         <div id="gameRulesModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
           <div class="bg-slate-900 border border-indigo-500/40 rounded-3xl max-w-sm sm:max-w-md w-full p-5 space-y-4 shadow-2xl">
             <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
-              <div class="flex items-center gap-2 min-w-0">
+              <div class="flex items-center gap-2">
                 ${renderGameArtwork(def.id, 'w-8 h-8')}
-                <div>
-                  <h3 class="font-black text-sm sm:text-base text-white truncate">${def.name} • Spelregels</h3>
-                  <span class="text-[10px] text-indigo-400 font-bold">Spiekbrief & Uitzonderingen</span>
-                </div>
+                <h3 class="font-black text-sm text-white">${def.name} • Spelregels</h3>
               </div>
-              <button type="button" onclick="document.getElementById('gameRulesModal').remove()" class="text-slate-400 hover:text-white font-bold text-sm">✕</button>
+              <button type="button" onclick="document.getElementById('gameRulesModal').remove()" class="text-slate-400 hover:text-white">✕</button>
             </div>
-
-            <div class="space-y-3 text-xs max-h-[60vh] overflow-y-auto pr-1">
-              <ul class="space-y-2 leading-relaxed bg-slate-950 p-3.5 rounded-2xl border border-slate-800">
-                ${rulesList}
-              </ul>
-              ${tieDesc}
-            </div>
-
-            <button type="button" onclick="document.getElementById('gameRulesModal').remove()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold btn-3d">
-              Sluiten
-            </button>
+            <ul class="space-y-2 text-xs max-h-[60vh] overflow-y-auto bg-slate-950 p-3.5 rounded-2xl border border-slate-800">${rulesList}</ul>
+            <button type="button" onclick="document.getElementById('gameRulesModal').remove()" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">Sluiten</button>
           </div>
         </div>
       `;
       document.body.insertAdjacentHTML('beforeend', modalHtml);
-      triggerHaptic(15);
-      SoundFX.click();
     }
 
     function renderScoreboard() {
@@ -3298,86 +3192,21 @@
         }
       }
 
-      const graphBtn = document.getElementById('roundGraphBtn');
-      if (graphBtn) {
-        if (def.type === 'rounds' || def.type === 'flip7' || def.type === 'beverbende' || def.type === 'beverclan' || def.type === 'seasalt') {
-          graphBtn.classList.remove('hidden');
-        } else {
-          graphBtn.classList.add('hidden');
-        }
-      }
-
-      const lowWins = isLowestWins();
-      let ruleTxt = lowWins ? '👑 Laagste score wint' : '👑 Hoogste score wint';
-      if (def.limit) ruleTxt += ` • Doel/Limiet: ${def.limit} pnt`;
-      if (def.tieBreakerDesc) ruleTxt += ` • ⚖️ Tie-breaker: ${def.tieBreakerDesc}`;
-      const ruleInfoEl = document.getElementById('activeGameRuleInfo');
-      if (ruleInfoEl) ruleInfoEl.textContent = ruleTxt;
-
       renderEndgameAlertBanner(def, gs);
       renderWinMarginBanner(def, getStandings());
-
-      const expBar = document.getElementById('expansionsBar');
-      if (expBar) {
-        if (def.expansions && def.expansions.length > 0) {
-          expBar.classList.remove('hidden');
-          expBar.innerHTML = `<span class="text-xs font-bold text-slate-400">🧩 Uitbreidingen:</span>` +
-            def.expansions.map(ex => {
-              const on = !!gs.activeExpansions[ex];
-              return `<button type="button" onclick="toggleExpansion('${ex.replace(/'/g, "\\'")}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition btn-3d ${on ? 'bg-amber-500/20 border-amber-400 text-amber-300 shadow' : 'bg-slate-950 border-slate-800 text-slate-400'}">${on ? '✓ ' : '+ '}${ex}</button>`;
-            }).join('');
-        } else {
-          expBar.classList.add('hidden');
-        }
-      }
-
-      const starterP = computeCurrentStarterPlayer(def.id);
-      const isRoundGame = (def.type === 'rounds' || def.type === 'flip7' || def.type === 'beverbende' || def.type === 'beverclan' || def.type === 'seasalt');
-      const roundNum = (gs.rounds || []).length + 1;
-      const stBar = document.getElementById('starterTrackerBar');
-      if (stBar && starterP) {
-        stBar.innerHTML = `
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="px-3 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-bold flex items-center gap-2 text-xs sm:text-sm">
-              🃏 Delen / Start (${isRoundGame ? 'Ronde ' + roundNum : 'Nu'}):
-              <span class="underline cursor-pointer font-black" onclick="cycleManualStarter()" title="Tik om door te schuiven naar volgende speler" style="color:${starterP.color}">${starterP.name} ↻</span>
-            </span>
-          </div>
-          <div class="flex items-center gap-1.5">
-            <span class="text-xs text-slate-400">Regel:</span>
-            <select onchange="setDealerRule(this.value)" class="bg-slate-950 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200">
-              <option value="clockwise" ${gs.dealerRule === 'clockwise' ? 'selected' : ''}>🔄 Elke ronde met de klok mee</option>
-              <option value="highest_total" ${gs.dealerRule === 'highest_total' ? 'selected' : ''}>📈 Hoogste totaalscore start</option>
-              <option value="lowest_total" ${gs.dealerRule === 'lowest_total' ? 'selected' : ''}>📉 Laagste totaalscore start</option>
-              <option value="winner_round" ${gs.dealerRule === 'winner_round' ? 'selected' : ''}>👑 Winnaar vorige ronde start</option>
-              <option value="manual" ${gs.dealerRule === 'manual' ? 'selected' : ''}>✋ Handmatig (tik op naam)</option>
-            </select>
-          </div>
-        `;
-      }
-
       renderLiveLeaderboard();
 
       const container = document.getElementById('gameSheetContainer');
       if (!container) return;
 
       try {
-        if (def.type === 'doolhof') renderDoolhofSheet(container);
-        else if (def.type === 'parijs') renderParijsSheet(container);
-        else if (def.type === 'beverbende' || def.type === 'beverclan') renderBeverbendeSheet(container, def);
-        else if (def.type === 'seasalt') renderSeaSaltSheet(container, def);
-        else if (def.type === 'harmonies') renderHarmoniesSheet(container);
-        else if (def.type === 'machiavelli') renderMachiavelliSheet(container);
-        else if (def.id === 'wingspan') renderWingspanDashboard(container);
-        else if (def.type === 'kok1' || def.type === 'kok2') renderKokSheet(container, def);
-        else if (def.type === 'azul') renderAzulSheet(container, def);
+        if (def.type === 'azul') renderAzulSheet(container, def);
         else if (def.type === 'rounds') renderRoundsSheet(container, def);
         else if (def.type === 'flip7') renderFlip7Sheet(container, def);
         else if (def.type === 'qwixx') renderQwixxSheet(container);
         else if (def.type === 'clever') renderCleverSheet(container);
         else if (def.type === 'cascadia') renderCascadiaSheet(container);
         else if (def.type === 'regenwormen') renderRegenwormenSheet(container);
-        else if (def.type === 'categories') renderCategoriesSheet(container, def);
         else if (def.type === 'wonders7') renderWonders7Sheet(container);
         else if (def.type === 'ttr') renderTtrSheet(container);
         else if (def.type === 'yahtzee') renderYahtzeeSheet(container);
@@ -3385,16 +3214,12 @@
         else if (def.type === 'sushigo') renderSushiGoSheet(container);
         else if (def.type === 'lostcities') renderLostCitiesSheet(container);
         else if (def.type === 'koehandel') renderKoehandelSheet(container);
-        else if (def.type === 'arknova') renderArkNovaSheet(container);
-        else if (def.type === 'heat') renderHeatSheet(container);
-        else if (def.type === 'dorfromantik') renderDorfromantikSheet(container);
         else if (def.type === 'coop') renderCoopSheet(container, def);
-        else if (def.type === 'codenames') renderCodenamesSheet(container);
-        else if (def.type === 'themind') renderTheMindSheet(container);
         else if (def.type === 'carcassonne') renderCarcassonneSheet(container, def);
+        else renderRoundsSheet(container, def);
       } catch (err) {
         console.error("Fout bij renderen spelblad:", err);
-        container.innerHTML = `<div class="p-4 bg-rose-950/40 border border-rose-500/40 rounded-2xl text-rose-300 text-xs font-bold">Fout bij inladen: ${err.message}</div>`;
+        container.innerHTML = `<div class="p-4 bg-rose-950/40 border border-rose-500/40 rounded-2xl text-rose-300 text-xs font-bold">Fout: ${err.message}</div>`;
       }
     }
 
@@ -3404,13 +3229,11 @@
       const def = getGameDef(state.activeGameId);
       const standings = getStandings();
       const topEntry = standings[0];
-      const hasTieBreak = standings.length > 1 && standings[0].score === standings[1].score && standings[0].tieVal !== standings[1].tieVal && standings[0].score !== 0;
-
       const boardEl = document.getElementById('liveLeaderboard');
       if (!boardEl) return;
 
       boardEl.innerHTML = standings.map((item, idx) => {
-        const isLeader = standings.some(x => x.score !== 0) && item.score === topEntry?.score && item.tieVal === topEntry?.tieVal;
+        const isLeader = standings.some(x => x.score !== 0) && item.score === topEntry?.score;
         const isTurn = (!state.isTeamMode && idx === (ensureGameState().activeTurnPlayerIdx || 0));
         const pColor = item.color || '#6366f1';
 
@@ -3418,18 +3241,27 @@
         const scoreChanged = oldScore !== undefined && oldScore !== item.score;
         previousLeaderboardScores[item.id] = item.score;
 
-        if (!item.isTeam && typeof checkLiveGroepRecord === 'function') {
-          checkLiveGroepRecord(def.id, item.id, item.score);
-        }
-
         let cardClass = 'player-card-glow';
         if (isTurn) cardClass = 'player-active-turn';
         else if (isLeader) cardClass = 'player-card-leader';
 
+        // IDEE 2: Mini-sparkline weergave op basis van rondes
+        const gs = ensureGameState(state.activeGameId);
+        const rounds = gs.rounds || [];
+        const sparklineHtml = rounds.length > 1 ? `
+          <div class="flex items-end gap-0.5 h-3 mt-1.5 opacity-70">
+            ${rounds.slice(-5).map(r => {
+              const val = Number(r[item.id] || 0);
+              const heightPct = Math.min(100, Math.max(15, Math.abs(val) * 10));
+              return `<div style="height: ${heightPct}%" class="w-1 rounded-t bg-indigo-400"></div>`;
+            }).join('')}
+          </div>
+        ` : '';
+
         return `
-          <div id="cardLeader_${item.id}" onclick="${!state.isTeamMode ? 'cycleActiveTurn(1)' : ''}" title="${!state.isTeamMode ? 'Tik om de beurt door te schuiven' : ''}"
+          <div id="cardLeader_${item.id}" onclick="${!state.isTeamMode ? 'cycleActiveTurn(1)' : ''}"
             class="relative overflow-hidden cursor-pointer rounded-2xl p-3.5 border transition btn-3d ${cardClass}"
-            style="border-left: 5px solid ${pColor}; --player-turn-color: ${pColor}; --card-glow-color: ${isLeader ? '#fbbf24' : pColor}35;">
+            style="border-left: 5px solid ${pColor}; --card-glow-color: ${isLeader ? '#fbbf24' : pColor}35;">
             
             <div class="flex items-center justify-between text-xs text-slate-400">
               <span class="player-title font-bold truncate flex items-center gap-1.5 text-slate-100">
@@ -3443,10 +3275,10 @@
               </span>
             </div>
             
-            <div id="leaderScoreNum_${item.id}" class="score-number text-2xl sm:text-3xl font-black mt-1 font-mono ${scoreChanged ? 'score-updated' : ''} ${isLeader ? 'text-amber-300' : 'text-white'}">${item.score}</div>
-            ${item.isTeam ? `<div class="text-[10px] text-slate-400 truncate mt-0.5">Leden: ${item.members.join(', ')}</div>` : ''}
-            ${isLeader && hasTieBreak ? `<div class="text-[10px] text-emerald-300 font-bold">⚖️ Tie-val: ${item.tieVal}</div>` : ''}
-            ${item.handicap ? `<div class="text-[10px] text-slate-400">Handicap: ${item.handicap > 0 ? '+' : ''}${item.handicap}</div>` : ''}
+            <div class="flex items-baseline justify-between mt-1">
+              <div class="score-number text-2xl sm:text-3xl font-black font-mono ${scoreChanged ? 'score-updated' : ''} ${isLeader ? 'text-amber-300' : 'text-white'}">${item.score}</div>
+              ${sparklineHtml}
+            </div>
           </div>`;
       }).join('');
 
