@@ -5200,6 +5200,361 @@
       `;
     }
 
+    // =========================================================================
+    // 12. HISTORIE, STATISTIEKEN & GRAFIEKEN
+    // =========================================================================
+    let eloChartInstance = null;
+
+    function renderHistoryView() {
+      renderChampionCupWidget();
+      populateHistoryFilter();
+      renderHallOfFame();
+      renderEloTimelineChart();
+      renderGameRecords();
+      renderHistoryMatchesList();
+    }
+
+    function populateHistoryFilter() {
+      const select = document.getElementById('historyGameFilter');
+      if (!select) return;
+
+      const currentVal = select.value || 'all';
+      const historyList = Array.isArray(state.history) ? state.history : [];
+      const playedGameIds = Array.from(new Set(historyList.map(m => m.gameId).filter(Boolean)));
+
+      let html = '<option value="all">🎮 Alle Spellen</option>';
+      playedGameIds.forEach(id => {
+        const def = (typeof getGameDef === 'function' ? getGameDef(id) : null) || { name: id };
+        html += `<option value="${id}" ${currentVal === id ? 'selected' : ''}>${def.name || id}</option>`;
+      });
+      select.innerHTML = html;
+    }
+
+    function renderChampionCupWidget() {
+      const widget = document.getElementById('championCupWidget');
+      if (!widget) return;
+
+      const holderId = state.championCup?.currentHolder;
+      const holder = (state.players || []).find(p => p.id === holderId);
+
+      if (!holder) {
+        widget.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">🏆</span>
+            <div>
+              <div class="text-xs font-black text-amber-300 uppercase tracking-wider">Wisselbeker van de Tafel</div>
+              <div class="text-[11px] text-slate-400">Nog geen bekerhouder. Sla een potje op om de trofee te claimen!</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      widget.innerHTML = `
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-11 h-11 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-2xl shrink-0">
+              🏆
+            </div>
+            <div class="min-w-0">
+              <div class="text-[10px] font-black text-amber-400 uppercase tracking-widest">Huidige Bekerhouder</div>
+              <div class="text-base font-black text-white truncate flex items-center gap-1.5">
+                ${renderMeepleSvg(holder.color, 'w-4 h-4')}
+                <span>${holder.name}</span>
+              </div>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-mono font-bold shrink-0">
+            Elo ${holder.elo || 1200}
+          </span>
+        </div>
+      `;
+    }
+
+    function getPlaagTrofeeData() {
+      const counts = {};
+      (state.players || []).forEach(p => { 
+        counts[p.id] = { id: p.id, name: p.name, color: p.color, count: p.loserCups || 0 }; 
+      });
+
+      (state.history || []).forEach(match => {
+        const scores = match.results || match.scores;
+        if (scores && scores.length > 1) {
+          const sorted = [...scores].sort((a, b) => a.score - b.score);
+          const loser = sorted[0];
+          if (loser && counts[loser.playerId]) {
+            counts[loser.playerId].count++;
+          }
+        }
+      });
+
+      return Object.values(counts).filter(c => c.count > 0).sort((a, b) => b.count - a.count);
+    }
+
+    function renderHallOfFame() {
+      const list = document.getElementById('hallOfFameList');
+      if (!list) return;
+
+      const filterGame = document.getElementById('historyGameFilter')?.value || 'all';
+      const historyMatches = (state.history || []).filter(m => filterGame === 'all' || m.gameId === filterGame);
+      const allPlayers = Array.isArray(state.players) ? state.players : [];
+
+      if (allPlayers.length === 0) {
+        list.innerHTML = `<div class="p-3 text-center text-xs text-slate-500 bg-slate-950/60 rounded-xl">Geen spelers gevonden.</div>`;
+        return;
+      }
+
+      const stats = allPlayers.map(p => {
+        const played = historyMatches.filter(m => 
+          (m.players && m.players.includes(p.id)) || 
+          (m.results && m.results.some(r => r.playerId === p.id)) ||
+          (m.scores && m.scores.some(r => r.playerId === p.id))
+        ).length;
+        const wins = historyMatches.filter(m => m.winners && m.winners.includes(p.id)).length;
+        const winPct = played > 0 ? Math.round((wins / played) * 100) : 0;
+        return { ...p, played, wins, winPct };
+      });
+
+      if (state.statsSortMode === 'pct') {
+        stats.sort((a, b) => b.winPct - a.winPct || b.wins - a.wins);
+      } else {
+        stats.sort((a, b) => b.wins - a.wins || (b.elo || 1200) - (a.elo || 1200));
+      }
+
+      const plaagList = getPlaagTrofeeData();
+
+      list.innerHTML = `
+        <div class="space-y-1.5">
+          ${stats.map((p, idx) => `
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 sm:p-3 flex items-center justify-between gap-2 shadow-sm btn-3d ${p.active === false ? 'opacity-70' : ''}">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="font-mono text-xs font-black ${idx === 0 && p.wins > 0 ? 'text-amber-400' : 'text-slate-500'}">#${idx + 1}</span>
+                ${renderMeepleSvg(p.color, 'w-5 h-5')}
+                <div class="min-w-0 flex items-center gap-1.5">
+                  <span class="font-bold text-xs sm:text-sm text-white truncate">${p.name}</span>
+                  ${p.active === false ? '<span class="text-[9px] px-1 py-0.2 rounded bg-slate-800 text-slate-400 border border-slate-700">Passief</span>' : ''}
+                </div>
+                ${idx === 0 && p.wins > 0 ? '<span class="text-xs">👑</span>' : ''}
+              </div>
+              <div class="flex items-center gap-2 font-mono text-xs shrink-0">
+                <span class="text-slate-400 text-[11px]">${p.wins}W / ${p.played}G (${p.winPct}%)</span>
+                <span class="px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800 text-amber-300 font-black">Elo ${p.elo || 1200}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        ${plaagList.length > 0 ? `
+          <div class="mt-3 p-3 bg-rose-950/25 border border-rose-900/40 rounded-2xl space-y-2">
+            <div class="flex items-center justify-between text-xs font-black text-rose-400">
+              <span class="flex items-center gap-1.5"><span>🥄</span> De Houten Lepel (Vaakst Laatste)</span>
+              <span class="text-[10px] text-slate-500 font-normal">Plaagtrofeeën</span>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              ${plaagList.map(item => `
+                <div class="flex items-center justify-between bg-slate-950/70 border border-slate-800/80 p-2 rounded-xl text-xs">
+                  <div class="flex items-center gap-1.5 truncate">
+                    ${renderMeepleSvg(item.color, 'w-3.5 h-3.5')}
+                    <span class="font-bold text-slate-300 truncate">${item.name}</span>
+                  </div>
+                  <span class="font-black text-rose-400 font-mono ml-1">${item.count}× 🥄</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function renderEloTimelineChart() {
+      const container = document.getElementById('eloTimelineCanvas')?.parentElement;
+      if (!container) return;
+
+      const historyMatches = Array.isArray(state.history) ? [...state.history].reverse() : [];
+      const players = state.players || [];
+
+      const width = 360;
+      const height = 150;
+      const padX = 35;
+      const padY = 20;
+
+      const numSteps = Math.max(1, historyMatches.length);
+      const scaleX = (idx) => padX + (idx / numSteps) * (width - 2 * padX);
+
+      let minElo = 1100;
+      let maxElo = 1300;
+
+      const playerSeries = players.map(p => {
+        let running = 1200;
+        const pts = [1200];
+        historyMatches.forEach(m => {
+          const inMatch = (m.players && m.players.includes(p.id)) || 
+                          (m.results && m.results.some(r => r.playerId === p.id));
+          if (inMatch) {
+            const isWinner = m.winners && m.winners.includes(p.id);
+            running += isWinner ? 16 : -12;
+            if (running < 800) running = 800;
+          }
+          pts.push(running);
+          if (running < minElo) minElo = running - 20;
+          if (running > maxElo) maxElo = running + 20;
+        });
+        return { player: p, points: pts };
+      });
+
+      const scaleY = (val) => height - padY - ((val - minElo) / (maxElo - minElo)) * (height - 2 * padY);
+
+      let linesMarkup = '';
+      playerSeries.forEach(s => {
+        const col = s.player.color || '#6366f1';
+        let pathD = '';
+        s.points.forEach((pt, idx) => {
+          const x = scaleX(idx);
+          const y = scaleY(pt);
+          pathD += (idx === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`);
+        });
+        linesMarkup += `<path d="${pathD}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linecap="round" />`;
+      });
+
+      container.innerHTML = `
+        <div class="w-full h-full flex flex-col justify-between">
+          <svg viewBox="0 0 ${width} ${height}" class="w-full h-36">
+            <line x1="${padX}" y1="${scaleY(1200)}" x2="${width - padX}" y2="${scaleY(1200)}" stroke="#334155" stroke-dasharray="3,3" stroke-width="1" />
+            <text x="${padX - 5}" y="${scaleY(1200) + 3}" fill="#64748b" font-size="8" text-anchor="end" font-mono>1200</text>
+            ${linesMarkup}
+          </svg>
+          <div class="flex items-center justify-center gap-3 overflow-x-auto no-scrollbar py-0.5">
+            ${players.map(p => `
+              <div class="flex items-center gap-1 text-[10px] text-slate-300 font-bold whitespace-nowrap">
+                <span class="w-2 h-2 rounded-full" style="background-color: ${p.color || '#6366f1'}"></span>
+                <span>${p.name}: <b class="text-white font-mono">${p.elo || 1200}</b></span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGameRecords() {
+      const grid = document.getElementById('gameRecordsGrid');
+      if (!grid) return;
+
+      const records = {};
+      (state.history || []).forEach(m => {
+        const scores = m.results || m.scores || [];
+        scores.forEach(r => {
+          if (!records[m.gameId] || r.score > records[m.gameId].score) {
+            const p = (state.players || []).find(x => x.id === r.playerId);
+            records[m.gameId] = {
+              score: r.score,
+              playerName: p ? p.name : 'Speler',
+              playerColor: p ? p.color : '#6366f1'
+            };
+          }
+        });
+      });
+
+      const keys = Object.keys(records);
+      if (!keys.length) {
+        grid.innerHTML = `<div class="col-span-full text-center py-4 text-xs text-slate-500 bg-slate-950/60 rounded-2xl border border-slate-800/60">Nog geen spelrecords behaald. Sla een potje op om records te vestigen!</div>`;
+        return;
+      }
+
+      grid.innerHTML = keys.map(gId => {
+        const def = (typeof getGameDef === 'function' ? getGameDef(gId) : null) || { name: gId };
+        const r = records[gId];
+        return `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              ${typeof renderGameArtwork === 'function' ? renderGameArtwork(gId, 'w-8 h-8') : ''}
+              <div class="min-w-0">
+                <div class="font-bold text-xs text-white truncate">${def.name || gId}</div>
+                <div class="text-[10px] text-slate-400 flex items-center gap-1 truncate">
+                  ${renderMeepleSvg(r.playerColor, 'w-2.5 h-2.5')}
+                  <span>${r.playerName}</span>
+                </div>
+              </div>
+            </div>
+            <span class="text-sm font-black font-mono text-amber-300 shrink-0">${r.score}p</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHistoryMatchesList() {
+      const container = document.getElementById('historyMatchesList');
+      if (!container) return;
+
+      const history = state.history || [];
+      if (history.length === 0) {
+        container.innerHTML = `<div class="text-center py-5 text-xs text-slate-500 bg-slate-950/60 rounded-2xl border border-slate-800/60">Nog geen potjes opgeslagen.</div>`;
+        return;
+      }
+
+      container.innerHTML = history.slice(0, 15).map((m, idx) => {
+        const def = (typeof getGameDef === 'function' ? getGameDef(m.gameId) : null) || { name: m.gameId };
+        const dateStr = m.date ? new Date(m.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' }) : '';
+        const winnerNames = (m.winners || []).map(id => (state.players || []).find(x => x.id === id)?.name).filter(Boolean).join(' & ');
+        const scores = m.results || m.scores || [];
+
+        return `
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2 min-w-0">
+                ${typeof renderGameArtwork === 'function' ? renderGameArtwork(m.gameId, 'w-6 h-6') : ''}
+                <span class="font-bold text-white truncate">${def.name || m.gameId}</span>
+                <span class="text-[10px] text-slate-500 font-mono">${dateStr}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-amber-300 font-extrabold text-xs">🏆 ${winnerNames || 'Gelijkspel'}</span>
+                <button type="button" onclick="deleteHistoryMatch(${idx})" class="text-slate-600 hover:text-rose-400 text-xs px-1">✕</button>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-400 flex gap-2 flex-wrap pt-1 border-t border-slate-900">
+              ${scores.map(r => {
+                const p = (state.players || []).find(x => x.id === r.playerId);
+                return `<span>${p ? p.name : 'Speler'}: <strong class="text-white font-mono">${r.score}p</strong></span>`;
+              }).join(' • ')}
+            </div>
+            ${m.note ? `<div class="text-[10px] text-slate-500 italic mt-0.5">"${m.note}"</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function deleteHistoryMatch(idx) {
+      if (!confirm('Wil je dit potje uit de geschiedenis verwijderen?')) return;
+      state.history.splice(idx, 1);
+      saveState();
+      renderHistoryView();
+      showToast('🗑️ Potje verwijderd.');
+    }
+
+    function clearAllHistoryConfirm() {
+      if (confirm('Weet je zeker dat je ALLE gespeelde potjes en geschiedenis wilt wissen?')) {
+        state.history = [];
+        saveState();
+        renderHistoryView();
+        showToast('🧹 Complete historie gewist.');
+      }
+    }
+
+    function setStatsSortMode(mode) {
+      state.statsSortMode = mode;
+      const bWins = document.getElementById('sortBtnWins');
+      const bPct = document.getElementById('sortBtnPct');
+      if (bWins && bPct) {
+        if (mode === 'wins') {
+          bWins.className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition btn-3d';
+          bPct.className = 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition btn-3d';
+        } else {
+          bPct.className = 'px-3 py-1.5 rounded-xl text-xs font-extrabold bg-indigo-600 text-white shadow transition btn-3d';
+          bWins.className = 'px-3 py-1.5 rounded-xl text-xs font-bold text-slate-400 hover:text-white transition btn-3d';
+        }
+      }
+      saveState();
+      renderHallOfFame();
+    }
 
 
         // =========================================================================
