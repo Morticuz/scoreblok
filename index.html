@@ -824,8 +824,8 @@
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
 
-        // =========================================================================
-    // MODULE 3: STATE MANAGEMENT, LOCAL STORAGE & NOODHERSTEL
+       // =========================================================================
+    // MODULE 3: STATE MANAGEMENT, HYBRIDE SYNC & PERSISTENTIE
     // =========================================================================
     const STORAGE_KEY = 'scoreblok_pro_v5';
     const SNAPSHOT_KEY = 'scoreblok_pro_autosave_emergency';
@@ -864,13 +864,15 @@
       roomCode: roomCodeParam,
       isHost: !urlParams.has('room') || urlParams.get('role') !== 'client',
       championCup: { currentHolder: null, previousHolder: null },
+      tournament: null,
       gamesState: {},
       history: []
     };
 
+    // Globale undo-stack (enkelvoudige declaratie)
     let undoStack = [];
 
-    // --- HYBRIDE ENGINE (MOET HIER STAAN VOOR SAVESTATE) ---
+    // --- HYBRIDE ENGINE VOOR REALTIME SYNCHRONISATIE ---
     const SyncEngine = {
       broadcastChan: null,
       peer: null,
@@ -912,7 +914,7 @@
           });
 
           this.peer.on('error', (err) => {
-            console.warn('PeerJS notice:', err);
+            console.warn('PeerJS status:', err);
             this.updateSyncBadge(false);
           });
         }
@@ -1154,7 +1156,102 @@
       showToast('🗑️ Conceptpotje verwijderd.');
     }
 
+    function getAllGames() {
+      return [...BUILTIN_GAMES, ...(state.customGames || [])];
+    }
 
+    function getGameDef(gameId = state.activeGameId) {
+      return getAllGames().find(g => g.id === gameId) || BUILTIN_GAMES[0];
+    }
+
+    function getActivePlayers() {
+      return (state.players || []).filter(p => p.active !== false);
+    }
+
+    function isLowestWins(gameId = state.activeGameId) {
+      const def = getGameDef(gameId);
+      const gs = state.gamesState?.[gameId];
+      if (gs && typeof gs.lowestWinsOverride === 'boolean') return gs.lowestWinsOverride;
+      return !!def.lowestWins;
+    }
+
+    function valOrEmpty(v) {
+      return (v !== undefined && v !== null && Number(v) !== 0) ? v : '';
+    }
+
+    function renderNumberStepper(id, value, changeHandlerJs, step = 1, min = 0) {
+      const val = Number(value || 0);
+      const safeCall = (targetVal) => `(${changeHandlerJs})(${targetVal})`;
+      return `
+        <div class="inline-flex items-center bg-slate-950 border border-slate-700/80 rounded-xl p-0.5 shadow-inner shrink-0">
+          <button type="button" onclick="SoundFX.minus(); ${safeCall(`Math.max(${min}, ${val - step})`)}" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 font-black text-sm flex items-center justify-center transition shrink-0 btn-3d">-</button> <input type="number" inputmode="numeric" pattern="[0-9]*" id="${id}" value="${valOrEmpty(val)}" placeholder="0" oninput="${safeCall('this.value')}" class="w-12 bg-transparent text-center font-mono font-black text-sm text-white focus:outline-none placeholder-slate-600" /> <button type="button" onclick="SoundFX.plus(); ${safeCall(`${val + step}`)}" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-black text-sm flex items-center justify-center transition shrink-0 btn-3d">+</button>
+        </div>
+      `;
+    }
+
+    function openSettingsModal() {
+      const hCheck = document.getElementById('settingHapticCheck');
+      const aCheck = document.getElementById('settingAudioCheck');
+      const apCheck = document.getElementById('settingApTimerCheck');
+      if (hCheck) hCheck.checked = (state.hapticFeedback !== false);
+      if (aCheck) aCheck.checked = (!state.audioMuted);
+      if (apCheck) apCheck.checked = !!state.apTimerEnabled;
+      
+      updateThemeButtonsUI();
+      document.getElementById('settingsModal')?.classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal')?.classList.add('hidden');
+    }
+
+    function setAppTheme(themeKey) {
+      state.appTheme = themeKey;
+      applyAppTheme();
+      updateThemeButtonsUI();
+      triggerHaptic(20);
+      SoundFX.click();
+      saveState();
+    }
+
+    function applyAppTheme() {
+      const theme = state.appTheme || 'indigo';
+      document.body.classList.remove('theme-indigo', 'theme-felt', 'theme-wood', 'theme-midnight');
+      document.body.classList.add(`theme-${theme}`);
+    }
+
+    function updateThemeButtonsUI() {
+      const current = state.appTheme || 'indigo';
+      ['indigo', 'felt', 'wood', 'midnight'].forEach(key => {
+        const btn = document.getElementById(`themeBtn_${key}`);
+        if (!btn) return;
+        if (key === current) {
+          btn.className = "p-2 rounded-xl border border-indigo-400 bg-indigo-600 text-white font-extrabold text-[11px] shadow-sm btn-3d";
+        } else {
+          btn.className = "p-2 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:text-white font-bold text-[11px] btn-3d";
+        }
+      });
+    }
+
+    function toggleHapticSetting(val) {
+      state.hapticFeedback = val;
+      if (val) triggerHaptic(40);
+      saveState();
+    }
+
+    function toggleAudioSetting(val) {
+      state.audioMuted = !val;
+      saveState();
+    }
+
+    function toggleApTimerSetting(val) {
+      state.apTimerEnabled = val;
+      saveState();
+    }
+
+    function dismissCrashBanner() {
+      document.getElementById('crashRecoveryBanner')?.classList.add('hidden');
+    }
 
     // =========================================================================
     // MODULE 4: SPELSTATUS INITIALISATIE & DATAMODELLEN
@@ -7380,7 +7477,7 @@
       }
     }
 
-        // =========================================================================
+       // =========================================================================
     // MODULE 18: GROEPRECORDS, UNDO ACTIES & WAKE-LOCK
     // =========================================================================
     function checkLiveGroepRecord(gameId, playerId, currentScore) {
@@ -7454,6 +7551,7 @@
         showToast('📱 Scherm blijft aan!');
       }
     }
+
 
     // =========================================================================
     // MODULE 19: BACK-UP IMPORT / EXPORT & TOASTS
@@ -7571,7 +7669,7 @@
       setTimeout(() => { container.innerHTML = ''; }, 3200);
     }
 
-    // =========================================================================
+        // =========================================================================
     // MODULE 20: INITIALISATIE BIJ OPSTARTEN (DOMContentLoaded & PWA)
     // =========================================================================
     function showUpdateAvailableBanner() {
@@ -7614,7 +7712,25 @@
 
       // 2. State & Thema inladen
       loadState();
+
+      // Veiligheidscorrectie: Zorg dat minstens 2 spelers actief zijn
+      if (!Array.isArray(state.players) || state.players.length === 0) {
+        state.players = [
+          { id: 'p1', name: 'Speler 1', color: '#6366f1', active: true, handicap: 0, elo: 1200 },
+          { id: 'p2', name: 'Speler 2', color: '#ec4899', active: true, handicap: 0, elo: 1200 }
+        ];
+      } else if (state.players.every(p => p.active === false)) {
+        state.players.forEach(p => p.active = true);
+      }
+
+      // Reset filters bij opstarten zodat alle spellen getoond worden
+      const pFilter = document.getElementById('filterPlayersSelect');
+      if (pFilter) pFilter.value = '0';
+      const dFilter = document.getElementById('filterDurationSelect');
+      if (dFilter) dFilter.value = 'all';
+
       applyAppTheme();
+      SyncEngine.init();
 
       // 3. QR Data Import check (#data=...)
       if (window.location.hash.startsWith('#data=')) {
@@ -7642,8 +7758,12 @@
         }, 600);
       }
 
-      // 5. Startscherm renderen
-      renderGamePicker();
+            // 5. Open juiste startweergave
+      if (isSpectatorMode) {
+        switchMainView('spectator');
+      } else {
+        switchMainView('picker');
+      }
     });
   </script>
 
