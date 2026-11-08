@@ -7723,11 +7723,13 @@
         state.players.forEach(p => p.active = true);
       }
 
-      // Reset filters bij opstarten zodat alle spellen getoond worden
+      // Reset filters bij opstarten zodat alle spellen gegarandeerd getoond worden
       const pFilter = document.getElementById('filterPlayersSelect');
       if (pFilter) pFilter.value = '0';
       const dFilter = document.getElementById('filterDurationSelect');
       if (dFilter) dFilter.value = 'all';
+      const sInput = document.getElementById('gameSearchInput');
+      if (sInput) sInput.value = '';
 
       applyAppTheme();
       SyncEngine.init();
@@ -7758,7 +7760,7 @@
         }, 600);
       }
 
-            // 5. Open juiste startweergave
+      // 5. Open juiste startweergave
       if (isSpectatorMode) {
         switchMainView('spectator');
       } else {
