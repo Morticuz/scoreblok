@@ -6859,16 +6859,41 @@
       setTimeout(() => { container.innerHTML = ''; }, 3200);
     }
 
-    // =========================================================================
         // =========================================================================
     // 20. INITIALISATIE BIJ OPSTARTEN (DOMContentLoaded & OFFLINE PWA REGISTRATIE)
     // =========================================================================
+    function showUpdateAvailableBanner() {
+      const bannerId = 'swUpdateBanner';
+      if (document.getElementById(bannerId)) return;
+
+      document.body.insertAdjacentHTML('beforeend', `
+        <div id="${bannerId}" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-indigo-600 text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-2xl border border-indigo-400 flex items-center gap-3 animate-bounce">
+          <span>🚀 Nieuwe versie beschikbaar!</span>
+          <button type="button" onclick="window.location.reload(true)" class="bg-white text-indigo-950 px-2.5 py-1 rounded-xl font-black text-[11px] btn-3d">
+            Vernieuw nu
+          </button>
+        </div>
+      `);
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
-      // 1. Service Worker registreren
+      // 1. Service Worker registreren & update-check
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')
           .then((reg) => {
             reg.update();
+
+            reg.addEventListener('updatefound', () => {
+              const newWorker = reg.installing;
+              if (newWorker) {
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    showUpdateAvailableBanner();
+                  }
+                });
+              }
+            });
+
             const dot = document.getElementById('pwaOfflineDot');
             if (dot) dot.title = 'Offline gereed';
           })
@@ -6908,7 +6933,7 @@
       // 5. Startscherm renderen
       renderGamePicker();
     });
-
+  </script>
 
   <!-- MODALS CONTAINER EN NUMPAD PLACEHOLDER -->
   <div id="podiumModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
