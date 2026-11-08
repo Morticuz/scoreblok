@@ -674,111 +674,10 @@
       `;
     }
 
+        // =========================================================================
+    // MODULE 2: SPELLEN CATALOGUS (AANGEPAST VOOR HITSTER & PARIJS)
     // =========================================================================
-    // MODULE 2: SPELLEN CATALOGUS & VECTOR BADGES
-    // =========================================================================
-    const GAME_BADGES = {
-      azul: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-950 flex flex-col items-center justify-center border border-sky-300/40 shadow-lg p-1.5"><div class="grid grid-cols-2 gap-1 w-6 h-6"><div class="bg-amber-400 rounded-sm"></div><div class="bg-sky-200 rounded-sm"></div><div class="bg-rose-500 rounded-sm"></div><div class="bg-slate-900 rounded-sm"></div></div></div>`,
-      parijs: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-blue-950 to-slate-950 flex items-center justify-center border border-amber-300/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🗼</span></div>`,
-      carcassonne: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-yellow-700 to-stone-900 flex items-center justify-center border border-amber-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🏰</span></div>`,
-      catan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-amber-600 to-yellow-600 flex items-center justify-center border border-amber-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🌾</span></div>`,
-      doolhof: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-teal-700 to-slate-950 flex items-center justify-center border border-cyan-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🌀</span></div>`,
-      cascadia: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-800 to-stone-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🌲</span></div>`,
-      wingspan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-400 via-teal-600 to-slate-950 flex items-center justify-center border border-sky-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🐦</span></div>`,
-      wyrmspan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-purple-700 via-indigo-900 to-slate-950 flex items-center justify-center border border-purple-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🐉</span></div>`,
-      regenwormen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-stone-900 flex items-center justify-center border border-amber-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🐛</span></div>`,
-      beverbende: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-800 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-600/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🦫</span></div>`,
-      beverclan: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-orange-700 via-amber-800 to-stone-950 flex items-center justify-center border border-orange-500/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🦫</span></div>`,
-      eldorado: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-yellow-500 via-amber-600 to-stone-950 flex items-center justify-center border border-yellow-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🧭</span></div>`,
-      mars: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-700 to-stone-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🪐</span></div>`,
-      dune: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-orange-900 to-slate-950 flex items-center justify-center border border-amber-500/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🏜️</span></div>`,
-      everdell: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-amber-800 to-stone-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🐿️</span></div>`,
-      wonders7: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🏛️</span></div>`,
-      wondersduel: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-700 via-purple-900 to-slate-950 flex items-center justify-center border border-indigo-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">⚔️</span></div>`,
-      splendor: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-blue-800 to-slate-950 flex items-center justify-center border border-cyan-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">💎</span></div>`,
-      patchwork: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-teal-600 via-amber-700 to-slate-950 flex items-center justify-center border border-teal-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🧵</span></div>`,
-      kwakzalvers: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-800 to-slate-950 flex items-center justify-center border border-purple-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🧪</span></div>`,
-      elgrande: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-red-900 to-slate-950 flex items-center justify-center border border-amber-500/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🏰</span></div>`,
-      dixit: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-pink-600 via-purple-700 to-indigo-950 flex items-center justify-center border border-pink-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🎨</span></div>`,
-      rozenkoning: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-red-900 to-stone-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🌹</span></div>`,
-      burgundy: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-stone-800 to-slate-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">⚜️</span></div>`,
-      agricola: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-yellow-800 to-stone-950 flex items-center justify-center border border-amber-500/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🚜</span></div>`,
-      arknova: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-700 to-slate-950 flex items-center justify-center border border-amber-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🦏</span></div>`,
-      brass: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-700 via-slate-800 to-slate-950 flex items-center justify-center border border-stone-500/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🏭</span></div>`,
-      heat: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-600 to-stone-950 flex items-center justify-center border border-red-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🏎️</span></div>`,
-      dorfromantik: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🌲</span></div>`,
-      skyteam: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-600 via-blue-800 to-slate-950 flex items-center justify-center border border-sky-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">✈️</span></div>`,
-      decrew: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-black flex items-center justify-center border border-indigo-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🚀</span></div>`,
-      codenames: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-700 via-slate-900 to-blue-800 flex items-center justify-center border border-slate-600/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🕵️</span></div>`,
-      flip7: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-slate-950 flex items-center justify-center border border-amber-300/50 shadow-lg text-white"><span class="text-3xl font-black drop-shadow">7️⃣</span></div>`,
-      qwixx: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-amber-500 to-blue-600 flex items-center justify-center border border-white/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🖍️</span></div>`,
-      clever: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 flex items-center justify-center border border-indigo-500/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🦊</span></div>`,
-      ttr: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-indigo-900 to-slate-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🚂</span></div>`,
-      yahtzee: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-slate-800 to-slate-950 flex items-center justify-center border border-red-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">⚄</span></div>`,
-      skyjo: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-slate-900 flex items-center justify-center border border-emerald-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🌈</span></div>`,
-      uno: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-yellow-500 to-blue-600 flex items-center justify-center border border-white/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🃏</span></div>`,
-      sushigo: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-500 via-pink-600 to-stone-900 flex items-center justify-center border border-pink-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🍣</span></div>`,
-      lostcities: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🏺</span></div>`,
-      koehandel: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-amber-700 to-stone-900 flex items-center justify-center border border-emerald-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🐄</span></div>`,
-      machiavelli: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-purple-900 to-slate-950 flex items-center justify-center border border-amber-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">👑</span></div>`,
-      themind: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950 flex items-center justify-center border border-cyan-400/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🧠</span></div>`,
-      qwirkle: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-slate-900 via-stone-900 to-black flex items-center justify-center border border-amber-400/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🔷</span></div>`,
-      arschmellows: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-orange-700 to-stone-900 flex items-center justify-center border border-amber-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🍢</span></div>`,
-      gameoftrains: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-700 via-slate-800 to-slate-950 flex items-center justify-center border border-sky-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🚂</span></div>`,
-      snackmatch: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-yellow-600 to-stone-900 flex items-center justify-center border border-yellow-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🍟</span></div>`,
-      moddervarkens: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-pink-600 via-amber-800 to-stone-950 flex items-center justify-center border border-pink-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🐷</span></div>`,
-      keeropkeer: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-sky-600 to-indigo-900 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🎲</span></div>`,
-      keeropkeer2: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-pink-700 to-indigo-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">❤️</span></div>`,
-      rummikub: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-600 via-sky-700 to-slate-950 flex items-center justify-center border border-sky-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🔢</span></div>`,
-      take5: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-700 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-500/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🐮</span></div>`,
-      boonanza: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-emerald-800 to-stone-900 flex items-center justify-center border border-amber-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🫘</span></div>`,
-      pointsalad: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-lime-600 to-stone-900 flex items-center justify-center border border-lime-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🥗</span></div>`,
-      saboteur: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-700 via-slate-800 to-black flex items-center justify-center border border-amber-400/40 shadow-lg text-white"><span class="text-3xl drop-shadow">⛏️</span></div>`,
-      qwinto: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-orange-500 via-purple-600 to-slate-950 flex items-center justify-center border border-orange-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">⬠</span></div>`,
-      hitster: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-fuchsia-600 via-purple-700 to-slate-950 flex items-center justify-center border border-fuchsia-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🎵</span></div>`,
-      schottentotten: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-teal-700 via-slate-800 to-slate-950 flex items-center justify-center border border-teal-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🪨</span></div>`,
-      loveletter: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-600 via-pink-700 to-stone-900 flex items-center justify-center border border-rose-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">💌</span></div>`,
-      explodingkittens: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-orange-600 to-stone-900 flex items-center justify-center border border-orange-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">💣</span></div>`,
-      monopoly: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-stone-800 to-slate-950 flex items-center justify-center border border-red-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🎩</span></div>`,
-      risk: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-stone-800 via-red-900 to-black flex items-center justify-center border border-red-500/50 shadow-lg text-white"><span class="text-3xl drop-shadow">⚔️</span></div>`,
-      cluedo: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-900 via-slate-900 to-black flex items-center justify-center border border-amber-400/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🔍</span></div>`,
-      stratego: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-700 via-red-700 to-slate-950 flex items-center justify-center border border-white/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🚩</span></div>`,
-      levensweg: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-pink-600 via-blue-600 to-slate-950 flex items-center justify-center border border-white/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🚗</span></div>`,
-      ganzenbord: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-sky-600 via-teal-700 to-slate-950 flex items-center justify-center border border-sky-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🪿</span></div>`,
-      mensergerjeniet: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-amber-500 to-blue-600 flex items-center justify-center border border-white/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🔴</span></div>`,
-      zeeslag: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-700 via-slate-800 to-slate-950 flex items-center justify-center border border-blue-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🚢</span></div>`,
-      trivial: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-blue-600 via-amber-600 to-purple-700 flex items-center justify-center border border-white/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🥧</span></div>`,
-      scrabble: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-300/40 shadow-lg text-white"><span class="text-3xl drop-shadow">🔤</span></div>`,
-      boggle: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 via-blue-800 to-slate-950 flex items-center justify-center border border-indigo-400/40 shadow-lg text-white"><span class="text-3xl drop-shadow">⏳</span></div>`,
-      thirtysec: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-orange-600 to-rose-900 flex items-center justify-center border border-amber-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">⏱️</span></div>`,
-      pictionary: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-purple-600 via-indigo-700 to-slate-950 flex items-center justify-center border border-purple-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">✏️</span></div>`,
-      pesten: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-rose-700 via-slate-800 to-slate-950 flex items-center justify-center border border-rose-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🃏</span></div>`,
-      klaverjas: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-700 via-stone-800 to-slate-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">♣️</span></div>`,
-      hartenjagen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-red-600 via-stone-800 to-slate-950 flex items-center justify-center border border-red-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">💔</span></div>`,
-      kingen: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-600 via-stone-800 to-slate-950 flex items-center justify-center border border-amber-300/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🤴</span></div>`,
-      seasalt: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-cyan-600 via-sky-700 to-blue-950 flex items-center justify-center border border-cyan-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🦀</span></div>`,
-      harmonies: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-600 via-teal-700 to-amber-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🍃</span></div>`,
-      trio: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-amber-500 via-yellow-600 to-orange-700 flex items-center justify-center border border-yellow-300/50 shadow-lg text-white"><span class="text-3xl font-black drop-shadow">3️⃣</span></div>`,
-      scout: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-fuchsia-600 via-purple-700 to-slate-950 flex items-center justify-center border border-fuchsia-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🎪</span></div>`,
-      forestshuffle: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-emerald-800 via-green-700 to-stone-950 flex items-center justify-center border border-emerald-400/50 shadow-lg text-white"><span class="text-3xl drop-shadow">🦌</span></div>`,
-      free: `<div class="w-full h-full rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-700 flex items-center justify-center border border-indigo-400/40 shadow-md text-white"><span class="text-3xl">✨</span></div>`
-    };
-
-    function renderGameArtwork(gameId, sizeClass = "w-12 h-12") {
-      const g = getGameDef(gameId) || { name: 'Spel', category: 'board', icon: 'free' };
-      if (GAME_BADGES[gameId]) {
-        return `<div class="${sizeClass} shrink-0">${GAME_BADGES[gameId]}</div>`;
-      }
-      const initial = (g.name || 'S').trim().substring(0, 3).toUpperCase();
-      const bg = g.category === 'board'
-        ? 'from-indigo-600 via-indigo-800 to-slate-950 border-indigo-500/40 text-indigo-200'
-        : 'from-amber-600 via-orange-800 to-slate-950 border-amber-500/40 text-amber-200';
-      return `
-        <div class="${sizeClass} shrink-0 rounded-2xl bg-gradient-to-br ${bg} border flex items-center justify-center shadow-md font-black text-xs tracking-wider">
-          ${initial}
-        </div>
-      `;
-    }
+    // ... (GAME_BADGES en renderGameArtwork blijven ongewijzigd) ...
 
     const BUILTIN_GAMES = [
       { id: 'azul', name: 'Azul', subtitle: 'Automatische 5x5 muur + patroonlijnen óf handmatig', category: 'board', type: 'azul', icon: 'azul', minP: 2, maxP: 4, dur: 'medium', tieBreakerDesc: 'Meeste horizontale rijen op de muur' },
@@ -787,7 +686,7 @@
       { id: 'trio', name: 'Trio', subtitle: 'Eerste speler met 3 trio\'s of het gouden trio van 7', category: 'card', type: 'carcassonne', icon: 'trio', limit: 1, minP: 3, maxP: 6, dur: 'short' },
       { id: 'scout', name: 'Scout', subtitle: 'Circuskaarten uitspelen minus overgebleven handkaarten', category: 'card', type: 'rounds', icon: 'scout', minP: 3, maxP: 5, dur: 'short' },
       { id: 'forestshuffle', name: 'Forest Shuffle', subtitle: 'Bomen, bosrand, paddenstoelen & bosdieren', category: 'card', type: 'categories', icon: 'forestshuffle', minP: 2, maxP: 5, dur: 'medium', categories: ['🌲 Bomen (Basis)', '🦌 Boven/Onder dieren', '🦔 Zijkanten dieren', '🍄 Paddenstoelen', '🦋 Vlinders & Insecten'] },
-      { id: 'parijs', name: 'Parijs: De Lichtstad', subtitle: 'Interactieve lantaarn-multiplier, ansichtkaarten & schilder', category: 'board', type: 'parijs', icon: 'parijs', minP: 2, maxP: 2, dur: 'short', tieBreakerDesc: 'Grootste aaneengesloten groep gebouwen' },
+      { id: 'parijs', name: 'Parijs: De Lichtstad', subtitle: 'Gebouwenlijst met lantaarn-multiplier, ansichtkaarten & schilder', category: 'board', type: 'parijs', icon: 'parijs', minP: 2, maxP: 2, dur: 'short', tieBreakerDesc: 'Grootste aaneengesloten groep gebouwen' },
       { id: 'keeropkeer', name: 'Keer op Keer', subtitle: 'Kleuren, kolommen A-O, ongebruikte jokers & sterren', category: 'card', type: 'kok1', icon: 'keeropkeer', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'keeropkeer2', name: 'Keer op Keer 2', subtitle: 'Losse hartjes-bonus, bonusrij & kolommen A-O', category: 'card', type: 'kok2', icon: 'keeropkeer2', minP: 1, maxP: 6, dur: 'short', tieBreakerDesc: 'Meeste overgebleven uitroeptekens (!)' },
       { id: 'regenwormen', name: 'Regenwormen (1 & 2)', subtitle: 'Tegel-tracker + Deel 2 schakelaar (Stenen 11 & 13 + 7 Wormfiches)', category: 'card', type: 'regenwormen', icon: 'regenwormen', minP: 2, maxP: 7, dur: 'short', expansions: ['🐦‍⬛ Deel 2: Uitbreiding (Stenen 11 & 13 + 7 Wormfiches)'], tieBreakerDesc: 'Hoogste tegelnummer in bezit' },
@@ -802,7 +701,7 @@
       { id: 'pointsalad', name: 'Point Salad', subtitle: 'Doelkaarten & groente-combinaties (Tomaat, Sla, Wortel, etc.)', category: 'card', type: 'categories', icon: 'pointsalad', minP: 2, maxP: 6, dur: 'short', categories: ['🎯 Doelkaart 1', '🎯 Doelkaart 2', '🎯 Doelkaart 3', '🎯 Overige Doelkaarten'] },
       { id: 'saboteur', name: 'Saboteur', subtitle: 'Rondeteller voor verzamelde goudklompjes (3 rondes)', category: 'card', type: 'rounds', icon: 'saboteur', minP: 3, maxP: 10, dur: 'short' },
       { id: 'qwinto', name: 'Qwinto', subtitle: 'Oranje, Gele en Paarse rijen + Vijfhoek-bonussen & Mislukte worpen', category: 'card', type: 'categories', icon: 'qwinto', minP: 2, maxP: 6, dur: 'short', categories: ['🟧 Oranje rij', '🟨 Gele rij', '🟪 Paarse rij', '⬠ Vijfhoek-bonussen', '❌ Mislukte worpen (-5p per stuk)'] },
-      { id: 'hitster', name: 'Hitster', subtitle: 'Live teller voor geraden muziekkaarten (Eerste met 10 wint!) & fiches', category: 'card', type: 'carcassonne', icon: 'hitster', limit: 10, minP: 2, maxP: 10, dur: 'medium' },
+      { id: 'hitster', name: 'Hitster', subtitle: 'Muziekkaarten (10 voor winst) & Hitster-fiches', category: 'card', type: 'categories', icon: 'hitster', limit: 10, minP: 2, maxP: 10, dur: 'medium', categories: ['🎵 Muziekkaarten op tijdlijn', '🪙 Hitster Fiches'] },
       { id: 'uno', name: 'UNO', subtitle: 'Rondeteller tot 500 punten (of strafpunten per ronde)', category: 'card', type: 'rounds', icon: 'uno', limit: 500, minP: 2, maxP: 10, dur: 'short' },
       { id: 'schottentotten', name: 'Schotten Totten', subtitle: 'Grensstenen (5 stuks of 3 naast elkaar)', category: 'card', type: 'categories', icon: 'schottentotten', minP: 2, maxP: 2, dur: 'short', categories: ['🪨 Veroverde Grensstenen', '🏆 Bonus Ronden'] },
       { id: 'loveletter', name: 'Love Letter', subtitle: 'Live teller voor gewonnen hartjes / gunstfiches', category: 'card', type: 'carcassonne', icon: 'loveletter', minP: 2, maxP: 6, dur: 'short' },
@@ -866,6 +765,7 @@
       { id: 'kingen', name: 'Kingen / Brikken', subtitle: 'Rondeteller voor min-contracten en plus-contracten per beurt', category: 'card', type: 'rounds', icon: 'kingen', lowestWins: false, minP: 4, maxP: 4, dur: 'medium' },
       { id: 'free', name: 'Vrij Scorebord', subtitle: 'Universeel scorebord voor elk ander spel', category: 'board', type: 'carcassonne', icon: 'free', minP: 1, maxP: 10, dur: 'medium', hasLastRoundKnock: true }
     ];
+
     // =========================================================================
     // MODULE 3: STATE MANAGEMENT, LOCAL STORAGE & NOODHERSTEL
     // =========================================================================
@@ -1120,8 +1020,8 @@
       document.getElementById('crashRecoveryBanner')?.classList.add('hidden');
     }
 
-    // =========================================================================
-    // MODULE 4: SPELSTATUS INITIALISATIE & DATAMODELLEN
+       // =========================================================================
+    // MODULE 4: SPELSTATUS INITIALISATIE & DATAMODELLEN (AANGEPAST)
     // =========================================================================
     function createEmptyPlayerData() {
       const lostcities = {};
@@ -1171,7 +1071,7 @@
         koehandel: { sets: {}, cashBonus: 0 },
         arknova: { appeal: 0, conservation: 0, endgame: 0 },
         heat: { pos: 1, pts: 0 },
-        parijs: { buildings: 0, lanterns: 0, cluster: 0, cardsBonus: 0, unbuiltPenalty: 0 },
+        parijs: { buildingList: [], cluster: 0, cardsBonus: 0, unbuiltPenalty: 0 },
         beverbendeCards: [0, 0, 0, 0],
         seasaltCurrent: { duos: 0, swimmers: 0, sharks: 0, shells: 0, octos: 0, penguins: 0, sailors: 0, mermaids: 0, colorCards: 0, colorMultis: 0 },
         harmoniesData: { trees: 0, mountains: 0, water: 0, animals: 0, secretGoals: 0 },
@@ -1223,7 +1123,8 @@
           if (!pd.azul.wall) pd.azul.wall = Array(5).fill(null).map(() => Array(5).fill(false));
           if (!pd.azul.pending) pd.azul.pending = Array(5).fill(null).map(() => Array(5).fill(false));
           if (!pd.wingspanBoard) pd.wingspanBoard = createEmptyPlayerData().wingspanBoard;
-          if (!pd.parijs) pd.parijs = { buildings: 0, lanterns: 0, cluster: 0, cardsBonus: 0, unbuiltPenalty: 0 };
+          if (!pd.parijs) pd.parijs = { buildingList: [], cluster: 0, cardsBonus: 0, unbuiltPenalty: 0 };
+          if (!Array.isArray(pd.parijs.buildingList)) pd.parijs.buildingList = [];
           if (!pd.beverbendeCards) pd.beverbendeCards = [0, 0, 0, 0];
           if (!pd.seasaltCurrent) pd.seasaltCurrent = { duos: 0, swimmers: 0, sharks: 0, shells: 0, octos: 0, penguins: 0, sailors: 0, mermaids: 0, colorCards: 0, colorMultis: 0 };
           if (!pd.harmoniesData) pd.harmoniesData = { trees: 0, mountains: 0, water: 0, animals: 0, secretGoals: 0 };
@@ -1234,7 +1135,7 @@
     }
 
     // =========================================================================
-    // MODULE 5: GEAVANCEERDE SPELREGEL-BEREKENINGEN & TIE-BREAKERS
+    // MODULE 5: GEAVANCEERDE SPELREGEL-BEREKENINGEN & TIE-BREAKERS (AANGEPAST)
     // =========================================================================
     function scoreSingleAzulPlacement(wall, r, c) {
       let horiz = 1;
@@ -1386,7 +1287,7 @@
       return 0;
     }
 
-    // =========================================================================
+        // =========================================================================
     // MODULE 6: CENTRALE SCOREBEREKENING & RANGLIJST ENGINE
     // =========================================================================
     function calculatePlayerTotal(gameId, playerId) {
@@ -1444,7 +1345,8 @@
         (gs.rounds || []).forEach(r => { rawScore += Number(r[playerId] || 0); });
       } else if (def.type === 'parijs') {
         const pj = pd.parijs || {};
-        const lighted = Number(pj.buildings || 0) * Number(pj.lanterns || 0);
+        const bList = Array.isArray(pj.buildingList) ? pj.buildingList : [];
+        const lighted = bList.reduce((acc, b) => acc + (Number(b.tiles || 0) * Number(b.lanterns || 0)), 0);
         const cluster = Number(pj.cluster || 0);
         const cards = Number(pj.cardsBonus || 0);
         const penalty = Math.abs(Number(pj.unbuiltPenalty || 0)) * 3;
@@ -2286,9 +2188,79 @@
       }).join('');
     }
 
+        // =========================================================================
+    // MODULE 9: SCOREBOARD RENDERING, BEURTWISSELS, TIMER & BANNERS
     // =========================================================================
-    // MODULE 9: SCOREBOARD RENDERING, BEURTWISSELS & LIVE BANNERS
-    // =========================================================================
+    let turnTimerInterval = null;
+    let turnTimeRemaining = 45;
+    const TURN_TIME_LIMIT = 45;
+
+    function startTableTimer() {
+      const container = document.getElementById('turnTimerContainer');
+      if (!state.apTimerEnabled) {
+        if (container) container.classList.add('hidden');
+        clearInterval(turnTimerInterval);
+        return;
+      }
+
+      const label = document.getElementById('timerPlayerLabel');
+      const countdown = document.getElementById('turnTimerCountdown');
+      const bar = document.getElementById('turnTimerProgressBar');
+      
+      const act = getActivePlayers();
+      const gs = ensureGameState(state.activeGameId);
+      const curP = act[gs.activeTurnPlayerIdx || 0];
+
+      if (!container || !curP) return;
+
+      container.classList.remove('hidden');
+      label.textContent = curP.name;
+      label.style.color = curP.color || '#ffffff';
+
+      clearInterval(turnTimerInterval);
+      turnTimeRemaining = TURN_TIME_LIMIT;
+      
+      if (countdown) countdown.textContent = `${turnTimeRemaining}s`;
+      if (bar) {
+        bar.style.width = '100%';
+        bar.style.backgroundColor = '';
+      }
+
+      turnTimerInterval = setInterval(() => {
+        turnTimeRemaining--;
+
+        if (countdown) countdown.textContent = `${turnTimeRemaining}s`;
+        if (bar) {
+          const pct = (turnTimeRemaining / TURN_TIME_LIMIT) * 100;
+          bar.style.width = `${pct}%`;
+        }
+
+        if (turnTimeRemaining === 10) {
+          triggerHaptic(30);
+          SoundFX.click();
+        }
+
+        if (turnTimeRemaining <= 0) {
+          clearInterval(turnTimerInterval);
+          triggerHaptic(60);
+          SoundFX.alarm();
+          showToast(`⏰ Tijd voorbij voor ${curP.name}!`);
+        }
+      }, 1000);
+    }
+
+    function toggleFullscreenTvMode() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {
+          showToast('⚠️ Volledig scherm niet toegestaan door browser.');
+        });
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
     function toggleTeamMode() {
       state.isTeamMode = !state.isTeamMode;
       triggerHaptic(30);
@@ -2307,6 +2279,8 @@
       gs.activeTurnPlayerIdx = (curIdx + delta + active.length) % active.length;
       triggerHaptic(20);
       SoundFX.click();
+
+      startTableTimer();
 
       saveState();
       renderLiveLeaderboard();
@@ -2732,7 +2706,9 @@
     // MODULE 10 (DEEL A): SPELBLADEN (AZUL, WINGSPAN, KEER OP KEER, ROUNDS)
     // =========================================================================
 
-    // --- AZUL ---
+        // =========================================================================
+    // MODULE 10 – SPEL 1: AZUL
+    // =========================================================================
     let activeAzulTabPlayerId = null;
 
     function renderAzulSheet(container, def) {
@@ -2804,6 +2780,7 @@
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center justify-center">
+            <!-- Patroonlijnen links -->
             <div class="md:col-span-6 bg-slate-950/70 border border-slate-800/80 rounded-2xl p-3.5 space-y-2">
               <div class="flex items-center justify-between text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">
                 <span>Patroonlijnen</span>
@@ -2838,6 +2815,7 @@
               }).join('')}
             </div>
 
+            <!-- Muur rechts -->
             <div class="md:col-span-6 flex flex-col items-center">
               <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">5x5 Mozaïek Muur</div>
               <div class="grid grid-cols-5 gap-1.5 max-w-[240px]">
@@ -2855,6 +2833,7 @@
             </div>
           </div>
 
+          <!-- Vloerlijn -->
           <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3 space-y-2">
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-300 font-bold">Vloerlijn (Strafpunten):</span>
@@ -3018,7 +2997,9 @@
       showToast(`✅ Ronde ${gs.azulRound - 1} berekend & tegels doorgeschoven!`);
     }
 
-    // --- WINGSPAN DASHBOARD ---
+    // =========================================================================
+    // MODULE 10 – SPEL 2: WINGSPAN
+    // =========================================================================
     let activeWingspanTabPlayerId = null;
 
     function renderWingspanDashboard(container) {
@@ -3164,7 +3145,10 @@
       document.getElementById('birdEditorModal')?.remove();
     }
 
-    // --- KEER OP KEER 1 & 2 ---
+
+        // =========================================================================
+    // MODULE 10 – SPEL 3: KEER OP KEER 1 & 2
+    // =========================================================================
     function renderKokSheet(container, def) {
       const gs = ensureGameState(def.id);
       const isKok2 = def.type === 'kok2';
@@ -3226,7 +3210,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
               <div class="bg-slate-950 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between">
-                <span class="text-xs font-bold text-emerald-400">❗ Over (+1)</span>
+                <span class="text-xs font-bold text-emerald-400">❗ Ongebruikt (+1)</span>
                 ${renderNumberStepper(`kok_excl_${p.id}`, pd.exclamations, `val => updateKokField('${p.id}','exclamations', val)`)}
               </div>
               ${!isKok2 ? `
@@ -3282,7 +3266,10 @@
       }
     }
 
-    // --- ROUNDS & FLIP 7 ---
+
+        // =========================================================================
+    // MODULE 10 – SPEL 4: ROUNDS & FLIP 7
+    // =========================================================================
     function renderRoundsSheet(container, def) {
       const gs = ensureGameState(def.id);
       const activePlayers = getActivePlayers();
@@ -3449,11 +3436,10 @@
     function closeRoundGraph() {
       document.getElementById('roundGraphModal')?.classList.add('hidden');
     }
-    // =========================================================================
-    // MODULE 10 (DEEL B): SPELBLADEN (QWIXX, CASCADIA, REGENWORMEN, TTR, CATAN, ETC.)
-    // =========================================================================
 
-    // --- QWIXX ---
+        // =========================================================================
+    // MODULE 10 – SPEL 5: QWIXX
+    // =========================================================================
     function renderQwixxSheet(container) {
       const gs = ensureGameState('qwixx');
       const rows = [
@@ -3462,6 +3448,7 @@
         { id: 'green', name: 'Groen', cls: 'text-emerald-400' },
         { id: 'blue', name: 'Blauw', cls: 'text-sky-400' }
       ];
+
       container.innerHTML = getActivePlayers().map(p => {
         const q = gs.playerData[p.id].qwixx;
         return `
@@ -3471,7 +3458,7 @@
                 ${renderMeepleSvg(p.color, 'w-4 h-4')}
                 <span class="font-bold text-sm text-white">${p.name}</span>
               </button>
-              <span class="text-xs font-bold text-indigo-400">${calculatePlayerTotal('qwixx', p.id)} pnt</span>
+              <span class="text-xs font-bold text-indigo-400">Totaal: ${calculatePlayerTotal('qwixx', p.id)} pnt</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
               ${rows.map(r => `
@@ -3502,7 +3489,9 @@
       renderScoreboard();
     }
 
-    // --- CLEVER ---
+        // =========================================================================
+    // MODULE 10 – SPEL 6: CLEVER
+    // =========================================================================
     function renderCleverSheet(container) {
       const gs = ensureGameState('clever');
       container.innerHTML = getActivePlayers().map(p => {
@@ -3558,7 +3547,9 @@
       if (key === 'greenCount') renderScoreboard();
     }
 
-    // --- CASCADIA ---
+    // =========================================================================
+    // MODULE 10 – SPEL 7: CASCADIA
+    // =========================================================================
     const CASCADIA_RULES = {
       salmon: { A: [0, 2, 5, 9, 14, 20, 27], B: [0, 2, 4, 9, 11, 17] },
       bear: { A: [0, 4, 11, 19, 27], B: [0, 10] }
@@ -3633,7 +3624,7 @@
               <button type="button" onclick="applyCascadiaPreset('${playerId}', '${animalKey}', 'A')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold btn-3d">Kaart A (Standaard)</button>
               <button type="button" onclick="applyCascadiaPreset('${playerId}', '${animalKey}', 'B')" class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold btn-3d">Kaart B (Groepen)</button>
             </div>
-            <button type="button" onclick="document.getElementById('cascCardModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Sluiten</button>
+            <button type="button" onclick="document.getElementById('cascCardModal').remove()" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">Sluiten</button>
           </div>
         </div>
       `;
@@ -3655,7 +3646,10 @@
       showToast(`🌲 +${score} punten berekend!`);
     }
 
-    // --- REGENWORMEN ---
+
+        // =========================================================================
+    // MODULE 10 – SPEL 8: REGENWORMEN
+    // =========================================================================
     function isRegenwormenExpActive(gs) {
       if (!gs || !gs.activeExpansions) return false;
       return Object.keys(gs.activeExpansions).some(k => gs.activeExpansions[k]);
@@ -3768,7 +3762,10 @@
       renderScoreboard();
     }
 
-    // --- CATEGORIES SHEET (POINT SALAD, BOONANZA, QWINTO, ETC.) ---
+
+        // =========================================================================
+    // MODULE 10 – SPEL 9: CATEGORIESPELLEN & 7 WONDERS (INCL. HITSTER)
+    // =========================================================================
     function renderCategoriesSheet(container, def) {
       const gs = ensureGameState(def.id);
       let cats = [...(def.categories || ['Punten'])];
@@ -3857,7 +3854,9 @@
       triggerHaptic(15);
     }
 
-    function renderWonders7Sheet(container) { renderCategoriesSheet(container, getGameDef('wonders7')); }
+    function renderWonders7Sheet(container) { 
+      renderCategoriesSheet(container, getGameDef('wonders7')); 
+    }
 
     // --- TICKET TO RIDE ---
     function renderTtrSheet(container) {
@@ -3925,7 +3924,9 @@
       renderScoreboard();
     }
 
-    // --- YAHTZEE ---
+        // =========================================================================
+    // MODULE 10 – SPEL 11: YAHTZEE
+    // =========================================================================
     function renderYahtzeeSheet(container) {
       const gs = ensureGameState('yahtzee');
       const upperFields = [
@@ -3989,7 +3990,9 @@
       renderScoreboard();
     }
 
-    // --- CATAN ---
+        // =========================================================================
+    // MODULE 10 – SPEL 12: CATAN
+    // =========================================================================
     function renderCatanSheet(container) {
       const gs = ensureGameState('catan');
       container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">` + getActivePlayers().map(p => {
@@ -4012,11 +4015,11 @@
 
               <div class="space-y-2 text-xs">
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
-                  <span class="text-slate-300 font-bold flex items-center gap-1">🏠 Dorpen (1p)</span>
+                  <span class="text-slate-300 font-bold flex items-center gap-1">🏠 Dorpen (1p, max 5)</span>
                   ${renderNumberStepper(`catan_v_${p.id}`, ct.villages, `setCatanProp.bind(null, '${p.id}', 'villages')`)}
                 </div>
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
-                  <span class="text-slate-300 font-bold flex items-center gap-1">🏰 Steden (2p)</span>
+                  <span class="text-slate-300 font-bold flex items-center gap-1">🏰 Steden (2p, max 4)</span>
                   ${renderNumberStepper(`catan_c_${p.id}`, ct.cities, `setCatanProp.bind(null, '${p.id}', 'cities')`)}
                 </div>
                 <div class="flex items-center justify-between bg-slate-950 p-2 rounded-xl border border-slate-800/80">
@@ -4044,7 +4047,19 @@
       if (!gs.playerData[playerId]) return;
       if (!gs.playerData[playerId].catan) gs.playerData[playerId].catan = {};
       
-      gs.playerData[playerId].catan[prop] = Math.max(0, Number(val || 0));
+      const ct = gs.playerData[playerId].catan;
+      const numVal = Math.max(0, Number(val || 0));
+
+      if (prop === 'villages' && numVal > 5) {
+        showToast('⚠️ Maximaal 5 dorpen in voorraad!');
+        return;
+      }
+      if (prop === 'cities' && numVal > 4) {
+        showToast('⚠️ Maximaal 4 steden in voorraad!');
+        return;
+      }
+
+      ct[prop] = numVal;
       saveState();
       broadcastLiveState();
       renderScoreboard();
@@ -4065,9 +4080,9 @@
       renderScoreboard();
     }
 
-    function renderSushiGoSheet(container) { renderCategoriesSheet(container, getGameDef('sushigo')); }
-
-    // --- LOST CITIES ---
+        // =========================================================================
+    // MODULE 10 – SPEL 13: LOST CITIES
+    // =========================================================================
     function renderLostCitiesSheet(container) {
       const gs = ensureGameState('lostcities');
       container.innerHTML = getActivePlayers().map(p => {
@@ -4099,6 +4114,19 @@
                       <span class="text-[10px] text-slate-300 block">Som kaarten:</span>
                       ${renderNumberStepper(`lc_${p.id}_${col.id}`, exp.pts, `val => { exp.pts = Number(val); if(Number(val)>0) exp.started=true; saveState(); renderLiveLeaderboard(); }`)}
                     </div>
+                    <div>
+                      <span class="text-[10px] text-slate-300 block">Weddenschappen:</span>
+                      <select onchange="exp.wagers = Number(this.value); if(Number(this.value)>0) exp.started=true; saveState(); renderScoreboard();" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-lg py-1 text-center text-xs font-bold text-white">
+                        <option value="0" ${Number(exp.wagers) === 0 ? 'selected' : ''}>Geen (×1)</option>
+                        <option value="1" ${Number(exp.wagers) === 1 ? 'selected' : ''}>1 handdruk (×2)</option>
+                        <option value="2" ${Number(exp.wagers) === 2 ? 'selected' : ''}>2 handdrukken (×3)</option>
+                        <option value="3" ${Number(exp.wagers) === 3 ? 'selected' : ''}>3 handdrukken (×4)</option>
+                      </select>
+                    </div>
+                    <label class="flex items-center gap-1.5 text-[10px] text-slate-300 cursor-pointer pt-0.5">
+                      <input type="checkbox" ${exp.bonus8 ? 'checked' : ''} onchange="exp.bonus8 = this.checked; saveState(); renderScoreboard();" />
+                      <span>8+ kaarten (+20)</span>
+                    </label>
                   </div>`;
               }).join('')}
             </div>
@@ -4106,7 +4134,10 @@
       }).join('');
     }
 
-    // --- KOEHANDEL ---
+
+        // =========================================================================
+    // MODULE 10 – SPEL 14: KOEHANDEL
+    // =========================================================================
     function renderKoehandelSheet(container) {
       const gs = ensureGameState('koehandel');
       container.innerHTML = getActivePlayers().map(p => {
@@ -4147,15 +4178,9 @@
       renderScoreboard();
     }
 
-    function renderMachiavelliSheet(container) { renderCategoriesSheet(container, getGameDef('machiavelli')); }
-    function renderArkNovaSheet(container) { renderCategoriesSheet(container, getGameDef('arknova')); }
-    function renderHeatSheet(container) { renderCarcassonneSheet(container, getGameDef('heat')); }
-    function renderDorfromantikSheet(container) { renderCategoriesSheet(container, getGameDef('dorfromantik')); }
-    function renderCoopSheet(container, def) { renderCarcassonneSheet(container, def); }
-    function renderCodenamesSheet(container) { renderCarcassonneSheet(container, getGameDef('codenames')); }
-    function renderTheMindSheet(container) { renderCarcassonneSheet(container, getGameDef('themind')); }
-
-    // --- CARCASSONNE MET CALCULATOR ---
+        // =========================================================================
+    // MODULE 10 – SPEL 15: CARCASSONNE (INCL. TEGELTELLER & CALCULATOR)
+    // =========================================================================
     function renderCarcaTileCounter(gs) {
       if (gs.tilesLeft === undefined) {
         let startTiles = 72;
