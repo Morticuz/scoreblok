@@ -1971,6 +1971,7 @@
     }
 
     let pickerWheelInterval = null;
+    let lastChosenWheelGameId = null;
 
     function openGamePickerWheelModal() {
       let modal = document.getElementById('gamePickerWheelModal');
@@ -2044,8 +2045,6 @@
       pickerWheelInterval = null;
       document.getElementById('gamePickerWheelModal')?.classList.add('hidden');
     }
-
-    let lastChosenWheelGameId = null;
 
     function spinGamePickerWheel() {
       const allCatalog = getAllGames();
@@ -2343,6 +2342,11 @@
     }
 
     function cycleActiveTurn(delta = 1) {
+      if (!state.isHost) {
+        sendActionToHost('cycle_turn', { delta });
+        return;
+      }
+
       const gs = ensureGameState(state.activeGameId);
       const active = getActivePlayers();
       if (!active.length) return;
@@ -2693,12 +2697,12 @@
       if (!container) return;
 
       try {
-        if (def.type === 'parijs') renderParijsSheet(container);
+        if (def.type === 'doolhof') renderDoolhofSheet(container);
+        else if (def.type === 'parijs') renderParijsSheet(container);
         else if (def.type === 'beverbende' || def.type === 'beverclan') renderBeverbendeSheet(container, def);
         else if (def.type === 'seasalt') renderSeaSaltSheet(container, def);
         else if (def.type === 'harmonies') renderHarmoniesSheet(container);
         else if (def.type === 'machiavelli') renderMachiavelliSheet(container);
-        else if (def.id === 'doolhof' || def.type === 'doolhof') renderDoolhofSheet(container);
         else if (def.id === 'wingspan') renderWingspanDashboard(container);
         else if (def.type === 'kok1' || def.type === 'kok2') renderKokSheet(container, def);
         else if (def.type === 'azul') renderAzulSheet(container, def);
@@ -4436,7 +4440,7 @@
     }
 
 
-    // =========================================================================
+        // =========================================================================
     // MODULE 10 – SPEL 16: DOOLHOF
     // =========================================================================
     function renderDoolhofSheet(container) {
@@ -6262,7 +6266,7 @@
       showToast(`🗑️ ${g.name} verwijderd.`);
     }
 
-    // =========================================================================
+       // =========================================================================
     // MODULE 15: LIVE WEBRTC SYNC ENGINE (HOST & GAST)
     // =========================================================================
     let peerInstance = null;
@@ -6294,13 +6298,13 @@
                 <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
                   <div class="font-bold text-indigo-400">2. Aanschuiven bij Tafel:</div>
                   <div class="flex gap-2">
-                    <input type="text" id="joinPeerCodeInput" placeholder="Code van host..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white" />
+                    <input type="text" id="joinPeerCodeInput" placeholder="Code van host..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500" />
                     <button type="button" onclick="connectToHostPeer()" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs btn-3d">Verbind</button>
                   </div>
                 </div>
               </div>
 
-              <div id="liveHostQrDisplay" class="hidden bg-white p-3 rounded-2xl inline-block mx-auto"></div>
+              <div id="liveHostQrDisplay" class="hidden bg-white p-3 rounded-2xl inline-block mx-auto shadow-inner"></div>
               <div id="liveHostCodeText" class="hidden text-xs font-mono font-bold text-emerald-300"></div>
 
               <button type="button" onclick="document.getElementById('liveRoomModal').classList.add('hidden')" class="w-full py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold btn-3d">Sluiten</button>
@@ -6324,7 +6328,14 @@
           const codeTxt = document.getElementById('liveHostCodeText');
           if (qrBox && codeTxt) {
             qrBox.innerHTML = '';
-            new QRCode(qrBox, { text: window.location.origin + window.location.pathname + '?join=' + id, width: 140, height: 140 });
+            new QRCode(qrBox, { 
+              text: window.location.origin + window.location.pathname + '?join=' + id, 
+              width: 140, 
+              height: 140,
+              colorDark: "#020617",
+              colorLight: "#ffffff",
+              correctLevel: QRCode.CorrectLevel.M
+            });
             qrBox.classList.remove('hidden');
             codeTxt.textContent = 'Kamer code: ' + id;
             codeTxt.classList.remove('hidden');
@@ -6388,6 +6399,8 @@
     }
 
     function handleIncomingPeerData(data) {
+      if (!data) return;
+
       if (data.type === 'state_sync') {
         state = { ...state, ...data.state };
         renderScoreboard();
@@ -6428,7 +6441,6 @@
         renderScoreboard();
       }
     }
-
     // =========================================================================
     // MODULE 16: PODIUM MODAL, RESULTAAT GENERATOR & SPELAVOND ENGINE
     // =========================================================================
@@ -6799,7 +6811,6 @@
       }
     }
 
-    // --- COMPETITIE & SPELAVOND MODAL ---
     function openStartTournamentModal() {
       let modal = document.getElementById('tournamentModal');
       if (!modal) {
@@ -7303,6 +7314,7 @@
       closeTournamentModal();
       renderHistoryView();
     }
+
 
     // =========================================================================
     // MODULE 17: SNELLE ACTIES, DOBBELSTEEN & WINNAAR MODALS
