@@ -1452,7 +1452,8 @@
         case 'set_category_val': {
           const { playerId, category, val } = payload;
           if (gs.playerData[playerId]?.categories) {
-            gs.playerData[playerId].categories[category] = Number(val || 0);
+            // Leeg veld toestaan voor soepele invoer zonder geforceerde 0
+            gs.playerData[playerId].categories[category] = val === '' ? '' : Number(val);
           }
           break;
         }
